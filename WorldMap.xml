@@ -1,8 +1,7 @@
 <GuiXml>
     <Controls>
 	
-    <!--
-	    <Control name="MapSearch_WorldMapWayshrineCategoryRow" virtual="true">
+	    <Control name="MapSearch_WorldMapCategoryRow" virtual="true">
 			<OnInitialized>
 				self.offsetX = 20
 				self.label = self:GetNamedChild("Label")
@@ -73,7 +72,7 @@
 
             </Controls>
         </Control>
-        -->
+        
         
         <TopLevelControl name="MapSearch_WorldMapTab" inherits="ZO_WorldMapInfoContent">
             <OnInitialized>
