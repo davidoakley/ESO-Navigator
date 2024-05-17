@@ -6,8 +6,10 @@ MapSearch.default = {}
 -- Make this properly localisable!
 ZO_CreateStringId("MAPSEARCH_SEARCH","Search")
 ZO_CreateStringId("SI_BINDING_NAME_MAPSEARCH_SEARCH", "Search")
+ZO_CreateStringId("MAPSEARCH_TAB_SEARCH","Search")
 
 local logger = LibDebugLogger(MapSearch.name)
+local Utils = MapSearch.Utils
 
 local _events = {}
 
@@ -27,10 +29,22 @@ local function addEvent(id, func)
   EVENT_MANAGER:RegisterForEvent(name, id, func)
 end
 
+local function AddWorldMapFragment(strId, fragment, normal, highlight, pressed)
+  WORLD_MAP_INFO.modeBar:Add(strId, { fragment }, { pressed = pressed, highlight = highlight, normal = normal })
+  end
+
+local function GetPaths(path, ...)
+  return unpack(Utils.map({ ... }, function(p)
+    return path .. p
+  end))
+end
+
 function MapSearch.initialize()
-  logger:Info("MapSearch.Initialize")
+  logger:Info("MapSearch.Initialize starts")
   -- https://wiki.esoui.com/How_to_add_buttons_to_the_keybind_strip
 
+  local mapTabControl = MapSearch_WorldMapTab
+  
   local ButtonGroup = {
 		{
 			name = "Search", --GetString(SI_BINDING_NAME_FASTER_TRAVEL_REJUMP),
@@ -50,7 +64,17 @@ function MapSearch.initialize()
       KEYBIND_STRIP:RemoveKeybindButtonGroup(ButtonGroup)
     end
   end)
-  logger:Info("MapSearch.Initialize")
+
+  local mapTab = MapSearch.MapTab(mapTabControl)
+
+  -- local normal, highlight, pressed = GetPaths("/esoui/art/guild/guildhistory_indexicon_guildstore_", "up.dds", "over.dds", "down.dds")
+  local normal = "/esoui/art/tradinghouse/tradinghouse_browse_tabicon_up.dds"
+  local highlight = "/esoui/art/tradinghouse/tradinghouse_browse_tabicon_over.dds"
+  local pressed = "/esoui/art/tradinghouse/tradinghouse_browse_tabicon_down.dds"
+
+  AddWorldMapFragment(MAPSEARCH_TAB_SEARCH, mapTabControl.fragment, normal, highlight, pressed)
+
+  logger:Info("MapSearch.Initialize exits")
 end
 
 -- Then we create an event handler function which will be called when the "addon loaded" event
@@ -60,7 +84,7 @@ function MapSearch.onAddOnLoaded(event, addonName)
   if addonName ~= "MapSearch" then return end
 
   MapSearch.initialize()
-  
+
   --unregister the event again as our addon was loaded now and we do not need it anymore to be run for each other addon that will load
   EVENT_MANAGER:UnregisterForEvent(MapSearch.name, EVENT_ADD_ON_LOADED)
 end
