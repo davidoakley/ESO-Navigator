@@ -2,6 +2,8 @@ MapSearch = {}
 MapSearch.name = "MapSearch"
 MapSearch.svName = "MapSearch_SavedVariables"
 MapSearch.default = {}
+MapSearch.Location = {}
+MapSearch.Wayshrine = {}
 
 -- Make this properly localisable!
 ZO_CreateStringId("MAPSEARCH_SEARCH","Search")

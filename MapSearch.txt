@@ -4,12 +4,15 @@
 ## APIVersion: 101040
 ## Version: 0.0.1
 ## DependsOn: LibCustomMenu LibDebugLogger>=180
-## OptionalDependsOn: pchat
+## OptionalDependsOn: pChat
 ## SavedVariables: MapSearch_SavedVariables
 
 MapSearch.lua
 Utils.lua
 ClassBase.lua
+Wayshrine.lua
+WayshrineData.lua
+LocationData.lua
 MapTab.lua
 Bindings.xml
 WorldMap.xml

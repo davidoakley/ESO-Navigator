@@ -80,28 +80,29 @@
 				-- self.sortOrderDropDown = ZO_ComboBox_ObjectFromContainer(self:GetNamedChild("SortOrder"))
 				-- self.sortAllOrderDropDown = ZO_ComboBox_ObjectFromContainer(self:GetNamedChild("SortAllOrder"))
                 -- self.list = self:GetNamedChild("List")	
-				-- self.fragment = ZO_FadeSceneFragment:New(self)
-				-- self.fragment.duration = 100
+				self.fragment = ZO_FadeSceneFragment:New(self)
+				self.fragment.duration = 100
 				-- ZO_ScrollList_AddDataType(self.list,0,"MapSearch_WorldMapWayshrineCategoryRow", 23, function(control, data) self:RefreshRow(control,data) end)
 				-- ZO_ScrollList_AddDataType(self.list,1,"MapSearch_WorldMapWayshrineRow", 23, function(control, data) self:RefreshRow(control,data) end)
 	        </OnInitialized>
             <Controls>
-				<Backdrop name="$(parent)Search" tier="HIGH" edgeColor="000000" inherits="ZO_SingleLineEditBackdrop_Keyboard" maxHeight="25" mouseEnabled="true">
+				<Backdrop name="$(parent)Search" tier="HIGH" XedgeColor="000000" inherits="ZO_SingleLineEditBackdrop_Keyboard" maxHeight="40" mouseEnabled="true">
 					<Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="0" offsetY="5"/>
-					<Anchor point="TOPRIGHT" relativeTo="$(parent)SortOrder" relativePoint="TOPLEFT" offsetX="-5"/>
-					<!--<Controls>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT" offsetX="0" offsetY="5" />
+
+					<Controls>
 						<EditBox name="$(parent)Edit" maxInputCharacters="30" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText">
 							<OnInitialized>
-								--MapSearch.MapSearch_WorldMapTab.ResetFilter(self, MapSearch_WorldMapWayshrinesList, true)
+								--TraderTravel.MapTabWayshrines.ResetFilter(self, TraderTravel_WorldMapWayshrinesList, true)
 							</OnInitialized>
 							<OnEscape>
-								--MapSearch_WorldMapTab.ResetFilter(self, MapSearch_WorldMapWayshrinesList, false)
+								--TraderTravel.MapTabWayshrines.ResetFilter(self, TraderTravel_WorldMapWayshrinesList, false)
 							</OnEscape>
 							<OnEffectivelyShown>
-								--MapSearch_WorldMapTab.ChangeFilter(self, MapSearch_WorldMapWayshrinesList)
+								--TraderTravel.MapTabWayshrines.ChangeFilter(self, TraderTravel_WorldMapWayshrinesList)
 							</OnEffectivelyShown>
 							<OnTextChanged>
-								--MapSearch_WorldMapTab.ChangeFilter(self, MapSearch_WorldMapWayshrinesList)
+								--TraderTravel.MapTabWayshrines.ChangeFilter(self, TraderTravel_WorldMapWayshrinesList)
 							</OnTextChanged>
 							<OnMouseDown>
 								self:TakeFocus()
@@ -110,7 +111,7 @@
 						</EditBox>
 						<Button name="$(parent)Clear" tier="HIGH">
 							<Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT" offsetX="-5" offsetY="5"/>
-							<OnMouseUp>MapSearch.MapTab.ResetFilter(MapSearch_WorldMapWayshrinesSearchEdit, MapSearch_WorldMapWayshrinesList, false)</OnMouseUp>
+							<OnMouseUp>TraderTravel.MapTabWayshrines.ResetFilter(TraderTravel_WorldMapWayshrinesSearchEdit, TraderTravel_WorldMapWayshrinesList, false)</OnMouseUp>
 							<Dimensions x="23" y="23" />
 							<Textures 	normal="EsoUI/art/buttons/decline_up.dds"
 										pressed="EsoUI/art/buttons/decline_down.dds"
@@ -118,8 +119,14 @@
 							/>
 						</Button>
 						
-					</Controls>-->
+					</Controls>
 				</Backdrop>
+
+                <Control name="$(parent)List" inherits="ZO_ScrollList">
+					<Dimensions x="285" y="400" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Search" relativePoint="BOTTOMLEFT" offsetY="5" />
+                    <Anchor point="BOTTOMRIGHT" />
+                </Control>
 
             </Controls>
         </TopLevelControl>

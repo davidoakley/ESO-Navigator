@@ -2,10 +2,107 @@ local MapTab = MapSearch.class()
 MapSearch.MapTab = MapTab
 
 local Utils = MapSearch.Utils
+local logger = LibDebugLogger(MapSearch.name)
+
+
+
+
+local function LayoutRow(rowControl, data, scrollList)
+	-- The rowControl, data, and scrollListControl are all supplied by the internal callback trigger
+	-- What is contained in data is determined by the structure of the table of data items you used
+	--[[ Copied here from where we created the data so we can easily reference the data structure
+	pets[petcounter] = {
+		index = index,
+		name = petNameClean,
+		description = p2
+		texture = p3
+	}
+	]]
+	rowControl:SetFont("ZoFontWinH4")
+	rowControl:SetMaxLineCount(1) -- Forces the text to only use one row.  If it goes longer, the extra will not display.
+	rowControl:SetText(data.name)
+	
+	-- When we added the data type earlier we also enabled being able to select an item and which function to run
+	-- when an row is slected.  We still need to set up a handler to actuall register the mouse click which
+	-- then triggers the row as "selected".  See https://wiki.esoui.com/UI_XML#OnAddGameData and following
+	-- entries for "On" events that can be set as handlers.
+	rowControl:SetHandler("OnMouseUp", function() ZO_ScrollList_MouseClick(scrollList, rowControl) end)
+	
+	-- Just for fun!!
+	-- Put together a tooltip string to display when the user positions mouse over the scroll list row.
+	-- https://wiki.esoui.com/How_to_format_strings_with_zo_strformat#Concatenating_lists
+	-- Using \n inserts a newline to bump the image down a bit.  There may be a better way to do this,
+	-- but I find \n frequently used in the source code so the developers use it too.
+	-- Added in a spacer |u to move the texture over a bit so it was not tight against the left side.
+	-- https://wiki.esoui.com/Text_Formatting  |u40:0:: |u
+	local concatToolTip = {}
+	table.insert(concatToolTip, "\n\n\n|u40:0:: |u|t600%:600%:")
+	table.insert(concatToolTip, data.texture)
+	table.insert(concatToolTip, "|t\n\n\n")
+	table.insert(concatToolTip, "|t1150%:100%:EsoUI/Art/Miscellaneous/horizontalDivider.dds|t\n") -- the % is the percentage of the font height.  Make it too large and it disappers.
+	table.insert(concatToolTip, data.description)
+	local tooltip = table.concat(concatToolTip, "")
+	
+	rowControl:SetHandler("OnMouseEnter", function(rowControl) ZO_Tooltips_ShowTextTooltip(rowControl, LEFT, tooltip) end)
+	rowControl:SetHandler("OnMouseExit", function(rowControl) ZO_Tooltips_HideTextTooltip() end )
+end
+
+
+--------------------------------------------------
+-- Step 7: Process the selection.
+-- If the user has selected a pet, summon that pet
+--------------------------------------------------
+local function OnRowSelect(previouslySelectedData, selectedData, reselectingDuringRebuild)
+    if not selectedData then return end
+    --UseCollectible(selectedData.index)
+end
+
+local function getCategories()
+	local categories = {}
+	local locations = MapSearch.Location.Data.GetList()
+
+	for i, map in ipairs(locations) do
+		if map.zoneId ~= nil then
+			print(" - "..map.zoneId.." - "..map.name)
+			categories[map.zoneIndex] = map
+		end
+	end
+
+	return categories
+end
 
 function MapTab:init(control)
 	self.control = control
 	
+    -- logger:Info("MapTab:init: "..self.control.list)
+
+    local control = MapSearch_WorldMapTabList
+
+    local typeId = 1
+	local templateName = "ZO_SelectableLabel"
+	local height = 25 -- height of the row, not the window
+	local setupFunction = LayoutRow
+	local hideCallback = nil
+	local dataTypeSelectSound = nil
+	local resetControlCallback = nil
+	local selectTemplate = "ZO_ThinListHighlight"
+	local selectCallback = OnRowSelect
+
+	ZO_ScrollList_AddDataType(control, typeId, templateName, height, setupFunction, hideCallback, dataTypeSelectSound, resetControlCallback)
+	ZO_ScrollList_EnableSelection(control, selectTemplate, selectCallback)
+
+    local data = MapSearch.Wayshrine.Data
+
+    local scrollData = ZO_ScrollList_GetDataList(control)
+
+	local categories = getCategories()
+	for index, map in pairs(categories) do
+		local entry = ZO_ScrollList_CreateDataEntry(typeId, {name = map.name})
+		table.insert(scrollData, entry)
+	end
+    
+	ZO_ScrollList_Commit(control)
+
 	local _refreshing = false
 	local _isDirty = true 
 	
