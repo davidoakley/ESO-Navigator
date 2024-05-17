@@ -2,7 +2,7 @@ local MapTab = MapSearch.class()
 MapSearch.MapTab = MapTab
 
 local Utils = MapSearch.Utils
-local logger = LibDebugLogger(MapSearch.name)
+local logger = LibDebugLogger("MapSearch")
 
 
 
@@ -68,11 +68,37 @@ local function getCategories()
 	for i, map in ipairs(locations) do
 		if map.zoneId ~= nil then
 			print(" - "..map.zoneId.." - "..map.name)
-			categories[map.zoneIndex] = map
+			--categories[map.zoneIndex] = map
+			table.insert(categories, map)
 		end
 	end
 
 	return categories
+end
+
+local function getZoneWayshrines(zoneIndex)
+	local data = {}
+
+	logger.Info("zoneIndex "..zoneIndex)
+	local iter = MapSearch.Wayshrine.GetKnownWayshrinesByZoneIndex(zoneIndex,-1)
+	-- iter = Utils.map(iter,function(item)
+	-- 	if item.traders_cnt then
+	-- 		item.name = string.format("|ce000e0%1d|r %s", -- magenta
+	-- 			item.traders_cnt, Utils.ShortName(item.name))
+	-- 	else
+	-- 		item.name = empty_prefix .. Utils.ShortName(item.name)
+	-- 	end
+	-- 	return AttachWayshrineDataHandlers(args,item)
+	-- end)
+
+	data = {}
+	for i in iter do
+		-- if i.traders_cnt then
+			table.insert(data, i)
+		-- end
+	end
+
+	return data
 end
 
 function MapTab:init(control)
@@ -102,9 +128,35 @@ function MapTab:init(control)
     local scrollData = ZO_ScrollList_GetDataList(control)
 
 	local categories = getCategories()
-	for index, map in pairs(categories) do
-		local entry = ZO_ScrollList_CreateDataEntry(0, {name = map.name})
-		table.insert(scrollData, entry)
+	table.sort(categories, Utils.SortByBareName)
+
+	MapSearch.categories = categories
+
+	for index, map in ipairs(categories) do
+		local nodes = getZoneWayshrines(map.zoneIndex)
+		table.sort(nodes, Utils.SortByBareName)
+
+		local categoryData = {
+			name = map.name,
+			barename = Utils.BareName(map.name)
+		}
+
+		if #nodes >= 1 then
+			local entry = ZO_ScrollList_CreateDataEntry(0, categoryData)
+			table.insert(scrollData, entry)
+	
+			for nodeIndex, nodeMap in ipairs(nodes) do
+				local nodeData = {
+					name = nodeMap.name,
+					barename = Utils.BareName(nodeMap.name)
+				}
+		
+				local entry = ZO_ScrollList_CreateDataEntry(1, nodeData)
+				table.insert(scrollData, entry)
+			end
+
+			--table.insert(MapSearch.categories, categoryData)
+		end
 	end
     
 	ZO_ScrollList_Commit(control)
