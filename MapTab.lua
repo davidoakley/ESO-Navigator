@@ -18,6 +18,9 @@ local function LayoutRow(rowControl, data, scrollList)
 		texture = p3
 	}
 	]]
+
+	rowControl.label:SetText(data.name)
+	--[[
 	rowControl:SetFont("ZoFontWinH4")
 	rowControl:SetMaxLineCount(1) -- Forces the text to only use one row.  If it goes longer, the extra will not display.
 	rowControl:SetText(data.name)
@@ -45,6 +48,7 @@ local function LayoutRow(rowControl, data, scrollList)
 	
 	rowControl:SetHandler("OnMouseEnter", function(rowControl) ZO_Tooltips_ShowTextTooltip(rowControl, LEFT, tooltip) end)
 	rowControl:SetHandler("OnMouseExit", function(rowControl) ZO_Tooltips_HideTextTooltip() end )
+	]]
 end
 
 
@@ -78,8 +82,8 @@ function MapTab:init(control)
 
     local control = MapSearch_WorldMapTabList
 
-    local typeId = 1
-	local templateName = "ZO_SelectableLabel"
+    local typeId = 0
+	local templateName = "MapSearch_WorldMapWayshrineRow" --"ZO_SelectableLabel"
 	local height = 25 -- height of the row, not the window
 	local setupFunction = LayoutRow
 	local hideCallback = nil
@@ -88,7 +92,9 @@ function MapTab:init(control)
 	local selectTemplate = "ZO_ThinListHighlight"
 	local selectCallback = OnRowSelect
 
-	ZO_ScrollList_AddDataType(control, typeId, templateName, height, setupFunction, hideCallback, dataTypeSelectSound, resetControlCallback)
+	ZO_ScrollList_AddDataType(control, 0, "MapSearch_WorldMapCategoryRow", height, setupFunction, hideCallback, dataTypeSelectSound, resetControlCallback)
+	ZO_ScrollList_AddDataType(control, 1, "MapSearch_WorldMapWayshrineRow", height, setupFunction, hideCallback, dataTypeSelectSound, resetControlCallback)
+
 	ZO_ScrollList_EnableSelection(control, selectTemplate, selectCallback)
 
     local data = MapSearch.Wayshrine.Data
@@ -97,7 +103,7 @@ function MapTab:init(control)
 
 	local categories = getCategories()
 	for index, map in pairs(categories) do
-		local entry = ZO_ScrollList_CreateDataEntry(typeId, {name = map.name})
+		local entry = ZO_ScrollList_CreateDataEntry(0, {name = map.name})
 		table.insert(scrollData, entry)
 	end
     

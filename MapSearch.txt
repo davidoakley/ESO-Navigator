@@ -16,6 +16,7 @@ LocationData.lua
 MapTab.lua
 Bindings.xml
 WorldMap.xml
+WorldMap.lua
 
 # This Add-on is not created by, affiliated with, or sponsored by, ZeniMax
 # Media Inc. or its affiliates. The Elder Scrolls® and related logos are
