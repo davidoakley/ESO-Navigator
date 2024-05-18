@@ -61,25 +61,10 @@ local function OnRowSelect(previouslySelectedData, selectedData, reselectingDuri
     --UseCollectible(selectedData.index)
 end
 
-local function getCategories()
-	local categories = {}
-	local locations = MapSearch.Location.Data.GetList()
-
-	for i, map in ipairs(locations) do
-		if map.zoneId ~= nil then
-			print(" - "..map.zoneId.." - "..map.name)
-			--categories[map.zoneIndex] = map
-			table.insert(categories, map)
-		end
-	end
-
-	return categories
-end
-
 local function getZoneWayshrines(zoneIndex)
 	local data = {}
 
-	logger.Info("zoneIndex "..zoneIndex)
+	--logger:Info("zoneIndex "..zoneIndex)
 	local iter = MapSearch.Wayshrine.GetKnownWayshrinesByZoneIndex(zoneIndex,-1)
 	-- iter = Utils.map(iter,function(item)
 	-- 	if item.traders_cnt then
@@ -101,40 +86,111 @@ local function getZoneWayshrines(zoneIndex)
 	return data
 end
 
-function MapTab:init(control)
-	self.control = control
+local function getCategories()
+	local categories = {}
+	local locations = MapSearch.Location.Data.GetList()
+
+	for i, map in ipairs(locations) do
+		if map.zoneId ~= nil then
+			print(" - "..map.zoneId.." - "..map.name)
+
+			local nodes = getZoneWayshrines(map.zoneIndex)
+			table.sort(nodes, Utils.SortByBareName)
+			map.nodes = nodes
 	
-    -- logger:Info("MapTab:init: "..self.control.list)
+			--categories[map.zoneIndex] = map
+			table.insert(categories, map)
+		end
+	end
 
-    local control = MapSearch_WorldMapTabList
+	return categories
+end
 
-    local typeId = 0
-	local templateName = "MapSearch_WorldMapWayshrineRow" --"ZO_SelectableLabel"
-	local height = 25 -- height of the row, not the window
-	local setupFunction = LayoutRow
-	local hideCallback = nil
-	local dataTypeSelectSound = nil
-	local resetControlCallback = nil
-	local selectTemplate = "ZO_ThinListHighlight"
-	local selectCallback = OnRowSelect
+local function deepCopy(obj)
+    if type(obj) ~= 'table' then return obj end
+    local res = {}
+    for k, v in pairs(obj) do res[deepCopy(k)] = deepCopy(v) end
+    return res
+end
 
-	ZO_ScrollList_AddDataType(control, 0, "MapSearch_WorldMapCategoryRow", height, setupFunction, hideCallback, dataTypeSelectSound, resetControlCallback)
-	ZO_ScrollList_AddDataType(control, 1, "MapSearch_WorldMapWayshrineRow", height, setupFunction, hideCallback, dataTypeSelectSound, resetControlCallback)
+local function nocase (s)
+    s = string.gsub(s, "%a", function (c)
+          return string.format("[%s%s]", string.lower(c),
+                                         string.upper(c))
+        end)
+    return s
+end
+  
 
-	ZO_ScrollList_EnableSelection(control, selectTemplate, selectCallback)
+local function filter(categoriesRef, searchTerm)
+    local categories = deepCopy(categoriesRef)
+    searchTerm = nocase(searchTerm)
 
-    local data = MapSearch.Wayshrine.Data
+    for i, category in ipairs(categories) do
+        if string.find(category.name, searchTerm) then
+            category.show = true
+        end
+        for j, node in ipairs(category.nodes) do
+            if string.find(node.name, searchTerm) then
+                node.show = true
+                category.showNodes = true
+            end
+        end
+    end
 
-    local scrollData = ZO_ScrollList_GetDataList(control)
+    local result = {}
+    for i, category in ipairs(categories) do
+        if category.show then
+            table.insert(result, category)
+        elseif category.showNodes then
+            local resultNodes = {}
+            for j, node in ipairs(category.nodes) do
+                if node.show then
+                    table.insert(resultNodes, node)
+                end
+            end
+            category.nodes = resultNodes
+            table.insert(result, category)
+        end
+    end
 
+    return result
+end
+
+
+local function buildCategories()
 	local categories = getCategories()
 	table.sort(categories, Utils.SortByBareName)
 
 	MapSearch.categories = categories
+end
+
+local function buildScrollList(control, searchString)
+
+	ZO_ScrollList_Clear(control)
+
+    local scrollData = ZO_ScrollList_GetDataList(control)
+
+	if MapSearch.categories == nil then
+		buildCategories()
+	end
+
+	local categories
+
+	if searchString ~= nil and #searchString > 0 then
+		categories = filter(MapSearch.categories, searchString)
+	else
+		categories = MapSearch.categories
+	end
+
+	local filteredCats = filter(categories, "sto")
+
+	-- MapSearch.categories = categories
+	-- MapSearch.saved.categories = categories
 
 	for index, map in ipairs(categories) do
-		local nodes = getZoneWayshrines(map.zoneIndex)
-		table.sort(nodes, Utils.SortByBareName)
+		local nodes = map.nodes -- getZoneWayshrines(map.zoneIndex)
+		-- table.sort(nodes, Utils.SortByBareName)
 
 		local categoryData = {
 			name = map.name,
@@ -160,6 +216,34 @@ function MapTab:init(control)
 	end
     
 	ZO_ScrollList_Commit(control)
+end
+
+local function setupScrollList(control)
+	logger:Info("setupScrollList")
+	local height = 25 -- height of the row, not the window
+	local setupFunction = LayoutRow
+	local hideCallback = nil
+	local dataTypeSelectSound = nil
+	local resetControlCallback = nil
+	local selectTemplate = "ZO_ThinListHighlight"
+	local selectCallback = OnRowSelect
+
+	ZO_ScrollList_AddDataType(control, 0, "MapSearch_WorldMapCategoryRow", height, setupFunction, hideCallback, dataTypeSelectSound, resetControlCallback)
+	ZO_ScrollList_AddDataType(control, 1, "MapSearch_WorldMapWayshrineRow", height, setupFunction, hideCallback, dataTypeSelectSound, resetControlCallback)
+
+	ZO_ScrollList_EnableSelection(control, selectTemplate, selectCallback)
+end
+
+function MapTab:init(tabControl)
+	logger:Info("MapTab:init")
+	self.tabControl = tabControl
+
+    local control = MapSearch_WorldMapTabList
+	self.listControl = control
+
+	setupScrollList(control)
+
+	buildScrollList(control)
 
 	local _refreshing = false
 	local _isDirty = true 
@@ -255,7 +339,12 @@ function MapTab:RefreshControl(categories)
 end
 
 
-function MapTab:Refresh(...)
-
+function MapTab:Refresh()
+	logger:Info("MapTab:Refresh")
 end
 
+function MapTab.OnTextChanged(editbox, listcontrol)
+	local searchString = string.lower(editbox:GetText())
+	logger:Info("OnTextChanged: "..searchString)
+	buildScrollList(listcontrol, searchString)
+end
