@@ -4,6 +4,7 @@ MapSearch.svName = "MapSearch_SavedVariables"
 MapSearch.default = {}
 MapSearch.Location = {}
 MapSearch.Wayshrine = {}
+MapSearch.isRecall = true -- Ew, should pass this around not have it as a global
 
 -- Make this properly localisable!
 ZO_CreateStringId("MAPSEARCH_SEARCH","Search")
@@ -95,10 +96,19 @@ end
 
 function MapSearch.onStartFastTravel(eventCode, nodeIndex)
   logger:Info("onStartFastTravel: "..eventCode..", "..nodeIndex)
+  MapSearch.isRecall = false
+end
+
+function MapSearch.onEndFastTravel()
+  logger:Info("onEndFastTravel")
+  MapSearch.isRecall = true
 end
 
 function MapSearch.showSearch()
   logger:Info("MapSearch.showSearch")
+  MAIN_MENU_KEYBOARD:ShowScene("worldMap")
+  WORLD_MAP_INFO:SelectTab(MAPSEARCH_TAB_SEARCH)
+  MapSearch.MapTab.ResetFilter(false)
 end
 
 -- Finally, we'll register our event handler function to be called when the proper event occurs.
@@ -107,3 +117,4 @@ end
 EVENT_MANAGER:RegisterForEvent(MapSearch.name, EVENT_ADD_ON_LOADED, MapSearch.onAddOnLoaded)
 
 addEvent(EVENT_START_FAST_TRAVEL_INTERACTION, MapSearch.onStartFastTravel)
+addEvent(EVENT_END_FAST_TRAVEL_INTERACTION, MapSearch.onEndFastTravel)
