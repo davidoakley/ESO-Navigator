@@ -19,10 +19,11 @@
 				<Label name="$(parent)Label" inherits="ZO_SelectableLabel" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
 					<Anchor point="TOPLEFT" offsetX="20"/>
 					<OnMouseDown>
-						self:GetParent():RowMouseDown(button)
+						--self:GetParent():RowMouseDown(button)
 					</OnMouseDown>
 					<OnMouseUp>
-						self:GetParent():RowMouseUp(button, upInside)
+						--self:GetParent():RowMouseUp(button, upInside)
+						MapSearch.MapTab.RowMouseUp()
 					</OnMouseUp>
 				</Label>
             </Controls>
@@ -42,13 +43,13 @@
 					<Anchor point="TOPLEFT" offsetX="-6" offsetY="-2" />
 					<TextureCoords top="0" bottom="1" left="0" right="1"/>
 					<OnMouseEnter>
-						self:GetParent():IconMouseEnter(self)
+						--self:GetParent():IconMouseEnter(self)
 					</OnMouseEnter>
                     <OnMouseExit>
-						self:GetParent():IconMouseExit(self)
+						--self:GetParent():IconMouseExit(self)
 					</OnMouseExit>
 					<OnMouseDown>
-						self:GetParent():IconMouseDown(self,button)
+						--self:GetParent():IconMouseDown(self,button)
 					</OnMouseDown>
 					<OnMouseUp>
 						self:GetParent():IconMouseUp(self,button, upInside)
@@ -57,16 +58,17 @@
 				<Label name="$(parent)Label" inherits="ZO_SelectableLabel" font="ZoFontHeader" newLineIndent="8">
 					<Anchor point="TOPLEFT" offsetX="20" />
 					<OnMouseEnter>
-						self:GetParent():RowMouseEnter(self)
+						--self:GetParent():RowMouseEnter(self)
 					</OnMouseEnter>
                     <OnMouseExit>
-						self:GetParent():RowMouseExit(self)
+						--self:GetParent():RowMouseExit(self)
 					</OnMouseExit>
 					<OnMouseDown>
-						self:GetParent():RowMouseDown(button)
+						--self:GetParent():RowMouseDown(button)
 					</OnMouseDown>
 					<OnMouseUp>
-						self:GetParent():RowMouseUp(button, upInside)
+						--self:GetParent():RowMouseUp(button, upInside)
+						MapSearch.MapTab.RowMouseUp(self, button, upInside)
 					</OnMouseUp>
 				</Label>
 
@@ -80,7 +82,8 @@
 				logger:Info("MapSearch_WorldMapTab.OnInitialized")
 				-- self.sortOrderDropDown = ZO_ComboBox_ObjectFromContainer(self:GetNamedChild("SortOrder"))
 				-- self.sortAllOrderDropDown = ZO_ComboBox_ObjectFromContainer(self:GetNamedChild("SortAllOrder"))
-                -- self.list = self:GetNamedChild("List")	
+                self.list = self:GetNamedChild("List")
+				self.edit = self:GetNamedChild("SearchEdit")
 				self.fragment = ZO_FadeSceneFragment:New(self)
 				self.fragment.duration = 100
 				-- ZO_ScrollList_AddDataType(self.list,0,"MapSearch_WorldMapWayshrineCategoryRow", 23, function(control, data) self:RefreshRow(control,data) end)
@@ -114,7 +117,7 @@
 						</EditBox>
 						<Button name="$(parent)Clear" tier="HIGH">
 							<Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT" offsetX="-5" offsetY="5"/>
-							<OnMouseUp>TraderTravel.MapTabWayshrines.ResetFilter(TraderTravel_WorldMapWayshrinesSearchEdit, TraderTravel_WorldMapWayshrinesList, false)</OnMouseUp>
+							<OnMouseUp>MapSearch.MapTab.ResetFilter(false)</OnMouseUp>
 							<Dimensions x="23" y="23" />
 							<Textures 	normal="EsoUI/art/buttons/decline_up.dds"
 										pressed="EsoUI/art/buttons/decline_down.dds"
