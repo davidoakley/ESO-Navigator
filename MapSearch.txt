@@ -4,7 +4,7 @@
 ## APIVersion: 101040
 ## Version: 0.0.1
 ## DependsOn: LibCustomMenu LibDebugLogger>=180
-## OptionalDependsOn: pChat
+## OptionalDependsOn: pChat, FasterTravel
 ## SavedVariables: MapSearch_SavedVariables
 
 MapSearch.lua
