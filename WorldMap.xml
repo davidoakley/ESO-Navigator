@@ -76,6 +76,8 @@
         
         <TopLevelControl name="MapSearch_WorldMapTab" inherits="ZO_WorldMapInfoContent">
             <OnInitialized>
+				local logger = LibDebugLogger("MapSearch")
+				logger:Info("MapSearch_WorldMapTab.OnInitialized")
 				-- self.sortOrderDropDown = ZO_ComboBox_ObjectFromContainer(self:GetNamedChild("SortOrder"))
 				-- self.sortAllOrderDropDown = ZO_ComboBox_ObjectFromContainer(self:GetNamedChild("SortAllOrder"))
                 -- self.list = self:GetNamedChild("List")	
@@ -102,6 +104,7 @@
 								--TraderTravel.MapTabWayshrines.ChangeFilter(self, TraderTravel_WorldMapWayshrinesList)
 							</OnEffectivelyShown>
 							<OnTextChanged>
+								MapSearch.MapTab.OnTextChanged(self, MapSearch_WorldMapTabList)
 								--TraderTravel.MapTabWayshrines.ChangeFilter(self, TraderTravel_WorldMapWayshrinesList)
 							</OnTextChanged>
 							<OnMouseDown>

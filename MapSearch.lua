@@ -45,6 +45,8 @@ function MapSearch.initialize()
   logger:Info("MapSearch.Initialize starts")
   -- https://wiki.esoui.com/How_to_add_buttons_to_the_keybind_strip
 
+  MapSearch.saved = ZO_SavedVars:NewAccountWide(MapSearch.svName, 1, nil, MapSearch.default)
+
   local mapTabControl = MapSearch_WorldMapTab
   
   local ButtonGroup = {
