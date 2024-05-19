@@ -170,7 +170,7 @@ local function ShortName(name)
 	return r
 end
 
-local function BareName(name) 
+local function BareName(name)
 	local r = ShortName(name)
 	if _lang == "en" then
 		r = r:gsub("^Dungeon: ", "", 1):gsub("^Trial: ", "", 1):gsub("^The ", "", 1)
@@ -184,6 +184,10 @@ local function BareName(name)
 	elseif _lang == "ru" then
 		r = r:gsub("ДС ", "", 1):gsub("^Подземелье: ", "", 1):gsub("^Испытание: ", "", 1)
 	end
+
+	r = r:lower()
+
+	r = r:gsub("[^%w ]", "")
 	return r
 end
 
