@@ -1,6 +1,7 @@
 local MapTab = MapSearch.class()
 MapSearch.MapTab = MapTab
 
+local Search = MapSearch.Search
 local Utils = MapSearch.Utils
 local logger = LibDebugLogger("MapSearch")
 
@@ -18,8 +19,21 @@ local function LayoutRow(rowControl, data, scrollList)
 		texture = p3
 	}
 	]]
+	local name = data.name
 
-	rowControl.label:SetText(data.name)
+	if data.poiType == 6 then
+		-- name = name .. " |c5c594aDungeon|r"
+		-- /esoui/art/icons/poi/poi_dungeon_complete.dds
+	end
+
+	if data.icon ~= nil then
+		rowControl.icon:SetTexture(data.icon)
+		rowControl.icon:SetHidden(false)
+	else
+		rowControl.icon:SetHidden(true)
+	end
+
+	rowControl.label:SetText(name)
 	--[[
 	rowControl:SetFont("ZoFontWinH4")
 	rowControl:SetMaxLineCount(1) -- Forces the text to only use one row.  If it goes longer, the extra will not display.
@@ -78,109 +92,6 @@ local function OnRowSelect(previouslySelectedData, selectedData, reselectingDuri
     --UseCollectible(selectedData.index)
 end
 
-local function getZoneWayshrines(zoneIndex)
-	local data = {}
-
-	--logger:Info("zoneIndex "..zoneIndex)
-	local iter = MapSearch.Wayshrine.GetKnownWayshrinesByZoneIndex(zoneIndex,-1)
-	-- iter = Utils.map(iter,function(item)
-	-- 	if item.traders_cnt then
-	-- 		item.name = string.format("|ce000e0%1d|r %s", -- magenta
-	-- 			item.traders_cnt, Utils.ShortName(item.name))
-	-- 	else
-	-- 		item.name = empty_prefix .. Utils.ShortName(item.name)
-	-- 	end
-	-- 	return AttachWayshrineDataHandlers(args,item)
-	-- end)
-
-	data = {}
-	for i in iter do
-		-- if i.traders_cnt then
-			table.insert(data, i)
-		-- end
-	end
-
-	return data
-end
-
-local function getCategories()
-	local categories = {}
-	local locations = MapSearch.Location.Data.GetList()
-
-	for i, map in ipairs(locations) do
-		if map.zoneId ~= nil then
-			print(" - "..map.zoneId.." - "..map.name)
-
-			local nodes = getZoneWayshrines(map.zoneIndex)
-			table.sort(nodes, Utils.SortByBareName)
-			map.nodes = nodes
-	
-			--categories[map.zoneIndex] = map
-			table.insert(categories, map)
-		end
-	end
-
-	return categories
-end
-
-local function deepCopy(obj)
-    if type(obj) ~= 'table' then return obj end
-    local res = {}
-    for k, v in pairs(obj) do res[deepCopy(k)] = deepCopy(v) end
-    return res
-end
-
-local function nocase (s)
-    s = string.gsub(s, "%a", function (c)
-          return string.format("[%s%s]", string.lower(c),
-                                         string.upper(c))
-        end)
-    return s
-end
-  
-
-local function filter(categoriesRef, searchTerm)
-    local categories = deepCopy(categoriesRef)
-    searchTerm = nocase(searchTerm)
-
-    for i, category in ipairs(categories) do
-        if string.find(category.name, searchTerm) then
-            category.show = true
-        end
-        for j, node in ipairs(category.nodes) do
-            if string.find(node.name, searchTerm) then
-                node.show = true
-                category.showNodes = true
-            end
-        end
-    end
-
-    local result = {}
-    for i, category in ipairs(categories) do
-        if category.show then
-            table.insert(result, category)
-        elseif category.showNodes then
-            local resultNodes = {}
-            for j, node in ipairs(category.nodes) do
-                if node.show then
-                    table.insert(resultNodes, node)
-                end
-            end
-            category.nodes = resultNodes
-            table.insert(result, category)
-        end
-    end
-
-    return result
-end
-
-
-local function buildCategories()
-	local categories = getCategories()
-	table.sort(categories, Utils.SortByBareName)
-
-	MapSearch.categories = categories
-end
 
 local function buildScrollList(control, searchString)
 
@@ -188,27 +99,24 @@ local function buildScrollList(control, searchString)
 
     local scrollData = ZO_ScrollList_GetDataList(control)
 
-	if MapSearch.categories == nil then
-		buildCategories()
-	end
-
-	local categories
+	local results
 
 	if searchString ~= nil and #searchString > 0 then
-		categories = filter(MapSearch.categories, searchString)
+		results = Search.run(searchString)
 	else
-		categories = MapSearch.categories
+		results = {} --MapSearch.categories
 	end
 
-	MapSearch.filteredCategories = categories
+	MapSearch.results = results
 	-- MapSearch.saved.categories = categories
 
-	for index, map in ipairs(categories) do
+	for index, map in ipairs(results) do
 		local nodes = map.nodes -- getZoneWayshrines(map.zoneIndex)
 		-- table.sort(nodes, Utils.SortByBareName)
 
 		local categoryData = {
 			name = map.name,
+			icon = map.icon,
 			barename = Utils.BareName(map.name)
 		}
 
@@ -220,7 +128,9 @@ local function buildScrollList(control, searchString)
 				local nodeData = {
 					name = nodeMap.name,
 					barename = Utils.BareName(nodeMap.name),
-					nodeIndex = nodeMap.nodeIndex
+					nodeIndex = nodeMap.nodeIndex,
+					poiType = nodeMap.poiType,
+					icon = nodeMap.icon
 				}
 
 				nodeMap.barename = Utils.BareName(nodeMap.name)
@@ -247,8 +157,8 @@ local function setupScrollList(control)
 	local selectTemplate = "ZO_ThinListHighlight"
 	local selectCallback = OnRowSelect
 
-	ZO_ScrollList_AddDataType(control, 0, "MapSearch_WorldMapCategoryRow", height, setupFunction, hideCallback, dataTypeSelectSound, resetControlCallback)
-	ZO_ScrollList_AddDataType(control, 1, "MapSearch_WorldMapWayshrineRow", height, setupFunction, hideCallback, dataTypeSelectSound, resetControlCallback)
+	ZO_ScrollList_AddDataType(control, 0, "MapSearch_WorldMapCategoryRow", 25, setupFunction, hideCallback, dataTypeSelectSound, resetControlCallback)
+	ZO_ScrollList_AddDataType(control, 1, "MapSearch_WorldMapWayshrineRow", 23, setupFunction, hideCallback, dataTypeSelectSound, resetControlCallback)
 
 	ZO_ScrollList_EnableSelection(control, selectTemplate, selectCallback)
 end
@@ -371,10 +281,10 @@ function MapTab.OnTextChanged(editbox, listcontrol)
 end
 
 function MapTab.OnTab(editbox, listcontrol)
-	local filteredCategories = MapSearch.filteredCategories
+	local result = MapSearch.Search.result
 
-	if #filteredCategories > 0 then
-		local firstCategory = filteredCategories[1]
+	if #result > 0 then
+		local firstCategory = result[1]
 		--logger:info("Tab: firstCategory: "..firstCategory.name)
 		if #firstCategory.nodes > 0 then
 			local firstNode = firstCategory.nodes[1]

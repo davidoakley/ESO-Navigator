@@ -4,6 +4,7 @@ MapSearch.svName = "MapSearch_SavedVariables"
 MapSearch.default = {}
 MapSearch.Location = {}
 MapSearch.Wayshrine = {}
+MapSearch.Search = {}
 MapSearch.isRecall = true -- Ew, should pass this around not have it as a global
 
 -- Make this properly localisable!
