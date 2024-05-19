@@ -31,7 +31,6 @@ local function getZoneWayshrines(zoneIndex)
 
 	data = {}
 	for i in iter do
-		-- if i.traders_cnt then
         local node = deepCopy(i)
         if node.name:find("Dungeon: ") then
             node.poiType = POI_TYPE_GROUP_DUNGEON
@@ -48,8 +47,10 @@ local function getZoneWayshrines(zoneIndex)
         elseif node.textureName == "/esoui/art/icons/poi/poi_group_house_glow.dds" then
             node.poiType = POI_TYPE_HOUSE
         end
-			table.insert(data, node)
-		-- end
+
+        node.barename = Utils.BareName(node.name)
+
+		table.insert(data, node)
 	end
 
 	return data
@@ -90,14 +91,33 @@ local function buildCategories()
 	Search.categories = categories
 end
 
+local function match(object, searchTerm)
+    local matchLevel = 0
+    local name = object.barename or object.name
+
+    if string.find(name, searchTerm) then
+        matchLevel = 10
+    end
+
+    return matchLevel
+end
+
+local function matchComparison(x,y)
+	return (x.barename or x.name) < (y.barename or y.name)
+end
+
 local function run(searchTerm)
     if Search.categories == nil then
         logger:Info("Search.run: building categories")
 		buildCategories()
 	end
 
+    searchTerm = searchTerm:lower()
+    searchTerm = searchTerm:gsub("[^%w ]", "")
+
+    logger:Info("Search.run("..searchTerm..")")
+
     local categories = deepCopy(Search.categories)
-    searchTerm = nocase(searchTerm)
 
     local wayshrines = {}
     local dungeons = {}
@@ -107,11 +127,11 @@ local function run(searchTerm)
     local zones = {}
 
     for i, category in ipairs(categories) do
-        if string.find(category.name, searchTerm) then
+        if match(category, searchTerm) > 0 then
             table.insert(zones, category) --category.show = true
         end
         for j, node in ipairs(category.nodes) do
-            if string.find(node.name, searchTerm) then
+            if match(node, searchTerm) > 0 then
                 if node.poiType == POI_TYPE_GROUP_DUNGEON then --or item.name:find("Trial: ") or item.poiIndex == 0 or item.nodeIndex == 270 then
                     table.insert(dungeons, node)
                 elseif node.poiType == POI_TYPE_TRIAL then
