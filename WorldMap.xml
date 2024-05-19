@@ -3,21 +3,21 @@
 	
 	    <Control name="MapSearch_WorldMapCategoryRow" virtual="true">
 			<OnInitialized>
-				self.offsetX = 20
+				self.offsetX = 30
 				self.label = self:GetNamedChild("Label")
 				self.icon = self:GetNamedChild("Icon")
 				self.icon:SetDrawLayer(self.label:GetDrawLayer() + 1)
 				self.label.GetTextColor = function() return GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SELECTED) end
 			</OnInitialized>
-            <Dimensions x="25" y="25"/>
+            <Dimensions x="25" y="40"/>
             <Controls>
 				<Texture name="$(parent)Icon" textureFile="EsoUI/Art/Quest/questJournal_trackedQuest_icon.dds" hidden="true" mouseEnabled="true">
 					<Dimensions x="25" y="25"/>
-					<Anchor point="TOPLEFT" offsetX="-6" offsetY="-2" />
+					<Anchor point="TOPLEFT" offsetX="0" offsetY="14" />
 					<TextureCoords top="0" bottom="1" left="0" right="1"/>
 				</Texture>
 				<Label name="$(parent)Label" inherits="ZO_SelectableLabel" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
-					<Anchor point="TOPLEFT" offsetX="20"/>
+					<Anchor point="TOPLEFT" offsetX="30" offsetY="14"/>
 					<OnMouseDown>
 						--self:GetParent():RowMouseDown(button)
 					</OnMouseDown>
@@ -31,7 +31,7 @@
 		
         <Control name="MapSearch_WorldMapWayshrineRow" virtual="true">
 			<OnInitialized>
-				self.offsetX = 20
+				self.offsetX = 30
 				self.label = self:GetNamedChild("Label")
 				self.icon = self:GetNamedChild("Icon")
 				self.icon:SetDrawLayer(self.label:GetDrawLayer() + 1)
@@ -40,7 +40,7 @@
             <Controls>
 				<Texture name="$(parent)Icon" textureFile="EsoUI/Art/Quest/questJournal_trackedQuest_icon.dds" hidden="true" mouseEnabled="true">
 					<Dimensions x="23" y="23"/>
-					<Anchor point="TOPLEFT" offsetX="-6" offsetY="-2" />
+					<Anchor point="TOPLEFT" offsetX="0" offsetY="0" />
 					<TextureCoords top="0" bottom="1" left="0" right="1"/>
 					<OnMouseEnter>
 						--self:GetParent():IconMouseEnter(self)
@@ -56,7 +56,7 @@
 					</OnMouseUp>
 				</Texture>
 				<Label name="$(parent)Label" inherits="ZO_SelectableLabel" font="ZoFontHeader" newLineIndent="8">
-					<Anchor point="TOPLEFT" offsetX="20" />
+					<Anchor point="TOPLEFT" offsetX="30" />
 					<OnMouseEnter>
 						--self:GetParent():RowMouseEnter(self)
 					</OnMouseEnter>
