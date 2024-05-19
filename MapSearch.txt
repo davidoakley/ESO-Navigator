@@ -13,6 +13,7 @@ ClassBase.lua
 Wayshrine.lua
 WayshrineData.lua
 LocationData.lua
+Search.lua
 MapTab.lua
 Bindings.xml
 WorldMap.xml

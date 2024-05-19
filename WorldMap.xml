@@ -9,10 +9,10 @@
 				self.icon:SetDrawLayer(self.label:GetDrawLayer() + 1)
 				self.label.GetTextColor = function() return GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SELECTED) end
 			</OnInitialized>
-            <Dimensions x="285" y="23"/>
+            <Dimensions x="25" y="25"/>
             <Controls>
 				<Texture name="$(parent)Icon" textureFile="EsoUI/Art/Quest/questJournal_trackedQuest_icon.dds" hidden="true" mouseEnabled="true">
-					<Dimensions x="24" y="23"/>
+					<Dimensions x="25" y="25"/>
 					<Anchor point="TOPLEFT" offsetX="-6" offsetY="-2" />
 					<TextureCoords top="0" bottom="1" left="0" right="1"/>
 				</Texture>
@@ -39,7 +39,7 @@
             <Dimensions x="285" y="23"/>
             <Controls>
 				<Texture name="$(parent)Icon" textureFile="EsoUI/Art/Quest/questJournal_trackedQuest_icon.dds" hidden="true" mouseEnabled="true">
-					<Dimensions x="24" y="23"/>
+					<Dimensions x="23" y="23"/>
 					<Anchor point="TOPLEFT" offsetX="-6" offsetY="-2" />
 					<TextureCoords top="0" bottom="1" left="0" right="1"/>
 					<OnMouseEnter>
