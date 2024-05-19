@@ -157,7 +157,7 @@ local function setupScrollList(control)
 	local selectTemplate = "ZO_ThinListHighlight"
 	local selectCallback = OnRowSelect
 
-	ZO_ScrollList_AddDataType(control, 0, "MapSearch_WorldMapCategoryRow", 25, setupFunction, hideCallback, dataTypeSelectSound, resetControlCallback)
+	ZO_ScrollList_AddDataType(control, 0, "MapSearch_WorldMapCategoryRow", 40, setupFunction, hideCallback, dataTypeSelectSound, resetControlCallback)
 	ZO_ScrollList_AddDataType(control, 1, "MapSearch_WorldMapWayshrineRow", 23, setupFunction, hideCallback, dataTypeSelectSound, resetControlCallback)
 
 	ZO_ScrollList_EnableSelection(control, selectTemplate, selectCallback)
