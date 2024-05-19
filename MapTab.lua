@@ -51,6 +51,23 @@ local function LayoutRow(rowControl, data, scrollList)
 	]]
 end
 
+local function ShowWayshrineConfirm(data,isRecall)
+	local nodeIndex,name,refresh,clicked = data.nodeIndex,data.name,data.refresh,data.clicked
+	ZO_Dialogs_ReleaseDialog("FAST_TRAVEL_CONFIRM")
+	ZO_Dialogs_ReleaseDialog("RECALL_CONFIRM")
+	name = name or select(2, MapSearch.Wayshrine.Data.GetNodeInfo(nodeIndex)) -- just in case
+	local id = (isRecall == true and "RECALL_CONFIRM") or "FAST_TRAVEL_CONFIRM"
+	if isRecall == true then
+		local _, timeLeft = GetRecallCooldown()
+		if timeLeft ~= 0 then
+			local text = zo_strformat(SI_FAST_TRAVEL_RECALL_COOLDOWN, name, ZO_FormatTimeMilliseconds(timeLeft, TIME_FORMAT_STYLE_DESCRIPTIVE, TIME_FORMAT_PRECISION_SECONDS))
+		    ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, text)
+			return
+		end
+	end
+	ZO_Dialogs_ShowPlatformDialog(id, {nodeIndex = nodeIndex}, {mainTextParams = {name}})
+end
+
 
 --------------------------------------------------
 -- Step 7: Process the selection.
@@ -183,12 +200,10 @@ local function buildScrollList(control, searchString)
 		categories = MapSearch.categories
 	end
 
-	local filteredCats = filter(categories, "sto")
-
-	-- MapSearch.categories = categories
+	MapSearch.filteredCategories = categories
 	-- MapSearch.saved.categories = categories
 
-	for index, map in ipairs(filteredCats) do
+	for index, map in ipairs(categories) do
 		local nodes = map.nodes -- getZoneWayshrines(map.zoneIndex)
 		-- table.sort(nodes, Utils.SortByBareName)
 
@@ -355,33 +370,33 @@ function MapTab.OnTextChanged(editbox, listcontrol)
 	buildScrollList(listcontrol, searchString)
 end
 
+function MapTab.OnTab(editbox, listcontrol)
+	local filteredCategories = MapSearch.filteredCategories
+
+	if #filteredCategories > 0 then
+		local firstCategory = filteredCategories[1]
+		--logger:info("Tab: firstCategory: "..firstCategory.name)
+		if #firstCategory.nodes > 0 then
+			local firstNode = firstCategory.nodes[1]
+			MapSearch.firstNode = firstNode
+			--logger:info("Tab: firstNode: "..firstNode.name)
+			ShowWayshrineConfirm(firstNode, MapSearch.isRecall)
+		end
+	end
+end
 
 function MapTab.ResetFilter(editbox, listcontrol, lose_focus)
 	--logger.Info(editbox)
 	MapSearch_WorldMapTabSearchEdit:SetText("")
+
+	buildScrollList(MapSearch_WorldMapTabList, "")
+
 	-- if lose_focus then
 	-- 	editbox:LoseFocus()
 	-- end
 	--ZO_EditDefaultText_Initialize(editbox, GetString(FASTER_TRAVEL_WAYSHRINES_SEARCH))
 	--ResetVisibility(listcontrol)
 	ZO_ScrollList_ResetToTop(MapSearch_WorldMapTabList)
-end
-
-local function ShowWayshrineConfirm(data,isRecall)
-	local nodeIndex,name,refresh,clicked = data.nodeIndex,data.name,data.refresh,data.clicked
-	ZO_Dialogs_ReleaseDialog("FAST_TRAVEL_CONFIRM")
-	ZO_Dialogs_ReleaseDialog("RECALL_CONFIRM")
-	name = name or select(2, MapSearch.Wayshrine.Data.GetNodeInfo(nodeIndex)) -- just in case
-	local id = (isRecall == true and "RECALL_CONFIRM") or "FAST_TRAVEL_CONFIRM"
-	if isRecall == true then
-		local _, timeLeft = GetRecallCooldown()
-		if timeLeft ~= 0 then
-			local text = zo_strformat(SI_FAST_TRAVEL_RECALL_COOLDOWN, name, ZO_FormatTimeMilliseconds(timeLeft, TIME_FORMAT_STYLE_DESCRIPTIVE, TIME_FORMAT_PRECISION_SECONDS))
-		    ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, text)
-			return
-		end
-	end
-	ZO_Dialogs_ShowPlatformDialog(id, {nodeIndex = nodeIndex}, {mainTextParams = {name}})
 end
 
 function MapTab.RowMouseUp(control, mouseButton, upInside)

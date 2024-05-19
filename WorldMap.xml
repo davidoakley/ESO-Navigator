@@ -100,9 +100,11 @@
 								--TraderTravel.MapTabWayshrines.ResetFilter(self, TraderTravel_WorldMapWayshrinesList, true)
 							</OnInitialized>
 							<OnEscape>
+								self:LoseFocus()
 								--TraderTravel.MapTabWayshrines.ResetFilter(self, TraderTravel_WorldMapWayshrinesList, false)
 							</OnEscape>
 							<OnEffectivelyShown>
+								MapSearch.MapTab.ResetFilter(false)
 								self:TakeFocus()
 								--TraderTravel.MapTabWayshrines.ChangeFilter(self, TraderTravel_WorldMapWayshrinesList)
 							</OnEffectivelyShown>
@@ -114,6 +116,9 @@
 								self:TakeFocus()
 								ZO_EditDefaultText_Disable(self)
 							</OnMouseDown>
+							<OnTab>
+								MapSearch.MapTab.OnTab(self, MapSearch_WorldMapTabList)
+							</OnTab>
 						</EditBox>
 						<Button name="$(parent)Clear" tier="HIGH">
 							<Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT" offsetX="-5" offsetY="5"/>
