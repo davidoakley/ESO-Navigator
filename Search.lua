@@ -147,8 +147,6 @@ local function run(searchTerm)
         end
     end
 
-    --                 table.insert(resultNodes, node)
-    --     end
     local result = {}
 
     if #wayshrines > 0 then
@@ -211,3 +209,10 @@ end
 
 Search.buildCategories = buildCategories
 Search.run = run
+
+SLASH_COMMANDS["/mapsearchsave"] = function (extra)
+    buildCategories()
+    MapSearch.saved.categories = deepCopy(Search.categories)
+    MapSearch.saved.result = deepCopy(Search.result)
+    d("Written MapSearch data to Saved Preferences")
+  end
