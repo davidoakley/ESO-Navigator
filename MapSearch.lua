@@ -110,6 +110,7 @@ function MapSearch.showSearch()
   MAIN_MENU_KEYBOARD:ShowScene("worldMap")
   WORLD_MAP_INFO:SelectTab(MAPSEARCH_TAB_SEARCH)
   MapSearch.MapTab.ResetFilter(false)
+  MapSearch_WorldMapTabSearchEdit:TakeFocus()
 end
 
 -- Finally, we'll register our event handler function to be called when the proper event occurs.
