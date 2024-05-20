@@ -1,9 +1,9 @@
 ## Title: Map Search
 ## Description: TODO
 ## Author: SirNightstorm (PC-EU)
-## APIVersion: 101040
+## APIVersion: 101042
 ## Version: 0.0.1
-## DependsOn: LibCustomMenu LibDebugLogger>=180
+## DependsOn: LibCustomMenu LibDebugLogger>=180 LibWorldMapInfoTab
 ## OptionalDependsOn: pChat, FasterTravel
 ## SavedVariables: MapSearch_SavedVariables
 
