@@ -147,24 +147,12 @@ local function run(searchTerm)
         end
     end
 
-    -- for i, category in ipairs(categories) do
-    --     if category.show then
-    --         table.insert(zones, category)
-    --     elseif category.showNodes then
-    --         local resultNodes = {}
-    --         for j, node in ipairs(category.nodes) do
-    --             if node.show then
     --                 table.insert(resultNodes, node)
-    --             end
-    --         end
-    --         category.nodes = resultNodes
-    --         table.insert(wayshrines, category)
     --     end
-    -- end
-
     local result = {}
 
     if #wayshrines > 0 then
+        table.sort(wayshrines, matchComparison)
         table.insert(result, {
             ["name"] = "Wayshrines",
             ["nodes"] = wayshrines,
@@ -173,6 +161,7 @@ local function run(searchTerm)
     end
 
     if #dungeons > 0 then
+        table.sort(dungeons, matchComparison)
         table.insert(result, {
             ["name"] = "Dungeons",
             ["nodes"] = dungeons,
@@ -181,6 +170,7 @@ local function run(searchTerm)
     end
 
     if #trials > 0 then
+        table.sort(trials, matchComparison)
         table.insert(result, {
             ["name"] = "Trials",
             ["nodes"] = trials,
@@ -189,6 +179,7 @@ local function run(searchTerm)
     end
 
     if #arenas > 0 then
+        table.sort(arenas, matchComparison)
         table.insert(result, {
             ["name"] = "Arenas",
             ["nodes"] = arenas,
@@ -197,6 +188,7 @@ local function run(searchTerm)
     end
 
     if #houses > 0 then
+        table.sort(houses, matchComparison)
         table.insert(result, {
             ["name"] = "Houses",
             ["nodes"] = houses,
@@ -205,6 +197,7 @@ local function run(searchTerm)
     end
 
     if #zones > 0 then
+        table.sort(zones, matchComparison)
         for k,v in ipairs(zones) do
             v.icon = "esoui/art/tutorial/zonestoryquest_icon_assisted.dds"
             table.insert(result, v)
