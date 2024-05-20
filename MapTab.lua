@@ -92,23 +92,10 @@ local function OnRowSelect(previouslySelectedData, selectedData, reselectingDuri
     --UseCollectible(selectedData.index)
 end
 
-
-local function buildScrollList(control, searchString)
-
+local function buildScrollList(control, results)
 	ZO_ScrollList_Clear(control)
-
     local scrollData = ZO_ScrollList_GetDataList(control)
-
-	local results
-
-	if searchString ~= nil and #searchString > 0 then
-		results = Search.run(searchString)
-	else
-		results = {} --MapSearch.categories
-	end
-
-	MapSearch.results = results
-	-- MapSearch.saved.categories = categories
+	local currentNodeIndex = 0
 
 	for index, map in ipairs(results) do
 		local nodes = map.nodes -- getZoneWayshrines(map.zoneIndex)
@@ -133,11 +120,17 @@ local function buildScrollList(control, searchString)
 					icon = nodeMap.icon
 				}
 
+				if currentNodeIndex == MapSearch.targetNode then
+					nodeData.icon = "esoui/art/chatwindow/chat_overflowarrow_up.dds"
+				end
+
 				nodeMap.barename = Utils.BareName(nodeMap.name)
 		
 				local entry = ZO_ScrollList_CreateDataEntry(1, nodeData)
 				-- local entry = ZO_ScrollList_CreateDataEntry(1, deepCopy(nodeMap))
 				table.insert(scrollData, entry)
+
+				currentNodeIndex = currentNodeIndex + 1
 			end
 
 			--table.insert(MapSearch.categories, categoryData)
@@ -145,6 +138,22 @@ local function buildScrollList(control, searchString)
 	end
     
 	ZO_ScrollList_Commit(control)
+end
+
+local function executeSearch(control, searchString)
+	local results
+
+	if searchString ~= nil and #searchString > 0 then
+		results = Search.run(searchString)
+	else
+		results = {} --MapSearch.categories
+	end
+
+	MapSearch.results = results
+	MapSearch.targetNode = 0
+	-- MapSearch.saved.categories = categories
+
+	buildScrollList(control, results)
 end
 
 local function setupScrollList(control)
@@ -163,6 +172,27 @@ local function setupScrollList(control)
 	ZO_ScrollList_EnableSelection(control, selectTemplate, selectCallback)
 end
 
+local function getTargetNode(results)
+	local currentNodeIndex = 0
+
+	for index, map in ipairs(results) do
+		local nodes = map.nodes
+
+		if #nodes >= 1 then
+			for nodeIndex, nodeMap in ipairs(nodes) do
+				if currentNodeIndex == MapSearch.targetNode then
+					return nodeMap
+				end
+
+				currentNodeIndex = currentNodeIndex + 1
+			end
+		end
+	end
+
+	return nil
+end
+
+
 function MapTab:init(tabControl)
 	logger:Info("MapTab:init")
 	self.tabControl = tabControl
@@ -174,7 +204,7 @@ function MapTab:init(tabControl)
 
 	setupScrollList(control)
 
-	buildScrollList(control)
+	executeSearch(control)
 
 	local _refreshing = false
 	local _isDirty = true 
@@ -277,29 +307,27 @@ end
 function MapTab.OnTextChanged(editbox, listcontrol)
 	local searchString = string.lower(editbox:GetText())
 	logger:Info("OnTextChanged: "..searchString)
-	buildScrollList(listcontrol, searchString)
+	executeSearch(listcontrol, searchString)
+end
+
+function MapTab.OnEnter(editbox, listcontrol)
+	local node = getTargetNode(MapSearch.Search.result)
+
+	if node then
+		ShowWayshrineConfirm(node, MapSearch.isRecall)
+	end
 end
 
 function MapTab.OnTab(editbox, listcontrol)
-	local result = MapSearch.Search.result
-
-	if #result > 0 then
-		local firstCategory = result[1]
-		--logger:info("Tab: firstCategory: "..firstCategory.name)
-		if #firstCategory.nodes > 0 then
-			local firstNode = firstCategory.nodes[1]
-			MapSearch.firstNode = firstNode
-			--logger:info("Tab: firstNode: "..firstNode.name)
-			ShowWayshrineConfirm(firstNode, MapSearch.isRecall)
-		end
-	end
+	MapSearch.targetNode = MapSearch.targetNode + 1
+	buildScrollList(listcontrol, MapSearch.results)
 end
 
 function MapTab.ResetFilter(editbox, listcontrol, lose_focus)
 	--logger.Info(editbox)
 	MapSearch_WorldMapTabSearchEdit:SetText("")
 
-	buildScrollList(MapSearch_WorldMapTabList, "")
+	executeSearch(MapSearch_WorldMapTabList, "")
 
 	-- if lose_focus then
 	-- 	editbox:LoseFocus()

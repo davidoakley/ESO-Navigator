@@ -99,6 +99,11 @@
 							<OnInitialized>
 								--TraderTravel.MapTabWayshrines.ResetFilter(self, TraderTravel_WorldMapWayshrinesList, true)
 							</OnInitialized>
+							<OnEnter>
+								local logger = LibDebugLogger("MapSearch")
+								logger:Info("EditBox.OnEnter")
+								MapSearch.MapTab.OnEnter(self, MapSearch_WorldMapTabList)
+							</OnEnter>
 							<OnEscape>
 								self:LoseFocus()
 								--TraderTravel.MapTabWayshrines.ResetFilter(self, TraderTravel_WorldMapWayshrinesList, false)
