@@ -187,6 +187,7 @@ local function BareName(name)
 
 	r = r:lower()
 
+	r = r:gsub("-", " ")
 	r = r:gsub("[^%w ]", "")
 	return r
 end
