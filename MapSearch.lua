@@ -7,6 +7,8 @@ MapSearch.Wayshrine = {}
 MapSearch.Search = {}
 MapSearch.isRecall = true -- Ew, should pass this around not have it as a global
 
+local isDeveloper = (GetDisplayName() == '@SirNightstorm' and true) or false
+
 -- Make this properly localisable!
 ZO_CreateStringId("MAPSEARCH_SEARCH","Search")
 ZO_CreateStringId("SI_BINDING_NAME_MAPSEARCH_SEARCH", "Search")
