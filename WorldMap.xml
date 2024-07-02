@@ -52,7 +52,7 @@
 						--self:GetParent():IconMouseDown(self,button)
 					</OnMouseDown>
 					<OnMouseUp>
-						self:GetParent():IconMouseUp(self,button, upInside)
+						MapSearch.MapTab.RowMouseUp(self,button, upInside)
 					</OnMouseUp>
 				</Texture>
 				<Label name="$(parent)Label" inherits="ZO_SelectableLabel" font="ZoFontHeader" newLineIndent="8">
@@ -95,14 +95,12 @@
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT" offsetX="0" offsetY="0" />
 
 					<Controls>
-						<EditBox name="$(parent)Edit" maxInputCharacters="30" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText">
+						<EditBox name="$(parent)Edit" maxInputCharacters="30" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText" newLineEnabled="true" XkeyboardEnabled="true">
 							<OnInitialized>
 								--TraderTravel.MapTabWayshrines.ResetFilter(self, TraderTravel_WorldMapWayshrinesList, true)
 							</OnInitialized>
 							<OnEnter>
-								local logger = LibDebugLogger("MapSearch")
-								logger:Info("EditBox.OnEnter")
-								MapSearch.MapTab.OnEnter(self, MapSearch_WorldMapTabList)
+								MapSearch.MapTab.JumpToResult()
 							</OnEnter>
 							<OnEscape>
 								self:LoseFocus()
@@ -111,18 +109,21 @@
 							<OnEffectivelyShown>
 								MapSearch.MapTab.ResetFilter(false)
 								self:TakeFocus()
-								--TraderTravel.MapTabWayshrines.ChangeFilter(self, TraderTravel_WorldMapWayshrinesList)
 							</OnEffectivelyShown>
 							<OnTextChanged>
 								MapSearch.MapTab.OnTextChanged(self, MapSearch_WorldMapTabList)
-								--TraderTravel.MapTabWayshrines.ChangeFilter(self, TraderTravel_WorldMapWayshrinesList)
 							</OnTextChanged>
 							<OnMouseDown>
 								self:TakeFocus()
 								ZO_EditDefaultText_Disable(self)
 							</OnMouseDown>
+							<OnDownArrow>
+								MapSearch.MapTab.NextResult()
+							</OnDownArrow>
+							<OnUpArrow>
+								MapSearch.MapTab.PreviousResult()
+							</OnUpArrow>
 							<OnTab>
-								MapSearch.MapTab.OnTab(self, MapSearch_WorldMapTabList)
 							</OnTab>
 						</EditBox>
 						<Button name="$(parent)Clear" tier="HIGH">

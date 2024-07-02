@@ -1,5 +1,6 @@
 local MapTab = MapSearch.class()
 MapSearch.MapTab = MapTab
+MapTab.resultCount = 0
 
 local Search = MapSearch.Search
 local Utils = MapSearch.Utils
@@ -136,6 +137,7 @@ local function buildScrollList(control, results)
 			--table.insert(MapSearch.categories, categoryData)
 		end
 	end
+	MapTab.resultCount = currentNodeIndex
     
 	ZO_ScrollList_Commit(control)
 end
@@ -310,7 +312,7 @@ function MapTab.OnTextChanged(editbox, listcontrol)
 	executeSearch(listcontrol, searchString)
 end
 
-function MapTab.OnEnter(editbox, listcontrol)
+function MapTab.JumpToResult()
 	local node = getTargetNode(MapSearch.Search.result)
 
 	if node then
@@ -318,9 +320,17 @@ function MapTab.OnEnter(editbox, listcontrol)
 	end
 end
 
-function MapTab.OnTab(editbox, listcontrol)
-	MapSearch.targetNode = MapSearch.targetNode + 1
-	buildScrollList(listcontrol, MapSearch.results)
+function MapTab.NextResult()
+	MapSearch.targetNode = (MapSearch.targetNode + 1) % MapTab.resultCount
+	buildScrollList(MapSearch_WorldMapTabList, MapSearch.results)
+end
+
+function MapTab.PreviousResult()
+	MapSearch.targetNode = MapSearch.targetNode - 1
+	if MapSearch.targetNode < 0 then
+		MapSearch.targetNode = MapSearch.results - 1
+	end
+	buildScrollList(MapSearch_WorldMapTabList, MapSearch.results)
 end
 
 function MapTab.ResetFilter(editbox, listcontrol, lose_focus)
