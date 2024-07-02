@@ -95,6 +95,18 @@ end
 
 local function buildScrollList(control, results)
 	ZO_ScrollList_Clear(control)
+	
+	local editBox = MapSearch_WorldMapTabSearchEdit
+	local searchString = editBox:GetText()
+	if searchString == "" then
+		-- reinstate default text
+		ZO_EditDefaultText_Initialize(editBox, GetString(MAPSEARCH_SEARCH))
+	else
+		-- remove default text
+		ZO_EditDefaultText_Disable(editBox)
+	end
+
+
     local scrollData = ZO_ScrollList_GetDataList(control)
 	local currentNodeIndex = 0
 
