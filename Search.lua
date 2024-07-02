@@ -14,6 +14,17 @@ local function deepCopy(obj)
     return res
 end
 
+local function splitByWord(inputstr, sep)
+    if sep == nil then
+        sep = "%s"
+    end
+    local t={}
+    for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
+        table.insert(t, str)
+    end
+    return t
+end
+
 local function getZoneWayshrines(zoneIndex)
 	local data = {}
 
@@ -49,6 +60,8 @@ local function getZoneWayshrines(zoneIndex)
         end
 
         node.barename = Utils.BareName(node.name)
+
+        node.words = splitByWord(node.barename)
 
 		table.insert(data, node)
 	end
@@ -216,3 +229,4 @@ SLASH_COMMANDS["/mapsearchsave"] = function (extra)
     MapSearch.saved.result = deepCopy(Search.result)
     d("Written MapSearch data to Saved Preferences")
   end
+ 
