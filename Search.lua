@@ -1,6 +1,6 @@
 local Search = MapSearch.Search or {}
 local Utils = MapSearch.Utils
-local logger = LibDebugLogger("MapSearch")
+local logger = MapSearch.logger -- LibDebugLogger("MapSearch")
 
 Search.categories = nil
 
