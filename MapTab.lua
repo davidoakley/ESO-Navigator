@@ -92,76 +92,6 @@ local function ShowWayshrineConfirm(data,isRecall)
 end
 
 
---------------------------------------------------
--- Step 7: Process the selection.
--- If the user has selected a pet, summon that pet
---------------------------------------------------
-local function OnRowSelect(previouslySelectedData, selectedData, reselectingDuringRebuild)
-    if not selectedData then return end
-    --UseCollectible(selectedData.index)
-end
-
-local function buildScrollListCategorised(control, results)
-	ZO_ScrollList_Clear(control)
-	
-	local editBox = MapSearch_WorldMapTabSearchEdit
-	local searchString = editBox:GetText()
-	if searchString == "" then
-		-- reinstate default text
-		ZO_EditDefaultText_Initialize(editBox, GetString(MAPSEARCH_SEARCH))
-	else
-		-- remove default text
-		ZO_EditDefaultText_Disable(editBox)
-	end
-
-
-    local scrollData = ZO_ScrollList_GetDataList(control)
-	local currentNodeIndex = 0
-
-	for index, map in ipairs(results) do
-		local nodes = map.nodes -- getZoneWayshrines(map.zoneIndex)
-		-- table.sort(nodes, Utils.SortByBareName)
-
-		local categoryData = {
-			name = map.name,
-			icon = map.icon,
-			barename = Utils.BareName(map.name)
-		}
-
-		if #nodes >= 1 then
-			local entry = ZO_ScrollList_CreateDataEntry(0, categoryData)
-			table.insert(scrollData, entry)
-	
-			for nodeIndex, nodeMap in ipairs(nodes) do
-				local nodeData = {
-					name = nodeMap.name,
-					barename = Utils.BareName(nodeMap.name),
-					nodeIndex = nodeMap.nodeIndex,
-					poiType = nodeMap.poiType,
-					icon = nodeMap.icon
-				}
-
-				if currentNodeIndex == MapSearch.targetNode then
-					nodeData.icon = "esoui/art/chatwindow/chat_overflowarrow_up.dds"
-				end
-
-				nodeMap.barename = Utils.BareName(nodeMap.name)
-		
-				local entry = ZO_ScrollList_CreateDataEntry(1, nodeData)
-				-- local entry = ZO_ScrollList_CreateDataEntry(1, deepCopy(nodeMap))
-				table.insert(scrollData, entry)
-
-				currentNodeIndex = currentNodeIndex + 1
-			end
-
-			--table.insert(MapSearch.categories, categoryData)
-		end
-	end
-	MapTab.resultCount = currentNodeIndex
-    
-	ZO_ScrollList_Commit(control)
-end
-
 local function buildScrollList(control, results)
 	ZO_ScrollList_Clear(control)
 	
@@ -215,12 +145,11 @@ local function executeSearch(control, searchString)
 	if searchString ~= nil and #searchString > 0 then
 		results = Search.run(searchString)
 	else
-		results = {} --MapSearch.categories
+		results = {}
 	end
 
 	MapSearch.results = results
 	MapSearch.targetNode = 0
-	-- MapSearch.saved.categories = categories
 
 	buildScrollList(control, results)
 end
@@ -290,52 +219,6 @@ function MapTab:init(tabControl)
 		end 
 	end
 	
-end
-
-function MapTab:AddCategory(categoryId,item)
-
-	local refresh = item.refresh 
-	local clicked = item.clicked
-	
-	item.clicked =  function(data,c) 
-							if clicked then 
-								clicked(data,c)
-							else
-								self:SetCategoryHidden(categoryId,not self:IsCategoryHidden(categoryId)) 
-							end
-						end
-	item.refresh =  function(data,c)
-							c.label:SetText(data.name) 
-							if refresh then
-								
-								refresh(data,c)
-							end
-						end
-	--item.data = nil 
-	local header = Utils.extend(item)
-	header.hidden = nil 
-	self.control:AddCategory(self.control.list,header,categoryId)
-	return header
-end
-
-function MapTab:AddCategories(data, tab) -- tab = 0 for Players, 1 for Wayshrines
-	local categoryId = 1
-	local parentId
-	
-	local hideRecents = (tab == 1) and not TraderTravel.settings.recentsEnabled 
-	local categories = {}
-	
-	for i,item in ipairs(data) do 
-		if i ~= TraderTravel.settings.recentsPosition or not hideRecents then
-			categories[i] = self:AddCategory(categoryId,item)
-			if #item.data > 0 then
-				self.control:AddEntries(self.control.list,item.data,1,categoryId)
-				item.categoryId=categoryId
-			end
-		end
-		categoryId = categoryId + 1
-	end
-	return categories
 end
 
 function MapTab:SetCategoryHidden(categoryId,value)
