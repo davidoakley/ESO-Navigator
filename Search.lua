@@ -18,31 +18,10 @@ local function deepCopy(obj)
     return res
 end
 
-local function splitByWord(inputstr, sep)
-    if sep == nil then
-        sep = "%s"
-    end
-    local t={}
-    for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
-        table.insert(t, str)
-    end
-    return t
-end
-
 local function getZoneWayshrines(zoneIndex)
 	local data = {}
 
-	--logger:Info("zoneIndex "..zoneIndex)
 	local iter = MapSearch.Wayshrine.GetKnownWayshrinesByZoneIndex(zoneIndex,-1)
-	-- iter = Utils.map(iter,function(item)
-	-- 	if item.traders_cnt then
-	-- 		item.name = string.format("|ce000e0%1d|r %s", -- magenta
-	-- 			item.traders_cnt, Utils.ShortName(item.name))
-	-- 	else
-	-- 		item.name = empty_prefix .. Utils.ShortName(item.name)
-	-- 	end
-	-- 	return AttachWayshrineDataHandlers(args,item)
-	-- end)
 
 	data = {}
 	for i in iter do
@@ -70,47 +49,10 @@ local function getZoneWayshrines(zoneIndex)
 
         node.barename = Utils.BareName(node.name)
 
-        node.words = splitByWord(node.barename)
-
 		table.insert(data, node)
 	end
 
 	return data
-end
-
-local function getCategories()
-	local categories = {}
-	local locations = MapSearch.Location.Data.GetList()
-
-	for i, map in ipairs(locations) do
-		if map.zoneId ~= nil then
-			-- print(" - "..map.zoneId.." - "..map.name)
-
-			local nodes = getZoneWayshrines(map.zoneIndex)
-			table.sort(nodes, Utils.SortByBareName)
-			map.nodes = nodes
-	
-			--categories[map.zoneIndex] = map
-			table.insert(categories, map)
-		end
-	end
-
-	return categories
-end
-
-local function nocase (s)
-    s = string.gsub(s, "%a", function (c)
-          return string.format("[%s%s]", string.lower(c),
-                                         string.upper(c))
-        end)
-    return s
-end
-
-local function buildCategories()
-	local categories = getCategories()
-	table.sort(categories, Utils.SortByBareName)
-
-	Search.categories = categories
 end
 
 local function buildLocations()
@@ -127,7 +69,7 @@ local function buildLocations()
             zones[map.zoneIndex].nodes = nil
 			-- table.sort(nodes, Utils.SortByBareName)
 			-- map.nodes = nodes
-	
+
 			--categories[map.zoneIndex] = map
 			-- table.insert(categories, map)
 			local nodes = getZoneWayshrines(map.zoneIndex)
@@ -145,27 +87,8 @@ local function buildLocations()
 end
 
 local function match(object, searchTerm)
-    local matchLevel = 0
     local name = object.barename or object.name
 
-    --[[
-    -- Matches any substring
-    if string.find(name, searchTerm) then
-        matchLevel = 10
-    end
-
-    -- Matches prefix of any word
-    for i, word in ipairs(object.words) do
-        if word:find(searchTerm, 1, true) == 1 then
-            matchLevel = 20
-        end
-    end
-
-    -- Matches prefix of first word
-    if object.words[1]:find(searchTerm, 1, true) == 1 then
-        matchLevel = 30
-    end
-    ]]
     local result = fzy.filter(searchTerm, {name})
 
     if #result >= 1 then
@@ -180,109 +103,6 @@ local function matchComparison(x,y)
         return x.match > y.match
     end
 	return (x.barename or x.name) < (y.barename or y.name)
-end
-
-local function runCategorised(searchTerm)
-    if Search.categories == nil then
-        logger:Info("Search.run: building categories")
-		buildCategories()
-	end
-
-    searchTerm = searchTerm:lower()
-    searchTerm = searchTerm:gsub("[^%w ]", "")
-
-    logger:Info("Search.run("..searchTerm..")")
-
-    local categories = deepCopy(Search.categories)
-
-    local wayshrines = {}
-    local dungeons = {}
-    local trials = {}
-    local arenas = {}
-    local houses = {}
-    local zones = {}
-
-    for i, category in ipairs(categories) do
-        -- logger:Info("Search.run - "..category.name)
-        if match(category, searchTerm) > 0 then
-            table.insert(zones, category) --category.show = true
-        end
-        for j, node in ipairs(category.nodes) do
-            -- logger:Info("Search.run - "..node.name)
-            if match(node, searchTerm) > 0 then
-                if node.poiType == POI_TYPE_GROUP_DUNGEON then --or item.name:find("Trial: ") or item.poiIndex == 0 or item.nodeIndex == 270 then
-                    table.insert(dungeons, node)
-                elseif node.poiType == POI_TYPE_TRIAL then
-                    table.insert(trials, node)
-                elseif node.poiType == POI_TYPE_ARENA then
-                    table.insert(arenas, node)
-                elseif node.poiType == POI_TYPE_HOUSE then
-                    table.insert(houses, node)
-                else
-                    table.insert(wayshrines, node)
-                end
-            end
-        end
-    end
-
-    local result = {}
-
-    if #wayshrines > 0 then
-        table.sort(wayshrines, matchComparison)
-        table.insert(result, {
-            ["name"] = "Wayshrines",
-            ["nodes"] = wayshrines,
-            ["icon"] = "esoui/art/icons/poi/poi_wayshrine_complete.dds"
-        })
-    end
-
-    if #dungeons > 0 then
-        table.sort(dungeons, matchComparison)
-        table.insert(result, {
-            ["name"] = "Group Dungeons",
-            ["nodes"] = dungeons,
-            ["icon"] = "esoui/art/icons/poi/poi_groupinstance_complete.dds"
-        })
-    end
-
-    if #trials > 0 then
-        table.sort(trials, matchComparison)
-        table.insert(result, {
-            ["name"] = "Trials",
-            ["nodes"] = trials,
-            ["icon"] = "esoui/art/tutorial/poi_raiddungeon_complete.dds"
-        })
-    end
-
-    if #arenas > 0 then
-        table.sort(arenas, matchComparison)
-        table.insert(result, {
-            ["name"] = "Arenas",
-            ["nodes"] = arenas,
-            ["icon"] = "esoui/art/tutorial/poi_raiddungeon_complete.dds"
-        })
-    end
-
-    if #houses > 0 then
-        table.sort(houses, matchComparison)
-        table.insert(result, {
-            ["name"] = "Houses",
-            ["nodes"] = houses,
-            ["icon"] = "esoui/art/icons/poi/poi_group_house_owned.dds"
-        })
-    end
-
-    if #zones > 0 then
-        table.sort(zones, matchComparison)
-        for k,v in ipairs(zones) do
-            v.icon = "esoui/art/tutorial/zonestoryquest_icon_assisted.dds"
-            table.insert(result, v)
-        end
-    end
-
-    Search.result = result
-
-    return result
 end
 
 local function runCombined(searchTerm)
@@ -340,16 +160,12 @@ local function highlightResult(result, matchChars)
     return colors(out)
 end
 
-
-Search.buildCategories = buildCategories
 Search.run = runCombined
 Search.highlightResult = highlightResult
 
 SLASH_COMMANDS["/mapsearch"] = function (extra)
     if extra == 'save' then
-        buildCategories()
         buildLocations()
-        -- MapSearch.saved.categories = deepCopy(Search.categories)
         MapSearch.saved.locations = deepCopy(Search.locations)
         MapSearch.saved.zones = deepCopy(Search.zones)
         MapSearch.saved.result = deepCopy(Search.result)
