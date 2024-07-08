@@ -223,10 +223,16 @@ end
 Search.buildCategories = buildCategories
 Search.run = run
 
-SLASH_COMMANDS["/mapsearchsave"] = function (extra)
-    buildCategories()
-    MapSearch.saved.categories = deepCopy(Search.categories)
-    MapSearch.saved.result = deepCopy(Search.result)
-    d("Written MapSearch data to Saved Preferences")
-  end
+SLASH_COMMANDS["/mapsearch"] = function (extra)
+    if extra == 'save' then
+        buildCategories()
+        MapSearch.saved.categories = deepCopy(Search.categories)
+        MapSearch.saved.result = deepCopy(Search.result)
+        d("Written MapSearch data to Saved Preferences")
+    elseif extra == 'clear' then
+        MapSearch.saved.categories = nil
+        MapSearch.saved.result = nil
+        d("Cleared MapSearch data from Saved Preferences")
+    end
+end
  
