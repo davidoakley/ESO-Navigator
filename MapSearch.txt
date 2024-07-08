@@ -8,6 +8,7 @@
 ## SavedVariables: MapSearch_SavedVariables
 
 MapSearch.lua
+fzy.lua
 Utils.lua
 ClassBase.lua
 Wayshrine.lua

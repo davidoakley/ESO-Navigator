@@ -13,6 +13,8 @@ SLASH_COMMANDS = {}
 
 function GetCVar(lang) return "en"  end
 
+require("fzy")
+MapSearch.ansicolors = require('ansicolors')
 require("test.SV.MapSearch")
 require("WayshrineData")
 require("LocationData")
@@ -20,74 +22,29 @@ require("Utils")
 require("Search")
 require("Wayshrine")
 
+
+MapSearch.isCLI = true
+
 local inspect = require('test.inspect')
 local Search = MapSearch.Search
 
+POI_TYPE_WAYSHRINE = 1
+POI_TYPE_GROUP_DUNGEON = 6
+POI_TYPE_HOUSE = 7
+
 MapSearch.Search.categories = MapSearch_SavedVariables.Default["@SirNightstorm"]["$AccountWide"].categories
+MapSearch.Search.locations = MapSearch_SavedVariables.Default["@SirNightstorm"]["$AccountWide"].locations
+MapSearch.Search.zones = MapSearch_SavedVariables.Default["@SirNightstorm"]["$AccountWide"].zones
 
-local function deepCopy(obj)
-    if type(obj) ~= 'table' then return obj end
-    local res = {}
-    for k, v in pairs(obj) do res[deepCopy(k)] = deepCopy(v) end
-    return res
-end
+local typeLabels = {
+    [POI_TYPE_WAYSHRINE] = 'W',
+    [POI_TYPE_GROUP_DUNGEON] = 'D',
+    [POI_TYPE_HOUSE] = 'H',
+    [POI_TYPE_TRIAL] = 'T',
+    [POI_TYPE_ARENA] = 'A'
+}
 
-local function nocase (s)
-    s = string.gsub(s, "%a", function (c)
-          return string.format("[%s%s]", string.lower(c),
-                                         string.upper(c))
-        end)
-    return s
-end
-  
-
-local function filter(categoriesRef, searchTerm)
-    local categories = deepCopy(categoriesRef)
-    searchTerm = nocase(searchTerm)
-
-    for i, category in ipairs(categories) do
-        if string.find(category.name, searchTerm) then
-            category.show = true
-        end
-        for j, node in ipairs(category.nodes) do
-            if string.find(node.name, searchTerm) then
-                node.show = true
-                category.showNodes = true
-            end
-        end
-    end
-
-    local result = {}
-    for i, category in ipairs(categories) do
-        if category.show then
-            table.insert(result, category)
-        elseif category.showNodes then
-            local resultNodes = {}
-            for j, node in ipairs(category.nodes) do
-                if node.show then
-                    table.insert(resultNodes, node)
-                end
-            end
-            category.nodes = resultNodes
-            table.insert(result, category)
-        end
-    end
-
-    return result
-end
-
-local function dump(categories)
-    for i, category in ipairs(categories) do
-        if category.zoneId ~= nil then
-            print(" - "..category.name)
-            for j, node in ipairs(category.nodes) do
-                print("   . "..node.name)
-            end
-        end
-    end
-end
-
-local function dumpResults(results)
+local function dumpCategorisedResults(results)
     for index, map in ipairs(results) do
         local nodes = map.nodes
         if #nodes >= 1 then
@@ -96,6 +53,14 @@ local function dumpResults(results)
                 print("  > "..nodeMap.name)
             end
         end
+    end
+end
+
+local function dumpResults(results)
+    for nodeIndex, nodeMap in ipairs(results) do
+        -- print(inspect(nodeMap))
+        local name = Search.highlightResult(nodeMap.name, nodeMap.matchChars)
+        print("  ["..typeLabels[nodeMap.poiType].."] "..name.." ("..nodeMap.match..")")
     end
 end
 
@@ -115,7 +80,6 @@ local function executeSearch(searchString)
 	--buildScrollList(control, results)
     dumpResults(results)
 end
-
 
 local searchTerm = arg[1]
 executeSearch(searchTerm)

@@ -6,6 +6,7 @@ MapSearch.Location = {}
 MapSearch.Wayshrine = {}
 MapSearch.Search = {}
 MapSearch.isRecall = true -- Ew, should pass this around not have it as a global
+MapSearch.isCLI = false
 
 local isDeveloper = (GetDisplayName() == '@SirNightstorm' and true) or false
 
