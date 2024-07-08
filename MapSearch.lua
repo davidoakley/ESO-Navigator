@@ -15,6 +15,8 @@ ZO_CreateStringId("SI_BINDING_NAME_MAPSEARCH_SEARCH", "Search")
 ZO_CreateStringId("MAPSEARCH_TAB_SEARCH","Search")
 
 local logger = LibDebugLogger(MapSearch.name)
+MapSearch.logger = logger
+
 local Utils = MapSearch.Utils
 
 local _events = {}
