@@ -13,14 +13,14 @@ SLASH_COMMANDS = {}
 
 function GetCVar(lang) return "en"  end
 
-require("SV.MapSearch")
+require("test.SV.MapSearch")
 require("WayshrineData")
 require("LocationData")
 require("Utils")
 require("Search")
 require("Wayshrine")
 
-local inspect = require('inspect')
+local inspect = require('test.inspect')
 local Search = MapSearch.Search
 
 MapSearch.Search.categories = MapSearch_SavedVariables.Default["@SirNightstorm"]["$AccountWide"].categories
