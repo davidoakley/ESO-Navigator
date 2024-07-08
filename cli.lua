@@ -3,6 +3,13 @@ MapSearch.Wayshrine = {}
 MapSearch.Location = {}
 MapSearch.Options = {}
 MapSearch.Utils = {}
+MapSearch.Search = {}
+MapSearch.logger = {}
+
+MapSearch.logger.Info = function(obj, text)
+    print(" # "..text)
+end
+SLASH_COMMANDS = {}
 
 function GetCVar(lang) return "en"  end
 
@@ -10,6 +17,13 @@ require("SV.MapSearch")
 require("WayshrineData")
 require("LocationData")
 require("Utils")
+require("Search")
+require("Wayshrine")
+
+local inspect = require('inspect')
+local Search = MapSearch.Search
+
+MapSearch.Search.categories = MapSearch_SavedVariables.Default["@SirNightstorm"]["$AccountWide"].categories
 
 local function deepCopy(obj)
     if type(obj) ~= 'table' then return obj end
@@ -73,17 +87,35 @@ local function dump(categories)
     end
 end
 
-local locations = MapSearch.Location.Data.GetList()
+local function dumpResults(results)
+    for index, map in ipairs(results) do
+        local nodes = map.nodes
+        if #nodes >= 1 then
+            print("@ "..map.name)
+            for nodeIndex, nodeMap in ipairs(nodes) do
+                print("  > "..nodeMap.name)
+            end
+        end
+    end
+end
 
--- for i, map in ipairs(locations) do
---     if map.zoneId ~= nil then
---         print(" - "..map.zoneId.." - "..map.name)
---     end
--- end
+local function executeSearch(searchString)
+	local results
 
-local categories = MapSearch_SavedVariables.Default["@SirNightstorm"]["$AccountWide"].categories
+	if searchString ~= nil and #searchString > 0 then
+		results = Search.run(searchString)
+	else
+		results = {} --MapSearch.categories
+	end
+
+	MapSearch.results = results
+	MapSearch.targetNode = 0
+	-- MapSearch.saved.categories = categories
+
+	--buildScrollList(control, results)
+    dumpResults(results)
+end
+
+
 local searchTerm = arg[1]
-
-local filteredCats = filter(categories, searchTerm)
-
-dump(filteredCats)
+executeSearch(searchTerm)

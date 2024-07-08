@@ -75,7 +75,7 @@ local function getCategories()
 
 	for i, map in ipairs(locations) do
 		if map.zoneId ~= nil then
-			print(" - "..map.zoneId.." - "..map.name)
+			-- print(" - "..map.zoneId.." - "..map.name)
 
 			local nodes = getZoneWayshrines(map.zoneIndex)
 			table.sort(nodes, Utils.SortByBareName)
@@ -140,10 +140,12 @@ local function run(searchTerm)
     local zones = {}
 
     for i, category in ipairs(categories) do
+        -- logger:Info("Search.run - "..category.name)
         if match(category, searchTerm) > 0 then
             table.insert(zones, category) --category.show = true
         end
         for j, node in ipairs(category.nodes) do
+            -- logger:Info("Search.run - "..node.name)
             if match(node, searchTerm) > 0 then
                 if node.poiType == POI_TYPE_GROUP_DUNGEON then --or item.name:find("Trial: ") or item.poiIndex == 0 or item.nodeIndex == 270 then
                     table.insert(dungeons, node)
@@ -235,4 +237,3 @@ SLASH_COMMANDS["/mapsearch"] = function (extra)
         d("Cleared MapSearch data from Saved Preferences")
     end
 end
- 
