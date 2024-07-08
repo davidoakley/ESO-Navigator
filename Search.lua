@@ -176,9 +176,9 @@ local function run(searchTerm)
     if #dungeons > 0 then
         table.sort(dungeons, matchComparison)
         table.insert(result, {
-            ["name"] = "Dungeons",
+            ["name"] = "Group Dungeons",
             ["nodes"] = dungeons,
-            ["icon"] = "esoui/art/icons/poi/poi_dungeon_complete.dds"
+            ["icon"] = "esoui/art/icons/poi/poi_groupinstance_complete.dds"
         })
     end
 
