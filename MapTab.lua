@@ -34,7 +34,15 @@ local function LayoutRow(rowControl, data, scrollList)
 		rowControl.icon:SetHidden(true)
 	end
 
+	rowControl.arrow:SetHidden(not data.isSelected)
+
 	rowControl.label:SetText(name)
+
+	if data.isSelected then
+		rowControl.label:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
+	else
+		rowControl.label:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
+	end
 	--[[
 	rowControl:SetFont("ZoFontWinH4")
 	rowControl:SetMaxLineCount(1) -- Forces the text to only use one row.  If it goes longer, the extra will not display.
@@ -93,7 +101,7 @@ local function OnRowSelect(previouslySelectedData, selectedData, reselectingDuri
     --UseCollectible(selectedData.index)
 end
 
-local function buildScrollList(control, results)
+local function buildScrollListCategorised(control, results)
 	ZO_ScrollList_Clear(control)
 	
 	local editBox = MapSearch_WorldMapTabSearchEdit
@@ -154,6 +162,53 @@ local function buildScrollList(control, results)
 	ZO_ScrollList_Commit(control)
 end
 
+local function buildScrollList(control, results)
+	ZO_ScrollList_Clear(control)
+	
+	local editBox = MapSearch_WorldMapTabSearchEdit
+	local searchString = editBox:GetText()
+	if searchString == "" then
+		-- reinstate default text
+		ZO_EditDefaultText_Initialize(editBox, GetString(MAPSEARCH_SEARCH))
+	else
+		-- remove default text
+		ZO_EditDefaultText_Disable(editBox)
+	end
+
+
+    local scrollData = ZO_ScrollList_GetDataList(control)
+	local currentNodeIndex = 0
+
+	for index, nodeMap in ipairs(results) do
+		local nodeData = {
+			name = nodeMap.name,
+			barename = Utils.BareName(nodeMap.name),
+			nodeIndex = nodeMap.nodeIndex,
+			poiType = nodeMap.poiType,
+			icon = nodeMap.icon
+		}
+
+		-- nodeData.icon = nodeData.icon:gsub('glow', 'complete')
+
+		-- if currentNodeIndex == MapSearch.targetNode then
+		-- 	nodeData.icon = "esoui/art/chatwindow/chat_overflowarrow_up.dds"
+		-- end
+		-- nodeData.icon = nodeMap.icon
+		nodeData.isSelected = (currentNodeIndex == MapSearch.targetNode)
+
+		nodeMap.barename = Utils.BareName(nodeMap.name)
+
+		local entry = ZO_ScrollList_CreateDataEntry(1, nodeData)
+		-- local entry = ZO_ScrollList_CreateDataEntry(1, deepCopy(nodeMap))
+		table.insert(scrollData, entry)
+
+		currentNodeIndex = currentNodeIndex + 1
+	end
+	MapTab.resultCount = currentNodeIndex
+    
+	ZO_ScrollList_Commit(control)
+end
+
 local function executeSearch(control, searchString)
 	local results
 
@@ -189,18 +244,12 @@ end
 local function getTargetNode(results)
 	local currentNodeIndex = 0
 
-	for index, map in ipairs(results) do
-		local nodes = map.nodes
-
-		if #nodes >= 1 then
-			for nodeIndex, nodeMap in ipairs(nodes) do
-				if currentNodeIndex == MapSearch.targetNode then
-					return nodeMap
-				end
-
-				currentNodeIndex = currentNodeIndex + 1
-			end
+	for nodeIndex, nodeMap in ipairs(results) do
+		if currentNodeIndex == MapSearch.targetNode then
+			return nodeMap
 		end
+
+		currentNodeIndex = currentNodeIndex + 1
 	end
 
 	return nil
