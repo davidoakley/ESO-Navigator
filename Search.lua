@@ -1,9 +1,8 @@
 local Search = MapSearch.Search or {}
 local Utils = MapSearch.Utils
+local Locations = MapSearch.Locations
 local logger = MapSearch.logger -- LibDebugLogger("MapSearch")
 local colors = MapSearch.ansicolors
-
--- https://github.com/swarn/fzy-lua/blob/main/docs/fzy.md
 local fzy = MapSearch.fzy
 
 Search.categories = nil
@@ -55,36 +54,37 @@ local function getZoneWayshrines(zoneIndex)
 	return data
 end
 
-local function buildLocations()
-    local locs = {}
-    local zones = {}
+-- local function buildLocations()
+--     local locs = {}
+--     local zones = {}
 
-	local locations = MapSearch.Location.Data.GetList()
+-- 	local nodes = MapSearch.Locations.getNodes()
 
-	for i, map in ipairs(locations) do
-		if map.zoneId ~= nil then
-			-- print(" - "..map.zoneId.." - "..map.name)
+-- 	for i = 1, #nodes do
+--         local map = nodes[i]
+-- 		if map.zoneId ~= nil then
+-- 			-- print(" - "..map.zoneId.." - "..map.name)
 
-            zones[map.zoneIndex] = deepCopy(map)
-            zones[map.zoneIndex].nodes = nil
-			-- table.sort(nodes, Utils.SortByBareName)
-			-- map.nodes = nodes
+--             zones[map.zoneIndex] = deepCopy(map)
+--             zones[map.zoneIndex].nodes = nil
+-- 			-- table.sort(nodes, Utils.SortByBareName)
+-- 			-- map.nodes = nodes
 
-			--categories[map.zoneIndex] = map
-			-- table.insert(categories, map)
-			local nodes = getZoneWayshrines(map.zoneIndex)
-            for j, node in ipairs(nodes) do
-                local l = node
-                table.insert(locs, l)
-            end
-		end
-	end
+-- 			--categories[map.zoneIndex] = map
+-- 			-- table.insert(categories, map)
+-- 			local nodes = getZoneWayshrines(map.zoneIndex)
+--             for j, node in ipairs(nodes) do
+--                 local l = node
+--                 table.insert(locs, l)
+--             end
+-- 		end
+-- 	end
 
-    Search.locations = locs
-    Search.zones = zones
+--     Search.locations = locs
+--     Search.zones = zones
 
-	return locations
-end
+-- 	return locations
+-- end
 
 local function match(object, searchTerm)
     local name = object.barename or object.name
@@ -106,10 +106,10 @@ local function matchComparison(x,y)
 end
 
 local function runCombined(searchTerm)
-    if Search.locations == nil then
-        logger:Info("Search.run: building locations")
-		buildLocations()
-	end
+    -- if Search.locations == nil then
+    --     logger:Info("Search.run: building locations")
+	-- 	buildLocations()
+	-- end
 
     searchTerm = searchTerm:lower()
     searchTerm = searchTerm:gsub("[^%w ]", "")
@@ -117,8 +117,10 @@ local function runCombined(searchTerm)
     logger:Info("Search.run("..searchTerm..")")
 
     local result = {}
+    local nodes = Locations:getKnownNodes()
 
-    for i, node in ipairs(Search.locations) do
+    for i = 1, #nodes do
+        local node = nodes[i]
         local matchLevel, matchChars = match(node, searchTerm)
         if matchLevel > 0 then
             local resultNode = deepCopy(node)
@@ -165,7 +167,8 @@ Search.highlightResult = highlightResult
 
 SLASH_COMMANDS["/mapsearch"] = function (extra)
     if extra == 'save' then
-        buildLocations()
+        MapSearch.Locations:initialise()
+        -- buildLocations()
         MapSearch.saved.locations = deepCopy(Search.locations)
         MapSearch.saved.zones = deepCopy(Search.zones)
         MapSearch.saved.result = deepCopy(Search.result)
@@ -178,3 +181,5 @@ SLASH_COMMANDS["/mapsearch"] = function (extra)
         d("Cleared MapSearch data from Saved Preferences")
     end
 end
+
+MapSearch.Search = Search

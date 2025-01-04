@@ -22,8 +22,7 @@
 						--self:GetParent():RowMouseDown(button)
 					</OnMouseDown>
 					<OnMouseUp>
-						--self:GetParent():RowMouseUp(button, upInside)
-						MapSearch.MapTab.RowMouseUp()
+						MapSearch.MapTab.rowMouseUp()
 					</OnMouseUp>
 				</Label>
             </Controls>
@@ -57,7 +56,7 @@
 						self:GetParent():IconMouseDown(self,button)
 					</OnMouseDown>-->
 					<OnMouseUp>
-						MapSearch.MapTab.RowMouseUp(self,button, upInside)
+						MapSearch.MapTab.rowMouseUp(self,button, upInside)
 					</OnMouseUp>
 				</Texture>
 				<Texture name="$(parent)Arrow" textureFile="esoui/art/tutorial/smithing_rightarrow_up.dds" hidden="true" mouseEnabled="true">
@@ -77,8 +76,7 @@
 						self:GetParent():RowMouseDown(button)
 					</OnMouseDown>-->
 					<OnMouseUp>
-						--self:GetParent():RowMouseUp(button, upInside)
-						MapSearch.MapTab.RowMouseUp(self, button, upInside)
+						MapSearch.MapTab.rowMouseUp(self, button, upInside)
 					</OnMouseUp>
 				</Label>
 
@@ -110,28 +108,28 @@
 								--TraderTravel.MapTabWayshrines.ResetFilter(self, TraderTravel_WorldMapWayshrinesList, true)
 							</OnInitialized>
 							<OnEnter>
-								MapSearch.MapTab.JumpToResult()
+								MapSearch.MapTab.jumpToResult()
 							</OnEnter>
 							<OnEscape>
 								self:LoseFocus()
 								--TraderTravel.MapTabWayshrines.ResetFilter(self, TraderTravel_WorldMapWayshrinesList, false)
 							</OnEscape>
 							<OnEffectivelyShown>
-								MapSearch.MapTab.ResetFilter(false)
+								MapSearch.MapTab.resetFilter(false)
 								self:TakeFocus()
 							</OnEffectivelyShown>
 							<OnTextChanged>
-								MapSearch.MapTab.OnTextChanged(self, MapSearch_WorldMapTabList)
+								MapSearch.MapTab.onTextChanged(self, MapSearch_WorldMapTabList)
 							</OnTextChanged>
 							<OnMouseDown>
 								self:TakeFocus()
 								ZO_EditDefaultText_Disable(self)
 							</OnMouseDown>
 							<OnDownArrow>
-								MapSearch.MapTab.NextResult()
+								MapSearch.MapTab.nextResult()
 							</OnDownArrow>
 							<OnUpArrow>
-								MapSearch.MapTab.PreviousResult()
+								MapSearch.MapTab.previousResult()
 							</OnUpArrow>
 							<OnTab>
 							</OnTab>

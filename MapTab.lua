@@ -1,25 +1,9 @@
-local MapTab = MapSearch.class()
-MapSearch.MapTab = MapTab
-MapTab.resultCount = 0
-
+local MT = MapSearch.MapTab or {}
 local Search = MapSearch.Search
 local Utils = MapSearch.Utils
-local logger = LibDebugLogger("MapSearch")
-
-
-
+local logger = MapSearch.logger
 
 local function LayoutRow(rowControl, data, scrollList)
-	-- The rowControl, data, and scrollListControl are all supplied by the internal callback trigger
-	-- What is contained in data is determined by the structure of the table of data items you used
-	--[[ Copied here from where we created the data so we can easily reference the data structure
-	pets[petcounter] = {
-		index = index,
-		name = petNameClean,
-		description = p2
-		texture = p3
-	}
-	]]
 	local name = data.name
 
 	if data.poiType == 6 then
@@ -43,38 +27,9 @@ local function LayoutRow(rowControl, data, scrollList)
 	else
 		rowControl.label:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
 	end
-	--[[
-	rowControl:SetFont("ZoFontWinH4")
-	rowControl:SetMaxLineCount(1) -- Forces the text to only use one row.  If it goes longer, the extra will not display.
-	rowControl:SetText(data.name)
-	
-	-- When we added the data type earlier we also enabled being able to select an item and which function to run
-	-- when an row is slected.  We still need to set up a handler to actuall register the mouse click which
-	-- then triggers the row as "selected".  See https://wiki.esoui.com/UI_XML#OnAddGameData and following
-	-- entries for "On" events that can be set as handlers.
-	rowControl:SetHandler("OnMouseUp", function() ZO_ScrollList_MouseClick(scrollList, rowControl) end)
-	
-	-- Just for fun!!
-	-- Put together a tooltip string to display when the user positions mouse over the scroll list row.
-	-- https://wiki.esoui.com/How_to_format_strings_with_zo_strformat#Concatenating_lists
-	-- Using \n inserts a newline to bump the image down a bit.  There may be a better way to do this,
-	-- but I find \n frequently used in the source code so the developers use it too.
-	-- Added in a spacer |u to move the texture over a bit so it was not tight against the left side.
-	-- https://wiki.esoui.com/Text_Formatting  |u40:0:: |u
-	local concatToolTip = {}
-	table.insert(concatToolTip, "\n\n\n|u40:0:: |u|t600%:600%:")
-	table.insert(concatToolTip, data.texture)
-	table.insert(concatToolTip, "|t\n\n\n")
-	table.insert(concatToolTip, "|t1150%:100%:EsoUI/Art/Miscellaneous/horizontalDivider.dds|t\n") -- the % is the percentage of the font height.  Make it too large and it disappers.
-	table.insert(concatToolTip, data.description)
-	local tooltip = table.concat(concatToolTip, "")
-	
-	rowControl:SetHandler("OnMouseEnter", function(rowControl) ZO_Tooltips_ShowTextTooltip(rowControl, LEFT, tooltip) end)
-	rowControl:SetHandler("OnMouseExit", function(rowControl) ZO_Tooltips_HideTextTooltip() end )
-	]]
 end
 
-local function ShowWayshrineConfirm(data,isRecall)
+local function showWayshrineConfirm(data,isRecall)
 	local nodeIndex,name,refresh,clicked = data.nodeIndex,data.name,data.refresh,data.clicked
 	ZO_Dialogs_ReleaseDialog("FAST_TRAVEL_CONFIRM")
 	ZO_Dialogs_ReleaseDialog("RECALL_CONFIRM")
@@ -90,7 +45,6 @@ local function ShowWayshrineConfirm(data,isRecall)
 	end
 	ZO_Dialogs_ShowPlatformDialog(id, {nodeIndex = nodeIndex}, {mainTextParams = {name}})
 end
-
 
 local function buildScrollList(control, results)
 	ZO_ScrollList_Clear(control)
@@ -112,11 +66,16 @@ local function buildScrollList(control, results)
 	for index, nodeMap in ipairs(results) do
 		local nodeData = {
 			name = nodeMap.name,
-			barename = Utils.BareName(nodeMap.name),
+			barename = Utils.bareName(nodeMap.name),
 			nodeIndex = nodeMap.nodeIndex,
 			poiType = nodeMap.poiType,
 			icon = nodeMap.icon
 		}
+        logger:Info(nodeData.name)
+        logger:Info(nodeData.barename)
+        logger:Info(nodeData.nodeIndex)
+        logger:Info(nodeData.poiType)
+        logger:Info(nodeData.icon)
 
 		-- nodeData.icon = nodeData.icon:gsub('glow', 'complete')
 
@@ -126,7 +85,7 @@ local function buildScrollList(control, results)
 		-- nodeData.icon = nodeMap.icon
 		nodeData.isSelected = (currentNodeIndex == MapSearch.targetNode)
 
-		nodeMap.barename = Utils.BareName(nodeMap.name)
+		-- nodeMap.barename = Utils.bareName(nodeMap.name)
 
 		local entry = ZO_ScrollList_CreateDataEntry(1, nodeData)
 		-- local entry = ZO_ScrollList_CreateDataEntry(1, deepCopy(nodeMap))
@@ -134,7 +93,7 @@ local function buildScrollList(control, results)
 
 		currentNodeIndex = currentNodeIndex + 1
 	end
-	MapTab.resultCount = currentNodeIndex
+	MT.resultCount = currentNodeIndex
     
 	ZO_ScrollList_Commit(control)
 end
@@ -184,8 +143,7 @@ local function getTargetNode(results)
 	return nil
 end
 
-
-function MapTab:init(tabControl)
+function MT.init(self, tabControl)
 	logger:Info("MapTab:init")
 	self.tabControl = tabControl
 
@@ -201,19 +159,19 @@ function MapTab:init(tabControl)
 	local _refreshing = false
 	local _isDirty = true 
 	
-	self.IsDirty = function()
+	self.isDirty = function()
 		return _isDirty
 	end
 	
-	self.SetDirty = function()
+	self.setDirty = function()
 		_isDirty = true 
 	end
 	
-	self.RefreshIfRequired = function(self,...)
+	selfrefreshIfRequired = function(self,...)
 		--df("RefreshIfRequired isDirty=%s refreshing=%s", tostring(_isDirty), tostring(_refreshing))
 		if _isDirty == true and _refreshing == false then 
 			_refreshing = true -- only allow one refresh at any one time
-			self:Refresh(...)
+			self:refresh(...)
 			_isDirty = false
 			_refreshing = false
 		end 
@@ -221,55 +179,26 @@ function MapTab:init(tabControl)
 	
 end
 
-function MapTab:SetCategoryHidden(categoryId,value)
-	self.control:SetCategoryHidden(self.control.list,categoryId,value)
-end
-
-function MapTab:IsCategoryHidden(categoryId)
-	return self.control:GetCategoryHidden(self.control.list,categoryId)
-end
-
-function MapTab:ClearControl()
-	self.control:Clear(self.control.list)
-end
-
-function MapTab:RefreshControl(categories)
-	if self.control == nil then return end
-	self.control:Refresh(self.control.list)
-	if categories == nil then return end
-	
-	for i,item in ipairs(categories) do
-		self.control:SetCategoryHidden(self.control.list,item.categoryId,item.hidden)
-	end
-	
-	self.control:Refresh(self.control.list)
-end
-
-
-function MapTab:Refresh()
-	logger:Info("MapTab:Refresh")
-end
-
-function MapTab.OnTextChanged(editbox, listcontrol)
+function MT.onTextChanged(editbox, listcontrol)
 	local searchString = string.lower(editbox:GetText())
 	logger:Info("OnTextChanged: "..searchString)
 	executeSearch(listcontrol, searchString)
 end
 
-function MapTab.JumpToResult()
+function MT.jumpToResult()
 	local node = getTargetNode(MapSearch.Search.result)
 
 	if node then
-		ShowWayshrineConfirm(node, MapSearch.isRecall)
+		showWayshrineConfirm(node, MapSearch.isRecall)
 	end
 end
 
-function MapTab.NextResult()
-	MapSearch.targetNode = (MapSearch.targetNode + 1) % MapTab.resultCount
+function MT.nextResult()
+	MapSearch.targetNode = (MapSearch.targetNode + 1) % MT.resultCount
 	buildScrollList(MapSearch_WorldMapTabList, MapSearch.results)
 end
 
-function MapTab.PreviousResult()
+function MT.previousResult()
 	MapSearch.targetNode = MapSearch.targetNode - 1
 	if MapSearch.targetNode < 0 then
 		MapSearch.targetNode = MapSearch.results - 1
@@ -277,7 +206,7 @@ function MapTab.PreviousResult()
 	buildScrollList(MapSearch_WorldMapTabList, MapSearch.results)
 end
 
-function MapTab.ResetFilter(editbox, listcontrol, lose_focus)
+function MT.resetFilter(editbox, listcontrol, lose_focus)
 	--logger.Info(editbox)
 	MapSearch_WorldMapTabSearchEdit:SetText("")
 
@@ -291,7 +220,7 @@ function MapTab.ResetFilter(editbox, listcontrol, lose_focus)
 	ZO_ScrollList_ResetToTop(MapSearch_WorldMapTabList)
 end
 
-function MapTab.RowMouseUp(control, mouseButton, upInside)
+function MT.rowMouseUp(control, mouseButton, upInside)
 	logger:Info("Row Mouse Up")
 	logger:Info(control)
 	--MapSearch.clickedControl = { control, mouseButton, upInside }
@@ -299,7 +228,7 @@ function MapTab.RowMouseUp(control, mouseButton, upInside)
 	if(upInside) then
 		local data = ZO_ScrollList_GetData(control:GetParent())
 		--MapSearch.clickedData = data
-		ShowWayshrineConfirm(data, MapSearch.isRecall)
+		showWayshrineConfirm(data, MapSearch.isRecall)
 		-- if data.clicked then
 		-- 	data:clicked(control,button)
 		-- 	-- self:RowMouseClicked(control,data,button)
@@ -308,3 +237,5 @@ function MapTab.RowMouseUp(control, mouseButton, upInside)
 	end
 
 end
+
+MapSearch.MapTab = MT
