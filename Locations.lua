@@ -1,10 +1,11 @@
-local Locs = MapSearch.Locations or {
+local MS = MapSearch
+local Locs = MS.Locations or {
     locations = nil,
     zones = nil,
     knownNodes = {}
 }
-local Utils = MapSearch.Utils
-local logger = MapSearch.logger -- LibDebugLogger("MapSearch")
+local Utils = MS.Utils
+local logger = MS.logger -- LibDebugLogger("MapSearch")
 
 function Locs:initialise()
     self.nodes = {}
@@ -27,10 +28,10 @@ function Locs:initialise()
     for i = 1, totalNodes do
         local known, name, Xcord, Ycord, icon, glowIcon, typePOI, onMap, isLocked = GetFastTravelNodeInfo(i)
 
-        local zoneIndex, _ =  GetFastTravelNodePOIIndicies(i)
+        local zoneIndex, _ = GetFastTravelNodePOIIndicies(i)
         local nodeZoneId = GetZoneId(zoneIndex)
 
-        if typePOI == 1 and not isLocked then -- and known then
+        if not isLocked then
             if self.zones[nodeZoneId] == nil then
                 -- d('FastTravelNodes: ' .. nodeZoneId .. ': ' .. name)
                 self.zones[nodeZoneId] = {
@@ -43,30 +44,52 @@ function Locs:initialise()
             local nodeInfo = {
                 nodeIndex = i,
                 name = name,
-                type = typePOI
+                type = typePOI,
+                glowIcon = glowIcon
             }
 
-            if nodeInfo.name:find("Dungeon: ") then
+            if typePOI == 6 then
                 nodeInfo.poiType = POI_TYPE_GROUP_DUNGEON
-                nodeInfo.name = string.sub(nodeInfo.name, 10, #nodeInfo.name)
                 nodeInfo.icon = "esoui/art/icons/poi/poi_groupinstance_complete.dds"
-            elseif nodeInfo.name:find("Trial: ") then
+                if name:find("Dungeon: ") then
+                    nodeInfo.name = string.sub(nodeInfo.name, 10, #nodeInfo.name)
+                end
+                nodeInfo.name = nodeInfo.name .. " |c82826FDungeon|r"
+            elseif typePOI == 3 then
                 nodeInfo.poiType = POI_TYPE_TRIAL
-                nodeInfo.name = string.sub(nodeInfo.name, 8, #nodeInfo.name)
                 nodeInfo.icon = "esoui/art/tutorial/poi_raiddungeon_complete.dds"
-            elseif nodeInfo.name:find(" Arena") then
-                nodeInfo.poiType = POI_TYPE_ARENA
-                nodeInfo.name = string.sub(nodeInfo.name, 1, #nodeInfo.name - 6)
-                nodeInfo.icon = "esoui/art/tutorial/poi_raiddungeon_complete.dds"
-            elseif nodeInfo.name:find(" Wayshrine") then
-                nodeInfo.poiType = POI_TYPE_WAYSHRINE
-                nodeInfo.name = string.sub(nodeInfo.name, 1, #nodeInfo.name - 10)
-                nodeInfo.icon = "esoui/art/icons/poi/poi_wayshrine_complete.dds"
-            elseif nodeInfo.textureName == "/esoui/art/icons/poi/poi_group_house_glow.dds" then
+                -- nodeInfo.colour = ZO_ColorDef:New(1.0, 0.9, 0.8, 1.0)
+                if nodeInfo.name:find("Trial: ") then
+                    nodeInfo.name = string.sub(nodeInfo.name, 8, #nodeInfo.name)
+                end
+                nodeInfo.name = nodeInfo.name .. " |c82826FTrial|r"
+            elseif typePOI == 7 then
                 nodeInfo.poiType = POI_TYPE_HOUSE
                 nodeInfo.icon = "esoui/art/icons/poi/poi_group_house_owned.dds"
+                -- elseif name:find(" Arena") then
+                --     nodeInfo.poiType = POI_TYPE_ARENA
+                --     -- nodeInfo.name = string.sub(nodeInfo.name, 1, #nodeInfo.name - 6)
+                --     nodeInfo.icon = "esoui/art/tutorial/poi_raiddungeon_complete.dds"
+            elseif typePOI == 1 then
+                nodeInfo.poiType = POI_TYPE_WAYSHRINE
+                nodeInfo.icon = "esoui/art/icons/poi/poi_wayshrine_complete.dds"
+                if name:find(" Wayshrine") then
+                    nodeInfo.name = string.sub(nodeInfo.name, 1, #nodeInfo.name - 10)
+                end
+            elseif glowIcon == "/esoui/art/icons/poi/poi_soloinstance_glow.dds" then
+                nodeInfo.poiType = POI_TYPE_ARENA
+                nodeInfo.icon = "esoui/art/tutorial/poi_soloinstance_complete.dds"
+                nodeInfo.name = nodeInfo.name .. " |c82826FArena|r"
+                -- if name:find(" Arena") then
+                --     nodeInfo.name = string.sub(nodeInfo.name, 1, #nodeInfo.name - 6)
+                -- end
+            else
+                logger:Info("POI " .. i .. " '" .. name .. "' type " .. typePOI)
+                -- if glowIcon ~= nil and glowIcon:find("/esoui/art/icons/poi/poi_") and glowIcon:find("_glow.dds") then
+                --     nodeInfo.icon = glowIcon:gsub("_glow.dds", "_complete.dds")
+                -- end
             end
-    
+
             nodeInfo.barename = Utils.bareName(nodeInfo.name)
 
             table.insert(self.zones[nodeZoneId].nodes, nodeInfo)
