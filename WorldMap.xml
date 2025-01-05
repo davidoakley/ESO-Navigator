@@ -28,7 +28,7 @@
             </Controls>
         </Control>
 		
-        <Control name="MapSearch_WorldMapWayshrineRow" virtual="true">
+        <Control name="MapSearch_WorldMapWayshrineRow" virtual="true" mouseEnabled="true">
 			<OnInitialized>
 				self.offsetX = 30
 				self.label = self:GetNamedChild("Label")
@@ -42,45 +42,23 @@
 		            <Dimensions x="285" y="23"/>
 					<Anchor point="TOPLEFT" offsetX="0" offsetY="0" />
 				</Texture> -->
-				<Texture name="$(parent)Icon" textureFile="EsoUI/Art/Quest/questJournal_trackedQuest_icon.dds" hidden="false" mouseEnabled="true">
+				<Texture name="$(parent)Icon" textureFile="EsoUI/Art/Quest/questJournal_trackedQuest_icon.dds" hidden="false" mouseEnabled="false">
 					<Dimensions x="23" y="23"/>
 					<Anchor point="TOPLEFT" offsetX="0" offsetY="0" />
 					<TextureCoords top="0" bottom="1" left="0" right="1"/>
-					<!--<OnMouseEnter>
-						self:GetParent():IconMouseEnter(self)
-					</OnMouseEnter>
-                    <OnMouseExit>
-						self:GetParent():IconMouseExit(self)
-					</OnMouseExit>
-					<OnMouseDown>
-						self:GetParent():IconMouseDown(self,button)
-					</OnMouseDown>-->
-					<OnMouseUp>
-						MapSearch.MapTab:rowMouseUp(self,button, upInside)
-					</OnMouseUp>
 				</Texture>
-				<Texture name="$(parent)Arrow" textureFile="esoui/art/tutorial/smithing_rightarrow_up.dds" hidden="true" mouseEnabled="true">
+				<Texture name="$(parent)Arrow" textureFile="esoui/art/tutorial/smithing_rightarrow_up.dds" hidden="true" mouseEnabled="false">
 					<Dimensions x="23" y="23"/>
 					<Anchor point="TOPRIGHT" offsetX="0" offsetY="0" />
 					<TextureCoords top="0" bottom="1" left="0" right="1"/>
 				</Texture>
-				<Label name="$(parent)Label" inherits="ZO_SelectableLabel" font="ZoFontHeader" newLineIndent="8">
+				<Label name="$(parent)Label" inherits="ZO_SelectableLabel" font="ZoFontHeader" newLineIndent="8" mouseEnabled="false">
 					<Anchor point="TOPLEFT" offsetX="30" />
-					<!--<OnMouseEnter>
-						self:GetParent():RowMouseEnter(self)
-					</OnMouseEnter>
-                    <OnMouseExit>
-						self:GetParent():RowMouseExit(self)
-					</OnMouseExit>
-					<OnMouseDown>
-						self:GetParent():RowMouseDown(button)
-					</OnMouseDown>-->
-					<OnMouseUp>
-						MapSearch.MapTab:rowMouseUp(self, button, upInside)
-					</OnMouseUp>
 				</Label>
-
             </Controls>
+			<OnMouseUp>
+				MapSearch.MapTab:rowMouseUp(self, button, upInside)
+			</OnMouseUp>
         </Control>
         
         

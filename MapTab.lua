@@ -19,9 +19,24 @@ local function LayoutRow(rowControl, data, scrollList)
 
 	if data.isSelected then
 		rowControl.label:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
-	else
+    elseif data.colour ~= nil then
+        logger:Info("LayoutRow: "..name..": ")
+        logger:Info(data.colour.UnpackRGBA)
+        MapSearch.colour = data.colour
+		rowControl.label:SetColor(data.colour:UnpackRGBA())
+    else
 		rowControl.label:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
 	end
+
+    if data.tooltip ~= nil then
+        logger:Info("Adding tooltip for "..name..": "..data.tooltip)
+        rowControl:SetHandler("OnMouseEnter", function(rc)
+            ZO_Tooltips_ShowTextTooltip(rc, LEFT, data.tooltip)
+        end)
+        rowControl:SetHandler("OnMouseExit", function(_)
+            ZO_Tooltips_HideTextTooltip()
+        end )
+    end
 end
 
 local function showWayshrineConfirm(data,isRecall)
@@ -64,13 +79,10 @@ local function buildScrollList(control, results)
 			barename = Utils.bareName(nodeMap.name),
 			nodeIndex = nodeMap.nodeIndex,
 			poiType = nodeMap.poiType,
-			icon = nodeMap.icon
+			icon = nodeMap.icon,
+            colour = nodeMap.colour,
+            tooltip = nodeMap.tooltip
 		}
-        logger:Info(nodeData.name)
-        logger:Info(nodeData.barename)
-        logger:Info(nodeData.nodeIndex)
-        logger:Info(nodeData.poiType)
-        logger:Info(nodeData.icon)
 
 		-- nodeData.icon = nodeData.icon:gsub('glow', 'complete')
 
@@ -221,7 +233,7 @@ function MT:rowMouseUp(control, mouseButton, upInside)
 	--MapSearch.clickedControl = { control, mouseButton, upInside }
 
 	if(upInside) then
-		local data = ZO_ScrollList_GetData(control:GetParent())
+		local data = ZO_ScrollList_GetData(control)
 		--MapSearch.clickedData = data
 		showWayshrineConfirm(data, MapSearch.isRecall)
 		-- if data.clicked then
