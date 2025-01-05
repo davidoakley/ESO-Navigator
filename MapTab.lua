@@ -14,6 +14,7 @@ local function LayoutRow(rowControl, data, scrollList)
 	end
 
 	rowControl.arrow:SetHidden(not data.isSelected)
+    rowControl.bg:SetHidden(not data.isSelected)
 
 	rowControl.label:SetText(name)
 
@@ -35,6 +36,9 @@ local function LayoutRow(rowControl, data, scrollList)
         end)
         rowControl:SetHandler("OnMouseExit", function(_)
             ZO_Tooltips_HideTextTooltip()
+            if data.isSelected then
+                rowControl.label:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
+            end
         end )
     end
 end

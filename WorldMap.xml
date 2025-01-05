@@ -34,14 +34,15 @@
 				self.label = self:GetNamedChild("Label")
 				self.icon = self:GetNamedChild("Icon")
 				self.arrow = self:GetNamedChild("Arrow")
+				self.bg = self:GetNamedChild("BG")
 				self.icon:SetDrawLayer(self.label:GetDrawLayer() + 1)
 			</OnInitialized>
             <Dimensions x="285" y="23"/>
             <Controls>
-				<!-- <Texture name="$(parent)BG" textureFile="EsoUI/Art/Buttons/ESO_buttonLarge_normal.dds" hidden="true" mouseEnabled="true">
+				<Texture name="$(parent)BG" textureFile="EsoUI/Art/Buttons/ESO_buttonLarge_normal.dds" hidden="true" mouseEnabled="false">
 		            <Dimensions x="285" y="23"/>
 					<Anchor point="TOPLEFT" offsetX="0" offsetY="0" />
-				</Texture> -->
+				</Texture>
 				<Texture name="$(parent)Icon" textureFile="EsoUI/Art/Quest/questJournal_trackedQuest_icon.dds" hidden="false" mouseEnabled="false">
 					<Dimensions x="23" y="23"/>
 					<Anchor point="TOPLEFT" offsetX="0" offsetY="0" />
