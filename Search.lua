@@ -17,6 +17,12 @@ local function deepCopy(obj)
     return res
 end
 
+local function shallowCopy(t)
+    local t2 = {}
+    for k,v in pairs(t) do
+      t2[k] = v
+    end
+    return t2
 end
 
 local function match(object, searchTerm)
@@ -56,7 +62,7 @@ local function runCombined(searchTerm)
         local node = nodes[i]
         local matchLevel, matchChars = match(node, searchTerm)
         if matchLevel > 0 then
-            local resultNode = deepCopy(node)
+            local resultNode = shallowCopy(node)
             resultNode.match = matchLevel
             resultNode.matchChars = matchChars
             table.insert(result, resultNode)
