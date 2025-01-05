@@ -60,11 +60,11 @@ function MS:initialize()
 		{
 			name = "Search", --GetString(SI_BINDING_NAME_FASTER_TRAVEL_REJUMP),
 			keybind = "UI_SHORTCUT_QUICK_SLOTS", --"MAPSEARCH_SEARCH",
-			order = 20,
+			order = 200,
 			visible = function() return true end,
 			callback = function() self.showSearch() end,
 		},
-		alignment = KEYBIND_STRIP_ALIGN_LEFT,
+		alignment = KEYBIND_STRIP_ALIGN_CENTER,
 	}
 
   SCENE_MANAGER:GetScene('worldMap'):RegisterCallback("StateChange",
