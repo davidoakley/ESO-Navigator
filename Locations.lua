@@ -107,7 +107,8 @@ function Locs:getKnownNodes()
 
     local nodes = {}
     for i = 1, #self.nodes do
-        if self.isKnownNode(i) then
+        local index = self.nodes[i].nodeIndex
+        if self:isKnownNode(index) then
             table.insert(nodes, self.nodes[i])
         end
     end
