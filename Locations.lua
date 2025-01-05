@@ -1,11 +1,12 @@
-local Locs = MapSearch.Search or {
+local Locs = MapSearch.Locations or {
     locations = nil,
     zones = nil,
     knownNodes = {}
 }
 local Utils = MapSearch.Utils
+local logger = MapSearch.logger -- LibDebugLogger("MapSearch")
 
-function Locs.initialise(self)
+function Locs:initialise()
     self.nodes = {}
     self.zones = {}
 
@@ -78,11 +79,11 @@ function Locs.initialise(self)
     MapSearch.saved.nodes = self.nodes
 end
 
-function Locs.clearKnownNodes(self)
+function Locs:clearKnownNodes()
     self.knownNodes = {}
 end
 
-function Locs.isKnownNode(self, nodeIndex)
+function Locs:isKnownNode(nodeIndex)
     if self.knownNodes[nodeIndex] ~= nil then
         return self.knownNodes[nodeIndex]
     else
@@ -92,14 +93,14 @@ function Locs.isKnownNode(self, nodeIndex)
     end
 end
 
-function Locs.getNodes(self)
+function Locs:getNodes()
     if self.nodes == nil then
         self:initialise()
     end
     return self.nodes
 end
 
-function Locs.getKnownNodes(self)
+function Locs:getKnownNodes()
     if self.nodes == nil then
         self:initialise()
     end

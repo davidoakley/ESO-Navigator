@@ -22,7 +22,7 @@
 						--self:GetParent():RowMouseDown(button)
 					</OnMouseDown>
 					<OnMouseUp>
-						MapSearch.MapTab.rowMouseUp()
+						MapSearch.MapTab:rowMouseUp()
 					</OnMouseUp>
 				</Label>
             </Controls>
@@ -56,7 +56,7 @@
 						self:GetParent():IconMouseDown(self,button)
 					</OnMouseDown>-->
 					<OnMouseUp>
-						MapSearch.MapTab.rowMouseUp(self,button, upInside)
+						MapSearch.MapTab:rowMouseUp(self,button, upInside)
 					</OnMouseUp>
 				</Texture>
 				<Texture name="$(parent)Arrow" textureFile="esoui/art/tutorial/smithing_rightarrow_up.dds" hidden="true" mouseEnabled="true">
@@ -76,7 +76,7 @@
 						self:GetParent():RowMouseDown(button)
 					</OnMouseDown>-->
 					<OnMouseUp>
-						MapSearch.MapTab.rowMouseUp(self, button, upInside)
+						MapSearch.MapTab:rowMouseUp(self, button, upInside)
 					</OnMouseUp>
 				</Label>
 
