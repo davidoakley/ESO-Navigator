@@ -1,9 +1,10 @@
 local Search = MapSearch.Search or {}
-local Utils = MapSearch.Utils
-local Locations = MapSearch.Locations
-local logger = MapSearch.logger -- LibDebugLogger("MapSearch")
-local colors = MapSearch.ansicolors
-local fzy = MapSearch.fzy
+local MS = MapSearch
+local Utils = MS.Utils
+local Locations = MS.Locations
+local logger = MS.logger -- LibDebugLogger("MapSearch")
+local colors = MS.ansicolors
+local fzy = MS.fzy
 
 Search.categories = nil
 
@@ -65,6 +66,12 @@ local function runCombined(searchTerm)
             local resultNode = shallowCopy(node)
             resultNode.match = matchLevel
             resultNode.matchChars = matchChars
+
+            if MS.isDeveloper then
+                -- resultNode.name = resultNode.name .. " |c808080[" .. resultNode.match .. "]|"
+                resultNode.tooltip = "nodeIndex " .. resultNode.nodeIndex
+            end
+
             table.insert(result, resultNode)
         end
     end

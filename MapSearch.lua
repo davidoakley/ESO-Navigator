@@ -8,8 +8,7 @@ MS.Wayshrine = {}
 MS.Search = {}
 MS.isRecall = true
 MS.isCLI = false
-
-local isDeveloper = (GetDisplayName() == '@SirNightstorm' and true) or false
+MS.isDeveloper = (GetDisplayName() == '@SirNightstorm' and true) or false
 
 -- Make this properly localisable!
 ZO_CreateStringId("MAPSEARCH_SEARCH","Search")
