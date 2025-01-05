@@ -49,11 +49,11 @@ local function GetPaths(path, ...)
   end))
 end
 
-local function initialize()
+function MS:initialize()
   logger:Info("MS.initialize starts")
   -- https://wiki.esoui.com/How_to_add_buttons_to_the_keybind_strip
 
-  MS.saved = ZO_SavedVars:NewAccountWide(MS.svName, 1, nil, MS.default)
+  self.saved = ZO_SavedVars:NewAccountWide(self.svName, 1, nil, self.default)
 
   local mapTabControl = MapSearch_WorldMapTab
   
@@ -63,7 +63,7 @@ local function initialize()
 			keybind = "UI_SHORTCUT_QUICK_SLOTS", --"MAPSEARCH_SEARCH",
 			order = 20,
 			visible = function() return true end,
-			callback = function() MS.showSearch() end,
+			callback = function() self.showSearch() end,
 		},
 		alignment = KEYBIND_STRIP_ALIGN_LEFT,
 	}
@@ -78,7 +78,7 @@ local function initialize()
     end)
 
   -- local mapTab = MS.MapTab(mapTabControl)
-  MapSearch.MapTab:init(mapTabControl)
+  self.MapTab:init(mapTabControl)
 
   -- local normal, highlight, pressed = GetPaths("/esoui/art/guild/guildhistory_indexicon_guildstore_", "up.dds", "over.dds", "down.dds")
   local normal = "/esoui/art/tradinghouse/tradinghouse_browse_tabicon_up.dds"
@@ -96,7 +96,7 @@ local function onAddOnLoaded(event, addonName)
   -- The event fires each time *any* addon loads - but we only care about when our own addon loads.
   if addonName ~= "MapSearch" then return end
 
-  initialize()
+  MS:initialize()
 
   --unregister the event again as our addon was loaded now and we do not need it anymore to be run for each other addon that will load
   EVENT_MANAGER:UnregisterForEvent(MS.name, EVENT_ADD_ON_LOADED)

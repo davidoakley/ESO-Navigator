@@ -143,7 +143,7 @@ local function getTargetNode(results)
 	return nil
 end
 
-function MT.init(self, tabControl)
+function MT:init(tabControl)
 	logger:Info("MapTab:init")
 	self.tabControl = tabControl
 
@@ -167,7 +167,7 @@ function MT.init(self, tabControl)
 		_isDirty = true 
 	end
 	
-	selfrefreshIfRequired = function(self,...)
+	self.refreshIfRequired = function(self,...)
 		--df("RefreshIfRequired isDirty=%s refreshing=%s", tostring(_isDirty), tostring(_refreshing))
 		if _isDirty == true and _refreshing == false then 
 			_refreshing = true -- only allow one refresh at any one time
@@ -220,7 +220,7 @@ function MT.resetFilter(editbox, listcontrol, lose_focus)
 	ZO_ScrollList_ResetToTop(MapSearch_WorldMapTabList)
 end
 
-function MT.rowMouseUp(control, mouseButton, upInside)
+function MT:rowMouseUp(control, mouseButton, upInside)
 	logger:Info("Row Mouse Up")
 	logger:Info(control)
 	--MapSearch.clickedControl = { control, mouseButton, upInside }
