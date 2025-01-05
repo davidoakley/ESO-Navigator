@@ -6,11 +6,6 @@ local logger = MapSearch.logger
 local function LayoutRow(rowControl, data, scrollList)
 	local name = data.name
 
-	if data.poiType == 6 then
-		-- name = name .. " |c5c594aDungeon|r"
-		-- /esoui/art/icons/poi/poi_dungeon_complete.dds
-	end
-
 	if data.icon ~= nil then
 		rowControl.icon:SetTexture(data.icon)
 		rowControl.icon:SetHidden(false)
