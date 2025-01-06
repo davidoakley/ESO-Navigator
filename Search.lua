@@ -11,21 +11,6 @@ Search.categories = nil
 POI_TYPE_TRIAL = 100
 POI_TYPE_ARENA = 101
 
-local function deepCopy(obj)
-    if type(obj) ~= 'table' then return obj end
-    local res = {}
-    for k, v in pairs(obj) do res[deepCopy(k)] = deepCopy(v) end
-    return res
-end
-
-local function shallowCopy(t)
-    local t2 = {}
-    for k,v in pairs(t) do
-      t2[k] = v
-    end
-    return t2
-end
-
 local function match(object, searchTerm)
     local name = object.barename or object.name
 
@@ -63,7 +48,7 @@ local function runCombined(searchTerm)
         local node = nodes[i]
         local matchLevel, matchChars = match(node, searchTerm)
         if matchLevel > 0 then
-            local resultNode = shallowCopy(node)
+            local resultNode = Utils.shallowCopy(node)
             resultNode.match = matchLevel
             resultNode.matchChars = matchChars
 
