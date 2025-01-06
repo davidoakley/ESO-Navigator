@@ -21,8 +21,6 @@ local function LayoutRow(rowControl, data, scrollList)
 	if data.isSelected then
 		rowControl.label:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
     elseif data.colour ~= nil then
-        logger:Info("LayoutRow: "..name..": ")
-        logger:Info(data.colour.UnpackRGBA)
         MapSearch.colour = data.colour
 		rowControl.label:SetColor(data.colour:UnpackRGBA())
     else
@@ -30,7 +28,6 @@ local function LayoutRow(rowControl, data, scrollList)
 	end
 
     if data.tooltip ~= nil then
-        logger:Info("Adding tooltip for "..name..": "..data.tooltip)
         rowControl:SetHandler("OnMouseEnter", function(rc)
             ZO_Tooltips_ShowTextTooltip(rc, LEFT, data.tooltip)
         end)
@@ -192,7 +189,6 @@ end
 
 function MT.onTextChanged(editbox, listcontrol)
 	local searchString = string.lower(editbox:GetText())
-	logger:Info("OnTextChanged: "..searchString)
 	executeSearch(listcontrol, searchString)
 end
 
@@ -232,8 +228,6 @@ function MT.resetFilter(editbox, listcontrol, lose_focus)
 end
 
 function MT:rowMouseUp(control, mouseButton, upInside)
-	logger:Info("Row Mouse Up")
-	logger:Info(control)
 	--MapSearch.clickedControl = { control, mouseButton, upInside }
 
 	if(upInside) then

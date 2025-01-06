@@ -54,7 +54,7 @@ local function runCombined(searchTerm)
     searchTerm = searchTerm:lower()
     searchTerm = searchTerm:gsub("[^%w ]", "")
 
-    logger:Info("Search.run("..searchTerm..")")
+    -- logger:Info("Search.run("..searchTerm..")")
 
     local result = {}
     local nodes = Locations:getKnownNodes()
