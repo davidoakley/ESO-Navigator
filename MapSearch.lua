@@ -2,7 +2,10 @@ MapSearch = {}
 local MS = MapSearch
 MS.name = "MapSearch"
 MS.svName = "MapSearch_SavedVariables"
-MS.default = {}
+MS.default = {
+  recentNodes = {},
+  maxRecent = 10
+}
 MS.Location = {}
 MS.Wayshrine = {}
 MS.Search = {}
@@ -78,6 +81,7 @@ function MS:initialize()
 
   -- local mapTab = MS.MapTab(mapTabControl)
   self.MapTab:init(mapTabControl)
+  self.Recents:init()
 
   -- local normal, highlight, pressed = GetPaths("/esoui/art/guild/guildhistory_indexicon_guildstore_", "up.dds", "over.dds", "down.dds")
   local normal = "/esoui/art/tradinghouse/tradinghouse_browse_tabicon_up.dds"
