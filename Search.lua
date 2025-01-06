@@ -31,11 +31,6 @@ local function matchComparison(x,y)
 end
 
 local function runCombined(searchTerm)
-    -- if Search.locations == nil then
-    --     logger:Info("Search.run: building locations")
-	-- 	buildLocations()
-	-- end
-
     searchTerm = searchTerm:lower()
     searchTerm = searchTerm:gsub("[^%w ]", "")
 
