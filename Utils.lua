@@ -34,4 +34,19 @@ function Utils.bareName(name)
 	return r
 end
 
+function Utils.shallowCopy(t)
+    local t2 = {}
+    for k,v in pairs(t) do
+      t2[k] = v
+    end
+    return t2
+end
+
+function Utils.deepCopy(obj)
+    if type(obj) ~= 'table' then return obj end
+    local res = {}
+    for k, v in pairs(obj) do res[deepCopy(k)] = deepCopy(v) end
+    return res
+end
+
 MapSearch.Utils = Utils
