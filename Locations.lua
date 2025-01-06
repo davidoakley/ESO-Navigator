@@ -84,7 +84,7 @@ function Locs:initialise()
                 --     nodeInfo.name = string.sub(nodeInfo.name, 1, #nodeInfo.name - 6)
                 -- end
             else
-                logger:Info("POI " .. i .. " '" .. name .. "' type " .. typePOI)
+                logger:Info("Unknown POI " .. i .. " '" .. name .. "' type " .. typePOI)
                 -- if glowIcon ~= nil and glowIcon:find("/esoui/art/icons/poi/poi_") and glowIcon:find("_glow.dds") then
                 --     nodeInfo.icon = glowIcon:gsub("_glow.dds", "_complete.dds")
                 -- end
