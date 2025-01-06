@@ -1,6 +1,7 @@
 local MS = MapSearch
 local Locs = MS.Locations or {
-    locations = nil,
+    nodes = nil,
+    nodeMap = nil,
     zones = nil,
     knownNodes = {}
 }
@@ -9,6 +10,7 @@ local logger = MS.logger -- LibDebugLogger("MapSearch")
 
 function Locs:initialise()
     self.nodes = {}
+    self.nodeMap = {}
     self.zones = {}
 
     -- for i = 1, GetNumMaps() do
@@ -44,6 +46,7 @@ function Locs:initialise()
             local nodeInfo = {
                 nodeIndex = i,
                 name = name,
+                originalName = name,
                 type = typePOI,
                 glowIcon = glowIcon
             }
@@ -94,6 +97,7 @@ function Locs:initialise()
 
             table.insert(self.zones[nodeZoneId].nodes, nodeInfo)
             table.insert(self.nodes, nodeInfo)
+            self.nodeMap[i] = nodeInfo
             self.knownNodes[i] = known
         end
     end
@@ -121,6 +125,13 @@ function Locs:getNodes()
         self:initialise()
     end
     return self.nodes
+end
+
+function Locs:getNodeMap()
+    if self.nodeMap == nil then
+        self:initialise()
+    end
+    return self.nodeMap
 end
 
 function Locs:getKnownNodes()

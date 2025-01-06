@@ -40,8 +40,19 @@ local function LayoutRow(rowControl, data, scrollList)
     end
 end
 
+local function LayoutCategoryRow(rowControl, data, scrollList)
+	-- if data.icon ~= nil then
+	-- 	rowControl.icon:SetTexture(data.icon)
+	-- 	rowControl.icon:SetHidden(false)
+	-- else
+	-- 	rowControl.icon:SetHidden(true)
+	-- end
+
+	rowControl.label:SetText(data.name)
+end
+
 local function showWayshrineConfirm(data,isRecall)
-	local nodeIndex,name,refresh,clicked = data.nodeIndex,data.name,data.refresh,data.clicked
+	local nodeIndex,name,refresh,clicked = data.nodeIndex,data.originalName,data.refresh,data.clicked
 	ZO_Dialogs_ReleaseDialog("FAST_TRAVEL_CONFIRM")
 	ZO_Dialogs_ReleaseDialog("RECALL_CONFIRM")
 	name = name or select(2, MapSearch.Wayshrine.Data.GetNodeInfo(nodeIndex)) -- just in case
@@ -57,6 +68,49 @@ local function showWayshrineConfirm(data,isRecall)
 	ZO_Dialogs_ShowPlatformDialog(id, {nodeIndex = nodeIndex}, {mainTextParams = {name}})
 end
 
+local function buildResultsList(scrollData, results)
+	local currentNodeIndex = 0
+
+    if #results > 0 then
+        local resultsEntry = ZO_ScrollList_CreateDataEntry(0, { name = "Results" })
+        table.insert(scrollData, resultsEntry)
+    end
+
+	for index, nodeMap in ipairs(results) do
+        local nodeData = Utils.shallowCopy(nodeMap)
+
+		nodeData.isSelected = (currentNodeIndex == MapSearch.targetNode)
+
+		local entry = ZO_ScrollList_CreateDataEntry(1, nodeData)
+		table.insert(scrollData, entry)
+
+		currentNodeIndex = currentNodeIndex + 1
+	end
+	MT.resultCount = currentNodeIndex
+end
+
+local function buildRecentsList(scrollData)
+    local recentEntry = ZO_ScrollList_CreateDataEntry(0, { name = "Recent" })
+    table.insert(scrollData, recentEntry)
+
+    local recents = MapSearch.Recents:getRecents()
+    local currentNodeIndex = MT.resultCount
+
+    for i = 1, #recents do
+        local recent = recents[i]
+
+        local nodeData = Utils.shallowCopy(recent)
+		nodeData.isSelected = (currentNodeIndex == MapSearch.targetNode)
+
+		local entry = ZO_ScrollList_CreateDataEntry(1, nodeData)
+		table.insert(scrollData, entry)
+
+        currentNodeIndex = currentNodeIndex + 1
+    end
+
+    MT.resultCount = currentNodeIndex
+end
+
 local function buildScrollList(control, results)
 	ZO_ScrollList_Clear(control)
 	
@@ -70,38 +124,11 @@ local function buildScrollList(control, results)
 		ZO_EditDefaultText_Disable(editBox)
 	end
 
-
     local scrollData = ZO_ScrollList_GetDataList(control)
-	local currentNodeIndex = 0
 
-	for index, nodeMap in ipairs(results) do
-		local nodeData = {
-			name = nodeMap.name,
-			barename = Utils.bareName(nodeMap.name),
-			nodeIndex = nodeMap.nodeIndex,
-			poiType = nodeMap.poiType,
-			icon = nodeMap.icon,
-            colour = nodeMap.colour,
-            tooltip = nodeMap.tooltip
-		}
+    buildResultsList(scrollData, results)
 
-		-- nodeData.icon = nodeData.icon:gsub('glow', 'complete')
-
-		-- if currentNodeIndex == MapSearch.targetNode then
-		-- 	nodeData.icon = "esoui/art/chatwindow/chat_overflowarrow_up.dds"
-		-- end
-		-- nodeData.icon = nodeMap.icon
-		nodeData.isSelected = (currentNodeIndex == MapSearch.targetNode)
-
-		-- nodeMap.barename = Utils.bareName(nodeMap.name)
-
-		local entry = ZO_ScrollList_CreateDataEntry(1, nodeData)
-		-- local entry = ZO_ScrollList_CreateDataEntry(1, deepCopy(nodeMap))
-		table.insert(scrollData, entry)
-
-		currentNodeIndex = currentNodeIndex + 1
-	end
-	MT.resultCount = currentNodeIndex
+    buildRecentsList(scrollData)
     
 	ZO_ScrollList_Commit(control)
 end
@@ -124,15 +151,14 @@ end
 local function setupScrollList(control)
 	logger:Info("setupScrollList")
 	local height = 25 -- height of the row, not the window
-	local setupFunction = LayoutRow
 	local hideCallback = nil
 	local dataTypeSelectSound = nil
 	local resetControlCallback = nil
 	local selectTemplate = "ZO_ThinListHighlight"
 	local selectCallback = OnRowSelect
 
-	ZO_ScrollList_AddDataType(control, 0, "MapSearch_WorldMapCategoryRow", 40, setupFunction, hideCallback, dataTypeSelectSound, resetControlCallback)
-	ZO_ScrollList_AddDataType(control, 1, "MapSearch_WorldMapWayshrineRow", 23, setupFunction, hideCallback, dataTypeSelectSound, resetControlCallback)
+	ZO_ScrollList_AddDataType(control, 0, "MapSearch_WorldMapCategoryRow", 50, LayoutCategoryRow, hideCallback, dataTypeSelectSound, resetControlCallback)
+	ZO_ScrollList_AddDataType(control, 1, "MapSearch_WorldMapWayshrineRow", 27, LayoutRow, hideCallback, dataTypeSelectSound, resetControlCallback)
 
 	ZO_ScrollList_EnableSelection(control, selectTemplate, selectCallback)
 end
@@ -140,13 +166,17 @@ end
 local function getTargetNode(results)
 	local currentNodeIndex = 0
 
-	for nodeIndex, nodeMap in ipairs(results) do
-		if currentNodeIndex == MapSearch.targetNode then
-			return nodeMap
-		end
+    local scrollData = ZO_ScrollList_GetDataList(MapSearch_WorldMapTabList)
+    MT.scrollData = scrollData
 
-		currentNodeIndex = currentNodeIndex + 1
-	end
+    for i = 1, #scrollData do
+        if scrollData[i].typeId == 1 then -- wayshrine row
+            if currentNodeIndex == MapSearch.targetNode then
+                return scrollData[i].data
+            end
+            currentNodeIndex = currentNodeIndex + 1
+        end
+    end
 
 	return nil
 end
