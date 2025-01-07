@@ -24,6 +24,10 @@ end
 local function LayoutRow(rowControl, data, scrollList)
 	local name = data.name
 
+    if data.suffix ~= nil then
+        name = name .. " |c82826F" .. data.suffix .. "|r"
+    end
+
 	if data.icon ~= nil then
 		rowControl.icon:SetTexture(data.icon)
 		rowControl.icon:SetHidden(false)

@@ -57,7 +57,7 @@ function Locs:initialise()
                 if name:find("Dungeon: ") then
                     nodeInfo.name = string.sub(nodeInfo.name, 10, #nodeInfo.name)
                 end
-                nodeInfo.name = nodeInfo.name .. " |c82826FDungeon|r"
+                nodeInfo.suffix = "Dungeon"
             elseif typePOI == 3 then
                 nodeInfo.poiType = POI_TYPE_TRIAL
                 nodeInfo.icon = "esoui/art/tutorial/poi_raiddungeon_complete.dds"
@@ -65,7 +65,7 @@ function Locs:initialise()
                 if nodeInfo.name:find("Trial: ") then
                     nodeInfo.name = string.sub(nodeInfo.name, 8, #nodeInfo.name)
                 end
-                nodeInfo.name = nodeInfo.name .. " |c82826FTrial|r"
+                nodeInfo.suffix = "Trial"
             elseif typePOI == 7 then
                 nodeInfo.poiType = POI_TYPE_HOUSE
                 nodeInfo.icon = "esoui/art/icons/poi/poi_group_house_owned.dds"
@@ -82,14 +82,14 @@ function Locs:initialise()
             elseif glowIcon == "/esoui/art/icons/poi/poi_soloinstance_glow.dds" then
                 nodeInfo.poiType = POI_TYPE_ARENA
                 nodeInfo.icon = "esoui/art/icons/poi/poi_soloinstance_complete.dds"
-                nodeInfo.name = nodeInfo.name .. " |c82826FArena|r"
+                nodeInfo.suffix = "Arena"
                 -- if name:find(" Arena") then
                 --     nodeInfo.name = string.sub(nodeInfo.name, 1, #nodeInfo.name - 6)
                 -- end
             elseif glowIcon == "/esoui/art/icons/poi/poi_groupinstance_glow.dds" then
                 nodeInfo.poiType = POI_TYPE_ARENA
                 nodeInfo.icon = "esoui/art/icons/poi/poi_groupinstance_complete.dds"
-                nodeInfo.name = nodeInfo.name .. " |c82826FArena|r"
+                nodeInfo.suffix = "Arena"
             else
                 logger:Info("Unknown POI " .. i .. " '" .. name .. "' type " .. typePOI .. " " ..
                     (glowIcon or "-"))
