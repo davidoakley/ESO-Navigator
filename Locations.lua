@@ -33,7 +33,7 @@ function Locs:initialise()
         local zoneIndex, _ = GetFastTravelNodePOIIndicies(i)
         local nodeZoneId = GetZoneId(zoneIndex)
 
-        if not isLocked then
+        if not isLocked and name ~= "" and glowIcon ~= nil then
             if self.zones[nodeZoneId] == nil then
                 -- d('FastTravelNodes: ' .. nodeZoneId .. ': ' .. name)
                 self.zones[nodeZoneId] = {
@@ -81,13 +81,18 @@ function Locs:initialise()
                 end
             elseif glowIcon == "/esoui/art/icons/poi/poi_soloinstance_glow.dds" then
                 nodeInfo.poiType = POI_TYPE_ARENA
-                nodeInfo.icon = "esoui/art/tutorial/poi_soloinstance_complete.dds"
+                nodeInfo.icon = "esoui/art/icons/poi/poi_soloinstance_complete.dds"
                 nodeInfo.name = nodeInfo.name .. " |c82826FArena|r"
                 -- if name:find(" Arena") then
                 --     nodeInfo.name = string.sub(nodeInfo.name, 1, #nodeInfo.name - 6)
                 -- end
+            elseif glowIcon == "/esoui/art/icons/poi/poi_groupinstance_glow.dds" then
+                nodeInfo.poiType = POI_TYPE_ARENA
+                nodeInfo.icon = "esoui/art/icons/poi/poi_groupinstance_complete.dds"
+                nodeInfo.name = nodeInfo.name .. " |c82826FArena|r"
             else
-                logger:Info("Unknown POI " .. i .. " '" .. name .. "' type " .. typePOI)
+                logger:Info("Unknown POI " .. i .. " '" .. name .. "' type " .. typePOI .. " " ..
+                    (glowIcon or "-"))
                 -- if glowIcon ~= nil and glowIcon:find("/esoui/art/icons/poi/poi_") and glowIcon:find("_glow.dds") then
                 --     nodeInfo.icon = glowIcon:gsub("_glow.dds", "_complete.dds")
                 -- end
