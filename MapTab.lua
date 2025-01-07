@@ -3,24 +3,6 @@ local Search = MapSearch.Search
 local Utils = MapSearch.Utils
 local logger = MapSearch.logger
 
-local function showWayshrineMenu(owner, nodeIndex)
-	ClearMenu()
-
-    local bookmarks = MapSearch.Bookmarks
-	if bookmarks:contains(nodeIndex) then
-		AddMenuItem("Remove Bookmark", function()
-			bookmarks:remove(nodeIndex)
-			ClearMenu()
-		end)
-	else
-		AddMenuItem("Add Bookmark", function()
-			bookmarks:add(nodeIndex)
-			ClearMenu()
-		end)
-	end
-	ShowMenu(owner)
-end
-
 local function LayoutRow(rowControl, data, scrollList)
 	local name = data.name
 
@@ -258,6 +240,26 @@ function MT.resetFilter(editbox, listcontrol, lose_focus)
 	--ZO_EditDefaultText_Initialize(editbox, GetString(FASTER_TRAVEL_WAYSHRINES_SEARCH))
 	--ResetVisibility(listcontrol)
 	ZO_ScrollList_ResetToTop(MapSearch_WorldMapTabList)
+end
+
+local function showWayshrineMenu(owner, nodeIndex)
+	ClearMenu()
+
+    local bookmarks = MapSearch.Bookmarks
+	if bookmarks:contains(nodeIndex) then
+		AddMenuItem("Remove Bookmark", function()
+			bookmarks:remove(nodeIndex)
+			ClearMenu()
+            buildScrollList(MapSearch_WorldMapTabList, MapSearch.results)
+		end)
+	else
+		AddMenuItem("Add Bookmark", function()
+			bookmarks:add(nodeIndex)
+			ClearMenu()
+            buildScrollList(MapSearch_WorldMapTabList, MapSearch.results)
+		end)
+	end
+	ShowMenu(owner)
 end
 
 function MT:rowMouseUp(control, mouseButton, upInside)
