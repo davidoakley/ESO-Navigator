@@ -218,6 +218,7 @@ end
 function MT.nextResult()
 	MapSearch.targetNode = (MapSearch.targetNode + 1) % MT.resultCount
 	buildScrollList(MapSearch_WorldMapTabList, MapSearch.results)
+    ZO_ScrollList_ScrollDataIntoView(MapSearch_WorldMapTabList, MapSearch.targetNode + 1, nil, true)
 end
 
 function MT.previousResult()
@@ -226,6 +227,7 @@ function MT.previousResult()
 		MapSearch.targetNode = MT.resultCount - 1
 	end
 	buildScrollList(MapSearch_WorldMapTabList, MapSearch.results)
+    ZO_ScrollList_ScrollDataIntoView(MapSearch_WorldMapTabList, MapSearch.targetNode + 1, nil, true)
 end
 
 function MT.resetFilter(editbox, listcontrol, lose_focus)
