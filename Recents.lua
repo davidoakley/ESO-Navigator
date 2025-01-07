@@ -4,13 +4,22 @@ local Recents = MS.Recents or {
     maxEntries = 10
 }
 local logger = MS.logger
+local FTrecent = nil
 
 function Recents:init()
     self.nodes = MS.saved.recentNodes or {}
     self.maxEntries = MS.saved.maxRecent or 10
 
-    self:addTravelDialogCallbacks()
-    self:hook(true)
+    if _G["FasterTravel"] ~= nil and
+       _G["FasterTravel"].settings ~= nil and
+       _G["FasterTravel"].settings.recentsEnabled then
+        logger:Info("FasterTravel is active")
+        FTrecent = _G["FasterTravel"].settings.recent
+        -- logger:Info(FT.settings.recent)
+    else
+        self:addTravelDialogCallbacks()
+        self:hook(true)
+    end
 end
 
 function Recents:insert(nodeId)
@@ -47,6 +56,15 @@ function Recents:getRecents()
     end
 
     return results
+end
+
+function Recents:onPlayerActivated()
+    if FTrecent ~= nil and #FTrecent >= 1 then
+        -- Pull the most recent nodeIndex from FasterTravel
+        local nodeIndex = FTrecent[1].nodeIndex
+        logger:Info("Recents:onPlayerActivated: adding recent from FasterTravel: "..nodeIndex)
+        self:insert(nodeIndex)
+    end
 end
 
 local travelDialogs = {
