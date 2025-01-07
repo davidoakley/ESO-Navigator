@@ -126,8 +126,8 @@ local function buildScrollList(control, results)
 
     local scrollData = ZO_ScrollList_GetDataList(control)
 
+    MT.resultCount = 0
     buildResultsList(scrollData, results)
-
     buildRecentsList(scrollData)
     
 	ZO_ScrollList_Commit(control)
@@ -238,7 +238,7 @@ end
 function MT.previousResult()
 	MapSearch.targetNode = MapSearch.targetNode - 1
 	if MapSearch.targetNode < 0 then
-		MapSearch.targetNode = MapSearch.results - 1
+		MapSearch.targetNode = MT.resultCount - 1
 	end
 	buildScrollList(MapSearch_WorldMapTabList, MapSearch.results)
 end
