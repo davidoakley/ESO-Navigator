@@ -115,6 +115,10 @@ local function onEndFastTravel()
   MS.isRecall = true
 end
 
+local function onPlayerActivated()
+  MS.Recents:onPlayerActivated()
+end
+
 function MS.showSearch()
   logger:Info("MS.showSearch")
   MAIN_MENU_KEYBOARD:ShowScene("worldMap")
@@ -130,3 +134,4 @@ EVENT_MANAGER:RegisterForEvent(MS.name, EVENT_ADD_ON_LOADED, onAddOnLoaded)
 
 addEvent(EVENT_START_FAST_TRAVEL_INTERACTION, onStartFastTravel)
 addEvent(EVENT_END_FAST_TRAVEL_INTERACTION, onEndFastTravel)
+addEvent(EVENT_PLAYER_ACTIVATED, onPlayerActivated)
