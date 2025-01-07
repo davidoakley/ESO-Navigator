@@ -14,6 +14,7 @@ Locations.lua
 Search.lua
 MapTab.lua
 Recents.lua
+Bookmarks.lua
 Bindings.xml
 WorldMap.xml
 
