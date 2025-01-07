@@ -3,6 +3,24 @@ local Search = MapSearch.Search
 local Utils = MapSearch.Utils
 local logger = MapSearch.logger
 
+local function showWayshrineMenu(owner, nodeIndex)
+	ClearMenu()
+
+    local bookmarks = MapSearch.Bookmarks
+	if bookmarks:contains(nodeIndex) then
+		AddMenuItem("Remove Bookmark", function()
+			bookmarks:remove(nodeIndex)
+			ClearMenu()
+		end)
+	else
+		AddMenuItem("Add Bookmark", function()
+			bookmarks:add(nodeIndex)
+			ClearMenu()
+		end)
+	end
+	ShowMenu(owner)
+end
+
 local function LayoutRow(rowControl, data, scrollList)
 	local name = data.name
 
@@ -68,36 +86,16 @@ local function showWayshrineConfirm(data,isRecall)
 	ZO_Dialogs_ShowPlatformDialog(id, {nodeIndex = nodeIndex}, {mainTextParams = {name}})
 end
 
-local function buildResultsList(scrollData, results)
-	local currentNodeIndex = 0
-
-    if #results > 0 then
-        local resultsEntry = ZO_ScrollList_CreateDataEntry(0, { name = "Results" })
-        table.insert(scrollData, resultsEntry)
+local function buildList(scrollData, title, list)
+    if #list > 0 then
+        local recentEntry = ZO_ScrollList_CreateDataEntry(0, { name = title })
+        table.insert(scrollData, recentEntry)
     end
 
-	for index, nodeMap in ipairs(results) do
-        local nodeData = Utils.shallowCopy(nodeMap)
-
-		nodeData.isSelected = (currentNodeIndex == MapSearch.targetNode)
-
-		local entry = ZO_ScrollList_CreateDataEntry(1, nodeData)
-		table.insert(scrollData, entry)
-
-		currentNodeIndex = currentNodeIndex + 1
-	end
-	MT.resultCount = currentNodeIndex
-end
-
-local function buildRecentsList(scrollData)
-    local recentEntry = ZO_ScrollList_CreateDataEntry(0, { name = "Recent" })
-    table.insert(scrollData, recentEntry)
-
-    local recents = MapSearch.Recents:getRecents()
     local currentNodeIndex = MT.resultCount
 
-    for i = 1, #recents do
-        local recent = recents[i]
+    for i = 1, #list do
+        local recent = list[i]
 
         local nodeData = Utils.shallowCopy(recent)
 		nodeData.isSelected = (currentNodeIndex == MapSearch.targetNode)
@@ -113,7 +111,7 @@ end
 
 local function buildScrollList(control, results)
 	ZO_ScrollList_Clear(control)
-	
+
 	local editBox = MapSearch_WorldMapTabSearchEdit
 	local searchString = editBox:GetText()
 	if searchString == "" then
@@ -127,9 +125,10 @@ local function buildScrollList(control, results)
     local scrollData = ZO_ScrollList_GetDataList(control)
 
     MT.resultCount = 0
-    buildResultsList(scrollData, results)
-    buildRecentsList(scrollData)
-    
+    buildList(scrollData, "Results", results)
+    buildList(scrollData, "Recent", MapSearch.Recents:getRecents())
+    buildList(scrollData, "Bookmarks", MapSearch.Bookmarks:getBookmarks())
+
 	ZO_ScrollList_Commit(control)
 end
 
@@ -262,13 +261,11 @@ function MT:rowMouseUp(control, mouseButton, upInside)
 
 	if(upInside) then
 		local data = ZO_ScrollList_GetData(control)
-		--MapSearch.clickedData = data
-		showWayshrineConfirm(data, MapSearch.isRecall)
-		-- if data.clicked then
-		-- 	data:clicked(control,button)
-		-- 	-- self:RowMouseClicked(control,data,button)
-		-- 	logger:Info("Row Mouse Up clicked? "..data.clicked)
-		-- end
+        if mouseButton == 1 then
+            showWayshrineConfirm(data, MapSearch.isRecall)
+		elseif mouseButton == 2 then
+			showWayshrineMenu(control, data.nodeIndex)
+		end
 	end
 
 end
