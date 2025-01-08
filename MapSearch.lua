@@ -137,3 +137,20 @@ EVENT_MANAGER:RegisterForEvent(MS.name, EVENT_ADD_ON_LOADED, onAddOnLoaded)
 addEvent(EVENT_START_FAST_TRAVEL_INTERACTION, onStartFastTravel)
 addEvent(EVENT_END_FAST_TRAVEL_INTERACTION, onEndFastTravel)
 addEvent(EVENT_PLAYER_ACTIVATED, onPlayerActivated)
+
+SLASH_COMMANDS["/mapsearch"] = function (extra)
+  if extra == 'save' then
+      MapSearch.Locations:initialise()
+      -- buildLocations()
+      MapSearch.saved.locations = Utils.deepCopy(MS.Search.locations)
+      MapSearch.saved.zones = Utils.deepCopy(MS.Search.zones)
+      MapSearch.saved.result = Utils.deepCopy(MS.Search.result)
+      d("Written MapSearch data to Saved Preferences")
+  elseif extra == 'clear' then
+      MapSearch.saved.categories = nil
+      MapSearch.saved.locations = nil
+      MapSearch.saved.zones = nil
+      MapSearch.saved.result = nil
+      d("Cleared MapSearch data from Saved Preferences")
+  end
+end

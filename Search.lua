@@ -91,21 +91,4 @@ end
 Search.run = runCombined
 Search.highlightResult = highlightResult
 
-SLASH_COMMANDS["/mapsearch"] = function (extra)
-    if extra == 'save' then
-        MapSearch.Locations:initialise()
-        -- buildLocations()
-        MapSearch.saved.locations = deepCopy(Search.locations)
-        MapSearch.saved.zones = deepCopy(Search.zones)
-        MapSearch.saved.result = deepCopy(Search.result)
-        d("Written MapSearch data to Saved Preferences")
-    elseif extra == 'clear' then
-        MapSearch.saved.categories = nil
-        MapSearch.saved.locations = nil
-        MapSearch.saved.zones = nil
-        MapSearch.saved.result = nil
-        d("Cleared MapSearch data from Saved Preferences")
-    end
-end
-
 MapSearch.Search = Search
