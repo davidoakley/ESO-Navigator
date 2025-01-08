@@ -61,21 +61,12 @@ local function runCombined(searchTerm)
     Search.result = result
     return result
 end
-
-function table.contains(table, element)
-    for _, value in pairs(table) do
-      if value == element then
-        return true
-      end
-    end
-    return false
-end
   
 local function highlightResult(result, matchChars)
     local out = ""
     for i = 1, #result do
-        local c = result:sub(i,i)
-        if table.contains(matchChars, i) then
+        local c = result:sub(i, i)
+        if Utils.tableContains(matchChars, i) then
             if MapSearch.isCLI then
                 out = out..'%{underline}'..c..'%{reset}'
             else
