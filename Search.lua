@@ -30,30 +30,45 @@ local function matchComparison(x,y)
 	return (x.barename or x.name) < (y.barename or y.name)
 end
 
-local function runCombined(searchTerm)
+local function addSearchResults(result, searchTerm, nodeList)
+    for i = 1, #nodeList do
+        local node = nodeList[i]
+        local matchLevel, _ = match(node, searchTerm)
+        if matchLevel > 0 or searchTerm == "" then
+            local resultNode = Utils.shallowCopy(node)
+            resultNode.match = matchLevel
+            -- resultNode.matchChars = matchChars
+
+            if MS.isDeveloper then
+                -- resultNode.name = resultNode.name .. " |c808080[" .. resultNode.match .. "]|r"
+                resultNode.tooltip = "nodeIndex " .. (resultNode.nodeIndex or "-") .. "; bareName '" .. (node.barename or '-')
+            end
+
+            table.insert(result, resultNode)
+        end
+    end
+end
+
+
+function Search.run(searchTerm)
+    local searchType = 'loc'
+    if searchTerm:sub(1, 1) == "@" then
+        searchType = 'pla'
+        searchTerm = searchTerm:sub(2)
+    end
     searchTerm = searchTerm:lower()
     searchTerm = searchTerm:gsub("[^%w ]", "")
 
     -- logger:Info("Search.run("..searchTerm..")")
 
     local result = {}
-    local nodes = Locations:getKnownNodes()
 
-    for i = 1, #nodes do
-        local node = nodes[i]
-        local matchLevel, matchChars = match(node, searchTerm)
-        if matchLevel > 0 then
-            local resultNode = Utils.shallowCopy(node)
-            resultNode.match = matchLevel
-            resultNode.matchChars = matchChars
-
-            if MS.isDeveloper then
-                -- resultNode.name = resultNode.name .. " |c808080[" .. resultNode.match .. "]|"
-                resultNode.tooltip = "nodeIndex " .. resultNode.nodeIndex
-            end
-
-            table.insert(result, resultNode)
-        end
+    if searchType == 'pla' then
+        logger:Info("Search.run: player '"..searchTerm.."'")
+        addSearchResults(result, searchTerm, Locations:getPlayerList())
+    else
+        logger:Info("Search.run: location '"..string.sub(searchTerm, 1, 1).."'")
+        addSearchResults(result, searchTerm, Locations:getKnownNodes())
     end
 
     table.sort(result, matchComparison)
@@ -62,7 +77,7 @@ local function runCombined(searchTerm)
     return result
 end
   
-local function highlightResult(result, matchChars)
+function Search.highlightResult(result, matchChars)
     local out = ""
     for i = 1, #result do
         local c = result:sub(i, i)
@@ -78,8 +93,5 @@ local function highlightResult(result, matchChars)
     end
     return colors(out)
 end
-
-Search.run = runCombined
-Search.highlightResult = highlightResult
 
 MapSearch.Search = Search
