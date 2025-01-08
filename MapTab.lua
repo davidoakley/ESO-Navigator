@@ -10,15 +10,20 @@ local function LayoutRow(rowControl, data, scrollList)
         name = name .. " |c82826F" .. data.suffix .. "|r"
     end
 
-    if MapSearch.isRecall and data.poiType == POI_TYPE_WAYSHRINE then
+    -- if MapSearch.isRecall and data.poiType == POI_TYPE_WAYSHRINE then
         -- name = name .. " |t80%:80%:/esoui/art/currency/gold_mipmap.dds|t"
-        data.icon = "/esoui/art/currency/gold_mipmap.dds"
-    end
+        -- data.icon = "/esoui/art/currency/gold_mipmap.dds"
+    -- end
 
 	if data.icon ~= nil then
 		rowControl.icon:SetTexture(data.icon)
 		rowControl.icon:SetHidden(false)
-	else
+        if MapSearch.isRecall and data.poiType == POI_TYPE_WAYSHRINE then
+            rowControl.icon:SetColor(0.8, 0.7, 0.1, 1)
+        else
+            rowControl.icon:SetColor(1, 1, 1, 1)
+        end
+    else
 		rowControl.icon:SetHidden(true)
 	end
 
