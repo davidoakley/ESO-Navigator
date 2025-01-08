@@ -8,9 +8,6 @@ local fzy = MS.fzy
 
 Search.categories = nil
 
-POI_TYPE_TRIAL = 100
-POI_TYPE_ARENA = 101
-
 local function match(object, searchTerm)
     local name = object.barename or object.name
 
@@ -69,6 +66,7 @@ function Search.run(searchTerm)
     else
         logger:Info("Search.run: location '"..string.sub(searchTerm, 1, 1).."'")
         addSearchResults(result, searchTerm, Locations:getKnownNodes())
+        addSearchResults(result, searchTerm, Locations:getPlayerZoneList())
     end
 
     table.sort(result, matchComparison)

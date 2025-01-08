@@ -10,10 +10,15 @@ local Locs = MS.Locations or {
 local Utils = MS.Utils
 local logger = MS.logger -- LibDebugLogger("MapSearch")
 
+POI_TYPE_TRIAL = 100
+POI_TYPE_ARENA = 101
+POI_TYPE_FRIEND = 102
+POI_TYPE_GUILDMATE = 103
+
 function Locs:initialise()
     logger:Debug("Locs:initialise() starts")
-    self:setupPlayerZones()
     self:setupNodes()
+    self:setupPlayerZones()
     logger:Debug("Locs:initialise() ends")
 end
 
@@ -110,15 +115,14 @@ function Locs:setupNodes()
     end
 end
 
-function Locs:addPlayerZone(zoneId, zoneName, userID, suffix, icon)
-    if CanJumpToPlayerInZone(zoneId) then
+function Locs:addPlayerZone(zoneId, zoneName, userID, icon, poiType)
+    if self.zones[zoneId] and CanJumpToPlayerInZone(zoneId) then
         local zoneInfo = {
             zoneId = zoneId,
             zoneName = zoneName,
             userID = userID,
             icon = icon,
-            suffix = suffix,
-            poiType = 10
+            poiType = poiType
         }
 
         self.players[userID] = zoneInfo
@@ -141,7 +145,7 @@ function Locs:setupPlayerZones()
 
             if playerStatus ~= PLAYER_STATUS_OFFLINE and userID~=myID then
                 local _, _, zoneName, _, _, _, _, zoneId = GetGuildMemberCharacterInfo(guildID, i)
-                self:addPlayerZone(zoneId, zoneName, userID, zoneName, "/esoui/art/guild/gamepad/gp_guild_menuicon_ownership.dds")
+                self:addPlayerZone(zoneId, zoneName, userID, "/esoui/art/notifications/notificationicon_guild.dds", POI_TYPE_GUILDMATE)
             end
         end
     end
@@ -153,7 +157,7 @@ function Locs:setupPlayerZones()
 		if playerStatus ~= PLAYER_STATUS_OFFLINE and secsSinceLogoff == 0 then
             local hasChar, _, zoneName, _, _, _, _, zoneId = GetFriendCharacterInfo(i)
             if hasChar then
-                self:addPlayerZone(zoneId, zoneName, userID, zoneName, "/esoui/art/notifications/gamepad/gp_notificationicon_friend.dds")
+                self:addPlayerZone(zoneId, zoneName, userID, "/esoui/art/notifications/gamepad/gp_notificationicon_friend.dds", POI_TYPE_FRIEND)
             end
         end
     end
@@ -213,7 +217,30 @@ function Locs:getPlayerList()
                 zoneId = info.zoneId,
                 zoneName = info.zoneName,
                 icon = info.icon,
-                suffix = info.suffix
+                suffix = info.zoneName,
+                poiType = info.poiType,
+                userID = userID
+            })
+        end
+    end
+
+    return nodes
+end
+
+function Locs:getPlayerZoneList()
+    local nodes = {}
+
+    if self.playerZones ~= nil then
+        for zoneID, info in pairs(self.playerZones) do
+            table.insert(nodes, {
+                name = info.zoneName,
+                barename = Utils.bareName(info.zoneName),
+                zoneId = zoneID,
+                zoneName = info.zoneName,
+                icon = "MapSearch/media/zone.dds",
+                suffix = info.userID,
+                poiType = info.poiType,
+                userID = info.userID
             })
         end
     end
