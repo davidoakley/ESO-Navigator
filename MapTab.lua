@@ -65,10 +65,26 @@ local function LayoutCategoryRow(rowControl, data, scrollList)
 	rowControl.label:SetText(data.name)
 end
 
-local function showWayshrineConfirm(data,isRecall)
-	local nodeIndex,name,refresh,clicked = data.nodeIndex,data.originalName,data.refresh,data.clicked
-	ZO_Dialogs_ReleaseDialog("FAST_TRAVEL_CONFIRM")
+local function jumpToNode(node)
+    local isRecall = MapSearch.isRecall
+	local nodeIndex,name,refresh,clicked = node.nodeIndex,node.originalName,node.refresh,node.clicked
+
+    ZO_Dialogs_ReleaseDialog("FAST_TRAVEL_CONFIRM")
 	ZO_Dialogs_ReleaseDialog("RECALL_CONFIRM")
+
+    -- TODO: Pick a friend / guildmate to jump to now, rather than relying on stale data
+    if node.poiType == POI_TYPE_FRIEND then
+        CHAT_SYSTEM:AddMessage("Jumping to "..node.zoneName.." via "..node.userID)
+        SCENE_MANAGER:Hide("worldMap")
+        JumpToFriend(node.userID)
+        return
+    elseif node.poiType == POI_TYPE_GUILDMATE then
+        CHAT_SYSTEM:AddMessage("Jumping to "..node.zoneName.." via "..node.userID)
+        SCENE_MANAGER:Hide("worldMap")
+        JumpToGuildMember(node.userID)
+        return
+    end
+
 	name = name or select(2, MapSearch.Wayshrine.Data.GetNodeInfo(nodeIndex)) -- just in case
 	local id = (isRecall == true and "RECALL_CONFIRM") or "FAST_TRAVEL_CONFIRM"
 	if isRecall == true then
@@ -221,7 +237,7 @@ function MT.jumpToResult()
 	local node = getTargetNode(MapSearch.Search.result)
 
 	if node then
-		showWayshrineConfirm(node, MapSearch.isRecall)
+		jumpToNode(node)
 	end
 end
 
@@ -280,12 +296,12 @@ function MT:rowMouseUp(control, mouseButton, upInside)
 	if(upInside) then
 		local data = ZO_ScrollList_GetData(control)
         if mouseButton == 1 then
-            showWayshrineConfirm(data, MapSearch.isRecall)
+            jumpToNode(data)
+            -- showWayshrineConfirm(data, MapSearch.isRecall)
 		elseif mouseButton == 2 then
 			showWayshrineMenu(control, data.nodeIndex)
 		end
 	end
-
 end
 
 MapSearch.MapTab = MT
