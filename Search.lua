@@ -48,9 +48,9 @@ end
 
 
 function Search.run(searchTerm)
-    local searchType = 'loc'
+    local playerSearch = false
     if searchTerm:sub(1, 1) == "@" then
-        searchType = 'pla'
+        playerSearch = true
         searchTerm = searchTerm:sub(2)
     end
     searchTerm = searchTerm:lower()
@@ -60,11 +60,9 @@ function Search.run(searchTerm)
 
     local result = {}
 
-    if searchType == 'pla' then
-        logger:Info("Search.run: player '"..searchTerm.."'")
+    if playerSearch then
         addSearchResults(result, searchTerm, Locations:getPlayerList())
     else
-        logger:Info("Search.run: location '"..string.sub(searchTerm, 1, 1).."'")
         addSearchResults(result, searchTerm, Locations:getKnownNodes())
         addSearchResults(result, searchTerm, Locations:getPlayerZoneList())
     end
