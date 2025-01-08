@@ -9,6 +9,7 @@
 
 MapSearch.lua
 fzy.lua
+Data.lua
 Utils.lua
 Locations.lua
 Search.lua
