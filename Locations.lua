@@ -3,30 +3,26 @@ local Locs = MS.Locations or {
     nodes = nil,
     nodeMap = nil,
     zones = nil,
+    players = nil,
+    playerZones = nil,
     knownNodes = {}
 }
 local Utils = MS.Utils
 local logger = MS.logger -- LibDebugLogger("MapSearch")
 
 function Locs:initialise()
+    logger:Debug("Locs:initialise() starts")
+    self:setupPlayerZones()
+    self:setupNodes()
+    logger:Debug("Locs:initialise() ends")
+end
+
+function Locs:setupNodes()
     self.nodes = {}
     self.nodeMap = {}
     self.zones = {}
 
-    -- for i = 1, GetNumMaps() do
-    --     local _, _, _, zoneIndex, _ = GetMapInfoByIndex(i)
-    --     local zoneID = GetZoneId(zoneIndex)
-    --     -- Include parent zones, plus Apocrypha, Arteum and the Brass Fortress;
-    --     -- remove "Clean Test", Cyrodiil and Imperial City
-    --     if (zoneID == GetParentZoneId(zoneID) or zoneID==981 or zoneID==1413 or zoneID==1027) and
-    --         GetNumSkyshardsInZone(zoneID)>=minSkyshards and
-    --         zoneID~=181 and zoneID~=584 and zoneID~=2 and CanJumpToPlayerInZone(zoneID) then
-    --       table.insert(self.zones, zoneID)
-    --       self.locations[zoneID] = {}
-    --     end
-    --   end
     local totalNodes = GetNumFastTravelNodes()
-
     for i = 1, totalNodes do
         local known, name, Xcord, Ycord, icon, glowIcon, typePOI, onMap, isLocked = GetFastTravelNodeInfo(i)
 
@@ -35,7 +31,6 @@ function Locs:initialise()
 
         if not isLocked and name ~= "" and glowIcon ~= nil then
             if self.zones[nodeZoneId] == nil then
-                -- d('FastTravelNodes: ' .. nodeZoneId .. ': ' .. name)
                 self.zones[nodeZoneId] = {
                     name = name,
                     index = zoneIndex,
@@ -48,6 +43,7 @@ function Locs:initialise()
                 name = name,
                 originalName = name,
                 type = typePOI,
+                zoneId = nodeZoneId,
                 glowIcon = glowIcon
             }
 
@@ -112,8 +108,55 @@ function Locs:initialise()
             self.knownNodes[i] = known
         end
     end
+end
 
-    self:addTraderCounts()
+function Locs:addPlayerZone(zoneId, zoneName, userID, suffix, icon)
+    if CanJumpToPlayerInZone(zoneId) then
+        local zoneInfo = {
+            zoneId = zoneId,
+            zoneName = zoneName,
+            userID = userID,
+            icon = icon,
+            suffix = suffix,
+            poiType = 10
+        }
+
+        self.players[userID] = zoneInfo
+        self.playerZones[zoneId] = zoneInfo
+    end
+end
+
+function Locs:setupPlayerZones()
+    local myID = GetDisplayName()
+    self.playerZones = {}
+    self.players = {}
+
+    local guildCount = GetNumGuilds()
+    for guild = 1, guildCount do
+        local guildID = GetGuildId(guild)
+        local guildMembers = GetNumGuildMembers(guildID)
+
+        for i=1, guildMembers do
+            local userID, _, _, playerStatus = GetGuildMemberInfo(guildID, i)
+
+            if playerStatus ~= PLAYER_STATUS_OFFLINE and userID~=myID then
+                local _, _, zoneName, _, _, _, _, zoneId = GetGuildMemberCharacterInfo(guildID, i)
+                self:addPlayerZone(zoneId, zoneName, userID, zoneName, "/esoui/art/guild/gamepad/gp_guild_menuicon_ownership.dds")
+            end
+        end
+    end
+
+    local friendCount = GetNumFriends()
+    for i = 1, friendCount do
+		local userID, _, playerStatus, secsSinceLogoff = GetFriendInfo(i)
+
+		if playerStatus ~= PLAYER_STATUS_OFFLINE and secsSinceLogoff == 0 then
+            local hasChar, _, zoneName, _, _, _, _, zoneId = GetFriendCharacterInfo(i)
+            if hasChar then
+                self:addPlayerZone(zoneId, zoneName, userID, zoneName, "/esoui/art/notifications/gamepad/gp_notificationicon_friend.dds")
+            end
+        end
+    end
 end
 
 function Locs:clearKnownNodes()
