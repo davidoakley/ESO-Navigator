@@ -218,7 +218,7 @@ end
 local function getTargetNode(results)
 	local currentNodeIndex = 0
 
-    local scrollData = ZO_ScrollList_GetDataList(MapSearch_WorldMapTabList)
+    local scrollData = ZO_ScrollList_GetDataList(MapSearch_MapTabList)
     MT.scrollData = scrollData
 
     for i = 1, #scrollData do
@@ -237,12 +237,11 @@ function MT:init(tabControl)
 	logger:Info("MapTab:init")
 	self.tabControl = tabControl
 
-    local control = MapSearch_WorldMapTabList
-	self.listControl = control
+	self.listControl = MapSearch_MapTabList
 
-	self.editControl = MapSearch_WorldMapTabSearchEdit
+	self.editControl = MapSearch_MapTabSearchEdit
 
-	setupScrollList(control)
+	setupScrollList(self.listControl)
 
 	-- executeSearch(control)
 

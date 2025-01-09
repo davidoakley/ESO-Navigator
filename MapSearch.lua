@@ -58,7 +58,7 @@ function MS:initialize()
 
   self.saved = ZO_SavedVars:NewAccountWide(self.svName, 1, nil, self.default)
 
-  local mapTabControl = MapSearch_WorldMapTab
+  local mapTabControl = MapSearch_MapTab
   
   local ButtonGroup = {
 		{
@@ -126,7 +126,7 @@ function MS.showSearch()
   MAIN_MENU_KEYBOARD:ShowScene("worldMap")
   WORLD_MAP_INFO:SelectTab(MAPSEARCH_TAB_SEARCH)
   MS.MapTab:resetFilter(false)
-  MapSearch_WorldMapTabSearchEdit:TakeFocus()
+  MapSearch_MapTabSearchEdit:TakeFocus()
 end
 
 -- Finally, we'll register our event handler function to be called when the proper event occurs.
