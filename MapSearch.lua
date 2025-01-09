@@ -58,7 +58,7 @@ function MS:initialize()
 
   self.saved = ZO_SavedVars:NewAccountWide(self.svName, 1, nil, self.default)
 
-  local mapTabControl = MapSearch_MapTab
+  -- local mapTabControl = MapSearch_MapTab
   
   local ButtonGroup = {
 		{
@@ -81,7 +81,7 @@ function MS:initialize()
     end)
 
   -- local mapTab = MS.MapTab(mapTabControl)
-  self.MapTab:init(mapTabControl)
+  self.MapTab:init()
   self.Recents:init()
   self.Bookmarks:init()
 
@@ -90,7 +90,7 @@ function MS:initialize()
   local highlight = "/esoui/art/tradinghouse/tradinghouse_browse_tabicon_over.dds"
   local pressed = "/esoui/art/tradinghouse/tradinghouse_browse_tabicon_down.dds"
 
-  AddWorldMapFragment(MAPSEARCH_TAB_SEARCH, mapTabControl.fragment, normal, highlight, pressed)
+  AddWorldMapFragment(MAPSEARCH_TAB_SEARCH, self.MapTab.fragment, normal, highlight, pressed)
 
   logger:Info("MS.Initialize exits")
 end

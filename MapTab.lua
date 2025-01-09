@@ -1,9 +1,9 @@
-local MT = MapSearch.MapTab or {}
+local MT = MapSearch_MapTab --MapSearch.MapTab or {}
 local Search = MapSearch.Search
 local Utils = MapSearch.Utils
 local logger = MapSearch.logger
 
-local function LayoutRow(rowControl, data, scrollList)
+function MT:layoutRow(rowControl, data, scrollList)
 	local name = data.name
     local tooltipText = data.tooltip
     local icon = data.icon
@@ -42,7 +42,8 @@ local function LayoutRow(rowControl, data, scrollList)
 		rowControl.icon:SetHidden(true)
 	end
 
-	rowControl.key:SetHidden(not data.isSelected)
+    -- MT.rowControl = rowControl
+	rowControl.keybind:SetHidden(not data.isSelected)
     rowControl.bg:SetHidden(not data.isSelected)
 
 	rowControl.label:SetText(name)
@@ -69,7 +70,7 @@ local function LayoutRow(rowControl, data, scrollList)
     end
 end
 
-local function LayoutCategoryRow(rowControl, data, scrollList)
+function MT:layoutCategoryRow(rowControl, data, scrollList)
 	-- if data.icon ~= nil then
 	-- 	rowControl.icon:SetTexture(data.icon)
 	-- 	rowControl.icon:SetHidden(false)
@@ -200,26 +201,10 @@ local function executeSearch(control, searchString)
 	MT:buildScrollList()
 end
 
-local function setupScrollList(control)
-	logger:Info("setupScrollList")
-	local height = 25 -- height of the row, not the window
-	local hideCallback = nil
-	local dataTypeSelectSound = nil
-	local resetControlCallback = nil
-	local selectTemplate = "ZO_ThinListHighlight"
-	local selectCallback = OnRowSelect
-
-	ZO_ScrollList_AddDataType(control, 0, "MapSearch_WorldMapCategoryRow", 50, LayoutCategoryRow, hideCallback, dataTypeSelectSound, resetControlCallback)
-	ZO_ScrollList_AddDataType(control, 1, "MapSearch_WorldMapWayshrineRow", 27, LayoutRow, hideCallback, dataTypeSelectSound, resetControlCallback)
-
-	ZO_ScrollList_EnableSelection(control, selectTemplate, selectCallback)
-end
-
-local function getTargetNode(results)
+function MT:getTargetNode()
 	local currentNodeIndex = 0
 
-    local scrollData = ZO_ScrollList_GetDataList(MapSearch_MapTabList)
-    MT.scrollData = scrollData
+    local scrollData = ZO_ScrollList_GetDataList(self.listControl)
 
     for i = 1, #scrollData do
         if scrollData[i].typeId == 1 then -- wayshrine row
@@ -233,17 +218,8 @@ local function getTargetNode(results)
 	return nil
 end
 
-function MT:init(tabControl)
+function MT:init()
 	logger:Info("MapTab:init")
-	self.tabControl = tabControl
-
-	self.listControl = MapSearch_MapTabList
-
-	self.editControl = MapSearch_MapTabSearchEdit
-
-	setupScrollList(self.listControl)
-
-	-- executeSearch(control)
 
 	local _refreshing = false
 	local _isDirty = true 
@@ -274,7 +250,7 @@ function MT:onTextChanged(editbox, listcontrol)
 end
 
 function MT:jumpToTargetNode()
-	local node = getTargetNode(MapSearch.Search.result)
+	local node = self:getTargetNode()
 
 	if node then
 		jumpToNode(node)

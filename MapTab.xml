@@ -33,7 +33,7 @@
 				self.offsetX = 30
 				self.label = self:GetNamedChild("Label")
 				self.icon = self:GetNamedChild("Icon")
-				self.key = self:GetNamedChild("Key")
+				self.keybind = self:GetNamedChild("Keybind")
 				self.bg = self:GetNamedChild("BG")
 				self.icon:SetDrawLayer(self.label:GetDrawLayer() + 1)
 			</OnInitialized>
@@ -51,7 +51,7 @@
 					<Anchor point="TOPLEFT" offsetX="10" offsetY="1" />
 					<TextureCoords top="0" bottom="1" left="0" right="1"/>
 				</Texture>
-				<Control name="$(parent)Key" hidden="true" mouseEnabled="false" resizeToFitDescendents="true">
+				<Control name="$(parent)Keybind" hidden="true" mouseEnabled="false" resizeToFitDescendents="true">
 					<Anchor point="TOPRIGHT" offsetX="0" offsetY="1" />
 					<Controls>
 						<Label name="$(parent)Label" font="$(MEDIUM_FONT)|$(KB_16)" text="Enter" layer="OVERLAY" horizontalAlignment="CENTER">
@@ -84,14 +84,15 @@
             <OnInitialized>
 				local logger = LibDebugLogger("MapSearch")
 				logger:Info("MapSearch_MapTab.OnInitialized")
-				-- self.sortOrderDropDown = ZO_ComboBox_ObjectFromContainer(self:GetNamedChild("SortOrder"))
-				-- self.sortAllOrderDropDown = ZO_ComboBox_ObjectFromContainer(self:GetNamedChild("SortAllOrder"))
-                self.list = self:GetNamedChild("List")
-				self.edit = self:GetNamedChild("SearchEdit")
+
+                self.listControl = self:GetNamedChild("List")
+				self.editControl = self:GetNamedChild("SearchEdit")
+
 				self.fragment = ZO_FadeSceneFragment:New(self)
 				self.fragment.duration = 100
-				-- ZO_ScrollList_AddDataType(self.list,0,"MapSearch_WorldMapWayshrineCategoryRow", 23, function(control, data) self:RefreshRow(control,data) end)
-				-- ZO_ScrollList_AddDataType(self.list,1,"MapSearch_WorldMapWayshrineRow", 23, function(control, data) self:RefreshRow(control,data) end)
+
+				ZO_ScrollList_AddDataType(self.listControl, 0, "MapSearch_WorldMapCategoryRow", 50, function(...) self:layoutCategoryRow(...) end, nil, nil, nil)
+				ZO_ScrollList_AddDataType(self.listControl, 1, "MapSearch_WorldMapWayshrineRow", 27, function(...) self:layoutRow(...) end, nil, nil, nil)
 	        </OnInitialized>
             <Controls>
 				<Backdrop name="$(parent)Search" tier="HIGH" XedgeColor="000000" inherits="ZO_SingleLineEditBackdrop_Keyboard" maxHeight="40" mouseEnabled="true">
