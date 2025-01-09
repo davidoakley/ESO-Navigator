@@ -33,7 +33,7 @@
 				self.offsetX = 30
 				self.label = self:GetNamedChild("Label")
 				self.icon = self:GetNamedChild("Icon")
-				self.arrow = self:GetNamedChild("Arrow")
+				self.key = self:GetNamedChild("Key")
 				self.bg = self:GetNamedChild("BG")
 				self.icon:SetDrawLayer(self.label:GetDrawLayer() + 1)
 			</OnInitialized>
@@ -50,7 +50,7 @@
 					<Anchor point="TOPLEFT" offsetX="10" offsetY="1" />
 					<TextureCoords top="0" bottom="1" left="0" right="1"/>
 				</Texture>
-				<Control name="$(parent)Arrow" hidden="true" mouseEnabled="false" resizeToFitDescendents="true">
+				<Control name="$(parent)Key" hidden="true" mouseEnabled="false" resizeToFitDescendents="true">
 					<Anchor point="TOPRIGHT" offsetX="0" offsetY="1" />
 					<Controls>
 						<Label name="$(parent)Label" font="$(MEDIUM_FONT)|$(KB_16)" text="Enter" layer="OVERLAY" horizontalAlignment="CENTER">
@@ -69,7 +69,7 @@
 				</Control>
 				<Label name="$(parent)Label" inherits="ZO_SelectableLabel" font="ZoFontHeader" wrapMode="ELLIPSIS" mouseEnabled="false">
 					<Anchor point="TOPLEFT" relativeTo="$(parent)Icon" relativePoint="TOPRIGHT" offsetX="6" offsetY="0" />
-					<Anchor point="TOPRIGHT" relativeTo="$(parent)Arrow" relativePoint="TOPLEFT" />
+					<Anchor point="TOPRIGHT" relativeTo="$(parent)Key" relativePoint="TOPLEFT" />
 		            <Dimensions y="24" />
 				</Label>
             </Controls>
