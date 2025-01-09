@@ -69,7 +69,8 @@ function Locs:setupNodes()
                 nodeInfo.suffix = "Trial"
             elseif typePOI == 7 then
                 nodeInfo.poiType = POI_TYPE_HOUSE
-                nodeInfo.icon = "esoui/art/icons/poi/poi_group_house_owned.dds"
+                nodeInfo.icon = icon
+                nodeInfo.owned = (icon == "esoui/art/icons/poi/poi_group_house_owned.dds")
                 -- elseif name:find(" Arena") then
                 --     nodeInfo.poiType = POI_TYPE_ARENA
                 --     -- nodeInfo.name = string.sub(nodeInfo.name, 1, #nodeInfo.name - 6)
@@ -200,7 +201,12 @@ function Locs:getKnownNodes()
     for i = 1, #self.nodes do
         local index = self.nodes[i].nodeIndex
         if self:isKnownNode(index) then
-            table.insert(nodes, self.nodes[i])
+            local node = Utils.shallowCopy(self.nodes[i])
+            if (node.poiType == POI_TYPE_WAYSHRINE and MS.isRecall) or
+               (node.poiType == POI_TYPE_HOUSE and not node.isOwned) then
+                node.weight = 0.8
+            end
+            table.insert(nodes, node)
         end
     end
     return nodes

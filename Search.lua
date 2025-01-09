@@ -33,6 +33,9 @@ local function addSearchResults(result, searchTerm, nodeList)
         local matchLevel, _ = match(node, searchTerm)
         if matchLevel > 0 or searchTerm == "" then
             local resultNode = Utils.shallowCopy(node)
+            if node.weight then
+                matchLevel = matchLevel * node.weight
+            end
             resultNode.match = matchLevel
             -- resultNode.matchChars = matchChars
 
