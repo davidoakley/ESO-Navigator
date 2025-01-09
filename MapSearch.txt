@@ -13,11 +13,13 @@ Data.lua
 Utils.lua
 Locations.lua
 Search.lua
+
+MapTab.xml
 MapTab.lua
+
 Recents.lua
 Bookmarks.lua
 Bindings.xml
-WorldMap.xml
 
 # This Add-on is not created by, affiliated with, or sponsored by, ZeniMax
 # Media Inc. or its affiliates. The Elder Scrolls® and related logos are

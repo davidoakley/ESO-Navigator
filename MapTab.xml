@@ -40,6 +40,7 @@
             <Dimensions y="25"/>
             <Controls>
 			<!-- EsoUI/Art/Buttons/ESO_buttonLarge_normal.dds  -->
+			<!-- /esoui/art/miscellaneous/listitem_highlight.dds -->
 				<Texture name="$(parent)BG" textureFile="/esoui/art/miscellaneous/listitem_backdrop.dds" hidden="true" mouseEnabled="false">
 		            <Dimensions y="30"/>
 					<Anchor point="TOPLEFT" offsetX="0" offsetY="0" />
@@ -79,10 +80,10 @@
         </Control>
         
         
-        <TopLevelControl name="MapSearch_WorldMapTab" inherits="ZO_WorldMapInfoContent">
+        <TopLevelControl name="MapSearch_MapTab" inherits="ZO_WorldMapInfoContent">
             <OnInitialized>
 				local logger = LibDebugLogger("MapSearch")
-				logger:Info("MapSearch_WorldMapTab.OnInitialized")
+				logger:Info("MapSearch_MapTab.OnInitialized")
 				-- self.sortOrderDropDown = ZO_ComboBox_ObjectFromContainer(self:GetNamedChild("SortOrder"))
 				-- self.sortAllOrderDropDown = ZO_ComboBox_ObjectFromContainer(self:GetNamedChild("SortAllOrder"))
                 self.list = self:GetNamedChild("List")
@@ -112,7 +113,7 @@
 								self:TakeFocus()
 							</OnEffectivelyShown>
 							<OnTextChanged>
-								MapSearch.MapTab:onTextChanged(self, MapSearch_WorldMapTabList)
+								MapSearch.MapTab:onTextChanged(self, MapSearch_MapTabList)
 							</OnTextChanged>
 							<OnMouseDown>
 								self:TakeFocus()
