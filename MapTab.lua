@@ -5,24 +5,39 @@ local logger = MapSearch.logger
 
 local function LayoutRow(rowControl, data, scrollList)
 	local name = data.name
+    local tooltipText = data.tooltip
+    local icon = data.icon
+    local iconColour = { 1.0, 1.0, 1.0, 1.0 }
 
     if data.suffix ~= nil then
         name = name .. " |c82826F" .. data.suffix .. "|r"
     end
 
-    -- if MapSearch.isRecall and data.poiType == POI_TYPE_WAYSHRINE then
-        -- name = name .. " |t80%:80%:/esoui/art/currency/gold_mipmap.dds|t"
-        -- data.icon = "/esoui/art/currency/gold_mipmap.dds"
-    -- end
+    if MapSearch.isRecall and data.poiType == POI_TYPE_WAYSHRINE then
+        local _, timeLeft = GetRecallCooldown()
+
+        if timeLeft == 0 then
+            icon = "/esoui/art/tradinghouse/tradinghouse_sell_tabicon_up.dds"
+            iconColour = { 1.0, 0.8, 0.2, 1 }
+
+            -- local cost,hasEnough = GetRecallCostInfo()
+            local currencyType = CURT_MONEY
+            local currencyAmount = GetRecallCost()
+            local formatType = ZO_CURRENCY_FORMAT_AMOUNT_ICON
+            local currencyString = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(currencyType, currencyAmount, formatType))
+            local costText = string.format(GetString(SI_TOOLTIP_RECALL_COST) .. "%s", currencyString)
+            if tooltipText then
+                tooltipText = costText .. "; " .. tooltipText
+            else
+                tooltipText = costText
+            end
+        end
+    end
 
 	if data.icon ~= nil then
-		rowControl.icon:SetTexture(data.icon)
+        rowControl.icon:SetColor(unpack(iconColour))
+		rowControl.icon:SetTexture(icon)
 		rowControl.icon:SetHidden(false)
-        if MapSearch.isRecall and data.poiType == POI_TYPE_WAYSHRINE then
-            rowControl.icon:SetColor(0.8, 0.7, 0.1, 1)
-        else
-            rowControl.icon:SetColor(1, 1, 1, 1)
-        end
     else
 		rowControl.icon:SetHidden(true)
 	end
@@ -41,9 +56,9 @@ local function LayoutRow(rowControl, data, scrollList)
 		rowControl.label:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
 	end
 
-    if data.tooltip ~= nil then
+    if tooltipText then
         rowControl:SetHandler("OnMouseEnter", function(rc)
-            ZO_Tooltips_ShowTextTooltip(rc, LEFT, data.tooltip)
+            ZO_Tooltips_ShowTextTooltip(rc, LEFT, tooltipText)
         end)
         rowControl:SetHandler("OnMouseExit", function(_)
             ZO_Tooltips_HideTextTooltip()
