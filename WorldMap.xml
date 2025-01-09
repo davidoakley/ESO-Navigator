@@ -100,38 +100,36 @@
 					<Controls>
 						<EditBox name="$(parent)Edit" maxInputCharacters="30" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText" newLineEnabled="true" XkeyboardEnabled="true">
 							<OnInitialized>
-								--TraderTravel.MapTabWayshrines.ResetFilter(self, TraderTravel_WorldMapWayshrinesList, true)
 							</OnInitialized>
 							<OnEnter>
-								MapSearch.MapTab.jumpToResult()
+								MapSearch.MapTab:jumpToTargetNode()
 							</OnEnter>
 							<OnEscape>
 								self:LoseFocus()
-								--TraderTravel.MapTabWayshrines.ResetFilter(self, TraderTravel_WorldMapWayshrinesList, false)
 							</OnEscape>
 							<OnEffectivelyShown>
-								MapSearch.MapTab.resetFilter(false)
+								MapSearch.MapTab:resetFilter(false)
 								self:TakeFocus()
 							</OnEffectivelyShown>
 							<OnTextChanged>
-								MapSearch.MapTab.onTextChanged(self, MapSearch_WorldMapTabList)
+								MapSearch.MapTab:onTextChanged(self, MapSearch_WorldMapTabList)
 							</OnTextChanged>
 							<OnMouseDown>
 								self:TakeFocus()
 								ZO_EditDefaultText_Disable(self)
 							</OnMouseDown>
 							<OnDownArrow>
-								MapSearch.MapTab.nextResult()
+								MapSearch.MapTab:nextResult()
 							</OnDownArrow>
 							<OnUpArrow>
-								MapSearch.MapTab.previousResult()
+								MapSearch.MapTab:previousResult()
 							</OnUpArrow>
 							<OnTab>
 							</OnTab>
 						</EditBox>
 						<Button name="$(parent)Clear" tier="HIGH">
 							<Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT" offsetX="-5" offsetY="5"/>
-							<OnMouseUp>MapSearch.MapTab.ResetFilter(false)</OnMouseUp>
+							<OnMouseUp>MapSearch.MapTab:ResetFilter(false)</OnMouseUp>
 							<Dimensions x="23" y="23" />
 							<Textures 	normal="EsoUI/art/buttons/decline_up.dds"
 										pressed="EsoUI/art/buttons/decline_down.dds"

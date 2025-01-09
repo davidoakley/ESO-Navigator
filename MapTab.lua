@@ -65,6 +65,36 @@ local function LayoutCategoryRow(rowControl, data, scrollList)
 	rowControl.label:SetText(data.name)
 end
 
+local function jumpToPlayer(node)
+    local userID, poiType, zoneId, zoneName = node.userID, node.poiType, node.zoneId, node.zoneName
+    local Locs = MapSearch.Locations
+
+    Locs:setupPlayerZones()
+
+    if not Locs.players[userID] or Locs.players[userID].zoneId ~= zoneId then
+        -- Player has disappeared or moved!
+        CHAT_SYSTEM:AddMessage(userID .. " is no longer in "..zoneName)
+
+        if Locs.playerZones[zoneId] then
+            node = Locs.playerZones[zoneId]
+            userID, poiType, zoneId, zoneName = node.userID, node.poiType, node.zoneId, node.zoneName
+        else
+            -- Eeek! Refresh the search results and finish
+            MT:buildScrollList()
+            return
+        end
+    end
+
+    CHAT_SYSTEM:AddMessage("Jumping to "..zoneName.." via "..userID)
+    SCENE_MANAGER:Hide("worldMap")
+
+    if poiType == POI_TYPE_FRIEND then
+        JumpToFriend(userID)
+    elseif poiType == POI_TYPE_GUILDMATE then
+        JumpToGuildMember(userID)
+    end
+end
+
 local function jumpToNode(node)
     local isRecall = MapSearch.isRecall
 	local nodeIndex,name,refresh,clicked = node.nodeIndex,node.originalName,node.refresh,node.clicked
@@ -72,16 +102,8 @@ local function jumpToNode(node)
     ZO_Dialogs_ReleaseDialog("FAST_TRAVEL_CONFIRM")
 	ZO_Dialogs_ReleaseDialog("RECALL_CONFIRM")
 
-    -- TODO: Pick a friend / guildmate to jump to now, rather than relying on stale data
-    if node.poiType == POI_TYPE_FRIEND then
-        CHAT_SYSTEM:AddMessage("Jumping to "..node.zoneName.." via "..node.userID)
-        SCENE_MANAGER:Hide("worldMap")
-        JumpToFriend(node.userID)
-        return
-    elseif node.poiType == POI_TYPE_GUILDMATE then
-        CHAT_SYSTEM:AddMessage("Jumping to "..node.zoneName.." via "..node.userID)
-        SCENE_MANAGER:Hide("worldMap")
-        JumpToGuildMember(node.userID)
+    if node.poiType == POI_TYPE_FRIEND or node.poiType == POI_TYPE_GUILDMATE then
+        jumpToPlayer(node)
         return
     end
 
@@ -121,27 +143,31 @@ local function buildList(scrollData, title, list)
     MT.resultCount = currentNodeIndex
 end
 
-local function buildScrollList(control, results)
-	ZO_ScrollList_Clear(control)
+function MT:buildScrollList()
+	ZO_ScrollList_Clear(self.listControl)
 
-	local editBox = MapSearch_WorldMapTabSearchEdit
-	local searchString = editBox:GetText()
+	local searchString = self.editControl:GetText()
 	if searchString == "" then
 		-- reinstate default text
-		ZO_EditDefaultText_Initialize(editBox, GetString(MAPSEARCH_SEARCH))
+		ZO_EditDefaultText_Initialize(self.editControl, GetString(MAPSEARCH_SEARCH))
 	else
 		-- remove default text
-		ZO_EditDefaultText_Disable(editBox)
+		ZO_EditDefaultText_Disable(self.editControl)
 	end
 
-    local scrollData = ZO_ScrollList_GetDataList(control)
+    local scrollData = ZO_ScrollList_GetDataList(self.listControl)
 
     MT.resultCount = 0
-    buildList(scrollData, "Results", results)
-    buildList(scrollData, "Recent", MapSearch.Recents:getRecents())
+    buildList(scrollData, "Results", MapSearch.results)
     buildList(scrollData, "Bookmarks", MapSearch.Bookmarks:getBookmarks())
+    buildList(scrollData, "Recent", MapSearch.Recents:getRecents())
 
-	ZO_ScrollList_Commit(control)
+	ZO_ScrollList_Commit(self.listControl)
+
+    if MT.resultCount > 0 then
+        -- FIXME: this doesn't account for the headings
+        ZO_ScrollList_ScrollDataIntoView(self.listControl, MapSearch.targetNode + 1, nil, true)
+    end
 end
 
 local function executeSearch(control, searchString)
@@ -156,7 +182,7 @@ local function executeSearch(control, searchString)
 	MapSearch.results = results
 	MapSearch.targetNode = 0
 
-	buildScrollList(control, results)
+	MT:buildScrollList()
 end
 
 local function setupScrollList(control)
@@ -203,7 +229,7 @@ function MT:init(tabControl)
 
 	setupScrollList(control)
 
-	executeSearch(control)
+	-- executeSearch(control)
 
 	local _refreshing = false
 	local _isDirty = true 
@@ -228,12 +254,12 @@ function MT:init(tabControl)
 	
 end
 
-function MT.onTextChanged(editbox, listcontrol)
+function MT:onTextChanged(editbox, listcontrol)
 	local searchString = string.lower(editbox:GetText())
 	executeSearch(listcontrol, searchString)
 end
 
-function MT.jumpToResult()
+function MT:jumpToTargetNode()
 	local node = getTargetNode(MapSearch.Search.result)
 
 	if node then
@@ -241,33 +267,31 @@ function MT.jumpToResult()
 	end
 end
 
-function MT.nextResult()
+function MT:nextResult()
 	MapSearch.targetNode = (MapSearch.targetNode + 1) % MT.resultCount
-	buildScrollList(MapSearch_WorldMapTabList, MapSearch.results)
-    ZO_ScrollList_ScrollDataIntoView(MapSearch_WorldMapTabList, MapSearch.targetNode + 1, nil, true)
+	self:buildScrollList()
 end
 
-function MT.previousResult()
+function MT:previousResult()
 	MapSearch.targetNode = MapSearch.targetNode - 1
 	if MapSearch.targetNode < 0 then
 		MapSearch.targetNode = MT.resultCount - 1
 	end
-	buildScrollList(MapSearch_WorldMapTabList, MapSearch.results)
-    ZO_ScrollList_ScrollDataIntoView(MapSearch_WorldMapTabList, MapSearch.targetNode + 1, nil, true)
+	self:buildScrollList()
 end
 
-function MT.resetFilter(editbox, listcontrol, lose_focus)
+function MT:resetFilter(lose_focus)
 	--logger.Info(editbox)
-	MapSearch_WorldMapTabSearchEdit:SetText("")
+	self.editControl:SetText("")
 
-	executeSearch(MapSearch_WorldMapTabList, "")
+	executeSearch(self.listControl, "")
 
 	-- if lose_focus then
 	-- 	editbox:LoseFocus()
 	-- end
 	--ZO_EditDefaultText_Initialize(editbox, GetString(FASTER_TRAVEL_WAYSHRINES_SEARCH))
 	--ResetVisibility(listcontrol)
-	ZO_ScrollList_ResetToTop(MapSearch_WorldMapTabList)
+	ZO_ScrollList_ResetToTop(self.listControl)
 end
 
 local function showWayshrineMenu(owner, nodeIndex)
@@ -278,13 +302,13 @@ local function showWayshrineMenu(owner, nodeIndex)
 		AddMenuItem("Remove Bookmark", function()
 			bookmarks:remove(nodeIndex)
 			ClearMenu()
-            buildScrollList(MapSearch_WorldMapTabList, MapSearch.results)
+            MT:buildScrollList()
 		end)
 	else
 		AddMenuItem("Add Bookmark", function()
 			bookmarks:add(nodeIndex)
 			ClearMenu()
-            buildScrollList(MapSearch_WorldMapTabList, MapSearch.results)
+            MT:buildScrollList()
 		end)
 	end
 	ShowMenu(owner)
