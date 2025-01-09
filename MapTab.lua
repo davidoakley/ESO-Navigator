@@ -42,7 +42,7 @@ local function LayoutRow(rowControl, data, scrollList)
 		rowControl.icon:SetHidden(true)
 	end
 
-	rowControl.arrow:SetHidden(not data.isSelected)
+	rowControl.key:SetHidden(not data.isSelected)
     rowControl.bg:SetHidden(not data.isSelected)
 
 	rowControl.label:SetText(name)
