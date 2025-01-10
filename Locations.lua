@@ -206,9 +206,14 @@ function Locs:getKnownNodes()
         local index = self.nodes[i].nodeIndex
         if self:isKnownNode(index) then
             local node = Utils.shallowCopy(self.nodes[i])
+            if MS.Bookmarks:contains(index) then
+                node.bookmarked = true
+            end
             if (node.poiType == POI_TYPE_WAYSHRINE and MS.isRecall) or
                (node.poiType == POI_TYPE_HOUSE and not node.isOwned) then
                 node.weight = 0.8
+            elseif node.bookmarked then
+                node.weight = 1.2
             end
             table.insert(nodes, node)
         end
