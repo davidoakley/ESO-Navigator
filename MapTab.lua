@@ -149,6 +149,7 @@ local function buildList(scrollData, title, list)
 
         local nodeData = Utils.shallowCopy(recent)
 		nodeData.isSelected = (currentNodeIndex == MapSearch.targetNode)
+        nodeData.dataIndex = currentNodeIndex
 
 		local entry = ZO_ScrollList_CreateDataEntry(1, nodeData)
 		table.insert(scrollData, entry)
@@ -201,7 +202,7 @@ local function executeSearch(control, searchString)
 	MT:buildScrollList()
 end
 
-function MT:getTargetNode()
+function MT:getTargetDataIndex()
 	local currentNodeIndex = 0
 
     local scrollData = ZO_ScrollList_GetDataList(self.listControl)
@@ -209,13 +210,61 @@ function MT:getTargetNode()
     for i = 1, #scrollData do
         if scrollData[i].typeId == 1 then -- wayshrine row
             if currentNodeIndex == MapSearch.targetNode then
-                return scrollData[i].data
+                return i
             end
             currentNodeIndex = currentNodeIndex + 1
         end
     end
 
 	return nil
+end
+
+function MT:getTargetNode()
+    local i = self:getTargetDataIndex()
+
+    if i then
+        local scrollData = ZO_ScrollList_GetDataList(self.listControl)
+        return scrollData[i].data
+    end
+
+    return nil
+end
+
+function MT:getNextCategoryFirstIndex()
+    local scrollData = ZO_ScrollList_GetDataList(self.listControl)
+
+    if #scrollData <= 2 then
+        return -- nothing to find!
+    end
+
+    local currentIndex = self:getTargetDataIndex()
+    local currentNodeIndex = MapSearch.targetNode + 1
+
+    local i = currentIndex + 1
+    local foundCategory = false
+
+    while true do
+        if scrollData[i].typeId == 1 then -- wayshrine row
+            if foundCategory or i == currentIndex then
+                -- return the first entry after the category header
+                -- logger:Info("Index %d node %d is result - returning", i, currentNodeIndex)
+                return currentNodeIndex
+            end
+            -- logger:Info("Index %d node %d is result - incrementing", i, currentNodeIndex)
+            currentNodeIndex = currentNodeIndex + 1
+        elseif scrollData[i].typeId == 0 then -- category header
+            -- logger:Info("Index %d node %d is category", i, currentNodeIndex)
+            foundCategory = true
+        end
+
+        if i >= #scrollData then
+            -- logger:Info("Wrapping at index %d node %d", i, currentNodeIndex)
+            i = 1
+            currentNodeIndex = 0
+        else
+            i = i + 1
+        end
+    end
 end
 
 function MT:init()
@@ -267,6 +316,11 @@ function MT:previousResult()
 	if MapSearch.targetNode < 0 then
 		MapSearch.targetNode = MT.resultCount - 1
 	end
+	self:buildScrollList()
+end
+
+function MT:nextCategory()
+    MapSearch.targetNode = self:getNextCategoryFirstIndex()
 	self:buildScrollList()
 end
 
