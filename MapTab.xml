@@ -127,6 +127,7 @@
 								MapSearch.MapTab:previousResult()
 							</OnUpArrow>
 							<OnTab>
+								MapSearch.MapTab:nextCategory()
 							</OnTab>
 						</EditBox>
 						<Button name="$(parent)Clear" tier="HIGH">
