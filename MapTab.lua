@@ -160,6 +160,9 @@ local function buildList(scrollData, title, list)
             end
             nodeData.suffix = (nodeData.suffix or "") .. "|t23:23:/esoui/art/icons/servicemappins/servicepin_guildkiosk.dds:inheritcolor|t"
         end
+        if listEntry.bookmarked then
+            nodeData.suffix = (nodeData.suffix or "") .. "|t25:25:MapSearch/media/bookmark.dds:inheritcolor|t"
+        end
 
 		local entry = ZO_ScrollList_CreateDataEntry(1, nodeData)
 		table.insert(scrollData, entry)
