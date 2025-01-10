@@ -24,6 +24,11 @@ function Locs:initialise()
 end
 
 function Locs:setupNodes()
+    if self.nodes then
+        self:clearKnownNodes()
+        return
+    end
+
     self.nodes = {}
     self.nodeMap = {}
     self.zones = {}

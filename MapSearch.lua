@@ -86,6 +86,8 @@ function MS:initialize()
         if MS.saved.defaultTab then
           WORLD_MAP_INFO:SelectTab(MAPSEARCH_TAB_SEARCH)
         end
+        MapSearch.Locations:initialise()
+        MapSearch.MapTab:buildScrollList()
         logger:Debug("WorldMap showing done")
       elseif newState == SCENE_HIDDEN then
         logger:Debug("WorldMap hidden")
