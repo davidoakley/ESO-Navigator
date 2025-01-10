@@ -247,18 +247,18 @@ function MT:getNextCategoryFirstIndex()
         if scrollData[i].typeId == 1 then -- wayshrine row
             if foundCategory or i == currentIndex then
                 -- return the first entry after the category header
-                -- logger:Info("Index %d node %d is result - returning", i, currentNodeIndex)
+                -- logger:Debug("Index %d node %d is result - returning", i, currentNodeIndex)
                 return currentNodeIndex
             end
-            -- logger:Info("Index %d node %d is result - incrementing", i, currentNodeIndex)
+            -- logger:Debug("Index %d node %d is result - incrementing", i, currentNodeIndex)
             currentNodeIndex = currentNodeIndex + 1
         elseif scrollData[i].typeId == 0 then -- category header
-            -- logger:Info("Index %d node %d is category", i, currentNodeIndex)
+            -- logger:Debug("Index %d node %d is category", i, currentNodeIndex)
             foundCategory = true
         end
 
         if i >= #scrollData then
-            -- logger:Info("Wrapping at index %d node %d", i, currentNodeIndex)
+            -- logger:Debug("Wrapping at index %d node %d", i, currentNodeIndex)
             i = 1
             currentNodeIndex = 0
         else
@@ -268,7 +268,7 @@ function MT:getNextCategoryFirstIndex()
 end
 
 function MT:init()
-	logger:Info("MapTab:init")
+	logger:Debug("MapTab:init")
 
 	local _refreshing = false
 	local _isDirty = true 

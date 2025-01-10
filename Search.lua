@@ -59,7 +59,7 @@ function Search.run(searchTerm)
     searchTerm = searchTerm:lower()
     searchTerm = searchTerm:gsub("[^%w ]", "")
 
-    -- logger:Info("Search.run("..searchTerm..")")
+    -- logger:Debug("Search.run("..searchTerm..")")
 
     local result = {}
 

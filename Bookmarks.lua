@@ -10,7 +10,7 @@ end
 
 function Bookmarks:add(nodeIndex)
     table.insert(self.nodes, nodeIndex)
-    logger:Info("Bookmarks:add("..nodeIndex..")")
+    logger:Debug("Bookmarks:add("..nodeIndex..")")
     self:save()
 end
 
@@ -18,7 +18,7 @@ function Bookmarks:remove(nodeIndex)
     for i = 1, #self.nodes do
         if self.nodes[i] == nodeIndex then
             table.remove(self.nodes, i)
-            logger:Info("Bookmarks:remove("..nodeIndex..")")
+            logger:Debug("Bookmarks:remove("..nodeIndex..")")
             self:save()
             return
         end
@@ -43,6 +43,10 @@ function Bookmarks:getBookmarks()
     if nodeMap ~= nil then
         for i = 1, #self.nodes do
             local node = nodeMap[self.nodes[i]]
+            local traders = MS.Data.traderCounts[self.nodes[i]]
+            if traders and traders > 0 then
+                node.traders = traders
+            end
             table.insert(results, node)
         end
     end
