@@ -57,7 +57,7 @@ local function GetPaths(path, ...)
 end
 
 function MS:initialize()
-  logger:Info("MS.initialize starts")
+  logger:Debug("initialize starts")
   -- https://wiki.esoui.com/How_to_add_buttons_to_the_keybind_strip
 
   self.saved = ZO_SavedVars:NewAccountWide(self.svName, 1, nil, self.default)
@@ -78,11 +78,14 @@ function MS:initialize()
   SCENE_MANAGER:GetScene('worldMap'):RegisterCallback("StateChange",
     function(oldState, newState)
       if newState == SCENE_SHOWING then
+        logger:Debug("WorldMap showing")
         KEYBIND_STRIP:AddKeybindButtonGroup(ButtonGroup)
         if MS.saved.defaultTab then
           WORLD_MAP_INFO:SelectTab(MAPSEARCH_TAB_SEARCH)
         end
+        logger:Debug("WorldMap showing done")
       elseif newState == SCENE_HIDDEN then
+        logger:Debug("WorldMap hidden")
         KEYBIND_STRIP:RemoveKeybindButtonGroup(ButtonGroup)
       end
     end)
@@ -100,7 +103,7 @@ function MS:initialize()
 
   AddWorldMapFragment(MAPSEARCH_TAB_SEARCH, self.MapTab.fragment, normal, highlight, pressed)
 
-  logger:Info("MS.Initialize exits")
+  logger:Debug("Initialize exits")
 end
 
 -- Then we create an event handler function which will be called when the "addon loaded" event
@@ -116,12 +119,12 @@ local function onAddOnLoaded(event, addonName)
 end
 
 local function onStartFastTravel(eventCode, nodeIndex)
-  logger:Info("onStartFastTravel: "..eventCode..", "..nodeIndex)
+  logger:Debug("onStartFastTravel: "..eventCode..", "..nodeIndex)
   MS.isRecall = false
 end
 
 local function onEndFastTravel()
-  logger:Info("onEndFastTravel")
+  logger:Debug("onEndFastTravel")
   MS.isRecall = true
 end
 
@@ -130,7 +133,7 @@ local function onPlayerActivated()
 end
 
 function MS.showSearch()
-  logger:Info("MS.showSearch")
+  logger:Debug("showSearch")
   MAIN_MENU_KEYBOARD:ShowScene("worldMap")
   WORLD_MAP_INFO:SelectTab(MAPSEARCH_TAB_SEARCH)
   MS.MapTab:resetFilter(false)

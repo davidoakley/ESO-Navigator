@@ -18,6 +18,7 @@ POI_TYPE_GUILDMATE = 103
 function Locs:initialise()
     logger:Debug("Locs:initialise() starts")
     self:setupNodes()
+    logger:Debug("Locs:initialise() setupPlayerZones")
     self:setupPlayerZones()
     logger:Debug("Locs:initialise() ends")
 end
@@ -93,8 +94,7 @@ function Locs:setupNodes()
                 nodeInfo.icon = "esoui/art/icons/poi/poi_groupinstance_complete.dds"
                 nodeInfo.suffix = "Arena"
             else
-                logger:Info("Unknown POI " .. i .. " '" .. name .. "' type " .. typePOI .. " " ..
-                    (glowIcon or "-"))
+                logger:Warn("Unknown POI " .. i .. " '" .. name .. "' type " .. typePOI .. " " .. (glowIcon or "-"))
                 -- if glowIcon ~= nil and glowIcon:find("/esoui/art/icons/poi/poi_") and glowIcon:find("_glow.dds") then
                 --     nodeInfo.icon = glowIcon:gsub("_glow.dds", "_complete.dds")
                 -- end

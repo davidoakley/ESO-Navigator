@@ -13,9 +13,9 @@ function Recents:init()
     if _G["FasterTravel"] ~= nil and
        _G["FasterTravel"].settings ~= nil and
        _G["FasterTravel"].settings.recentsEnabled then
-        logger:Info("FasterTravel is active")
+        logger:Debug("FasterTravel is active")
         FTrecent = _G["FasterTravel"].settings.recent
-        -- logger:Info(FT.settings.recent)
+        -- logger:Debug(FT.settings.recent)
     else
         self:addTravelDialogCallbacks()
         self:hook(true)
@@ -26,16 +26,16 @@ function Recents:insert(nodeId)
     for i = 1, #self.nodes do
         if self.nodes[i] == nodeId then
             table.remove(self.nodes, i)
-            logger:Info("Recents:insert("..nodeId..") removed existing entry #"..i)
+            logger:Debug("Recents:insert("..nodeId..") removed existing entry #"..i)
             break
         end
     end
     if #self.nodes >= self.maxEntries then
         table.remove(self.nodes)
-        logger:Info("Recents:insert("..nodeId..") removed overflow entry #"..#self.nodes)
+        logger:Debug("Recents:insert("..nodeId..") removed overflow entry #"..#self.nodes)
     end
     table.insert(self.nodes, 1, nodeId)
-    logger:Info("Recents:insert("..nodeId..")")
+    logger:Debug("Recents:insert("..nodeId..")")
     self:save()
 end
 
@@ -62,7 +62,7 @@ function Recents:onPlayerActivated()
     if FTrecent ~= nil and #FTrecent >= 1 then
         -- Pull the most recent nodeIndex from FasterTravel
         local nodeIndex = FTrecent[1].nodeIndex
-        logger:Info("Recents:onPlayerActivated: adding recent from FasterTravel: "..nodeIndex)
+        logger:Debug("Recents:onPlayerActivated: adding recent from FasterTravel: "..nodeIndex)
         self:insert(nodeIndex)
     end
 end

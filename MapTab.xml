@@ -82,8 +82,7 @@
         
         <TopLevelControl name="MapSearch_MapTab" inherits="ZO_WorldMapInfoContent">
             <OnInitialized>
-				local logger = LibDebugLogger("MapSearch")
-				logger:Info("MapSearch_MapTab.OnInitialized")
+				MapSearch.logger:Debug("MapSearch_MapTab.OnInitialized")
 
                 self.listControl = self:GetNamedChild("List")
 				self.editControl = self:GetNamedChild("SearchEdit")
@@ -94,6 +93,9 @@
 				ZO_ScrollList_AddDataType(self.listControl, 0, "MapSearch_WorldMapCategoryRow", 50, function(...) self:layoutCategoryRow(...) end, nil, nil, nil)
 				ZO_ScrollList_AddDataType(self.listControl, 1, "MapSearch_WorldMapWayshrineRow", 27, function(...) self:layoutRow(...) end, nil, nil, nil)
 	        </OnInitialized>
+			<OnEffectivelyShown>
+				MapSearch.logger:Debug("MapSearch_MapTab.OnEffectivelyShown")
+			</OnEffectivelyShown>
             <Controls>
 				<Backdrop name="$(parent)Search" tier="HIGH" XedgeColor="000000" inherits="ZO_SingleLineEditBackdrop_Keyboard" maxHeight="40" mouseEnabled="true">
 					<Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="0" offsetY="-30"/>
