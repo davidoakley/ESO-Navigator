@@ -1,22 +1,25 @@
-MapSearch = {}
-local MS = MapSearch
-MS.name = "MapSearch"
-MS.menuName = "Map Search"          -- A UNIQUE identifier for menu object.
-MS.author = "SirNightstorm"
-MS.version = "0.1.0"
-MS.svName = "MapSearch_SavedVariables"
-MS.default = {
-  recentNodes = {},
-  maxRecent = 10,
-  bookmarkNodes = {},
-  defaultTab = false
+MapSearch = {
+  name = "MapSearch",
+  menuName = "Map Search",          -- A UNIQUE identifier for menu object.
+  author = "SirNightstorm",
+  version = "0.1.0",
+  svName = "MapSearch_SavedVariables",
+  default = {
+    recentNodes = {},
+    maxRecent = 10,
+    bookmarkNodes = {},
+    defaultTab = false
+  },
+  Location = {},
+  Wayshrine = {},
+  Search = {},
+  isRecall = true,
+  isCLI = false,
+  isDeveloper = (GetDisplayName() == '@SirNightstorm' and true) or false,
+  results = {},
+  targetNode = 0,
 }
-MS.Location = {}
-MS.Wayshrine = {}
-MS.Search = {}
-MS.isRecall = true
-MS.isCLI = false
-MS.isDeveloper = (GetDisplayName() == '@SirNightstorm' and true) or false
+local MS = MapSearch
 
 -- Make this properly localisable!
 ZO_CreateStringId("MAPSEARCH_SEARCH","Search")
