@@ -109,7 +109,8 @@
 								MapSearch.MapTab:jumpToTargetNode()
 							</OnEnter>
 							<OnEscape>
-								self:LoseFocus()
+								-- self:LoseFocus()
+								SCENE_MANAGER:Hide("worldMap")
 							</OnEscape>
 							<OnEffectivelyShown>
 								MapSearch.MapTab:resetFilter(false)

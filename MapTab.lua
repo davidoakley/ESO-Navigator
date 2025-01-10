@@ -42,7 +42,6 @@ function MT:layoutRow(rowControl, data, scrollList)
 		rowControl.icon:SetHidden(true)
 	end
 
-    -- MT.rowControl = rowControl
 	rowControl.keybind:SetHidden(not data.isSelected)
     rowControl.bg:SetHidden(not data.isSelected)
 
