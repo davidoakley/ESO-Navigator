@@ -96,7 +96,19 @@
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT" offsetX="0" offsetY="-30" />
 
 					<Controls>
+						<Button name="$(parent)Clear" tier="HIGH">
+							<Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT" offsetX="-5" offsetY="5"/>
+							<OnMouseUp>MapSearch.MapTab:ResetFilter(false)</OnMouseUp>
+							<Dimensions x="23" y="23" />
+							<Textures 	normal="EsoUI/art/buttons/decline_up.dds"
+										pressed="EsoUI/art/buttons/decline_down.dds"
+										mouseOver="EsoUI/art/buttons/decline_over.dds"
+							/>
+						</Button>
+
 						<EditBox name="$(parent)Edit" maxInputCharacters="30" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText" newLineEnabled="true" XkeyboardEnabled="true">
+							<Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="4" offsetY="-1" />
+							<Anchor point="TOPRIGHT" relativeTo="$(parent)Clear" relativePoint="TOPLEFT" offsetX="-4" offsetY="-1" />
 							<OnInitialized>
 							</OnInitialized>
 							<OnEnter>
@@ -126,17 +138,7 @@
 							<OnTab>
 								MapSearch.MapTab:nextCategory()
 							</OnTab>
-						</EditBox>
-						<Button name="$(parent)Clear" tier="HIGH">
-							<Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT" offsetX="-5" offsetY="5"/>
-							<OnMouseUp>MapSearch.MapTab:ResetFilter(false)</OnMouseUp>
-							<Dimensions x="23" y="23" />
-							<Textures 	normal="EsoUI/art/buttons/decline_up.dds"
-										pressed="EsoUI/art/buttons/decline_down.dds"
-										mouseOver="EsoUI/art/buttons/decline_over.dds"
-							/>
-						</Button>
-						
+						</EditBox>						
 					</Controls>
 				</Backdrop>
 
