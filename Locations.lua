@@ -105,7 +105,6 @@ function Locs:setupNodes()
             local traders = MS.Data.traderCounts[i]
             if traders and traders > 0 then
                 nodeInfo.traders = traders
-                nodeInfo.suffix = "|t23:23:/esoui/art/icons/servicemappins/servicepin_guildkiosk.dds:inheritcolor|t"
             end
 
             table.insert(self.zones[nodeZoneId].nodes, nodeInfo)
