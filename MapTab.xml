@@ -70,7 +70,7 @@
 				</Control>
 				<Label name="$(parent)Label" inherits="ZO_SelectableLabel" font="ZoFontHeader" wrapMode="ELLIPSIS" mouseEnabled="false">
 					<Anchor point="TOPLEFT" relativeTo="$(parent)Icon" relativePoint="TOPRIGHT" offsetX="6" offsetY="0" />
-					<Anchor point="TOPRIGHT" relativeTo="$(parent)Key" relativePoint="TOPLEFT" />
+					<Anchor point="TOPRIGHT" relativeTo="$(parent)Keybind" relativePoint="TOPLEFT" />
 		            <Dimensions y="24" />
 				</Label>
             </Controls>
