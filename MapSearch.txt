@@ -3,7 +3,8 @@
 ## Author: SirNightstorm (PC-EU)
 ## APIVersion: 101042
 ## Version: 0.0.1
-## DependsOn: LibCustomMenu LibDebugLogger>=180 LibWorldMapInfoTab
+## DependsOn: LibDebugLogger>=180 LibWorldMapInfoTab LibAddonMenu-2.0
+## X-DependsOn: LibCustomMenu
 ## OptionalDependsOn: pChat, FasterTravel
 ## SavedVariables: MapSearch_SavedVariables
 
@@ -11,6 +12,7 @@ MapSearch.lua
 fzy.lua
 Data.lua
 Utils.lua
+Settings.lua
 Locations.lua
 Search.lua
 
