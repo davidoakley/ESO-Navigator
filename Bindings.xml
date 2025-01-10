@@ -1,7 +1,15 @@
 <Bindings>
 	<Layer name="SI_KEYBINDINGS_LAYER_GENERAL">
-		<Category name="MapSearch">
+		<Category name="Map Search">
 			<Action name="MAPSEARCH_SEARCH" rebindable="true">
+				<Down>MapSearch.showSearch()</Down>
+			</Action>
+		</Category>
+	</Layer>
+	
+	<Layer name="Map">
+		<Category>
+			<Action name="MAPSEARCH_OPENTAB" hideAction="true" inheritsBindFrom="UI_SHORTCUT_QUICK_SLOTS">
 				<Down>MapSearch.showSearch()</Down>
 			</Action>
 		</Category>

@@ -23,6 +23,7 @@ local MS = MapSearch
 
 -- Make this properly localisable!
 ZO_CreateStringId("MAPSEARCH_SEARCH","Search")
+ZO_CreateStringId("MAPSEARCH_OPENTAB","Open Search tab (on Map screen)")
 ZO_CreateStringId("SI_BINDING_NAME_MAPSEARCH_SEARCH", "Search")
 ZO_CreateStringId("MAPSEARCH_TAB_SEARCH","Search")
 
@@ -70,7 +71,7 @@ function MS:initialize()
   local ButtonGroup = {
 		{
 			name = "Search", --GetString(SI_BINDING_NAME_FASTER_TRAVEL_REJUMP),
-			keybind = "UI_SHORTCUT_QUICK_SLOTS", --"MAPSEARCH_SEARCH",
+			keybind = "MAPSEARCH_OPENTAB", --"UI_SHORTCUT_QUICK_SLOTS", --"MAPSEARCH_SEARCH",
 			order = 200,
 			visible = function() return true end,
 			callback = function() self.showSearch() end,
@@ -82,6 +83,7 @@ function MS:initialize()
     function(oldState, newState)
       if newState == SCENE_SHOWING then
         logger:Debug("WorldMap showing")
+        PushActionLayerByName("Map")
         KEYBIND_STRIP:AddKeybindButtonGroup(ButtonGroup)
         if MS.saved.defaultTab then
           WORLD_MAP_INFO:SelectTab(MAPSEARCH_TAB_SEARCH)
@@ -92,6 +94,7 @@ function MS:initialize()
       elseif newState == SCENE_HIDDEN then
         logger:Debug("WorldMap hidden")
         KEYBIND_STRIP:RemoveKeybindButtonGroup(ButtonGroup)
+        RemoveActionLayerByName("Map")
       end
     end)
 
