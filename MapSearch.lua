@@ -1,11 +1,15 @@
 MapSearch = {}
 local MS = MapSearch
 MS.name = "MapSearch"
+MS.menuName = "Map Search"          -- A UNIQUE identifier for menu object.
+MS.author = "SirNightstorm"
+MS.version = "0.1.0"
 MS.svName = "MapSearch_SavedVariables"
 MS.default = {
   recentNodes = {},
   maxRecent = 10,
-  bookmarkNodes = {}
+  bookmarkNodes = {},
+  defaultTab = false
 }
 MS.Location = {}
 MS.Wayshrine = {}
@@ -75,6 +79,9 @@ function MS:initialize()
     function(oldState, newState)
       if newState == SCENE_SHOWING then
         KEYBIND_STRIP:AddKeybindButtonGroup(ButtonGroup)
+        if MS.saved.defaultTab then
+          WORLD_MAP_INFO:SelectTab(MAPSEARCH_TAB_SEARCH)
+        end
       elseif newState == SCENE_HIDDEN then
         KEYBIND_STRIP:RemoveKeybindButtonGroup(ButtonGroup)
       end
@@ -84,6 +91,7 @@ function MS:initialize()
   self.MapTab:init()
   self.Recents:init()
   self.Bookmarks:init()
+  self:loadSettings()
 
   -- local normal, highlight, pressed = GetPaths("/esoui/art/guild/guildhistory_indexicon_guildstore_", "up.dds", "over.dds", "down.dds")
   local normal = "/esoui/art/tradinghouse/tradinghouse_browse_tabicon_up.dds"
