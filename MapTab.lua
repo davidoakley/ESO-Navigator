@@ -145,11 +145,21 @@ local function buildList(scrollData, title, list)
     local currentNodeIndex = MT.resultCount
 
     for i = 1, #list do
-        local recent = list[i]
+        local listEntry = list[i]
 
-        local nodeData = Utils.shallowCopy(recent)
+        local nodeData = Utils.shallowCopy(listEntry)
 		nodeData.isSelected = (currentNodeIndex == MapSearch.targetNode)
         nodeData.dataIndex = currentNodeIndex
+
+        -- logger:Info("%s: traders %d", nodeData.barename, nodeData.traders or 0)
+        if listEntry.traders and listEntry.traders > 0 then
+            if listEntry.traders >= 5 then
+                nodeData.suffix = "|t20:23:MapSearch/media/city_narrow.dds:inheritcolor|t"
+            elseif listEntry.traders >= 2 then
+                nodeData.suffix = "|t20:23:MapSearch/media/town_narrow.dds:inheritcolor|t"
+            end
+            nodeData.suffix = (nodeData.suffix or "") .. "|t23:23:/esoui/art/icons/servicemappins/servicepin_guildkiosk.dds:inheritcolor|t"
+        end
 
 		local entry = ZO_ScrollList_CreateDataEntry(1, nodeData)
 		table.insert(scrollData, entry)
