@@ -144,7 +144,7 @@ function MS.showSearch()
   logger:Debug("showSearch")
   MAIN_MENU_KEYBOARD:ShowScene("worldMap")
   WORLD_MAP_INFO:SelectTab(MAPSEARCH_TAB_SEARCH)
-  MS.MapTab:resetFilter(false)
+  MS.MapTab:resetSearch(false)
   MapSearch_MapTabSearchEdit:TakeFocus()
 end
 

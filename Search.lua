@@ -8,13 +8,19 @@ local fzy = MS.fzy
 
 Search.categories = nil
 
+FILTER_TYPE_NONE = 0    -- filter = { FILTER_TYPE_NONE }
+FILTER_TYPE_PLAYERS = 1 -- filter = { FILTER_TYPE_PLAYERS }
+FILTER_TYPE_ZONES = 2   -- filter = { FILTER_TYPE_ZONES }
+FILTER_TYPE_ZONE = 3    -- filter = { FILTER_TYPE_ZONE, 'Grahtwood' }
+FILTER_TYPE_HOUSES = 4   -- filter = { FILTER_TYPE_HOUSES }
+
 local function match(object, searchTerm)
     local name = object.barename or object.name
 
     local result = fzy.filter(searchTerm, {name})
 
     if #result >= 1 then
-        return result[1][3], result[1][2]
+        return result[1][3] -- result[1][3], result[1][2]
     else
         return 0
     end
@@ -30,8 +36,8 @@ end
 local function addSearchResults(result, searchTerm, nodeList)
     for i = 1, #nodeList do
         local node = nodeList[i]
-        local matchLevel, _ = match(node, searchTerm)
-        if matchLevel > 0 or searchTerm == "" then
+        local matchLevel = searchTerm ~= "" and match(node, searchTerm) or 1.0
+        if matchLevel > 0 then
             local resultNode = Utils.shallowCopy(node)
             if node.weight then
                 matchLevel = matchLevel * node.weight
@@ -50,24 +56,48 @@ local function addSearchResults(result, searchTerm, nodeList)
 end
 
 
-function Search.run(searchTerm)
-    local playerSearch = false
-    if searchTerm:sub(1, 1) == "@" then
-        playerSearch = true
-        searchTerm = searchTerm:sub(2)
-    end
-    searchTerm = searchTerm:lower()
+function Search.run(searchTerm, filter)
+    local filterType = filter[1]
+    searchTerm = searchTerm and searchTerm:lower() or ""
     searchTerm = searchTerm:gsub("[^%w ]", "")
 
-    -- logger:Debug("Search.run("..searchTerm..")")
+    logger:Debug(string.format("Search.run('%s', %d)", searchTerm, filterType))
+
+    if filterType == FILTER_TYPE_NONE and searchTerm == "" then
+        return {}
+    end
 
     local result = {}
 
-    if playerSearch then
+    if filterType == FILTER_TYPE_PLAYERS then
         addSearchResults(result, searchTerm, Locations:getPlayerList())
+    elseif filterType == FILTER_TYPE_ZONES then
+        addSearchResults(result, searchTerm, Locations:getZoneList())
+    elseif filterType == FILTER_TYPE_HOUSES then
+        addSearchResults(result, searchTerm, Locations:getHouseList())
+    elseif filterType == FILTER_TYPE_ZONE then
+        local zoneId = filter[2]
+        addSearchResults(result, searchTerm, Locations:getKnownNodes(zoneId))
+        if MS.isRecall then
+            local playerInfo = Locations:getPlayerInZone(zoneId)
+            if playerInfo then
+                playerInfo.name = "Jump to player"
+            else
+                playerInfo = {
+                    name = "No players to recall to",
+                    barename = "",
+                    zoneId = zoneId,
+                    zoneName = GetZoneNameById(zoneId),
+                    icon = "/esoui/art/crafting/crafting_smithing_notrait.dds",
+                    poiType = POI_TYPE_NONE
+                }
+                end
+            playerInfo.weight = 10.0 -- list this first!
+            addSearchResults(result, searchTerm, { playerInfo })
+        end
     else
         addSearchResults(result, searchTerm, Locations:getKnownNodes())
-        addSearchResults(result, searchTerm, Locations:getPlayerZoneList())
+        addSearchResults(result, searchTerm, Locations:getZoneList())
     end
 
     table.sort(result, matchComparison)
