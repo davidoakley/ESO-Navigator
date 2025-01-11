@@ -3,6 +3,8 @@ local Search = MapSearch.Search
 local Utils = MapSearch.Utils
 local logger = MapSearch.logger
 
+MT.filter = { FILTER_TYPE_NONE }
+
 function MT:layoutRow(rowControl, data, scrollList)
 	local name = data.name
     local tooltipText = data.tooltip
@@ -69,14 +71,34 @@ function MT:layoutRow(rowControl, data, scrollList)
     end
 end
 
-function MT:layoutCategoryRow(rowControl, data, scrollList)
-	-- if data.icon ~= nil then
-	-- 	rowControl.icon:SetTexture(data.icon)
-	-- 	rowControl.icon:SetHidden(false)
-	-- else
-	-- 	rowControl.icon:SetHidden(true)
-	-- end
+function MT:showFilterControl(text)
+    self.filterControl:SetHidden(false)
+    self.filterControl:SetText("|u6:6::"..text.."|u")
+    self.editControl:SetAnchor(TOPLEFT, self.filterControl, TOPRIGHT, 2, -1)
+end
 
+function MT:hideFilterControl()
+    self.filterControl:SetHidden(true)
+    self.editControl:SetAnchor(TOPLEFT, self.searchControl, TOPLEFT, 4, -1)
+end
+
+function MT:updateFilterControl()
+    if self.filter == FILTER_TYPE_NONE then
+        self:hideFilterControl()
+        return
+    elseif self.filter[1] == FILTER_TYPE_PLAYERS then
+        self:showFilterControl('Players')
+    elseif self.filter[1] == FILTER_TYPE_ZONES then
+        self:showFilterControl('Zones')
+    elseif self.filter[1] == FILTER_TYPE_HOUSES then
+        self:showFilterControl('Houses')
+    elseif self.filter[1] == FILTER_TYPE_ZONE then
+        local zoneName = GetZoneNameById(self.filter[2])
+        self:showFilterControl(zoneName)
+    end
+end
+
+function MT:layoutCategoryRow(rowControl, data, scrollList)
 	rowControl.label:SetText(data.name)
 end
 
@@ -159,7 +181,7 @@ local function buildList(scrollData, title, list)
             end
             nodeData.suffix = (nodeData.suffix or "") .. "|t23:23:/esoui/art/icons/servicemappins/servicepin_guildkiosk.dds:inheritcolor|t"
         end
-        if listEntry.bookmarked then
+        if MapSearch.Bookmarks:contains(listEntry.nodeIndex) then
             nodeData.suffix = (nodeData.suffix or "") .. "|t25:25:MapSearch/media/bookmark.dds:inheritcolor|t"
         end
 
@@ -188,8 +210,11 @@ function MT:buildScrollList()
 
     MT.resultCount = 0
     buildList(scrollData, "Results", MapSearch.results)
-    buildList(scrollData, "Bookmarks", MapSearch.Bookmarks:getBookmarks())
-    buildList(scrollData, "Recent", MapSearch.Recents:getRecents())
+
+    if #MapSearch.results == 0 then
+        buildList(scrollData, "Bookmarks", MapSearch.Bookmarks:getBookmarks())
+        buildList(scrollData, "Recent", MapSearch.Recents:getRecents())
+    end
 
 	ZO_ScrollList_Commit(self.listControl)
 
@@ -199,19 +224,18 @@ function MT:buildScrollList()
     end
 end
 
-local function executeSearch(control, searchString)
+function MT:executeSearch(searchString)
 	local results
 
-	if searchString ~= nil and #searchString > 0 then
-		results = Search.run(searchString)
-	else
-		results = {}
-	end
+    MT.searchString = searchString
+
+    results = Search.run(searchString or "", MT.filter)
 
 	MapSearch.results = results
 	MapSearch.targetNode = 0
 
 	MT:buildScrollList()
+    MT:updateFilterControl()
 end
 
 function MT:getTargetDataIndex()
@@ -307,14 +331,27 @@ end
 
 function MT:onTextChanged(editbox, listcontrol)
 	local searchString = string.lower(editbox:GetText())
-	executeSearch(listcontrol, searchString)
+    if searchString == "z:" then
+        self.filter = { FILTER_TYPE_ZONES }
+        editbox:SetText("")
+        searchString = ""
+    elseif searchString == "h:" then
+        self.filter = { FILTER_TYPE_HOUSES }
+        editbox:SetText("")
+        searchString = ""
+    elseif searchString == '@' or searchString == "p:" then
+        self.filter = { FILTER_TYPE_PLAYERS }
+        editbox:SetText("")
+        searchString = ""
+    end
+
+	self:executeSearch(searchString)
 end
 
-function MT:jumpToTargetNode()
-	local node = self:getTargetNode()
-
-	if node then
-		jumpToNode(node)
+function MT:selectCurrentResult()
+	local data = self:getTargetNode()
+	if data then
+		self:selectResult(nil, data, 1)
 	end
 end
 
@@ -336,11 +373,19 @@ function MT:nextCategory()
 	self:buildScrollList()
 end
 
-function MT:resetFilter(lose_focus)
+function MT:resetFilter()
+    MT.filter = { FILTER_TYPE_NONE }
+    MT:hideFilterControl()
+	self:executeSearch("")
+	ZO_ScrollList_ResetToTop(self.listControl)
+end
+
+function MT:resetSearch(lose_focus)
 	--logger.Info(editbox)
 	self.editControl:SetText("")
-
-	executeSearch(self.listControl, "")
+    MT.filter = { FILTER_TYPE_NONE }
+    MT:hideFilterControl()
+	self:executeSearch("")
 
 	-- if lose_focus then
 	-- 	editbox:LoseFocus()
@@ -358,29 +403,39 @@ local function showWayshrineMenu(owner, nodeIndex)
 		AddMenuItem("Remove Bookmark", function()
 			bookmarks:remove(nodeIndex)
 			ClearMenu()
-            MT:buildScrollList()
+            MT:executeSearch(MT.searchString)
 		end)
 	else
 		AddMenuItem("Add Bookmark", function()
 			bookmarks:add(nodeIndex)
 			ClearMenu()
-            MT:buildScrollList()
+            MT:executeSearch(MT.searchString)
 		end)
 	end
 	ShowMenu(owner)
 end
 
+function MT:selectResult(control, data, mouseButton)
+    if mouseButton == 1 then
+        if data.nodeIndex or data.userID then
+            jumpToNode(data)
+        elseif data.poiType == POI_TYPE_ZONE then
+            MT.filter = { FILTER_TYPE_ZONE, data.zoneId }
+            self.editControl:SetText("")
+        end
+    elseif mouseButton == 2 then
+        if data.nodeIndex then
+            showWayshrineMenu(control, data.nodeIndex)
+        end
+    end
+end
+
 function MT:rowMouseUp(control, mouseButton, upInside)
 	--MapSearch.clickedControl = { control, mouseButton, upInside }
 
-	if(upInside) then
+	if upInside then
 		local data = ZO_ScrollList_GetData(control)
-        if mouseButton == 1 then
-            jumpToNode(data)
-            -- showWayshrineConfirm(data, MapSearch.isRecall)
-		elseif mouseButton == 2 then
-			showWayshrineMenu(control, data.nodeIndex)
-		end
+        self:selectResult(control, data, mouseButton)
 	end
 end
 

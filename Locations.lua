@@ -10,10 +10,12 @@ local Locs = MS.Locations or {
 local Utils = MS.Utils
 local logger = MS.logger -- LibDebugLogger("MapSearch")
 
+POI_TYPE_NONE = -1
 POI_TYPE_TRIAL = 100
 POI_TYPE_ARENA = 101
 POI_TYPE_FRIEND = 102
 POI_TYPE_GUILDMATE = 103
+POI_TYPE_ZONE = 104
 
 function Locs:initialise()
     logger:Debug("Locs:initialise() starts")
@@ -42,8 +44,9 @@ function Locs:setupNodes()
 
         if not isLocked and name ~= "" and glowIcon ~= nil then
             if self.zones[nodeZoneId] == nil then
+                local zoneName = GetZoneNameById(nodeZoneId)
                 self.zones[nodeZoneId] = {
-                    name = name,
+                    name = zoneName,
                     index = zoneIndex,
                     nodes = {}
                 }
@@ -150,7 +153,7 @@ function Locs:setupPlayerZones()
 
             if playerStatus ~= PLAYER_STATUS_OFFLINE and userID~=myID then
                 local _, _, zoneName, _, _, _, _, zoneId = GetGuildMemberCharacterInfo(guildID, i)
-                self:addPlayerZone(zoneId, zoneName, userID, "/esoui/art/notifications/notificationicon_guild.dds", POI_TYPE_GUILDMATE)
+                self:addPlayerZone(zoneId, zoneName, userID, "/esoui/art/menubar/gamepad/gp_playermenu_icon_character.dds", POI_TYPE_GUILDMATE)
             end
         end
     end
@@ -162,7 +165,7 @@ function Locs:setupPlayerZones()
 		if playerStatus ~= PLAYER_STATUS_OFFLINE and secsSinceLogoff == 0 then
             local hasChar, _, zoneName, _, _, _, _, zoneId = GetFriendCharacterInfo(i)
             if hasChar then
-                self:addPlayerZone(zoneId, zoneName, userID, "/esoui/art/notifications/gamepad/gp_notificationicon_friend.dds", POI_TYPE_FRIEND)
+                self:addPlayerZone(zoneId, zoneName, userID, "/esoui/art/menubar/gamepad/gp_playermenu_icon_character.dds", POI_TYPE_FRIEND)
             end
         end
     end
@@ -196,7 +199,7 @@ function Locs:getNodeMap()
     return self.nodeMap
 end
 
-function Locs:getKnownNodes()
+function Locs:getKnownNodes(zoneId)
     if self.nodes == nil then
         self:initialise()
     end
@@ -204,14 +207,42 @@ function Locs:getKnownNodes()
     local nodes = {}
     for i = 1, #self.nodes do
         local index = self.nodes[i].nodeIndex
-        if self:isKnownNode(index) then
+        if self:isKnownNode(index) and (not zoneId or self.nodes[i].zoneId == zoneId) then
+            local node = Utils.shallowCopy(self.nodes[i])
+            local bookmarked = MS.Bookmarks:contains(index)
+            node.known = true
+            node.weight = 1.0
+            if node.poiType == POI_TYPE_WAYSHRINE and MS.isRecall then
+                node.weight = bookmarked and 0.9 or 0.8
+            elseif node.poiType == POI_TYPE_HOUSE and not node.owned then
+                node.weight = 0.7
+            elseif bookmarked then
+                node.weight = 1.2
+            end
+            if node.traders and node.traders > 0 then
+                node.weight = node.weight * (1.0 + 0.02 * node.traders)
+            end
+            table.insert(nodes, node)
+        end
+    end
+    return nodes
+end
+
+function Locs:getHouseList()
+    if self.nodes == nil then
+        self:initialise()
+    end
+
+    local nodes = {}
+    for i = 1, #self.nodes do
+        local index = self.nodes[i].nodeIndex
+        if self:isKnownNode(index) and self.nodes[i].poiType == POI_TYPE_HOUSE then
             local node = Utils.shallowCopy(self.nodes[i])
             if MS.Bookmarks:contains(index) then
                 node.bookmarked = true
             end
-            if (node.poiType == POI_TYPE_WAYSHRINE and MS.isRecall) or
-               (node.poiType == POI_TYPE_HOUSE and not node.isOwned) then
-                node.weight = 0.8
+            if not node.owned then
+                node.weight = 0.7
             elseif node.bookmarked then
                 node.weight = 1.2
             end
@@ -245,17 +276,56 @@ end
 function Locs:getPlayerZoneList()
     local nodes = {}
 
-    if self.playerZones ~= nil then
-        for zoneID, info in pairs(self.playerZones) do
+    if self.playerZones == nil then
+        self:setupPlayerZones()
+    end
+
+    for zoneID, info in pairs(self.playerZones) do
+        table.insert(nodes, {
+            name = info.zoneName,
+            barename = Utils.bareName(info.zoneName),
+            zoneId = zoneID,
+            zoneName = info.zoneName,
+            icon = "MapSearch/media/zone.dds",
+            suffix = info.userID,
+            poiType = info.poiType,
+            userID = info.userID
+        })
+    end
+
+    return nodes
+end
+
+function Locs:getPlayerInZone(zoneId)
+    if self.playerZones == nil then
+        self:setupPlayerZones()
+    end
+
+    local info = self.playerZones[zoneId]
+    return {
+        name = info.zoneName,
+        barename = Utils.bareName(info.zoneName),
+        zoneId = zoneId,
+        zoneName = info.zoneName,
+        icon = info.icon,
+        suffix = info.userID,
+        poiType = info.poiType,
+        userID = info.userID
+    }
+end
+
+function Locs:getZoneList()
+    local nodes = {}
+
+    if self.zones ~= nil then
+        for zoneID, info in pairs(self.zones) do
             table.insert(nodes, {
-                name = info.zoneName,
-                barename = Utils.bareName(info.zoneName),
+                name = info.name,
+                barename = Utils.bareName(info.name),
                 zoneId = zoneID,
-                zoneName = info.zoneName,
+                zoneName = info.name,
                 icon = "MapSearch/media/zone.dds",
-                suffix = info.userID,
-                poiType = info.poiType,
-                userID = info.userID
+                poiType = POI_TYPE_ZONE
             })
         end
     end
