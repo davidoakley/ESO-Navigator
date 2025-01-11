@@ -89,7 +89,8 @@ function Search.run(searchTerm, filter)
                     zoneId = zoneId,
                     zoneName = GetZoneNameById(zoneId),
                     icon = "/esoui/art/crafting/crafting_smithing_notrait.dds",
-                    poiType = POI_TYPE_NONE
+                    poiType = POI_TYPE_NONE,
+                    known = true
                 }
                 end
             playerInfo.weight = 10.0 -- list this first!

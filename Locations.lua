@@ -299,7 +299,8 @@ function Locs:getPlayerZoneList()
             icon = "MapSearch/media/zone.dds",
             suffix = info.userID,
             poiType = info.poiType,
-            userID = info.userID
+            userID = info.userID,
+            known = true
         })
     end
 
@@ -320,7 +321,8 @@ function Locs:getPlayerInZone(zoneId)
         icon = info.icon,
         suffix = info.userID,
         poiType = info.poiType,
-        userID = info.userID
+        userID = info.userID,
+        known = true
     }
 end
 
@@ -335,7 +337,8 @@ function Locs:getZoneList()
                 zoneId = zoneID,
                 zoneName = info.name,
                 icon = "MapSearch/media/zone.dds",
-                poiType = POI_TYPE_ZONE
+                poiType = POI_TYPE_ZONE,
+                known = true
             })
         end
     end

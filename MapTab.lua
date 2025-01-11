@@ -9,13 +9,13 @@ function MT:layoutRow(rowControl, data, scrollList)
 	local name = data.name
     local tooltipText = data.tooltip
     local icon = data.icon
-    local iconColour = { 1.0, 1.0, 1.0, 1.0 }
+    local iconColour = data.known and { 1.0, 1.0, 1.0, 1.0 } or { 0.51, 0.51, 0.44, 1.0 }
 
     if data.suffix ~= nil then
         name = name .. " |c82826F" .. data.suffix .. "|r"
     end
 
-    if MapSearch.isRecall and data.poiType == POI_TYPE_WAYSHRINE then
+    if MapSearch.isRecall and data.poiType == POI_TYPE_WAYSHRINE and data.known then
         local _, timeLeft = GetRecallCooldown()
 
         if timeLeft == 0 then
@@ -44,18 +44,20 @@ function MT:layoutRow(rowControl, data, scrollList)
 		rowControl.icon:SetHidden(true)
 	end
 
-	rowControl.keybind:SetHidden(not data.isSelected)
+	rowControl.keybind:SetHidden(not data.isSelected or not data.known)
     rowControl.bg:SetHidden(not data.isSelected)
 
 	rowControl.label:SetText(name)
 
-	if data.isSelected then
+	if data.isSelected and data.known then
 		rowControl.label:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
     elseif data.colour ~= nil then
         MapSearch.colour = data.colour
 		rowControl.label:SetColor(data.colour:UnpackRGBA())
-    else
+    elseif data.known then
 		rowControl.label:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
+    else
+		rowControl.label:SetColor(0.51, 0.51, 0.44, 1.0)
 	end
 
     if tooltipText then
@@ -133,6 +135,10 @@ local function jumpToPlayer(node)
 end
 
 local function jumpToNode(node)
+    if not node.known then
+        return
+    end
+
     local isRecall = MapSearch.isRecall
 	local nodeIndex,name,refresh,clicked = node.nodeIndex,node.originalName,node.refresh,node.clicked
 

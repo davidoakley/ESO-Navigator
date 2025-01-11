@@ -42,7 +42,8 @@ function Bookmarks:getBookmarks()
 
     if nodeMap ~= nil then
         for i = 1, #self.nodes do
-            local node = nodeMap[self.nodes[i]]
+            local node = MS.Utils.shallowCopy(nodeMap[self.nodes[i]])
+            node.known = MS.Locations:isKnownNode(node.nodeIndex)
             local traders = MS.Data.traderCounts[self.nodes[i]]
             if traders and traders > 0 then
                 node.traders = traders

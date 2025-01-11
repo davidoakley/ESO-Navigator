@@ -50,7 +50,8 @@ function Recents:getRecents()
 
     if nodeMap ~= nil then
         for i = 1, #self.nodes do
-            local node = nodeMap[self.nodes[i]]
+            local node = MS.Utils.shallowCopy(nodeMap[self.nodes[i]])
+            node.known = MS.Locations:isKnownNode(node.nodeIndex)
             table.insert(results, node)
         end
     end
