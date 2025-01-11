@@ -42,7 +42,11 @@ function Locs:setupNodes()
         local zoneIndex, _ = GetFastTravelNodePOIIndicies(i)
         local nodeZoneId = GetZoneId(zoneIndex)
 
-        if not isLocked and name ~= "" and glowIcon ~= nil then
+        if name:find('Harborage') then
+            logger:Info("POI " .. i .. " '" .. name .. "' type " .. typePOI .. " " .. (glowIcon or "-"))
+        end
+
+        if not isLocked and name ~= "" and (typePOI == 1 or glowIcon ~= nil) then
             if self.zones[nodeZoneId] == nil then
                 local zoneName = GetZoneNameById(nodeZoneId)
                 self.zones[nodeZoneId] = {
@@ -58,7 +62,9 @@ function Locs:setupNodes()
                 originalName = name,
                 type = typePOI,
                 zoneId = nodeZoneId,
-                glowIcon = glowIcon
+                glowIcon = glowIcon,
+                icon = icon,
+                originalIcon = icon
             }
 
             if typePOI == 6 then
@@ -78,28 +84,28 @@ function Locs:setupNodes()
                 nodeInfo.suffix = "Trial"
             elseif typePOI == 7 then
                 nodeInfo.poiType = POI_TYPE_HOUSE
-                nodeInfo.icon = icon
-                nodeInfo.owned = (icon == "esoui/art/icons/poi/poi_group_house_owned.dds")
+                -- nodeInfo.icon = icon
+                nodeInfo.owned = (icon:find("poi_group_house_owned") ~= nil) --(icon == "/esoui/art/icons/poi/poi_group_house_owned.dds")
                 -- elseif name:find(" Arena") then
                 --     nodeInfo.poiType = POI_TYPE_ARENA
                 --     -- nodeInfo.name = string.sub(nodeInfo.name, 1, #nodeInfo.name - 6)
                 --     nodeInfo.icon = "esoui/art/tutorial/poi_raiddungeon_complete.dds"
             elseif typePOI == 1 then
                 nodeInfo.poiType = POI_TYPE_WAYSHRINE
-                nodeInfo.icon = "esoui/art/icons/poi/poi_wayshrine_complete.dds"
+                -- nodeInfo.icon = "esoui/art/icons/poi/poi_wayshrine_complete.dds"
                 if name:find(" Wayshrine") then
                     nodeInfo.name = string.sub(nodeInfo.name, 1, #nodeInfo.name - 10)
                 end
             elseif glowIcon == "/esoui/art/icons/poi/poi_soloinstance_glow.dds" then
                 nodeInfo.poiType = POI_TYPE_ARENA
-                nodeInfo.icon = "esoui/art/icons/poi/poi_soloinstance_complete.dds"
+                -- nodeInfo.icon = "esoui/art/icons/poi/poi_soloinstance_complete.dds"
                 nodeInfo.suffix = "Arena"
                 -- if name:find(" Arena") then
                 --     nodeInfo.name = string.sub(nodeInfo.name, 1, #nodeInfo.name - 6)
                 -- end
             elseif glowIcon == "/esoui/art/icons/poi/poi_groupinstance_glow.dds" then
                 nodeInfo.poiType = POI_TYPE_ARENA
-                nodeInfo.icon = "esoui/art/icons/poi/poi_groupinstance_complete.dds"
+                -- nodeInfo.icon = "esoui/art/icons/poi/poi_groupinstance_complete.dds"
                 nodeInfo.suffix = "Arena"
             else
                 logger:Warn("Unknown POI " .. i .. " '" .. name .. "' type " .. typePOI .. " " .. (glowIcon or "-"))
@@ -109,6 +115,10 @@ function Locs:setupNodes()
             end
 
             nodeInfo.barename = Utils.bareName(nodeInfo.name)
+
+            if icon == "/esoui/art/icons/icon_missing.dds" then
+                nodeInfo.icon = "/esoui/art/crafting/crafting_smithing_notrait.dds"
+            end
 
             local traders = MS.Data.traderCounts[i]
             if traders and traders > 0 then
