@@ -10,6 +10,7 @@ function MT:layoutRow(rowControl, data, scrollList)
     local tooltipText = data.tooltip
     local icon = data.icon
     local iconColour = data.known and { 1.0, 1.0, 1.0, 1.0 } or { 0.51, 0.51, 0.44, 1.0 }
+    local isFree = true
 
     if data.suffix ~= nil then
         name = name .. " |c82826F" .. data.suffix .. "|r"
@@ -19,10 +20,6 @@ function MT:layoutRow(rowControl, data, scrollList)
         local _, timeLeft = GetRecallCooldown()
 
         if timeLeft == 0 then
-            icon = "/esoui/art/tradinghouse/tradinghouse_sell_tabicon_up.dds"
-            iconColour = { 1.0, 0.8, 0.2, 1 }
-
-            -- local cost,hasEnough = GetRecallCostInfo()
             local currencyType = CURT_MONEY
             local currencyAmount = GetRecallCost()
             local formatType = ZO_CURRENCY_FORMAT_AMOUNT_ICON
@@ -33,6 +30,7 @@ function MT:layoutRow(rowControl, data, scrollList)
             else
                 tooltipText = costText
             end
+            isFree = false
         end
     end
 
@@ -43,6 +41,8 @@ function MT:layoutRow(rowControl, data, scrollList)
     else
 		rowControl.icon:SetHidden(true)
 	end
+
+    rowControl.cost:SetHidden(isFree)
 
 	rowControl.keybind:SetHidden(not data.isSelected or not data.known)
     rowControl.bg:SetHidden(not data.isSelected)
