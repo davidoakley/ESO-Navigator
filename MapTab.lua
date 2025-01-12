@@ -340,15 +340,20 @@ function MT:onTextChanged(editbox, listcontrol)
     if searchString == "z:" then
         self.filter = { FILTER_TYPE_ZONES }
         editbox:SetText("")
+        editbox.editTextChanged = false
         searchString = ""
     elseif searchString == "h:" then
         self.filter = { FILTER_TYPE_HOUSES }
         editbox:SetText("")
+        editbox.editTextChanged = false
         searchString = ""
     elseif searchString == '@' or searchString == "p:" then
         self.filter = { FILTER_TYPE_PLAYERS }
+        editbox.editTextChanged = false
         editbox:SetText("")
         searchString = ""
+    else
+        self.editTextChanged = true
     end
 
 	self:executeSearch(searchString)
