@@ -1,4 +1,4 @@
-local MT = MapSearch_MapTab --MapSearch.MapTab or {}
+local MT = MapSearch_MapTab -- from XML
 local Search = MapSearch.Search
 local Utils = MapSearch.Utils
 local logger = MapSearch.logger

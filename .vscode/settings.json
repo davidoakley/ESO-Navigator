@@ -15,7 +15,15 @@
         "MAIN_MENU_KEYBOARD",
         "SI_TOOLTIP_RECALL_COST",
         "SI_NUMBER_FORMAT",
-        "MAPSEARCH_SEARCH"
+        "MAPSEARCH_SEARCH",
+        "MAPSEARCH_SEARCH_KEYPRESS",
+        "MapSearch_MapTab",
+        "PITHKA",
+        "LibSlashCommander",
+        "CHAT_SYSTEM",
+        "SCENE_MANAGER",
+        "JumpToFriend",
+        "JumpToGuildMember"
     ],
     "Lua.diagnostics.globalsRegex": [
         "^ZO_.*",
