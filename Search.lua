@@ -45,11 +45,6 @@ local function addSearchResults(result, searchTerm, nodeList)
             resultNode.match = matchLevel
             -- resultNode.matchChars = matchChars
 
-            if MS.isDeveloper then
-                -- resultNode.name = resultNode.name .. " |c808080[" .. resultNode.match .. "]|r"
-                resultNode.tooltip = "nodeIndex " .. (resultNode.nodeIndex or "-") .. "; bareName '" .. (node.barename or '-')
-            end
-
             table.insert(result, resultNode)
         end
     end
