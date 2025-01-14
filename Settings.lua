@@ -16,20 +16,17 @@ function MapSearch:loadSettings()
   
     local optionsTable = {}
   
-    table.insert(
-      optionsTable,
-      {
+    table.insert(optionsTable, {
         type = "checkbox",
-        name = "Default map tab",
-        tooltip = "Automatically selects the Search tab when the Maps screen is opened",
+        name = "Auto-select Search tab",
+        tooltip = "Automatically selects the Search tab when the Maps screen is opened.",
         getFunc = function() return sv.defaultTab end,
         setFunc = function(value)
           sv.defaultTab = value
           end,
         width = "full", --or "half",
         requiresReload = true,
-      }
-    )
+    })
 
     LAM:RegisterOptionControls(self.menuName, optionsTable)
   end
