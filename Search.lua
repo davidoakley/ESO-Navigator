@@ -53,7 +53,7 @@ end
 
 function Search.run(searchTerm, filter)
     local filterType = filter[1]
-    searchTerm = searchTerm and searchTerm:lower() or ""
+    searchTerm = searchTerm and string.lower(searchTerm) or ""
     searchTerm = searchTerm:gsub("[^%w ]", "")
 
     logger:Debug(string.format("Search.run('%s', %d)", searchTerm, filterType))

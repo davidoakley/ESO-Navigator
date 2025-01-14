@@ -9,6 +9,7 @@ MapSearch = {
     maxRecent = 10,
     bookmarkNodes = {},
     defaultTab = false
+    tpCommand = "None"
   },
   Location = {},
   Wayshrine = {},
@@ -102,6 +103,7 @@ function MS:initialize()
   self.MapTab:init()
   self.Recents:init()
   self.Bookmarks:init()
+  self.Chat:Init()
   self:loadSettings()
 
   -- local normal, highlight, pressed = GetPaths("/esoui/art/guild/guildhistory_indexicon_guildstore_", "up.dds", "over.dds", "down.dds")

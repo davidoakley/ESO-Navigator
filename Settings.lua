@@ -28,6 +28,18 @@ function MapSearch:loadSettings()
         requiresReload = true,
     })
 
+    table.insert(optionsTable, {
+      type = "dropdown",
+      name = "Teleport chat command:",
+      tooltip = "Select what name to give the chat slash command",
+      choices = {"None", "/tp", "/mstp"},
+      getFunc = function() return sv.tpCommand end,
+      setFunc = function(value) sv.tpCommand = value end,
+      width = "full",
+      default = MapSearch.default.tpCommand,
+      requiresReload = true,
+    })
+
     LAM:RegisterOptionControls(self.menuName, optionsTable)
   end
   
