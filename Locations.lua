@@ -323,17 +323,21 @@ function Locs:getPlayerInZone(zoneId)
     end
 
     local info = self.playerZones[zoneId]
-    return {
-        name = info.zoneName,
-        barename = Utils.bareName(info.zoneName),
-        zoneId = zoneId,
-        zoneName = info.zoneName,
-        icon = info.icon,
-        suffix = info.userID,
-        poiType = info.poiType,
-        userID = info.userID,
-        known = true
-    }
+    if info then
+        return {
+            name = info.zoneName,
+            barename = Utils.bareName(info.zoneName),
+            zoneId = zoneId,
+            zoneName = info.zoneName,
+            icon = info.icon,
+            suffix = info.userID,
+            poiType = info.poiType,
+            userID = info.userID,
+            known = true
+        }
+    else
+        return nil
+    end
 end
 
 function Locs:getZoneList()
