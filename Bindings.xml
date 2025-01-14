@@ -9,7 +9,7 @@
 	
 	<Layer name="Map">
 		<Category>
-			<Action name="MAPSEARCH_OPENTAB" hideAction="true" inheritsBindFrom="UI_SHORTCUT_QUICK_SLOTS">
+			<Action name="MAPSEARCH_OPENTAB" hideAction="false" inheritsBindFrom="CYCLE_PREFERRED_ENEMY_TARGET">
 				<Down>MapSearch.showSearch()</Down>
 			</Action>
 		</Category>
