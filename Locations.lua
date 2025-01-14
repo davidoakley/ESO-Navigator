@@ -6,6 +6,7 @@ local Locs = MS.Locations or {
     players = nil,
     playerZones = nil,
     knownNodes = {}
+    harborageIndex = nil
 }
 local Utils = MS.Utils
 local logger = MS.logger -- LibDebugLogger("MapSearch")
@@ -42,10 +43,6 @@ function Locs:setupNodes()
         local zoneIndex, _ = GetFastTravelNodePOIIndicies(i)
         local nodeZoneId = GetZoneId(zoneIndex)
 
-        if name:find('Harborage') then
-            logger:Info("POI " .. i .. " '" .. name .. "' type " .. typePOI .. " " .. (glowIcon or "-"))
-        end
-
         if not isLocked and name ~= "" and (typePOI == 1 or glowIcon ~= nil) then
             if self.zones[nodeZoneId] == nil then
                 local zoneName = GetZoneNameById(nodeZoneId)
@@ -54,6 +51,11 @@ function Locs:setupNodes()
                     index = zoneIndex,
                     nodes = {}
                 }
+            end
+
+            if i >= 210 and i <= 212 then
+                -- Save this character's alliance's Harborage
+                self.harborageIndex = i
             end
 
             local nodeInfo = {
@@ -186,6 +188,11 @@ function Locs:clearKnownNodes()
 end
 
 function Locs:isKnownNode(nodeIndex)
+    if nodeIndex == 211 or nodeIndex == 212 then
+        -- The Harborage is always stored as index 210
+        nodeIndex = 210
+    end
+
     if self.knownNodes[nodeIndex] ~= nil then
         return self.knownNodes[nodeIndex]
     else
