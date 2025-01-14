@@ -5,7 +5,8 @@ local Locs = MS.Locations or {
     zones = nil,
     players = nil,
     playerZones = nil,
-    knownNodes = {}
+    mapIndices = nil,
+    knownNodes = {},
     harborageIndex = nil
 }
 local Utils = MS.Utils
@@ -20,18 +21,13 @@ POI_TYPE_ZONE = 104
 
 function Locs:initialise()
     logger:Debug("Locs:initialise() starts")
-    self:setupNodes()
-    logger:Debug("Locs:initialise() setupPlayerZones")
-    self:setupPlayerZones()
+    -- self:setupNodes()
+    -- logger:Debug("Locs:initialise() setupPlayerZones")
+    -- self:setupPlayerZones()
     logger:Debug("Locs:initialise() ends")
 end
 
 function Locs:setupNodes()
-    if self.nodes then
-        self:clearKnownNodes()
-        return
-    end
-
     self.nodes = {}
     self.nodeMap = {}
     self.zones = {}
@@ -189,6 +185,10 @@ function Locs:clearKnownNodes()
 end
 
 function Locs:isKnownNode(nodeIndex)
+    if self.nodes == nil then
+        self:setupNodes()
+    end
+
     if nodeIndex == 211 or nodeIndex == 212 then
         -- The Harborage is always stored as index 210
         nodeIndex = 210
@@ -205,21 +205,21 @@ end
 
 function Locs:getNodes()
     if self.nodes == nil then
-        self:initialise()
+        self:setupNodes()
     end
     return self.nodes
 end
 
 function Locs:getNodeMap()
     if self.nodeMap == nil then
-        self:initialise()
+        self:setupNodes()
     end
     return self.nodeMap
 end
 
 function Locs:getKnownNodes(zoneId)
     if self.nodes == nil then
-        self:initialise()
+        self:setupNodes()
     end
 
     local nodes = {}
@@ -248,7 +248,7 @@ end
 
 function Locs:getHouseList()
     if self.nodes == nil then
-        self:initialise()
+        self:setupNodes()
     end
 
     local nodes = {}
@@ -271,21 +271,22 @@ function Locs:getHouseList()
 end
 
 function Locs:getPlayerList()
-    local nodes = {}
+    if self.players == nil then
+        self:setupPlayerZones()
+    end
 
-    if self.players ~= nil then
-        for userID, info in pairs(self.players) do
-            table.insert(nodes, {
-                name = userID,
-                barename = userID:sub(2), -- remove '@' prefix
-                zoneId = info.zoneId,
-                zoneName = info.zoneName,
-                icon = info.icon,
-                suffix = info.zoneName,
-                poiType = info.poiType,
-                userID = userID
-            })
-        end
+    local nodes = {}
+    for userID, info in pairs(self.players) do
+        table.insert(nodes, {
+            name = userID,
+            barename = userID:sub(2), -- remove '@' prefix
+            zoneId = info.zoneId,
+            zoneName = info.zoneName,
+            icon = info.icon,
+            suffix = info.zoneName,
+            poiType = info.poiType,
+            userID = userID
+        })
     end
 
     return nodes
@@ -337,18 +338,20 @@ end
 function Locs:getZoneList()
     local nodes = {}
 
-    if self.zones ~= nil then
-        for zoneID, info in pairs(self.zones) do
-            table.insert(nodes, {
-                name = info.name,
-                barename = Utils.bareName(info.name),
-                zoneId = zoneID,
-                zoneName = info.name,
-                icon = "MapSearch/media/zone.dds",
-                poiType = POI_TYPE_ZONE,
-                known = true
-            })
-        end
+    if self.nodes == nil then
+        self:setupNodes()
+    end
+
+    for zoneID, info in pairs(self.zones) do
+        table.insert(nodes, {
+            name = info.name,
+            barename = Utils.bareName(info.name),
+            zoneId = zoneID,
+            zoneName = info.name,
+            icon = "MapSearch/media/zone.dds",
+            poiType = POI_TYPE_ZONE,
+            known = true
+        })
     end
 
     return nodes

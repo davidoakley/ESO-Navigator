@@ -8,7 +8,8 @@ MapSearch = {
     recentNodes = {},
     maxRecent = 10,
     bookmarkNodes = {},
-    defaultTab = false
+    defaultTab = false,
+    autoFocus = false,
     tpCommand = "None"
   },
   Location = {},
@@ -19,6 +20,7 @@ MapSearch = {
   isDeveloper = (GetDisplayName() == '@SirNightstorm' and true) or false,
   results = {},
   targetNode = 0,
+  mapVisible = false,
 }
 local MS = MapSearch
 
@@ -61,6 +63,70 @@ local function GetPaths(path, ...)
   end))
 end
 
+local function OnMapStateChange(oldState, newState)
+  local ButtonGroup = {
+  {
+    name = "Search", --GetString(SI_BINDING_NAME_FASTER_TRAVEL_REJUMP),
+    keybind = "MAPSEARCH_OPENTAB", --"UI_SHORTCUT_QUICK_SLOTS", --"MAPSEARCH_SEARCH",
+    order = 200,
+    visible = function() return true end,
+    callback = function() MS.showSearch() end,
+    },
+    alignment = KEYBIND_STRIP_ALIGN_CENTER,
+  }
+
+  if newState == SCENE_SHOWING then
+    logger:Debug("WorldMap showing")
+    MS.mapVisible = true
+    PushActionLayerByName("Map")
+    KEYBIND_STRIP:AddKeybindButtonGroup(ButtonGroup)
+    if MS.saved and MS.saved["defaultTab"] then
+      WORLD_MAP_INFO:SelectTab(MAPSEARCH_TAB_SEARCH)
+    end
+    MapSearch.Locations:initialise()
+    MapSearch.MapTab:buildScrollList()
+    logger:Debug("WorldMap showing done")
+  elseif newState == SCENE_HIDDEN then
+    logger:Debug("WorldMap hidden")
+    MS.mapVisible = false
+    KEYBIND_STRIP:RemoveKeybindButtonGroup(ButtonGroup)
+    RemoveActionLayerByName("Map")
+  end
+end
+
+local function OnMapChanged()
+  logger:Debug("OnMapChanged")
+  MS.MapTab.OnMapChanged()
+end
+
+local function OnStartFastTravel(eventCode, nodeIndex)
+  logger:Debug("OnStartFastTravel: "..eventCode..", "..nodeIndex)
+  MS.isRecall = false
+end
+
+local function OnEndFastTravel()
+  logger:Debug("OnEndFastTravel")
+  MS.isRecall = true
+end
+
+local function OnPlayerActivated()
+  logger:Debug("OnPlayerActivated")
+  MS.Recents:onPlayerActivated()
+end
+
+local function OnPOIUpdated()
+  logger:Debug("OnPOIUpdated")
+  MS.Locations:clearKnownNodes()
+end
+
+function MS.showSearch()
+  logger:Debug("showSearch")
+  MAIN_MENU_KEYBOARD:ShowScene("worldMap")
+  WORLD_MAP_INFO:SelectTab(MAPSEARCH_TAB_SEARCH)
+  MS.MapTab:resetSearch(false)
+  MS.MapTab.editControl:TakeFocus()
+end
+
 function MS:initialize()
   logger:Debug("initialize starts")
   -- https://wiki.esoui.com/How_to_add_buttons_to_the_keybind_strip
@@ -68,36 +134,8 @@ function MS:initialize()
   self.saved = ZO_SavedVars:NewAccountWide(self.svName, 1, nil, self.default)
 
   -- local mapTabControl = MapSearch_MapTab
-  
-  local ButtonGroup = {
-		{
-			name = "Search", --GetString(SI_BINDING_NAME_FASTER_TRAVEL_REJUMP),
-			keybind = "MAPSEARCH_OPENTAB", --"UI_SHORTCUT_QUICK_SLOTS", --"MAPSEARCH_SEARCH",
-			order = 200,
-			visible = function() return true end,
-			callback = function() self.showSearch() end,
-		},
-		alignment = KEYBIND_STRIP_ALIGN_CENTER,
-	}
 
-  SCENE_MANAGER:GetScene('worldMap'):RegisterCallback("StateChange",
-    function(oldState, newState)
-      if newState == SCENE_SHOWING then
-        logger:Debug("WorldMap showing")
-        PushActionLayerByName("Map")
-        KEYBIND_STRIP:AddKeybindButtonGroup(ButtonGroup)
-        if MS.saved.defaultTab then
-          WORLD_MAP_INFO:SelectTab(MAPSEARCH_TAB_SEARCH)
-        end
-        MapSearch.Locations:initialise()
-        MapSearch.MapTab:buildScrollList()
-        logger:Debug("WorldMap showing done")
-      elseif newState == SCENE_HIDDEN then
-        logger:Debug("WorldMap hidden")
-        KEYBIND_STRIP:RemoveKeybindButtonGroup(ButtonGroup)
-        RemoveActionLayerByName("Map")
-      end
-    end)
+  SCENE_MANAGER:GetScene('worldMap'):RegisterCallback("StateChange", OnMapStateChange)
 
   -- local mapTab = MS.MapTab(mapTabControl)
   self.MapTab:init()
@@ -105,6 +143,15 @@ function MS:initialize()
   self.Bookmarks:init()
   self.Chat:Init()
   self:loadSettings()
+
+  CALLBACK_MANAGER:RegisterCallback("OnWorldMapChanged", OnMapChanged)
+  CALLBACK_MANAGER:RegisterCallback("OnWorldMapModeChanged", OnMapChanged)
+
+  addEvent(EVENT_START_FAST_TRAVEL_INTERACTION, OnStartFastTravel)
+  addEvent(EVENT_END_FAST_TRAVEL_INTERACTION, OnEndFastTravel)
+  addEvent(EVENT_PLAYER_ACTIVATED, OnPlayerActivated)
+  addEvent(EVENT_POI_DISCOVERED , OnPOIUpdated)
+  addEvent(EVENT_POI_UPDATED, OnPOIUpdated)
 
   -- local normal, highlight, pressed = GetPaths("/esoui/art/guild/guildhistory_indexicon_guildstore_", "up.dds", "over.dds", "down.dds")
   local normal = "/esoui/art/tradinghouse/tradinghouse_browse_tabicon_up.dds"
@@ -116,48 +163,15 @@ function MS:initialize()
   logger:Debug("Initialize exits")
 end
 
--- Then we create an event handler function which will be called when the "addon loaded" event
--- occurs. We'll use this to initialize our addon after all of its resources are fully loaded.
-local function onAddOnLoaded(event, addonName)
-  -- The event fires each time *any* addon loads - but we only care about when our own addon loads.
+local function OnAddOnLoaded(_, addonName)
   if addonName ~= "MapSearch" then return end
 
   MS:initialize()
 
-  --unregister the event again as our addon was loaded now and we do not need it anymore to be run for each other addon that will load
   EVENT_MANAGER:UnregisterForEvent(MS.name, EVENT_ADD_ON_LOADED)
 end
 
-local function onStartFastTravel(eventCode, nodeIndex)
-  logger:Debug("onStartFastTravel: "..eventCode..", "..nodeIndex)
-  MS.isRecall = false
-end
-
-local function onEndFastTravel()
-  logger:Debug("onEndFastTravel")
-  MS.isRecall = true
-end
-
-local function onPlayerActivated()
-  MS.Recents:onPlayerActivated()
-end
-
-function MS.showSearch()
-  logger:Debug("showSearch")
-  MAIN_MENU_KEYBOARD:ShowScene("worldMap")
-  WORLD_MAP_INFO:SelectTab(MAPSEARCH_TAB_SEARCH)
-  MS.MapTab:resetSearch(false)
-  MapSearch_MapTabSearchEdit:TakeFocus()
-end
-
--- Finally, we'll register our event handler function to be called when the proper event occurs.
--->This event EVENT_ADD_ON_LOADED will be called for EACH of the addns/libraries enabled, this is why there needs to be a check against the addon name
--->within your callback function! Else the very first addon loaded would run your code + all following addons too.
-EVENT_MANAGER:RegisterForEvent(MS.name, EVENT_ADD_ON_LOADED, onAddOnLoaded)
-
-addEvent(EVENT_START_FAST_TRAVEL_INTERACTION, onStartFastTravel)
-addEvent(EVENT_END_FAST_TRAVEL_INTERACTION, onEndFastTravel)
-addEvent(EVENT_PLAYER_ACTIVATED, onPlayerActivated)
+EVENT_MANAGER:RegisterForEvent(MS.name, EVENT_ADD_ON_LOADED, OnAddOnLoaded)
 
 SLASH_COMMANDS["/mapsearch"] = function (extra)
   if extra == 'save' then
