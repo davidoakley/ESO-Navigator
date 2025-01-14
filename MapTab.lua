@@ -16,12 +16,12 @@ function MT:layoutRow(rowControl, data, scrollList)
         name = name .. " |c82826F" .. data.suffix .. "|r"
     end
 
-    if MapSearch.isRecall and data.poiType == POI_TYPE_WAYSHRINE and data.known then
+    if MapSearch.isRecall and data.poiType == POI_TYPE_WAYSHRINE and data.known and data.nodeIndex then
         local _, timeLeft = GetRecallCooldown()
 
         if timeLeft == 0 then
             local currencyType = CURT_MONEY
-            local currencyAmount = GetRecallCost()
+            local currencyAmount = GetRecallCost(data.nodeIndex)
             local formatType = ZO_CURRENCY_FORMAT_AMOUNT_ICON
             local currencyString = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(currencyType, currencyAmount, formatType))
             local costText = string.format(GetString(SI_TOOLTIP_RECALL_COST) .. "%s", currencyString)
