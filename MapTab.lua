@@ -244,8 +244,10 @@ function MT:buildScrollList()
     buildList(scrollData, "Results", MapSearch.results)
 
     if #MapSearch.results == 0 then
-        buildList(scrollData, "Bookmarks", MapSearch.Bookmarks:getBookmarks())
-        buildList(scrollData, "Recent", MapSearch.Recents:getRecents())
+        if MT.filter[1] == FILTER_TYPE_NONE then
+            buildList(scrollData, "Bookmarks", MapSearch.Bookmarks:getBookmarks())
+            buildList(scrollData, "Recent", MapSearch.Recents:getRecents())
+        end
 
         local zone = MapSearch.Locations:getCurrentMapZone()
         if zone then
@@ -409,7 +411,7 @@ function MT:onTextChanged(editbox, listcontrol)
         editbox:SetText("")
         searchString = ""
     else
-        self.editTextChanged = true
+        self.editControl.editTextChanged = true
     end
 
 	self:executeSearch(searchString)
@@ -446,6 +448,7 @@ function MT:previousCategory()
 end
 
 function MT:resetFilter()
+	logger.Debug("MT.resetFilter")
     MT.filter = { FILTER_TYPE_NONE }
     MT:hideFilterControl()
 	self:executeSearch("")
@@ -453,7 +456,7 @@ function MT:resetFilter()
 end
 
 function MT:resetSearch(lose_focus)
-	--logger.Info(editbox)
+	logger.Debug("MT.resetSearch")
 	self.editControl:SetText("")
     MT.filter = { FILTER_TYPE_NONE }
     MT:hideFilterControl()
@@ -513,7 +516,28 @@ end
 
 function MT.OnMapChanged()
     if MapSearch.mapVisible then
-        MT:buildScrollList()
+        -- local mapId = GetCurrentMapId()
+        local zone = MapSearch.Locations:getCurrentMapZone()
+        if zone and zone.zoneId ~= MapSearch.initialMapZoneId then
+            logger:Debug("Moved to zoneId: "..zone.zoneId.."(initial "..(MapSearch.initialMapZoneId or 0)..")")
+            MT.filter = { FILTER_TYPE_ZONE, zone.zoneId }
+            MT:updateFilterControl()
+            MT.editControl:SetText("")
+        else
+            local mapId = GetCurrentMapId()
+            local _, mapType, _, zoneIndex, _ = GetMapInfoById(mapId)
+            local zoneId = GetZoneId(zoneIndex)
+            if zoneId == 2 then -- Tamriel
+                MT.filter = { FILTER_TYPE_ZONES }
+                MT:updateFilterControl()
+                MT.editControl:SetText("")
+                logger:Debug("ZONES")
+            else
+                logger:Debug("Not moved; zoneIndex: "..(zoneIndex or 0).."; zoneId: "..(zoneId or 0).."(initial "..(MapSearch.initialMapZoneId or 0)..")")
+            end
+        end
+        -- MT:buildScrollList()
+        MT:executeSearch("")
     end
 end
 
