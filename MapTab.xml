@@ -92,7 +92,7 @@
 				self.fragment.duration = 100
 
 				ZO_ScrollList_AddDataType(self.listControl, 0, "MapSearch_WorldMapCategoryRow", 50, function(...) self:layoutCategoryRow(...) end, nil, nil, nil)
-				ZO_ScrollList_AddDataType(self.listControl, 1, "MapSearch_WorldMapWayshrineRow", 27, function(...) self:layoutRow(...) end, nil, nil, nil)
+				ZO_ScrollList_AddDataType(self.listControl, 1, "MapSearch_WorldMapWayshrineRow", 25, function(...) self:layoutRow(...) end, nil, nil, nil)
 	        </OnInitialized>
 			<OnEffectivelyShown>
 				MapSearch.logger:Debug("MapSearch_MapTab.OnEffectivelyShown")
