@@ -27,6 +27,13 @@ function Locs:initialise()
     logger:Debug("Locs:initialise() ends")
 end
 
+function Locs:IsZone(zoneId)
+    if zoneId == GetParentZoneId(zoneId) or zoneId==981 or zoneId==1413 or zoneId==1027 then
+        return true
+    end
+    return false
+end
+
 function Locs:setupNodes()
     self.nodes = {}
     self.nodeMap = {}
@@ -37,17 +44,19 @@ function Locs:setupNodes()
         local known, name, Xcord, Ycord, icon, glowIcon, typePOI, onMap, isLocked = GetFastTravelNodeInfo(i)
 
         local zoneIndex, _ = GetFastTravelNodePOIIndicies(i)
-        local nodeZoneId = GetZoneId(zoneIndex)
+        local nodeZoneId = GetParentZoneId(GetZoneId(zoneIndex))
 
         if not isLocked and name ~= "" and (typePOI == 1 or glowIcon ~= nil) then
             if self.zones[nodeZoneId] == nil then
-                local zoneName = GetZoneNameById(nodeZoneId)
-                self.zones[nodeZoneId] = {
-                    name = zoneName,
-                    zoneId = nodeZoneId,
-                    index = zoneIndex,
-                    nodes = {}
-                }
+                if self:IsZone(nodeZoneId) then
+                    local zoneName = GetZoneNameById(nodeZoneId)
+                    self.zones[nodeZoneId] = {
+                        name = zoneName,
+                        zoneId = nodeZoneId,
+                        index = zoneIndex,
+                        nodes = {}
+                    }
+                end
             end
 
             if i >= 210 and i <= 212 then
@@ -124,7 +133,11 @@ function Locs:setupNodes()
                 nodeInfo.traders = traders
             end
 
-            table.insert(self.zones[nodeZoneId].nodes, nodeInfo)
+            if self.zones[nodeZoneId] then
+                table.insert(self.zones[nodeZoneId].nodes, nodeInfo)
+            else
+                logger:Debug("Locs:setupNodes: node "..i.." '"..nodeInfo.name.."' in non-parent zoneId "..nodeZoneId)
+            end
             table.insert(self.nodes, nodeInfo)
             self.nodeMap[i] = nodeInfo
             self.knownNodes[i] = known
