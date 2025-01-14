@@ -82,7 +82,7 @@
         <TopLevelControl name="MapSearch_MapTab" inherits="ZO_WorldMapInfoContent">
             <OnInitialized>
 				MapSearch.logger:Debug("MapSearch_MapTab.OnInitialized")
-
+				self.visible = false
                 self.listControl = self:GetNamedChild("List")
 				self.searchControl = self:GetNamedChild("Search")
 				self.editControl = self:GetNamedChild("SearchEdit")
@@ -96,7 +96,14 @@
 	        </OnInitialized>
 			<OnEffectivelyShown>
 				MapSearch.logger:Debug("MapSearch_MapTab.OnEffectivelyShown")
+				self.visible = true
+				MapSearch.Locations:initialise()
+			    MapSearch.MapTab:buildScrollList()
 			</OnEffectivelyShown>
+			<OnEffectivelyHidden>
+				MapSearch.logger:Debug("MapSearch_MapTab.OnEffectivelyHidden")
+				self.visible = false
+			</OnEffectivelyHidden>
             <Controls>
 				<Backdrop name="$(parent)Search" tier="HIGH" XedgeColor="000000" inherits="ZO_SingleLineEditBackdrop_Keyboard" maxHeight="40" mouseEnabled="true">
 					<Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="0" offsetY="-30"/>
@@ -145,8 +152,16 @@
 							</OnEscape>
 							<OnEffectivelyShown>
 								MapSearch.MapTab:resetSearch(false)
-								self:TakeFocus()
+								if MapSearch.saved.autoFocus then
+									self:TakeFocus()
+								end
 							</OnEffectivelyShown>
+							<OnFocusGained>
+								MapSearch.MapTab:UpdateEditDefaultText()
+							</OnFocusGained>
+							<OnFocusLost>
+								MapSearch.MapTab:UpdateEditDefaultText()
+							</OnFocusLost>
 							<OnTextChanged>
 								MapSearch.logger:Debug("onTextChanged: pos="..self:GetCursorPosition())
 								MapSearch.MapTab:onTextChanged(self, MapSearch_MapTabList)
@@ -161,9 +176,12 @@
 							<OnUpArrow>
 								MapSearch.MapTab:previousResult()
 							</OnUpArrow>
-							<OnTab>
+							<OnPageDown>
 								MapSearch.MapTab:nextCategory()
-							</OnTab>
+							</OnPageDown>
+							<OnPageUp>
+								MapSearch.MapTab:previousCategory()
+							</OnPageUp>
 						</EditBox>						
 					</Controls>
 				</Backdrop>
