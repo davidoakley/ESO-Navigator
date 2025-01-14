@@ -5,7 +5,7 @@
 ## Version: 0.0.1
 ## DependsOn: LibDebugLogger>=180 LibWorldMapInfoTab LibAddonMenu-2.0
 ## X-DependsOn: LibCustomMenu
-## OptionalDependsOn: pChat, FasterTravel
+## OptionalDependsOn: pChat, FasterTravel, LibSlashCommander
 ## SavedVariables: MapSearch_SavedVariables
 
 MapSearch.lua
@@ -15,6 +15,7 @@ Utils.lua
 Settings.lua
 Locations.lua
 Search.lua
+Chat.lua
 
 MapTab.xml
 MapTab.lua
