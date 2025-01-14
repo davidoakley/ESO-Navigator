@@ -353,4 +353,20 @@ function Locs:getZoneList()
     return nodes
 end
 
+function Locs:getCurrentMapZone()
+    if self.zones == nil then
+        self:setupNodes()
+    end
+
+    local mapId = GetCurrentMapId()
+    local _, mapType, _, zoneIndex, _ = GetMapInfoById(mapId)
+    local zoneId = GetZoneId(zoneIndex)
+    logger:Debug("Locs:getCurrentMapZone zoneId = "..zoneId.." type "..mapType)
+    if mapType == MAPTYPE_SUBZONE then
+        zoneId = GetParentZoneId(zoneId)
+        logger:Debug("Locs:getCurrentMapZone parent zoneId = "..zoneId)
+    end
+    return self.zones[zoneId]
+end
+
 MapSearch.Locations = Locs
