@@ -67,20 +67,20 @@ function Chat:TP(text)
         MT.jumpToNode(data)
     end
 
-    if not Locs.playerZones[zoneId] then
+    local node = Locs:getPlayerInZone(zoneId)
+    if not node then
         return
     end
 
-    local node = Locs.playerZones[zoneId]
-    local userID, poiType, zoneId, zoneName = node.userID, node.poiType, node.zoneId, node.zoneName
+    -- local userID, poiType, zoneId, zoneName = node.userID, node.poiType, node.zoneId, node.zoneName
 
-    CHAT_SYSTEM:AddMessage("Jumping to "..zoneName.." via "..userID)
+    CHAT_SYSTEM:AddMessage("Jumping to "..node.zoneName.." via "..node.userID)
     SCENE_MANAGER:Hide("worldMap")
 
-    if poiType == POI_TYPE_FRIEND then
-        JumpToFriend(userID)
-    elseif poiType == POI_TYPE_GUILDMATE then
-        JumpToGuildMember(userID)
+    if node.poiType == POI_TYPE_FRIEND then
+        JumpToFriend(node.userID)
+    elseif node.poiType == POI_TYPE_GUILDMATE then
+        JumpToGuildMember(node.userID)
     end
 
 end
