@@ -24,12 +24,6 @@ MapSearch = {
 }
 local MS = MapSearch
 
--- Make this properly localisable!
-ZO_CreateStringId("MAPSEARCH_SEARCH","Search")
-ZO_CreateStringId("MAPSEARCH_OPENTAB","Open Search tab (on Map screen)")
-ZO_CreateStringId("SI_BINDING_NAME_MAPSEARCH_SEARCH", "Open Map Search")
-ZO_CreateStringId("MAPSEARCH_TAB_SEARCH","Search")
-
 local logger = LibDebugLogger(MS.name)
 MS.logger = logger
 
@@ -119,10 +113,25 @@ end
 
 function MS.showSearch()
   logger:Debug("showSearch")
+  local tabVisible = MapSearch.MapTab.visible
   MAIN_MENU_KEYBOARD:ShowScene("worldMap")
   WORLD_MAP_INFO:SelectTab(MAPSEARCH_TAB_SEARCH)
   MS.MapTab:resetSearch(false)
-  MS.MapTab.editControl:TakeFocus()
+  if MapSearch.saved.autoFocus or tabVisible then
+    MS.MapTab.editControl:TakeFocus()
+    logger:Debug("showSearch: setting editControl focus")
+  end
+end
+
+function MS:CreateStrings()
+  -- Make this properly localisable!
+  local openTabBinding = ZO_Keybindings_GetHighestPriorityNarrationStringFromAction("MAPSEARCH_OPENTAB") or '-'
+  -- openTabBinding = ZO_Keybindings_GenerateTextKeyMarkup(openTabBinding)
+  ZO_CreateStringId("MAPSEARCH_SEARCH","Search locations, zones or @players")
+  ZO_CreateStringId("MAPSEARCH_SEARCH_KEYPRESS","Search ("..openTabBinding..")")
+  ZO_CreateStringId("MAPSEARCH_OPENTAB","Open Search tab (on Map screen)")
+  ZO_CreateStringId("SI_BINDING_NAME_MAPSEARCH_SEARCH", "Open Map Search")
+  ZO_CreateStringId("MAPSEARCH_TAB_SEARCH","Search")
 end
 
 function MS:initialize()
@@ -131,11 +140,10 @@ function MS:initialize()
 
   self.saved = ZO_SavedVars:NewAccountWide(self.svName, 1, nil, self.default)
 
-  -- local mapTabControl = MapSearch_MapTab
+  self:CreateStrings()
 
   SCENE_MANAGER:GetScene('worldMap'):RegisterCallback("StateChange", OnMapStateChange)
 
-  -- local mapTab = MS.MapTab(mapTabControl)
   self.MapTab:init()
   self.Recents:init()
   self.Bookmarks:init()

@@ -1,5 +1,6 @@
 function MapSearch:loadSettings()
     local LAM = LibAddonMenu2
+    local logger = MapSearch.logger
     local sv = self.saved
     if sv == nil then return end
   
@@ -26,6 +27,17 @@ function MapSearch:loadSettings()
           end,
         width = "full", --or "half",
         requiresReload = true,
+    })
+
+    table.insert(optionsTable, {
+      type = "checkbox",
+      name = "Auto-focus Search box",
+      tooltip = "Automatically puts the cursor in the search box when the tab is selected. This means that the 'M' key can't be used to exit the map; use 'Escape' instead.",
+      getFunc = function() return sv.autoFocus end,
+      setFunc = function(value)
+        sv.autoFocus = value
+        end,
+      width = "full",
     })
 
     table.insert(optionsTable, {

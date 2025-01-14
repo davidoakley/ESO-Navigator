@@ -213,13 +213,26 @@ local function buildList(scrollData, title, list)
     MT.resultCount = currentNodeIndex
 end
 
+function MT:UpdateEditDefaultText()
+	local searchString = self.editControl:GetText()
+	if searchString == "" then
+		-- reinstate default text
+        local s = self.editControl:HasFocus() and GetString(MAPSEARCH_SEARCH) or GetString(MAPSEARCH_SEARCH_KEYPRESS)
+		ZO_EditDefaultText_Initialize(self.editControl, s)
+	else
+		-- remove default text
+		ZO_EditDefaultText_Disable(self.editControl)
+	end
+end
+
 function MT:buildScrollList()
 	ZO_ScrollList_Clear(self.listControl)
 
 	local searchString = self.editControl:GetText()
 	if searchString == "" then
 		-- reinstate default text
-		ZO_EditDefaultText_Initialize(self.editControl, GetString(MAPSEARCH_SEARCH))
+        local s = self.editControl:HasFocus() and GetString(MAPSEARCH_SEARCH) or GetString(MAPSEARCH_SEARCH_KEYPRESS)
+		ZO_EditDefaultText_Initialize(self.editControl, s)
 	else
 		-- remove default text
 		ZO_EditDefaultText_Disable(self.editControl)
@@ -425,6 +438,11 @@ end
 function MT:nextCategory()
     MapSearch.targetNode = self:getNextCategoryFirstIndex()
 	self:buildScrollList()
+end
+
+function MT:previousCategory()
+    -- MapSearch.targetNode = self:getPreviousCategoryFirstIndex()
+	-- self:buildScrollList()
 end
 
 function MT:resetFilter()
