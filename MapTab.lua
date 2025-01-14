@@ -163,6 +163,13 @@ local function jumpToNode(node)
 	ZO_Dialogs_ShowPlatformDialog(id, {nodeIndex = nodeIndex}, {mainTextParams = {name}})
 end
 
+local function weightComparison(x,y)
+    if x.weight ~= y.weight then
+        return x.weight > y.weight
+    end
+	return (x.barename or x.name) < (y.barename or y.name)
+end
+
 local function buildList(scrollData, title, list)
     if #list > 0 then
         local recentEntry = ZO_ScrollList_CreateDataEntry(0, { name = title })
@@ -226,6 +233,36 @@ function MT:buildScrollList()
     if #MapSearch.results == 0 then
         buildList(scrollData, "Bookmarks", MapSearch.Bookmarks:getBookmarks())
         buildList(scrollData, "Recent", MapSearch.Recents:getRecents())
+
+        local zone = MapSearch.Locations:getCurrentMapZone()
+        if zone then
+            local list = MapSearch.Locations:getKnownNodes(zone.zoneId)
+
+            if MapSearch.isRecall then
+                local playerInfo = MapSearch.Locations:getPlayerInZone(zone.zoneId)
+                if playerInfo then
+                    playerInfo.name = "Jump to " .. zone.name
+                    playerInfo.suffix = "Via " .. playerInfo.suffix
+                else
+                    playerInfo = {
+                        name = "No players to recall to",
+                        barename = "",
+                        zoneId = zone.zoneId,
+                        zoneName = GetZoneNameById(zone.zoneId),
+                        icon = "/esoui/art/crafting/crafting_smithing_notrait.dds",
+                        poiType = POI_TYPE_NONE,
+                        known = true
+                    }
+                    end
+                playerInfo.weight = 10.0 -- list this first!
+                table.insert(list, playerInfo)
+            end
+
+            table.sort(list, weightComparison)
+            buildList(scrollData, zone.name, list)
+        end
+        -- GetMapNameByIndex(currentMapIndex)
+        -- buildList(scrollData, "Zone")
     end
 
 	ZO_ScrollList_Commit(self.listControl)
