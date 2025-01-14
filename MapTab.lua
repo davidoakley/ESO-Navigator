@@ -60,17 +60,17 @@ function MT:layoutRow(rowControl, data, scrollList)
 		rowControl.label:SetColor(0.51, 0.51, 0.44, 1.0)
 	end
 
-    if tooltipText then
-        rowControl:SetHandler("OnMouseEnter", function(rc)
+    rowControl:SetHandler("OnMouseEnter", function(rc)
+        if tooltipText then
             ZO_Tooltips_ShowTextTooltip(rc, LEFT, tooltipText)
-        end)
-        rowControl:SetHandler("OnMouseExit", function(_)
-            ZO_Tooltips_HideTextTooltip()
-            if data.isSelected then
-                rowControl.label:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
-            end
-        end )
-    end
+        end
+    end)
+    rowControl:SetHandler("OnMouseExit", function(_)
+        ZO_Tooltips_HideTextTooltip()
+        if data.isSelected then
+            rowControl.label:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
+        end
+    end )
 end
 
 function MT:showFilterControl(text)
