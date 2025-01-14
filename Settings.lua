@@ -40,6 +40,18 @@ function MapSearch:loadSettings()
       requiresReload = true,
     })
 
+    table.insert(optionsTable, 	{
+      type = "description",
+      -- title = "My Description",
+      text = function()
+        if PITHKA and PITHKA.SV and PITHKA.SV.options.enableTeleport then
+          return "|cFFFF00|t24:24:/esoui/art/miscellaneous/eso_icon_warning.dds:inheritcolor|t|r |c8080FFPithka's Achievement Tracker|r has its teleport command enabled, which also uses '/tp'"
+        else
+          return ""
+        end
+      end,
+    })
+
     LAM:RegisterOptionControls(self.menuName, optionsTable)
   end
   
