@@ -191,6 +191,12 @@ local function buildList(scrollData, title, list)
             nodeData.suffix = (nodeData.suffix or "") .. "|t25:25:MapSearch/media/bookmark.dds:inheritcolor|t"
         end
 
+        if MapSearch.isDeveloper then
+            -- resultNode.name = resultNode.name .. " |c808080[" .. resultNode.match .. "]|r"
+            nodeData.tooltip = "nodeIndex " .. (nodeData.nodeIndex or "-") .. "; bareName '" .. (nodeData.barename or '-') ..
+              "; weight "..(nodeData.weight or 0)
+        end
+
 		local entry = ZO_ScrollList_CreateDataEntry(1, nodeData)
 		table.insert(scrollData, entry)
 
