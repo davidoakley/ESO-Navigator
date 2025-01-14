@@ -9,6 +9,11 @@ function Bookmarks:init()
 end
 
 function Bookmarks:add(nodeIndex)
+    if nodeIndex == 211 or nodeIndex == 212 then
+        -- Always store The Harborage as index 210
+        nodeIndex = 210
+    end
+
     table.insert(self.nodes, nodeIndex)
     logger:Debug("Bookmarks:add("..nodeIndex..")")
     self:save()
@@ -26,6 +31,11 @@ function Bookmarks:remove(nodeIndex)
 end
 
 function Bookmarks:contains(nodeIndex)
+    if nodeIndex == 211 or nodeIndex == 212 then
+        -- The Harborage is always stored as index 210
+        nodeIndex = 210
+    end
+
     for i = 1, #self.nodes do
         if self.nodes[i] == nodeIndex then return true end
     end

@@ -22,20 +22,25 @@ function Recents:init()
     end
 end
 
-function Recents:insert(nodeId)
+function Recents:insert(nodeIndex)
+    if nodeIndex == 211 or nodeIndex == 212 then
+        -- Always store The Harborage as index 210
+        nodeIndex = 210
+    end
+
     for i = 1, #self.nodes do
-        if self.nodes[i] == nodeId then
+        if self.nodes[i] == nodeIndex then
             table.remove(self.nodes, i)
-            logger:Debug("Recents:insert("..nodeId..") removed existing entry #"..i)
+            logger:Debug("Recents:insert("..nodeIndex..") removed existing entry #"..i)
             break
         end
     end
     if #self.nodes >= self.maxEntries then
         table.remove(self.nodes)
-        logger:Debug("Recents:insert("..nodeId..") removed overflow entry #"..#self.nodes)
+        logger:Debug("Recents:insert("..nodeIndex..") removed overflow entry #"..#self.nodes)
     end
-    table.insert(self.nodes, 1, nodeId)
-    logger:Debug("Recents:insert("..nodeId..")")
+    table.insert(self.nodes, 1, nodeIndex)
+    logger:Debug("Recents:insert("..nodeIndex..")")
     self:save()
 end
 
