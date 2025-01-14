@@ -48,6 +48,7 @@ function Locs:setupNodes()
                 local zoneName = GetZoneNameById(nodeZoneId)
                 self.zones[nodeZoneId] = {
                     name = zoneName,
+                    zoneId = nodeZoneId,
                     index = zoneIndex,
                     nodes = {}
                 }
