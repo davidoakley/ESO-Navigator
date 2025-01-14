@@ -1,5 +1,17 @@
 local Utils = MapSearch.Utils or {}
 
+local _lang
+
+local function CurrentLanguage()
+	if _lang == nil then 
+		_lang = GetCVar("language.2")
+		_lang = string.lower(_lang)
+	end 
+	return _lang
+end
+
+CurrentLanguage()
+
 function Utils.shortName(name)
 	local r = name
 	if _lang == "fr" then
@@ -45,7 +57,7 @@ end
 function Utils.deepCopy(obj)
     if type(obj) ~= 'table' then return obj end
     local res = {}
-    for k, v in pairs(obj) do res[deepCopy(k)] = deepCopy(v) end
+    for k, v in pairs(obj) do res[Utils.deepCopy(k)] = Utils.deepCopy(v) end
     return res
 end
 
