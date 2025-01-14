@@ -4,5 +4,22 @@
         "old/**"
     ],
     "Lua.diagnostics.ignoredFiles": "Disable",
-    "Lua.diagnostics.libraryFiles": "Opened"
+    "Lua.diagnostics.libraryFiles": "Opened",
+    "Lua.diagnostics.globals": [
+        "LibAddonMenu2",
+        "LibDebugLogger",
+        "MAPSEARCH_TAB_SEARCH",
+        "KEYBIND_STRIP",
+        "WORLD_MAP_INFO",
+        "KEYBIND_STRIP_ALIGN_CENTER",
+        "MAIN_MENU_KEYBOARD",
+        "SI_TOOLTIP_RECALL_COST",
+        "SI_NUMBER_FORMAT",
+        "MAPSEARCH_SEARCH"
+    ],
+    "Lua.diagnostics.globalsRegex": [
+        "^ZO_.*",
+        "^zo_.*",
+        "^SI_[A-Z_]+"
+    ]
 }
