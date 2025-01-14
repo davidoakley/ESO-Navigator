@@ -285,7 +285,8 @@ function Locs:getPlayerList()
             icon = info.icon,
             suffix = info.zoneName,
             poiType = info.poiType,
-            userID = userID
+            userID = userID,
+            known = true
         })
     end
 
