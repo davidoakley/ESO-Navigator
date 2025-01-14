@@ -16,12 +16,13 @@ function Chat:Init()
     command:SetCallback(function(input) self:TP(input) end)
     command:SetDescription("Map Search: Teleports to the given zone")
 
-    self.AutoCompleteProvider = self.lsc.AutoCompleteProvider:Subclass()
+    ---@class Chat.AutoCompleteProvider
+    Chat.AutoCompleteProvider = LibSlashCommander.AutoCompleteProvider:Subclass()
 
     function Chat.AutoCompleteProvider:New()
         return Chat.lsc.AutoCompleteProvider.New(self)
     end
-    
+
     function Chat.AutoCompleteProvider:GetResultList()
         local zoneList = MS.Locations:getZoneList()
         local list = {}
@@ -31,7 +32,7 @@ function Chat:Init()
         logger:Info("Chat.AutoCompleteProvider:GetResultList: "..#list)
         return list
     end
-    
+
     command:SetAutoComplete(self.AutoCompleteProvider:New())
 
     command.GetAutoCompleteResults = function(self, text)
