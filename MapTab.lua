@@ -493,4 +493,10 @@ function MT:rowMouseUp(control, mouseButton, upInside)
 	end
 end
 
+function MT.OnMapChanged()
+    if MapSearch.mapVisible then
+        MT:buildScrollList()
+    end
+end
+
 MapSearch.MapTab = MT
