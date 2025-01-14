@@ -25,7 +25,7 @@ local MS = MapSearch
 -- Make this properly localisable!
 ZO_CreateStringId("MAPSEARCH_SEARCH","Search")
 ZO_CreateStringId("MAPSEARCH_OPENTAB","Open Search tab (on Map screen)")
-ZO_CreateStringId("SI_BINDING_NAME_MAPSEARCH_SEARCH", "Search")
+ZO_CreateStringId("SI_BINDING_NAME_MAPSEARCH_SEARCH", "Open Map Search")
 ZO_CreateStringId("MAPSEARCH_TAB_SEARCH","Search")
 
 local logger = LibDebugLogger(MS.name)
