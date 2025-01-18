@@ -497,6 +497,15 @@ function MT:selectResult(control, data, mouseButton)
         elseif data.poiType == POI_TYPE_ZONE then
             MT.filter = { FILTER_TYPE_ZONE, data.zoneId }
             self.editControl:SetText("")
+
+            local mapZoneId = MapSearch.Locations:getCurrentMapZone()
+            logger:Debug(zo_strformat("selectResult: data.zoneId {} mapZoneId {}", data.zoneId, mapZoneId))
+            if data.zoneId ~= mapZoneId then
+                local mapIndex = GetMapIndexByZoneId(data.zoneId)
+                if mapIndex then
+                    WORLD_MAP_MANAGER:SetMapByIndex(mapIndex)
+                end
+            end
         end
     elseif mouseButton == 2 then
         if data.nodeIndex then
