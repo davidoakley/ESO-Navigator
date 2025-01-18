@@ -28,7 +28,14 @@ function Locs:initialise()
 end
 
 function Locs:IsZone(zoneId)
-    if zoneId == GetParentZoneId(zoneId) or zoneId==981 or zoneId==1413 or zoneId==1027 then
+    if (zoneId == GetParentZoneId(zoneId)
+       or zoneId==981 -- The Brass Fortress
+       or zoneId==1413 -- Apocrypha
+       or zoneId==1027 -- Artaeum
+       ) and not (
+          zoneId==2 -- Tamriel
+       )
+       then
         return true
     end
     return false
@@ -40,109 +47,145 @@ function Locs:setupNodes()
     self.zones = {}
 
     local totalNodes = GetNumFastTravelNodes()
+    local nodeMap = {}
     for i = 1, totalNodes do
-        local known, name, Xcord, Ycord, icon, glowIcon, typePOI, onMap, isLocked = GetFastTravelNodeInfo(i)
+        local known, name, _, _, icon, glowIcon, typePOI, _, isLocked = GetFastTravelNodeInfo(i)
 
         local zoneIndex, _ = GetFastTravelNodePOIIndicies(i)
         local nodeZoneId = GetParentZoneId(GetZoneId(zoneIndex))
 
         if not isLocked and name ~= "" and (typePOI == 1 or glowIcon ~= nil) then
-            if self.zones[nodeZoneId] == nil then
-                if self:IsZone(nodeZoneId) then
-                    local zoneName = GetZoneNameById(nodeZoneId)
-                    self.zones[nodeZoneId] = {
-                        name = zoneName,
-                        zoneId = nodeZoneId,
-                        index = zoneIndex,
-                        nodes = {}
-                    }
-                end
-            end
+            local nodeInfo = self:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon, known)
 
-            if i >= 210 and i <= 212 then
-                -- Save this character's alliance's Harborage
-                self.harborageIndex = i
-            end
-
-            local nodeInfo = {
-                nodeIndex = i,
-                name = name,
-                originalName = name,
-                type = typePOI,
-                zoneId = nodeZoneId,
-                glowIcon = glowIcon,
-                icon = icon,
-                originalIcon = icon
-            }
-
-            if typePOI == 6 then
-                nodeInfo.poiType = POI_TYPE_GROUP_DUNGEON
-                nodeInfo.icon = "esoui/art/icons/poi/poi_groupinstance_complete.dds"
-                if name:find("Dungeon: ") then
-                    nodeInfo.name = string.sub(nodeInfo.name, 10, #nodeInfo.name)
-                end
-                nodeInfo.suffix = "Dungeon"
-            elseif typePOI == 3 then
-                nodeInfo.poiType = POI_TYPE_TRIAL
-                nodeInfo.icon = "esoui/art/tutorial/poi_raiddungeon_complete.dds"
-                -- nodeInfo.colour = ZO_ColorDef:New(1.0, 0.9, 0.8, 1.0)
-                if nodeInfo.name:find("Trial: ") then
-                    nodeInfo.name = string.sub(nodeInfo.name, 8, #nodeInfo.name)
-                end
-                nodeInfo.suffix = "Trial"
-            elseif typePOI == 7 then
-                nodeInfo.poiType = POI_TYPE_HOUSE
-                -- nodeInfo.icon = icon
-                nodeInfo.owned = (icon:find("poi_group_house_owned") ~= nil) --(icon == "/esoui/art/icons/poi/poi_group_house_owned.dds")
-                -- elseif name:find(" Arena") then
-                --     nodeInfo.poiType = POI_TYPE_ARENA
-                --     -- nodeInfo.name = string.sub(nodeInfo.name, 1, #nodeInfo.name - 6)
-                --     nodeInfo.icon = "esoui/art/tutorial/poi_raiddungeon_complete.dds"
-            elseif typePOI == 1 then
-                nodeInfo.poiType = POI_TYPE_WAYSHRINE
-                -- nodeInfo.icon = "esoui/art/icons/poi/poi_wayshrine_complete.dds"
-                if name:find(" Wayshrine") then
-                    nodeInfo.name = string.sub(nodeInfo.name, 1, #nodeInfo.name - 10)
-                end
-            elseif glowIcon == "/esoui/art/icons/poi/poi_soloinstance_glow.dds" then
-                nodeInfo.poiType = POI_TYPE_ARENA
-                -- nodeInfo.icon = "esoui/art/icons/poi/poi_soloinstance_complete.dds"
-                nodeInfo.suffix = "Arena"
-                -- if name:find(" Arena") then
-                --     nodeInfo.name = string.sub(nodeInfo.name, 1, #nodeInfo.name - 6)
-                -- end
-            elseif glowIcon == "/esoui/art/icons/poi/poi_groupinstance_glow.dds" then
-                nodeInfo.poiType = POI_TYPE_ARENA
-                -- nodeInfo.icon = "esoui/art/icons/poi/poi_groupinstance_complete.dds"
-                nodeInfo.suffix = "Arena"
-            else
-                logger:Warn("Unknown POI " .. i .. " '" .. name .. "' type " .. typePOI .. " " .. (glowIcon or "-"))
-                -- if glowIcon ~= nil and glowIcon:find("/esoui/art/icons/poi/poi_") and glowIcon:find("_glow.dds") then
-                --     nodeInfo.icon = glowIcon:gsub("_glow.dds", "_complete.dds")
-                -- end
-            end
-
-            nodeInfo.barename = Utils.bareName(nodeInfo.name)
-
-            if icon == "/esoui/art/icons/icon_missing.dds" then
-                nodeInfo.icon = "/esoui/art/crafting/crafting_smithing_notrait.dds"
-            end
-
-            local traders = MS.Data.traderCounts[i]
-            if traders and traders > 0 then
-                nodeInfo.traders = traders
-            end
-
-            if self.zones[nodeZoneId] then
-                table.insert(self.zones[nodeZoneId].nodes, nodeInfo)
-            else
-                logger:Debug("Locs:setupNodes: node "..i.." '"..nodeInfo.name.."' in non-parent zoneId "..nodeZoneId)
-            end
             table.insert(self.nodes, nodeInfo)
             self.nodeMap[i] = nodeInfo
             self.knownNodes[i] = known
+            nodeMap[Utils.bareName(name)] = nodeInfo
         end
     end
+
+    -- Iterate through zones to find correct zones for nodes
+    for zoneId = 1, 2000 do
+		local zoneName = GetZoneNameById(zoneId)
+		if zoneName ~= nil and zoneName ~= "" then
+			local zoneIndex = GetZoneIndex(zoneId)
+			local numPOIs = GetNumPOIs(zoneIndex)
+			for poiIndex = 1, numPOIs do
+				local poiName = GetPOIInfo(zoneIndex, poiIndex) -- might be wrong - "X" instead of "Dungeon: X"!
+				local nodeInfo = nodeMap[Utils.bareName(poiName)]  -- that's why we use BareName to strip prefix
+                if poiName ~= "" and nodeInfo ~= nil  then -- teleportable POI
+					-- fix "Darkshade Caverns I" being returned for both DC1 and DC2
+                    if zoneId==1146 then -- the Dragonguard Sanctuary wayshrine in Tideholm
+                        zoneId = 1133 -- should appear in Southern Elsweyr
+					elseif zoneId == 57 and poiIndex == 60 then -- zone Deshaan, POI 60 is DC2!
+						for k, v in pairs(nodeMap) do
+							if v.nodeIndex == 264 then
+								nodeInfo = v
+							end
+						end
+					end
+
+                    if not self.zones[zoneId] then
+                        if self:IsZone(zoneId) then
+                            local zoneName = GetZoneNameById(zoneId)
+                            self.zones[zoneId] = {
+                                name = zoneName,
+                                zoneId = zoneId,
+                                index = zoneIndex,
+                                nodes = {}
+                            }
+                        else
+                            logger:Debug(zo_strformat("setupNodes: not zone: zoneId <<1>> name <<2>>", zoneId, zoneName))
+                        end
+                    end
+
+                    if self.zones[zoneId] then
+                        nodeInfo.zoneId = zoneId
+                        table.insert(self.zones[zoneId].nodes, nodeInfo)
+                    -- else
+                    --     logger:Debug("Locs:setupNodes: node "..i.." '"..nodeInfo.name.."' in non-parent zoneId "..nodeZoneId)
+                    end
+				end
+			end
+		end
+	end
+
+end
+
+function Locs:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon, known)
+    if i >= 210 and i <= 212 then
+        -- Save this character's alliance's Harborage
+        self.harborageIndex = i
+    end
+
+    local nodeInfo = {
+        nodeIndex = i,
+        name = name,
+        originalName = name,
+        type = typePOI,
+        zoneId = nodeZoneId,
+        glowIcon = glowIcon,
+        icon = icon,
+        originalIcon = icon
+    }
+
+    if typePOI == 6 then
+        nodeInfo.poiType = POI_TYPE_GROUP_DUNGEON
+        nodeInfo.icon = "esoui/art/icons/poi/poi_groupinstance_complete.dds"
+        if name:find("Dungeon: ") then
+            nodeInfo.name = string.sub(nodeInfo.name, 10, #nodeInfo.name)
+        end
+        nodeInfo.suffix = "Dungeon"
+    elseif typePOI == 3 then
+        nodeInfo.poiType = POI_TYPE_TRIAL
+        nodeInfo.icon = "esoui/art/tutorial/poi_raiddungeon_complete.dds"
+        if nodeInfo.name:find("Trial: ") then
+            nodeInfo.name = string.sub(nodeInfo.name, 8, #nodeInfo.name)
+        end
+        nodeInfo.suffix = "Trial"
+    elseif typePOI == 7 then
+        nodeInfo.poiType = POI_TYPE_HOUSE
+        nodeInfo.owned = (icon:find("poi_group_house_owned") ~= nil) --(icon == "/esoui/art/icons/poi/poi_group_house_owned.dds")
+        -- elseif name:find(" Arena") then
+        --     nodeInfo.poiType = POI_TYPE_ARENA
+        --     -- nodeInfo.name = string.sub(nodeInfo.name, 1, #nodeInfo.name - 6)
+        --     nodeInfo.icon = "esoui/art/tutorial/poi_raiddungeon_complete.dds"
+    elseif typePOI == 1 then
+        nodeInfo.poiType = POI_TYPE_WAYSHRINE
+        if name:find(" Wayshrine") then
+            nodeInfo.name = string.sub(nodeInfo.name, 1, #nodeInfo.name - 10)
+        end
+    elseif glowIcon == "/esoui/art/icons/poi/poi_soloinstance_glow.dds" or
+           glowIcon == "/esoui/art/icons/poi/poi_groupinstance_glow.dds" then
+        nodeInfo.poiType = POI_TYPE_ARENA
+        nodeInfo.suffix = "Arena"
+        -- if name:find(" Arena") then
+        --     nodeInfo.name = string.sub(nodeInfo.name, 1, #nodeInfo.name - 6)
+        -- end
+    else
+        logger:Warn("Unknown POI " .. i .. " '" .. name .. "' type " .. typePOI .. " " .. (glowIcon or "-"))
+        -- if glowIcon ~= nil and glowIcon:find("/esoui/art/icons/poi/poi_") and glowIcon:find("_glow.dds") then
+        --     nodeInfo.icon = glowIcon:gsub("_glow.dds", "_complete.dds")
+        -- end
+    end
+
+    nodeInfo.barename = Utils.bareName(nodeInfo.name)
+
+    if icon == "/esoui/art/icons/icon_missing.dds" then
+        nodeInfo.icon = "/esoui/art/crafting/crafting_smithing_notrait.dds"
+    end
+
+    local traders = MS.Data.traderCounts[i]
+    if traders and traders > 0 then
+        nodeInfo.traders = traders
+    end
+
+    -- if self.zones[nodeZoneId] then
+    --     table.insert(self.zones[nodeZoneId].nodes, nodeInfo)
+    -- else
+    --     logger:Debug("Locs:setupNodes: node "..i.." '"..nodeInfo.name.."' in non-parent zoneId "..nodeZoneId)
+    -- end
+    return nodeInfo
 end
 
 function Locs:addPlayerZone(zoneId, zoneName, userID, icon, poiType)
