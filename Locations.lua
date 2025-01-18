@@ -384,7 +384,7 @@ function Locs:getCurrentMapZone()
     local _, mapType, _, zoneIndex, _ = GetMapInfoById(mapId)
     local zoneId = GetZoneId(zoneIndex)
     -- logger:Debug("Locs:getCurrentMapZone zoneId = "..zoneId.." type "..mapType)
-    if mapType == MAPTYPE_SUBZONE then
+    if mapType == MAPTYPE_SUBZONE and not self:IsZone(zoneId) then
         zoneId = GetParentZoneId(zoneId)
         -- logger:Debug("Locs:getCurrentMapZone parent zoneId = "..zoneId)
     end
