@@ -34,6 +34,7 @@ function Locs:IsZone(zoneId)
        or zoneId==1027 -- Artaeum
        ) and not (
           zoneId==2 -- Tamriel
+       or zoneId==181 -- Cyrodiil
        )
        then
         return true
