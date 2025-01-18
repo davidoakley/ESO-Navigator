@@ -73,7 +73,7 @@ function Search.run(searchTerm, filter)
     elseif filterType == FILTER_TYPE_ZONE then
         local zoneId = filter[2]
         addSearchResults(result, searchTerm, Locations:getKnownNodes(zoneId))
-        if MS.isRecall then
+        if MS.isRecall and zoneId ~= 584 then -- Imperial City
             local playerInfo = Locations:getPlayerInZone(zoneId)
             if playerInfo then
                 playerInfo.name = "Jump to player"
