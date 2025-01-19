@@ -38,7 +38,7 @@ function Chat:Init()
     command.GetAutoCompleteResults = function(self, text)
         local results = {}
 
-        local searchResult = MS.Search.run(text, {FILTER_TYPE_NONE})
+        local searchResult = MS.Search.run(text, MS.FILTER_NONE)
 
         local count = (#searchResult <= 1) and #searchResult or 1
         for i = 1, count do
@@ -56,7 +56,7 @@ function Chat:TP(text)
     local MT = MS.MapTab
     local Locs = MS.Locations
 
-    local searchResult = MS.Search.run(text, {FILTER_TYPE_NONE})
+    local searchResult = MS.Search.run(text, MS.FILTER_NONE)
     if #searchResult == 0 then
         return
     end

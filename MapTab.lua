@@ -1,9 +1,10 @@
 local MT = MapSearch_MapTab -- from XML
+local MS = MapSearch
 local Search = MapSearch.Search
 local Utils = MapSearch.Utils
 local logger = MapSearch.logger
 
-MT.filter = { FILTER_TYPE_NONE }
+MT.filter = MS.FILTER_NONE
 
 function MT:layoutRow(rowControl, data, scrollList)
 	local name = data.name
@@ -85,12 +86,12 @@ function MT:hideFilterControl()
 end
 
 function MT:updateFilterControl()
-    if self.filter == FILTER_TYPE_NONE then
+    if self.filter == MS.FILTER_NONE then
         self:hideFilterControl()
         return
-    elseif self.filter[1] == FILTER_TYPE_PLAYERS then
+    elseif self.filter == MS.FILTER_PLAYERS then
         self:showFilterControl('Players')
-    elseif self.filter[1] == FILTER_TYPE_HOUSES then
+    elseif self.filter == MS.FILTER_HOUSES then
         self:showFilterControl('Houses')
     end
 end
@@ -402,17 +403,17 @@ function MT:onTextChanged(editbox, listcontrol)
         if mapIndex then
             WORLD_MAP_MANAGER:SetMapByIndex(mapIndex)
         end
-        MT.filter = { FILTER_TYPE_NONE } -- self.filter = { FILTER_TYPE_ZONES }
+        MT.filter = MS.FILTER_NONE
         editbox:SetText("")
         editbox.editTextChanged = false
         searchString = ""
     elseif searchString == "h:" then
-        self.filter = { FILTER_TYPE_HOUSES }
+        self.filter = MS.FILTER_HOUSES
         editbox:SetText("")
         editbox.editTextChanged = false
         searchString = ""
     elseif searchString == '@' or searchString == "p:" then
-        self.filter = { FILTER_TYPE_PLAYERS }
+        self.filter = MS.FILTER_PLAYERS
         editbox.editTextChanged = false
         editbox:SetText("")
         searchString = ""
@@ -455,7 +456,7 @@ end
 
 function MT:resetFilter()
 	logger.Debug("MT.resetFilter")
-    MT.filter = { FILTER_TYPE_NONE }
+    MT.filter = MS.FILTER_NONE
     MT:hideFilterControl()
 	self:executeSearch("")
 	ZO_ScrollList_ResetToTop(self.listControl)
@@ -464,7 +465,7 @@ end
 function MT:resetSearch(lose_focus)
 	logger.Debug("MT.resetSearch")
 	self.editControl:SetText("")
-    MT.filter = { FILTER_TYPE_NONE }
+    MT.filter = MS.FILTER_NONE
     MT:hideFilterControl()
 	self:executeSearch("")
 
@@ -501,7 +502,7 @@ function MT:selectResult(control, data, mouseButton)
         if data.nodeIndex or data.userID then
             jumpToNode(data)
         elseif data.poiType == POI_TYPE_ZONE then
-            MT.filter = { FILTER_TYPE_NONE } -- MT.filter = { FILTER_TYPE_ZONE, data.zoneId }
+            MT.filter = MS.FILTER_NONE
             self.editControl:SetText("")
 
             local mapZoneId = MapSearch.Locations:getCurrentMapZone()
@@ -540,7 +541,7 @@ function MT.OnMapChanged()
         local zone = MapSearch.Locations:getCurrentMapZone()
         if zone and zone.zoneId ~= MapSearch.initialMapZoneId then
             logger:Debug("Moved to zoneId: "..zone.zoneId.."(initial "..(MapSearch.initialMapZoneId or 0)..")")
-            MT.filter = { FILTER_TYPE_NONE } -- { FILTER_TYPE_ZONE, zone.zoneId }
+            MT.filter = MS.FILTER_NONE
             MT:updateFilterControl()
             MT.editControl:SetText("")
         else
@@ -548,7 +549,7 @@ function MT.OnMapChanged()
             local _, mapType, _, zoneIndex, _ = GetMapInfoById(mapId)
             local zoneId = GetZoneId(zoneIndex)
             if zoneId == 2 then -- Tamriel
-                MT.filter = { FILTER_TYPE_NONE } -- { FILTER_TYPE_ZONES }
+                MT.filter = MS.FILTER_NONE
                 MT:updateFilterControl()
                 MT.editControl:SetText("")
                 logger:Debug("ZONES")

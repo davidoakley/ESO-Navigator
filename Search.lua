@@ -8,9 +8,9 @@ local fzy = MS.fzy
 
 Search.categories = nil
 
-FILTER_TYPE_NONE = 0    -- filter = { FILTER_TYPE_NONE }
-FILTER_TYPE_PLAYERS = 1 -- filter = { FILTER_TYPE_PLAYERS }
-FILTER_TYPE_HOUSES = 4   -- filter = { FILTER_TYPE_HOUSES }
+MS.FILTER_NONE = 0
+MS.FILTER_PLAYERS = 1
+MS.FILTER_HOUSES = 4
 
 local function match(object, searchTerm)
     local name = object.barename or object.name
@@ -50,21 +50,20 @@ end
 
 
 function Search.run(searchTerm, filter)
-    local filterType = filter[1]
     searchTerm = searchTerm and string.lower(searchTerm) or ""
     searchTerm = searchTerm:gsub("[^%w ]", "")
 
-    logger:Debug(string.format("Search.run('%s', %d)", searchTerm, filterType))
+    logger:Debug(string.format("Search.run('%s', %d)", searchTerm, filter))
 
-    if filterType == FILTER_TYPE_NONE and searchTerm == "" then
+    if filter == MS.FILTER_NONE and searchTerm == "" then
         return {}
     end
 
     local result = {}
 
-    if filterType == FILTER_TYPE_PLAYERS then
+    if filter == MS.FILTER_PLAYERS then
         addSearchResults(result, searchTerm, Locations:getPlayerList())
-    elseif filterType == FILTER_TYPE_HOUSES then
+    elseif filter == MS.FILTER_HOUSES then
         addSearchResults(result, searchTerm, Locations:getHouseList())
     else
         addSearchResults(result, searchTerm, Locations:getKnownNodes())
