@@ -10,8 +10,6 @@ Search.categories = nil
 
 FILTER_TYPE_NONE = 0    -- filter = { FILTER_TYPE_NONE }
 FILTER_TYPE_PLAYERS = 1 -- filter = { FILTER_TYPE_PLAYERS }
-FILTER_TYPE_ZONES = 2   -- filter = { FILTER_TYPE_ZONES }
-FILTER_TYPE_ZONE = 3    -- filter = { FILTER_TYPE_ZONE, 'Grahtwood' }
 FILTER_TYPE_HOUSES = 4   -- filter = { FILTER_TYPE_HOUSES }
 
 local function match(object, searchTerm)
@@ -66,31 +64,8 @@ function Search.run(searchTerm, filter)
 
     if filterType == FILTER_TYPE_PLAYERS then
         addSearchResults(result, searchTerm, Locations:getPlayerList())
-    elseif filterType == FILTER_TYPE_ZONES then
-        addSearchResults(result, searchTerm, Locations:getZoneList())
     elseif filterType == FILTER_TYPE_HOUSES then
         addSearchResults(result, searchTerm, Locations:getHouseList())
-    elseif filterType == FILTER_TYPE_ZONE then
-        local zoneId = filter[2]
-        addSearchResults(result, searchTerm, Locations:getKnownNodes(zoneId))
-        if MS.isRecall and zoneId ~= 584 then -- Imperial City
-            local playerInfo = Locations:getPlayerInZone(zoneId)
-            if playerInfo then
-                playerInfo.name = "Jump to player"
-            else
-                playerInfo = {
-                    name = "No players to recall to",
-                    barename = "",
-                    zoneId = zoneId,
-                    zoneName = GetZoneNameById(zoneId),
-                    icon = "/esoui/art/crafting/crafting_smithing_notrait.dds",
-                    poiType = POI_TYPE_NONE,
-                    known = true
-                }
-                end
-            playerInfo.weight = 10.0 -- list this first!
-            addSearchResults(result, searchTerm, { playerInfo })
-        end
     else
         addSearchResults(result, searchTerm, Locations:getKnownNodes())
         addSearchResults(result, searchTerm, Locations:getZoneList())
