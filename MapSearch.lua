@@ -49,16 +49,9 @@ end
 
 local function AddWorldMapFragment(strId, fragment, normal, highlight, pressed)
   WORLD_MAP_INFO.modeBar:Add(strId, { fragment }, { pressed = pressed, highlight = highlight, normal = normal })
-  end
-
-local function GetPaths(path, ...)
-  return unpack(Utils.map({ ... }, function(p)
-    return path .. p
-  end))
 end
 
-local function OnMapStateChange(oldState, newState)
-  local ButtonGroup = {
+local ButtonGroup = {
   {
     name = "Search", --GetString(SI_BINDING_NAME_FASTER_TRAVEL_REJUMP),
     keybind = "MAPSEARCH_OPENTAB", --"UI_SHORTCUT_QUICK_SLOTS", --"MAPSEARCH_SEARCH",
@@ -69,6 +62,7 @@ local function OnMapStateChange(oldState, newState)
     alignment = KEYBIND_STRIP_ALIGN_CENTER,
   }
 
+local function OnMapStateChange(oldState, newState)
   if newState == SCENE_SHOWING then
     logger:Debug("WorldMap showing")
     MS.mapVisible = true
