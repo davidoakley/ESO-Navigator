@@ -158,9 +158,11 @@
 							</OnEffectivelyShown>
 							<OnFocusGained>
 								MapSearch.MapTab:UpdateEditDefaultText()
+								MapSearch.MapTab:buildScrollList()
 							</OnFocusGained>
 							<OnFocusLost>
 								MapSearch.MapTab:UpdateEditDefaultText()
+								MapSearch.MapTab:buildScrollList()
 							</OnFocusLost>
 							<OnTextChanged>
 								MapSearch.logger:Debug("onTextChanged: pos="..self:GetCursorPosition())
