@@ -64,12 +64,23 @@
 							<Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="-8" offsetY="-4" />
 							<Anchor point="BOTTOMRIGHT" relativeTo="$(parent)" relativePoint="BOTTOMRIGHT" offsetX="8" offsetY="4" />
 						</Backdrop>
+						<Texture name="$(parent)Up" textureFile="/esoui/art/miscellaneous/gamepad/arrow_up.dds" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" hidden="false" mouseEnabled="false">
+							<Dimensions x="12" y="12"/>
+							<Anchor point="BOTTOM" relativeTo="$(parent)Bg" relativePoint="TOP" offsetX="0" offsetY="1" />
+							<TextureCoords top="0" bottom="1" left="0" right="1"/>
+						</Texture>
+						<Texture name="$(parent)Down" textureFile="/esoui/art/miscellaneous/gamepad/arrow_down.dds" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" hidden="false" mouseEnabled="false">
+							<Dimensions x="12" y="12"/>
+							<Anchor point="TOP" relativeTo="$(parent)Bg" relativePoint="BOTTOM" offsetX="0" offsetY="-3" />
+							<TextureCoords top="0" bottom="1" left="0" right="1"/>
+						</Texture>
+						<!-- /esoui/art/miscellaneous/gamepad/arrow_down.dds -->
 					</Controls>
 				</Label>
 
 				<Label name="$(parent)Label" inherits="ZO_SelectableLabel" font="ZoFontHeader" wrapMode="ELLIPSIS" mouseEnabled="false">
 					<Anchor point="TOPLEFT" relativeTo="$(parent)Icon" relativePoint="TOPRIGHT" offsetX="6" offsetY="0" />
-					<Anchor point="TOPRIGHT" relativeTo="$(parent)Keybind" relativePoint="TOPLEFT" />
+					<Anchor point="TOPRIGHT" relativeTo="$(parent)Keybind" relativePoint="TOPLEFT" offsetX="-4" />
 		            <Dimensions y="24" />
 				</Label>
             </Controls>
@@ -158,9 +169,11 @@
 							</OnEffectivelyShown>
 							<OnFocusGained>
 								MapSearch.MapTab:UpdateEditDefaultText()
+								MapSearch.MapTab:buildScrollList()
 							</OnFocusGained>
 							<OnFocusLost>
 								MapSearch.MapTab:UpdateEditDefaultText()
+								MapSearch.MapTab:buildScrollList()
 							</OnFocusLost>
 							<OnTextChanged>
 								MapSearch.logger:Debug("onTextChanged: pos="..self:GetCursorPosition())

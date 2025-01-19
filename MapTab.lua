@@ -46,7 +46,7 @@ function MT:layoutRow(rowControl, data, scrollList)
 
     rowControl.cost:SetHidden(isFree)
 
-	rowControl.keybind:SetHidden(not data.isSelected or not data.known)
+	rowControl.keybind:SetHidden(not data.isSelected or not data.known or not self.editControl:HasFocus())
     rowControl.bg:SetHidden(not data.isSelected)
 
 	rowControl.label:SetText(name)
@@ -350,7 +350,7 @@ function MT:getNextCategoryFirstIndex()
 
     while true do
         if scrollData[i].typeId == 1 then -- wayshrine row
-            if foundCategory or i == currentIndex then
+            if (foundCategory and scrollData[i].data.known) or i == currentIndex then
                 -- return the first entry after the category header
                 -- logger:Debug("Index %d node %d is result - returning", i, currentNodeIndex)
                 return currentNodeIndex
@@ -434,15 +434,31 @@ function MT:selectCurrentResult()
 end
 
 function MT:nextResult()
-	MapSearch.targetNode = (MapSearch.targetNode + 1) % MT.resultCount
+    local known = false
+    local startNode = MapSearch.targetNode
+    repeat
+    	MapSearch.targetNode = (MapSearch.targetNode + 1) % MT.resultCount
+        local node = self:getTargetNode()
+        if node and node.known then
+            known = true
+        end
+    until known or MapSearch.targetNode == startNode
 	self:buildScrollList()
 end
 
 function MT:previousResult()
-	MapSearch.targetNode = MapSearch.targetNode - 1
-	if MapSearch.targetNode < 0 then
-		MapSearch.targetNode = MT.resultCount - 1
-	end
+    local known = false
+    local startNode = MapSearch.targetNode
+    repeat
+        MapSearch.targetNode = MapSearch.targetNode - 1
+        if MapSearch.targetNode < 0 then
+            MapSearch.targetNode = MT.resultCount - 1
+        end
+        local node = self:getTargetNode()
+        if node and node.known then
+            known = true
+        end
+    until known or MapSearch.targetNode == startNode
 	self:buildScrollList()
 end
 
