@@ -90,13 +90,8 @@ function MT:updateFilterControl()
         return
     elseif self.filter[1] == FILTER_TYPE_PLAYERS then
         self:showFilterControl('Players')
-    elseif self.filter[1] == FILTER_TYPE_ZONES then
-        self:showFilterControl('Zones')
     elseif self.filter[1] == FILTER_TYPE_HOUSES then
         self:showFilterControl('Houses')
-    elseif self.filter[1] == FILTER_TYPE_ZONE then
-        local zoneName = GetZoneNameById(self.filter[2])
-        self:showFilterControl(zoneName)
     end
 end
 
@@ -163,10 +158,14 @@ local function jumpToNode(node)
 	ZO_Dialogs_ShowPlatformDialog(id, {nodeIndex = nodeIndex}, {mainTextParams = {name}})
 end
 
-local function weightComparison(x,y)
+local function weightComparison(x, y)
     if x.weight ~= y.weight then
         return x.weight > y.weight
     end
+	return (x.barename or x.name) < (y.barename or y.name)
+end
+
+local function nameComparison(x, y)
 	return (x.barename or x.name) < (y.barename or y.name)
 end
 
@@ -243,21 +242,26 @@ function MT:buildScrollList()
     MT.resultCount = 0
     buildList(scrollData, "Results", MapSearch.results)
 
+    local currentZoneId = MapSearch.Locations:getCurrentMapZoneId()
     if #MapSearch.results == 0 then
-        if MT.filter[1] == FILTER_TYPE_NONE then
+        if self:IsViewingInitialZone() and currentZoneId ~= 2 then
             buildList(scrollData, "Bookmarks", MapSearch.Bookmarks:getBookmarks())
             buildList(scrollData, "Recent", MapSearch.Recents:getRecents())
         end
 
         local zone = MapSearch.Locations:getCurrentMapZone()
-        if zone then
+        if zone and zone.zoneId == 2 then
+            local list = MapSearch.Locations:getZoneList()
+            table.sort(list, nameComparison)
+            buildList(scrollData, "Zones", list)
+        elseif zone then
             local list = MapSearch.Locations:getKnownNodes(zone.zoneId)
 
             if MapSearch.isRecall then
                 local playerInfo = MapSearch.Locations:getPlayerInZone(zone.zoneId)
                 if playerInfo then
                     playerInfo.name = "Jump to " .. zone.name
-                    playerInfo.suffix = "Via " .. playerInfo.suffix
+                    -- playerInfo.suffix = "via " .. playerInfo.suffix
                 else
                     playerInfo = {
                         name = "No players to recall to",
@@ -266,7 +270,7 @@ function MT:buildScrollList()
                         zoneName = GetZoneNameById(zone.zoneId),
                         icon = "/esoui/art/crafting/crafting_smithing_notrait.dds",
                         poiType = POI_TYPE_NONE,
-                        known = true
+                        known = false
                     }
                     end
                 playerInfo.weight = 10.0 -- list this first!
@@ -276,8 +280,6 @@ function MT:buildScrollList()
             table.sort(list, weightComparison)
             buildList(scrollData, zone.name, list)
         end
-        -- GetMapNameByIndex(currentMapIndex)
-        -- buildList(scrollData, "Zone")
     end
 
 	ZO_ScrollList_Commit(self.listControl)
@@ -396,7 +398,11 @@ end
 function MT:onTextChanged(editbox, listcontrol)
 	local searchString = string.lower(editbox:GetText())
     if searchString == "z:" then
-        self.filter = { FILTER_TYPE_ZONES }
+        local mapIndex = GetMapIndexByZoneId(2) -- Tamriel
+        if mapIndex then
+            WORLD_MAP_MANAGER:SetMapByIndex(mapIndex)
+        end
+        MT.filter = { FILTER_TYPE_NONE } -- self.filter = { FILTER_TYPE_ZONES }
         editbox:SetText("")
         editbox.editTextChanged = false
         searchString = ""
@@ -495,7 +501,7 @@ function MT:selectResult(control, data, mouseButton)
         if data.nodeIndex or data.userID then
             jumpToNode(data)
         elseif data.poiType == POI_TYPE_ZONE then
-            MT.filter = { FILTER_TYPE_ZONE, data.zoneId }
+            MT.filter = { FILTER_TYPE_NONE } -- MT.filter = { FILTER_TYPE_ZONE, data.zoneId }
             self.editControl:SetText("")
 
             local mapZoneId = MapSearch.Locations:getCurrentMapZone()
@@ -523,13 +529,18 @@ function MT:rowMouseUp(control, mouseButton, upInside)
 	end
 end
 
+function MT:IsViewingInitialZone()
+    local zone = MapSearch.Locations:getCurrentMapZone()
+    return not zone or zone.zoneId == MapSearch.initialMapZoneId
+end
+
 function MT.OnMapChanged()
     if MapSearch.mapVisible then
         -- local mapId = GetCurrentMapId()
         local zone = MapSearch.Locations:getCurrentMapZone()
         if zone and zone.zoneId ~= MapSearch.initialMapZoneId then
             logger:Debug("Moved to zoneId: "..zone.zoneId.."(initial "..(MapSearch.initialMapZoneId or 0)..")")
-            MT.filter = { FILTER_TYPE_ZONE, zone.zoneId }
+            MT.filter = { FILTER_TYPE_NONE } -- { FILTER_TYPE_ZONE, zone.zoneId }
             MT:updateFilterControl()
             MT.editControl:SetText("")
         else
@@ -537,7 +548,7 @@ function MT.OnMapChanged()
             local _, mapType, _, zoneIndex, _ = GetMapInfoById(mapId)
             local zoneId = GetZoneId(zoneIndex)
             if zoneId == 2 then -- Tamriel
-                MT.filter = { FILTER_TYPE_ZONES }
+                MT.filter = { FILTER_TYPE_NONE } -- { FILTER_TYPE_ZONES }
                 MT:updateFilterControl()
                 MT.editControl:SetText("")
                 logger:Debug("ZONES")
