@@ -161,9 +161,9 @@ function MS:initialize()
   addEvent(EVENT_POI_UPDATED, OnPOIUpdated)
 
   -- local normal, highlight, pressed = GetPaths("/esoui/art/guild/guildhistory_indexicon_guildstore_", "up.dds", "over.dds", "down.dds")
-  local normal = "/esoui/art/tradinghouse/tradinghouse_browse_tabicon_up.dds"
-  local highlight = "/esoui/art/tradinghouse/tradinghouse_browse_tabicon_over.dds"
-  local pressed = "/esoui/art/tradinghouse/tradinghouse_browse_tabicon_down.dds"
+  local normal = "Navigator/media/tabicon_up.dds"
+  local highlight = "Navigator/media/tabicon_over.dds"
+  local pressed = "Navigator/media/tabicon_down.dds"
 
   WORLD_MAP_INFO.modeBar:Add(MAPSEARCH_TAB_SEARCH, { self.MapTab.fragment }, { pressed = pressed, highlight = highlight, normal = normal })
   moveTabToFirst()

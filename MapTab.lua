@@ -189,14 +189,14 @@ local function buildList(scrollData, title, list)
         -- logger:Info("%s: traders %d", nodeData.barename, nodeData.traders or 0)
         if listEntry.traders and listEntry.traders > 0 then
             if listEntry.traders >= 5 then
-                nodeData.suffix = "|t20:23:MapSearch/media/city_narrow.dds:inheritcolor|t"
+                nodeData.suffix = "|t20:23:Navigator/media/city_narrow.dds:inheritcolor|t"
             elseif listEntry.traders >= 2 then
-                nodeData.suffix = "|t20:23:MapSearch/media/town_narrow.dds:inheritcolor|t"
+                nodeData.suffix = "|t20:23:Navigator/media/town_narrow.dds:inheritcolor|t"
             end
             nodeData.suffix = (nodeData.suffix or "") .. "|t23:23:/esoui/art/icons/servicemappins/servicepin_guildkiosk.dds:inheritcolor|t"
         end
         if MapSearch.Bookmarks:contains(listEntry.nodeIndex) then
-            nodeData.suffix = (nodeData.suffix or "") .. "|t25:25:MapSearch/media/bookmark.dds:inheritcolor|t"
+            nodeData.suffix = (nodeData.suffix or "") .. "|t25:25:Navigator/media/bookmark.dds:inheritcolor|t"
         end
 
         if MapSearch.isDeveloper then

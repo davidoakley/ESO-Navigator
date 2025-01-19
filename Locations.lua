@@ -363,7 +363,7 @@ function Locs:getPlayerZoneList()
             barename = Utils.bareName(info.zoneName),
             zoneId = zoneID,
             zoneName = info.zoneName,
-            icon = "MapSearch/media/zone.dds",
+            icon = "Navigator/media/zone.dds",
             suffix = info.userID,
             poiType = info.poiType,
             userID = info.userID,
@@ -410,7 +410,7 @@ function Locs:getZoneList()
             barename = Utils.bareName(info.name),
             zoneId = zoneID,
             zoneName = info.name,
-            icon = "MapSearch/media/zone.dds",
+            icon = "Navigator/media/zone.dds",
             poiType = POI_TYPE_ZONE,
             known = true
         })
