@@ -7,7 +7,7 @@
 ## OptionalDependsOn: pChat FasterTravel LibSlashCommander LibWorldMapInfoTab
 ## SavedVariables: Navigator_SavedVariables
 
-MapSearch.lua
+Navigator.lua
 fzy.lua
 Data.lua
 Utils.lua
