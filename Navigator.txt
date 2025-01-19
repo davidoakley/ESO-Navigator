@@ -1,12 +1,11 @@
-## Title: Map Search
-## Description: TODO
+## Title: Navigator
+## Description: Find your way around ESO's maps quicker with a context-aware sidebar and search
 ## Author: SirNightstorm (PC-EU)
 ## APIVersion: 101042
 ## Version: 0.0.1
-## DependsOn: LibDebugLogger>=180 LibWorldMapInfoTab LibAddonMenu-2.0
-## X-DependsOn: LibCustomMenu
-## OptionalDependsOn: pChat, FasterTravel, LibSlashCommander
-## SavedVariables: MapSearch_SavedVariables
+## DependsOn: LibDebugLogger>=180 LibAddonMenu-2.0
+## OptionalDependsOn: pChat FasterTravel LibSlashCommander LibWorldMapInfoTab
+## SavedVariables: Navigator_SavedVariables
 
 MapSearch.lua
 fzy.lua
