@@ -10,7 +10,8 @@ function MT:layoutRow(rowControl, data, scrollList)
 	local name = data.name
     local tooltipText = data.tooltip
     local icon = data.icon
-    local iconColour = data.known and { 1.0, 1.0, 1.0, 1.0 } or { 0.51, 0.51, 0.44, 1.0 }
+    local iconColour = data.colour and { data.colour:UnpackRGBA() } or
+                       (data.known and { 1.0, 1.0, 1.0, 1.0 } or { 0.51, 0.51, 0.44, 1.0 })
     local isFree = true
 
     if data.suffix ~= nil then
@@ -263,6 +264,7 @@ function MT:buildScrollList()
                 if playerInfo then
                     playerInfo.name = "Jump to " .. zone.name
                     -- playerInfo.suffix = "via " .. playerInfo.suffix
+                    playerInfo.colour = ZO_SECOND_CONTRAST_TEXT
                 else
                     playerInfo = {
                         name = "No players to recall to",

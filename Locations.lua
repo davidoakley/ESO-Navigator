@@ -387,7 +387,7 @@ function Locs:getPlayerInZone(zoneId)
             zoneId = zoneId,
             zoneName = info.zoneName,
             icon = info.icon,
-            suffix = info.userID,
+            -- suffix = info.userID,
             poiType = info.poiType,
             userID = info.userID,
             known = true
