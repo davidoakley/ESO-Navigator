@@ -46,7 +46,7 @@ function MT:layoutRow(rowControl, data, scrollList)
 
     rowControl.cost:SetHidden(isFree)
 
-	rowControl.keybind:SetHidden(not data.isSelected or not data.known)
+	rowControl.keybind:SetHidden(not data.isSelected or not data.known or not self.editControl:HasFocus())
     rowControl.bg:SetHidden(not data.isSelected)
 
 	rowControl.label:SetText(name)
