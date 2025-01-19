@@ -1,7 +1,8 @@
 {
     "Lua.workspace.ignoreDir": [
         ".vscode",
-        "old/**"
+        "old/**",
+        "test/ESOUI.lua"
     ],
     "Lua.diagnostics.ignoredFiles": "Disable",
     "Lua.diagnostics.libraryFiles": "Opened",

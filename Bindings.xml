@@ -1,6 +1,6 @@
 <Bindings>
 	<Layer name="SI_KEYBINDINGS_LAYER_GENERAL">
-		<Category name="Map Search">
+		<Category name="Navigator">
 			<Action name="MAPSEARCH_SEARCH" rebindable="true">
 				<Down>MapSearch.showSearch()</Down>
 			</Action>

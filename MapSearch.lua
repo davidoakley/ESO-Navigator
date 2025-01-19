@@ -1,9 +1,9 @@
 MapSearch = {
-  name = "MapSearch",
-  menuName = "Map Search",          -- A UNIQUE identifier for menu object.
+  name = "Navigator",
+  menuName = "Navigator",          -- A UNIQUE identifier for menu object.
   author = "SirNightstorm",
   version = "0.1.0",
-  svName = "MapSearch_SavedVariables",
+  svName = "Navigator_SavedVariables",
   default = {
     recentNodes = {},
     maxRecent = 10,
@@ -121,9 +121,9 @@ function MS:CreateStrings()
   -- openTabBinding = ZO_Keybindings_GenerateTextKeyMarkup(openTabBinding)
   ZO_CreateStringId("MAPSEARCH_SEARCH","Search locations, zones or @players")
   ZO_CreateStringId("MAPSEARCH_SEARCH_KEYPRESS","Search ("..openTabBinding..")")
-  ZO_CreateStringId("MAPSEARCH_OPENTAB","Open Search tab (on Map screen)")
-  ZO_CreateStringId("SI_BINDING_NAME_MAPSEARCH_SEARCH", "Open Map Search")
-  ZO_CreateStringId("MAPSEARCH_TAB_SEARCH","Search")
+  ZO_CreateStringId("MAPSEARCH_OPENTAB","Open Navigator tab (on Map screen)")
+  ZO_CreateStringId("SI_BINDING_NAME_MAPSEARCH_SEARCH", "Open Map Navigator")
+  ZO_CreateStringId("MAPSEARCH_TAB_SEARCH","Navigator")
 end
 
 local function moveTabToFirst()
@@ -172,7 +172,7 @@ function MS:initialize()
 end
 
 local function OnAddOnLoaded(_, addonName)
-  if addonName ~= "MapSearch" then return end
+  if addonName ~= "Navigator" then return end
 
   MS:initialize()
 
