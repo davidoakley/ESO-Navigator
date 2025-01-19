@@ -47,10 +47,6 @@ local function addEvent(id, func)
   EVENT_MANAGER:RegisterForEvent(name, id, func)
 end
 
-local function AddWorldMapFragment(strId, fragment, normal, highlight, pressed)
-  WORLD_MAP_INFO.modeBar:Add(strId, { fragment }, { pressed = pressed, highlight = highlight, normal = normal })
-end
-
 local ButtonGroup = {
   {
     name = "Search", --GetString(SI_BINDING_NAME_FASTER_TRAVEL_REJUMP),
@@ -130,6 +126,15 @@ function MS:CreateStrings()
   ZO_CreateStringId("MAPSEARCH_TAB_SEARCH","Search")
 end
 
+local function moveTabToFirst()
+  local buttons = WORLD_MAP_INFO.modeBar.menuBar.m_object.m_buttons
+  local ourButton = buttons[#buttons]
+  buttons[#buttons] = nil
+  table.insert(buttons, 1, ourButton)
+  WORLD_MAP_INFO.modeBar:UpdateButtons(false)
+  logger:Debug("Menu re-ordered")
+end
+
 function MS:initialize()
   logger:Debug("initialize starts")
   -- https://wiki.esoui.com/How_to_add_buttons_to_the_keybind_strip
@@ -160,7 +165,8 @@ function MS:initialize()
   local highlight = "/esoui/art/tradinghouse/tradinghouse_browse_tabicon_over.dds"
   local pressed = "/esoui/art/tradinghouse/tradinghouse_browse_tabicon_down.dds"
 
-  AddWorldMapFragment(MAPSEARCH_TAB_SEARCH, self.MapTab.fragment, normal, highlight, pressed)
+  WORLD_MAP_INFO.modeBar:Add(MAPSEARCH_TAB_SEARCH, { self.MapTab.fragment }, { pressed = pressed, highlight = highlight, normal = normal })
+  moveTabToFirst()
 
   logger:Debug("Initialize exits")
 end
