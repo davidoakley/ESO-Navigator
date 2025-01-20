@@ -16,6 +16,7 @@ This add-on is brand-new, and has only been tested by me! I would appreciate fri
   - Dungeons, Arenas or Trials
   - @Usernames
 - **Results appear as you type**, with weightings given depending on the target (more for owned houses, or bookmarked locations, less for unowned houses or wayshrines with a recall cost, for instance)
+- **Keyboard navigation** - focus the edit box with `Tab`, type your search, choose result using the up and down cursor keys and then select by pressing `Enter`
 - **`/nav` chat command** to jump to a destination (configurable to be `/tp` instead)
 - **Bookmarks** (right-click a result to add or remove)
 
