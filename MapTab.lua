@@ -48,6 +48,11 @@ function MT:layoutRow(rowControl, data, scrollList)
 
 	rowControl.keybind:SetHidden(not data.isSelected or not data.known or not self.editControl:HasFocus())
     rowControl.bg:SetHidden(not data.isSelected)
+    if data.isSelected then
+        rowControl.label:SetAnchor(TOPRIGHT, rowControl.keybind, TOPLEFT, -4, -1)
+    else
+        rowControl.label:SetAnchor(TOPRIGHT, rowControl, TOPRIGHT, -4, 0)
+    end
 
 	rowControl.label:SetText(name)
 
