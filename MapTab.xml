@@ -148,7 +148,7 @@
 							<OnInitialized>
 							</OnInitialized>
 							<OnBackspace>
-								MapSearch.logger:Debug("OnBackspace: pos="..self:GetCursorPosition().." changed="..(self.editTextChanged and 1 or 0))
+								--MapSearch.logger:Debug("OnBackspace: pos="..self:GetCursorPosition().." changed="..(self.editTextChanged and 1 or 0))
 								if self:GetCursorPosition() == 0 and not self.editTextChanged then
 									MapSearch.MapTab:resetFilter()
 								end
@@ -176,7 +176,7 @@
 								MapSearch.MapTab:buildScrollList()
 							</OnFocusLost>
 							<OnTextChanged>
-								MapSearch.logger:Debug("onTextChanged: pos="..self:GetCursorPosition())
+								--MapSearch.logger:Debug("onTextChanged: pos="..self:GetCursorPosition())
 								MapSearch.MapTab:onTextChanged(self, MapSearch_MapTabList)
 							</OnTextChanged>
 							<OnMouseDown>
