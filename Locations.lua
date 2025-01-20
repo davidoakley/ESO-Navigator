@@ -241,6 +241,11 @@ function Locs:setupPlayerZones()
     end
 end
 
+function Locs:ClearPlayers()
+    self.playerZones = nil
+    self.players = nil
+end
+
 function Locs:clearKnownNodes()
     self.knownNodes = {}
 end
