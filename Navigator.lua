@@ -210,7 +210,7 @@ end
 
 EVENT_MANAGER:RegisterForEvent(MS.name, EVENT_ADD_ON_LOADED, OnAddOnLoaded)
 
-SLASH_COMMANDS["/mapsearch"] = function (extra)
+--[[SLASH_COMMANDS["/mapsearch"] = function (extra)
   if extra == 'save' then
       MapSearch.Locations:initialise()
       -- buildLocations()
@@ -225,4 +225,4 @@ SLASH_COMMANDS["/mapsearch"] = function (extra)
       MapSearch.saved.result = nil
       d("Cleared MapSearch data from Saved Preferences")
   end
-end
+end ]]--
