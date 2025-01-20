@@ -74,10 +74,10 @@ local ButtonGroup = {
 
 local function OnMapStateChange(oldState, newState)
   if newState == SCENE_SHOWING then
-    logger:Debug("WorldMap showing")
     MS.mapVisible = true
     local zone = MS.Locations:getCurrentMapZone()
     MS.initialMapZoneId = zone and zone.zoneId or nil
+    logger:Debug(zo_strformat("WorldMap showing; initialMapZoneId=<<1>>", MS.initialMapZoneId or 0))
     PushActionLayerByName("Map")
     KEYBIND_STRIP:AddKeybindButtonGroup(ButtonGroup)
     if MS.saved and MS.saved["defaultTab"] then
