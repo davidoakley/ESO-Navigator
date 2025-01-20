@@ -44,7 +44,7 @@ function MapSearch:loadSettings()
       type = "dropdown",
       name = "Teleport chat command:",
       tooltip = "Select what name to give the chat slash command",
-      choices = {"None", "/tp", "/mstp"},
+      choices = {"None", "/nav", "/tp"},
       getFunc = function() return sv.tpCommand end,
       setFunc = function(value) sv.tpCommand = value end,
       width = "full",

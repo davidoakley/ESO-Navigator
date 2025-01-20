@@ -131,7 +131,7 @@ local function jumpToPlayer(node)
     end
 end
 
-local function jumpToNode(node)
+function MT:jumpToNode(node)
     if not node.known then
         return
     end
@@ -518,7 +518,7 @@ end
 function MT:selectResult(control, data, mouseButton)
     if mouseButton == 1 then
         if data.nodeIndex or data.userID then
-            jumpToNode(data)
+            self:jumpToNode(data)
         elseif data.poiType == POI_TYPE_ZONE then
             MT.filter = MS.FILTER_NONE
             self.editControl:SetText("")

@@ -12,9 +12,9 @@ function Chat:Init()
     end
 
     local command = self.lsc:Register()
-    command:AddAlias("/tp") -- TODO: Make this configurable
+    command:AddAlias(MS.saved.tpCommand)
     command:SetCallback(function(input) self:TP(input) end)
-    command:SetDescription("Map Search: Teleports to the given zone")
+    command:SetDescription("Navigator: Teleports to the given zone, wayshrine, house or player")
 
     ---@class Chat.AutoCompleteProvider
     Chat.AutoCompleteProvider = LibSlashCommander.AutoCompleteProvider:Subclass()
@@ -38,7 +38,17 @@ function Chat:Init()
     command.GetAutoCompleteResults = function(self, text)
         local results = {}
 
-        local searchResult = MS.Search.run(text, MS.FILTER_NONE)
+        local searchResult
+
+        if text:sub(1, 1) == "@" then
+            if #text >= 2 then
+                searchResult = MS.Search.run(text:sub(2), MS.FILTER_PLAYERS)
+            else
+                searchResult = {}
+            end
+        else
+            searchResult = MS.Search.run(text, MS.FILTER_NONE)
+        end
 
         local count = (#searchResult <= 1) and #searchResult or 1
         for i = 1, count do
@@ -62,28 +72,33 @@ function Chat:TP(text)
     end
 
     local data = searchResult[1]
-    local zoneId = data.zoneId
 
-    if data.nodeIndex or data.userID then
-        MT.jumpToNode(data)
-    end
-
-    local node = Locs:getPlayerInZone(zoneId)
-    if not node then
+    if data.nodeIndex then
+        MS.MapTab:jumpToNode(data)
         return
     end
 
-    -- local userID, poiType, zoneId, zoneName = node.userID, node.poiType, node.zoneId, node.zoneName
+    local zoneId = data.zoneId
+    if zoneId then
+        local node = Locs:getPlayerInZone(zoneId)
+        if not node then
+            CHAT_SYSTEM:AddMessage("Failed to find a player in "..data.zoneName)
+            return
+        end
 
-    CHAT_SYSTEM:AddMessage("Jumping to "..node.zoneName.." via "..node.userID)
-    SCENE_MANAGER:Hide("worldMap")
+        -- local userID, poiType, zoneId, zoneName = node.userID, node.poiType, node.zoneId, node.zoneName
 
-    if node.poiType == POI_TYPE_FRIEND then
-        JumpToFriend(node.userID)
-    elseif node.poiType == POI_TYPE_GUILDMATE then
-        JumpToGuildMember(node.userID)
+        CHAT_SYSTEM:AddMessage("Jumping to "..node.zoneName.." via "..node.userID)
+        SCENE_MANAGER:Hide("worldMap")
+
+        if node.poiType == POI_TYPE_FRIEND then
+            JumpToFriend(node.userID)
+        elseif node.poiType == POI_TYPE_GUILDMATE then
+            JumpToGuildMember(node.userID)
+        end
+    else
+        CHAT_SYSTEM:AddMessage("Sorry, I wasn't able to process that result")
     end
-
 end
 
 MS.Chat = Chat
