@@ -47,6 +47,20 @@ local function addEvent(id, func)
   EVENT_MANAGER:RegisterForEvent(name, id, func)
 end
 
+local function addEvents(func, ...)
+  local count = select('#', ...)
+  local id
+  for i = 1, count do
+  id = select(i, ...)
+  if not id then
+    df('%s element %d is nil.  Please report.', MS.name, i)
+  else
+    addEvent(id, func)
+  end
+  end
+end
+
+
 local ButtonGroup = {
   {
     name = "Search", --GetString(SI_BINDING_NAME_FASTER_TRAVEL_REJUMP),
@@ -103,6 +117,14 @@ local function OnPOIUpdated()
   MS.Locations:clearKnownNodes()
 end
 
+local function SetPlayersDirty(eventCode)
+  logger:Debug("SetPlayersDirty("..eventCode..")")
+  MS.Locations:ClearPlayers()
+  if MS.mapVisible then
+    MS.MapTab:executeSearch(MS.MapTab.searchString)
+  end
+end
+
 function MS.showSearch()
   logger:Debug("showSearch")
   local tabVisible = MapSearch.MapTab.visible
@@ -157,8 +179,15 @@ function MS:initialize()
   addEvent(EVENT_START_FAST_TRAVEL_INTERACTION, OnStartFastTravel)
   addEvent(EVENT_END_FAST_TRAVEL_INTERACTION, OnEndFastTravel)
   addEvent(EVENT_PLAYER_ACTIVATED, OnPlayerActivated)
-  addEvent(EVENT_POI_DISCOVERED , OnPOIUpdated)
-  addEvent(EVENT_POI_UPDATED, OnPOIUpdated)
+
+  addEvents(OnPOIUpdated, EVENT_POI_DISCOVERED, EVENT_POI_UPDATED, EVENT_FAST_TRAVEL_NETWORK_UPDATED)
+
+  addEvents(SetPlayersDirty,
+    EVENT_GROUP_MEMBER_JOINED, EVENT_GROUP_MEMBER_LEFT, EVENT_GROUP_MEMBER_CONNECTED_STATUS,
+    EVENT_GUILD_SELF_JOINED_GUILD, EVENT_GUILD_SELF_LEFT_GUILD, EVENT_GUILD_MEMBER_ADDED, EVENT_GUILD_MEMBER_REMOVED,
+    EVENT_GUILD_MEMBER_CHARACTER_ZONE_CHANGED, EVENT_FRIEND_CHARACTER_ZONE_CHANGED,
+    EVENT_FRIEND_ADDED, EVENT_FRIEND_REMOVED)
+
 
   -- local normal, highlight, pressed = GetPaths("/esoui/art/guild/guildhistory_indexicon_guildstore_", "up.dds", "over.dds", "down.dds")
   local normal = "Navigator/media/tabicon_up.dds"
