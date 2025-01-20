@@ -10,7 +10,7 @@ MapSearch = {
     bookmarkNodes = {},
     defaultTab = false,
     autoFocus = false,
-    tpCommand = "None"
+    tpCommand = "/nav"
   },
   Location = {},
   Wayshrine = {},

@@ -205,6 +205,10 @@ function Locs:addPlayerZone(zoneId, zoneName, userID, icon, poiType)
 end
 
 function Locs:setupPlayerZones()
+    if not self.zones then
+        self:setupNodes()
+    end
+
     local myID = GetDisplayName()
     self.playerZones = {}
     self.players = {}
