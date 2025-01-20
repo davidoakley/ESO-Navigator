@@ -293,7 +293,7 @@ function MT:buildScrollList()
     end
 end
 
-function MT:executeSearch(searchString)
+function MT:executeSearch(searchString, keepTargetNode)
 	local results
 
     MT.searchString = searchString
@@ -301,7 +301,9 @@ function MT:executeSearch(searchString)
     results = Search.run(searchString or "", MT.filter)
 
 	MapSearch.results = results
-	MapSearch.targetNode = 0
+    if not keepTargetNode or MapSearch.targetNode >= MT.resultCount then
+    	MapSearch.targetNode = 0
+    end
 
 	MT:buildScrollList()
     MT:updateFilterControl()
