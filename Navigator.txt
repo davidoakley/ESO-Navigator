@@ -2,7 +2,7 @@
 ## Description: Find your way around ESO's maps quicker with a context-aware sidebar and search
 ## Author: SirNightstorm (PC-EU)
 ## APIVersion: 101042
-## Version: 0.0.1
+## Version: 0
 ## DependsOn: LibDebugLogger>=180 LibAddonMenu-2.0
 ## OptionalDependsOn: pChat FasterTravel LibSlashCommander LibWorldMapInfoTab
 ## SavedVariables: Navigator_SavedVariables
