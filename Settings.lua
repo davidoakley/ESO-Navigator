@@ -9,7 +9,7 @@ function MapSearch:loadSettings()
       name = self.menuName,
       displayName = self.menuName,
       author = self.author, -- DynamicFPS.Colorize(DynamicFPS.author, "AAF0BB"),
-      version = self.version,
+      version = self.appVersion,
       registerForRefresh = true,
       registerForDefaults = true,
     }
