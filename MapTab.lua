@@ -577,7 +577,7 @@ function MT.OnMapChanged()
                 MT.filter = MS.FILTER_NONE
                 MT:updateFilterControl()
                 MT.editControl:SetText("")
-                logger:Debug("ZONES")
+                -- logger:Debug("ZONES")
             else
                 logger:Debug("Not moved; zoneIndex: "..(zoneIndex or 0).."; zoneId: "..(zoneId or 0).."(initial "..(MapSearch.initialMapZoneId or 0)..")")
             end

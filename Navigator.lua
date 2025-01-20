@@ -118,7 +118,7 @@ local function OnPOIUpdated()
 end
 
 local function SetPlayersDirty(eventCode)
-  logger:Debug("SetPlayersDirty("..eventCode..")")
+  -- logger:Debug("SetPlayersDirty("..eventCode..")")
   MS.Locations:ClearPlayers()
   if MS.mapVisible then
     MS.MapTab:executeSearch(MS.MapTab.searchString, true)
