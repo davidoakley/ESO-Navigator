@@ -522,6 +522,15 @@ local function showWayshrineMenu(owner, nodeIndex)
 	ShowMenu(owner)
 end
 
+local function getMapIdByZoneId(zoneId)
+    local mapIndex
+    if zoneId == 981 then -- Brass Fortress
+        return 1348
+    else
+        return GetMapIdByZoneId(zoneId)
+    end
+end
+
 function MT:selectResult(control, data, mouseButton)
     if mouseButton == 1 then
         if data.nodeIndex or data.userID then
@@ -531,11 +540,12 @@ function MT:selectResult(control, data, mouseButton)
             self.editControl:SetText("")
 
             local mapZoneId = MapSearch.Locations:getCurrentMapZone()
-            logger:Debug(zo_strformat("selectResult: data.zoneId {} mapZoneId {}", data.zoneId, mapZoneId))
+            logger:Debug(zo_strformat("selectResult: data.zoneId <<1>> mapZoneId <<2>>", data.zoneId, mapZoneId))
             if data.zoneId ~= mapZoneId then
-                local mapIndex = GetMapIndexByZoneId(data.zoneId)
-                if mapIndex then
-                    WORLD_MAP_MANAGER:SetMapByIndex(mapIndex)
+                local mapId = getMapIdByZoneId(data.zoneId)
+                logger:Debug(zo_strformat("selectResult: mapId <<1>>", mapId or 0))
+                if mapId then
+                    WORLD_MAP_MANAGER:SetMapById(mapId)
                 end
             end
         end
@@ -543,6 +553,8 @@ function MT:selectResult(control, data, mouseButton)
         if data.nodeIndex then
             showWayshrineMenu(control, data.nodeIndex)
         end
+    else
+        logger:Debug(zo_strformat("selectResult: unhandled; poiType=<<1>> zoneId=<<2>>", data.poiType or -1, data.zoneId or -1))
     end
 end
 
@@ -562,10 +574,10 @@ end
 
 function MT.OnMapChanged()
     if MapSearch.mapVisible then
-        -- local mapId = GetCurrentMapId()
         local zone = MapSearch.Locations:getCurrentMapZone()
         if zone and zone.zoneId ~= MapSearch.initialMapZoneId then
-            logger:Debug("Moved to zoneId: "..zone.zoneId.."(initial "..(MapSearch.initialMapZoneId or 0)..")")
+            local mapId = GetCurrentMapId()
+            logger:Debug(zo_strformat("Moved to zoneId=<<1>> mapId=<<2>>", zone.zoneId, mapId or 0))
             MT.filter = MS.FILTER_NONE
             MT:updateFilterControl()
             MT.editControl:SetText("")

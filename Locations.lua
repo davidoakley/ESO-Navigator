@@ -68,7 +68,10 @@ function Locs:setupNodes()
     -- Iterate through zones to find correct zones for nodes
     for zoneId = 1, 2000 do
 		local zoneName = GetZoneNameById(zoneId)
-		if zoneName ~= nil and zoneName ~= "" then
+		if zoneName ~= nil and zoneName ~= ""
+           and zoneId ~= 643 -- Imperial Sewers
+           and zoneId ~= 1283 -- The Shambles
+           then
 			local zoneIndex = GetZoneIndex(zoneId)
 			local numPOIs = GetNumPOIs(zoneIndex)
 			for poiIndex = 1, numPOIs do
