@@ -200,7 +200,8 @@ local function buildList(scrollData, title, list)
             end
             nodeData.suffix = (nodeData.suffix or "") .. "|t23:23:/esoui/art/icons/servicemappins/servicepin_guildkiosk.dds:inheritcolor|t"
         end
-        if MapSearch.Bookmarks:containsNodeIndex(listEntry.nodeIndex) then
+
+        if MapSearch.Bookmarks:contains(nodeData) then
             nodeData.suffix = (nodeData.suffix or "") .. "|t25:25:Navigator/media/bookmark.dds:inheritcolor|t"
         end
 
@@ -502,19 +503,29 @@ function MT:resetSearch(lose_focus)
 	ZO_ScrollList_ResetToTop(self.listControl)
 end
 
-local function showWayshrineMenu(owner, nodeIndex)
+local function showWayshrineMenu(owner, data)
 	ClearMenu()
 
+    local entry = {}
+    if data.nodeIndex then
+        entry.nodeIndex = data.nodeIndex
+    elseif data.zoneId then
+        entry.zoneId = data.zoneId
+    else
+        logger.Debug("showWayshrineMenu: unrecognised data")
+        return
+    end
+
     local bookmarks = MapSearch.Bookmarks
-	if bookmarks:containsNodeIndex(nodeIndex) then
+	if bookmarks:contains(entry) then
 		AddMenuItem("Remove Bookmark", function()
-			bookmarks:removeNodeIndex(nodeIndex)
+			bookmarks:remove(entry)
 			ClearMenu()
             MT:executeSearch(MT.searchString)
 		end)
 	else
 		AddMenuItem("Add Bookmark", function()
-			bookmarks:add({ nodeIndex = nodeIndex })
+			bookmarks:add(entry)
 			ClearMenu()
             MT:executeSearch(MT.searchString)
 		end)
@@ -550,8 +561,8 @@ function MT:selectResult(control, data, mouseButton)
             end
         end
     elseif mouseButton == 2 then
-        if data.nodeIndex then
-            showWayshrineMenu(control, data.nodeIndex)
+        if data.nodeIndex or data.zoneId then
+            showWayshrineMenu(control, data)
         end
     else
         logger:Debug(zo_strformat("selectResult: unhandled; poiType=<<1>> zoneId=<<2>>", data.poiType or -1, data.zoneId or -1))

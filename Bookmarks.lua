@@ -19,10 +19,33 @@ end
     MS.saved.bookmarks = list
 end -- ]]
 
+function Bookmarks:getIndex(entry)
+    if entry.nodeIndex then
+        local nodeIndex = entry.nodeIndex
+        if nodeIndex == 211 or nodeIndex == 212 then
+            -- Always refer to The Harborage as index 210
+            nodeIndex = 210
+        end
+        for i = 1, #self.list do
+            if nodeIndex == self.list[i].nodeIndex then
+                return i
+            end
+        end
+    elseif entry.zoneId then
+        local zoneId = entry.zoneId
+        for i = 1, #self.list do
+            if zoneId == self.list[i].zoneId then
+                return i
+            end
+        end
+    end
+    return nil
+end
+
 function Bookmarks:add(entry)
-    if nodeIndex == 211 or nodeIndex == 212 then
+    if entry.nodeIndex and (entry.nodeIndex == 211 or entry.nodeIndex == 212) then
         -- Always store The Harborage as index 210
-        nodeIndex = 210
+        entry.nodeIndex = 210
     end
 
     table.insert(self.list, entry)
@@ -30,27 +53,18 @@ function Bookmarks:add(entry)
     self:save()
 end
 
-function Bookmarks:removeNodeIndex(nodeIndex)
-    for i = 1, #self.list do
-        if self.list[i].nodeIndex == nodeIndex then
-            table.remove(self.list, i)
-            logger:Debug("Bookmarks:removeNodeIndex("..nodeIndex..")")
-            self:save()
-            return
-        end
+function Bookmarks:remove(entry)
+    local i = self:getIndex(entry)
+    if i then
+        table.remove(self.list, i)
+        logger:Debug("Bookmarks:remove("..i..")")
+        self:save()    
     end
 end
 
-function Bookmarks:containsNodeIndex(nodeIndex)
-    if nodeIndex == 211 or nodeIndex == 212 then
-        -- The Harborage is always stored as index 210
-        nodeIndex = 210
-    end
 
-    for i = 1, #self.list do
-        if self.list[i].nodeIndex == nodeIndex then return true end
-    end
-    return false
+function Bookmarks:contains(entry)
+    return self:getIndex(entry) ~= nil
 end
 
 function Bookmarks:save()
@@ -61,17 +75,20 @@ function Bookmarks:getBookmarks()
     local results = {}
     local nodeMap = MS.Locations:getNodeMap()
 
-    if nodeMap ~= nil then
-        for i = 1, #self.list do
-            local entry = self.list[i]
-            if entry.nodeIndex then
-                local node = MS.Utils.shallowCopy(nodeMap[entry.nodeIndex])
-                node.known = MS.Locations:isKnownNode(entry.nodeIndex)
-                local traders = MS.Data.traderCounts[entry.nodeIndex]
-                if traders and traders > 0 then
-                    node.traders = traders
-                end
-                table.insert(results, node)
+    for i = 1, #self.list do
+        local entry = self.list[i]
+        if entry.nodeIndex and nodeMap then
+            local node = MS.Utils.shallowCopy(nodeMap[entry.nodeIndex])
+            node.known = MS.Locations:isKnownNode(entry.nodeIndex)
+            local traders = MS.Data.traderCounts[entry.nodeIndex]
+            if traders and traders > 0 then
+                node.traders = traders
+            end
+            table.insert(results, node)
+        elseif entry.zoneId then
+            local zone = MS.Locations:getZone(entry.zoneId)
+            if zone then
+                table.insert(results, zone)
             end
         end
     end
