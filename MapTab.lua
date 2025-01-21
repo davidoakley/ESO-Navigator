@@ -456,7 +456,7 @@ function MT:onTextChanged(editbox, listcontrol)
         self.editControl.editTextChanged = true
     end
 
-    self:ImmediateRefresh()
+    self:executeSearch(searchString)
 end
 
 function MT:selectCurrentResult()
