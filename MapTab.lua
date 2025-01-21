@@ -15,18 +15,18 @@ function MT:queueRefresh()
                 if self.needsRefresh and self.visible and not self.menuOpen then
                     self:ImmediateRefresh()
                 else
-                    -- logger:Debug("MT:queueRefresh: skipped")
+                    -- MS.log("MT:queueRefresh: skipped")
                 end
             end, 50)
-            -- logger:Debug("MT:queueRefresh: queued")
+            -- MS.log("MT:queueRefresh: queued")
         else
-            -- logger:Debug("MT:queueRefresh: not queued")
+            -- MS.log("MT:queueRefresh: not queued")
         end
     end
 end
 
 function MT:ImmediateRefresh()
-    -- logger:Debug("MT:ImmediateRefresh")
+    -- MS.log("MT:ImmediateRefresh")
     self:executeSearch(self.searchString, true)
     self.needsRefresh = false
 end
@@ -216,7 +216,7 @@ local function buildList(scrollData, title, list)
 		nodeData.isSelected = (currentNodeIndex == MapSearch.targetNode)
         nodeData.dataIndex = currentNodeIndex
 
-        -- logger:Info("%s: traders %d", nodeData.barename, nodeData.traders or 0)
+        -- MS.log("%s: traders %d", nodeData.barename, nodeData.traders or 0)
         if listEntry.traders and listEntry.traders > 0 then
             if listEntry.traders >= 5 then
                 nodeData.suffix = "|t20:23:Navigator/media/city_narrow.dds:inheritcolor|t"
@@ -385,18 +385,18 @@ function MT:getNextCategoryFirstIndex()
         if scrollData[i].typeId == 1 then -- wayshrine row
             if (foundCategory and scrollData[i].data.known) or i == currentIndex then
                 -- return the first entry after the category header
-                -- logger:Debug("Index %d node %d is result - returning", i, currentNodeIndex)
+                -- MS.log("Index %d node %d is result - returning", i, currentNodeIndex)
                 return currentNodeIndex
             end
-            -- logger:Debug("Index %d node %d is result - incrementing", i, currentNodeIndex)
+            -- MS.log("Index %d node %d is result - incrementing", i, currentNodeIndex)
             currentNodeIndex = currentNodeIndex + 1
         elseif scrollData[i].typeId == 0 then -- category header
-            -- logger:Debug("Index %d node %d is category", i, currentNodeIndex)
+            -- MS.log("Index %d node %d is category", i, currentNodeIndex)
             foundCategory = true
         end
 
         if i >= #scrollData then
-            -- logger:Debug("Wrapping at index %d node %d", i, currentNodeIndex)
+            -- MS.log("Wrapping at index %d node %d", i, currentNodeIndex)
             i = 1
             currentNodeIndex = 0
         else
@@ -406,7 +406,7 @@ function MT:getNextCategoryFirstIndex()
 end
 
 function MT:init()
-	logger:Debug("MapTab:init")
+	MS.log("MapTab:init")
 
 	local _refreshing = false
 	local _isDirty = true 
@@ -509,7 +509,7 @@ function MT:resetFilter()
 	logger.Debug("MT.resetFilter")
     self.filter = MS.FILTER_NONE
     self:hideFilterControl()
-    self:immediateRefresh()
+    self:ImmediateRefresh()
 	ZO_ScrollList_ResetToTop(self.listControl)
 end
 
@@ -561,7 +561,7 @@ local function showWayshrineMenu(owner, data)
 	end
 	ShowMenu(owner)
     SetMenuHiddenCallback(function()
-        logger:Debug("SetMenuHiddenCallback: Menu hidden")
+        MS.log("SetMenuHiddenCallback: Menu hidden")
         MT.menuOpen = false
         if MT.needsRefresh then
             MT:ImmediateRefresh()
@@ -587,10 +587,10 @@ function MT:selectResult(control, data, mouseButton)
             self.editControl:SetText("")
 
             local mapZoneId = MapSearch.Locations:getCurrentMapZone()
-            logger:Debug(zo_strformat("selectResult: data.zoneId <<1>> mapZoneId <<2>>", data.zoneId, mapZoneId))
+            MS.log("selectResult: data.zoneId %d mapZoneId %d", data.zoneId, mapZoneId)
             if data.zoneId ~= mapZoneId then
                 local mapId = getMapIdByZoneId(data.zoneId)
-                logger:Debug(zo_strformat("selectResult: mapId <<1>>", mapId or 0))
+                MS.log("selectResult: mapId %d", mapId or 0)
                 if mapId then
                     WORLD_MAP_MANAGER:SetMapById(mapId)
                 end
@@ -601,7 +601,7 @@ function MT:selectResult(control, data, mouseButton)
             showWayshrineMenu(control, data)
         end
     else
-        logger:Debug(zo_strformat("selectResult: unhandled; poiType=<<1>> zoneId=<<2>>", data.poiType or -1, data.zoneId or -1))
+        MS.log("selectResult: unhandled; poiType=%d zoneId=%d", data.poiType or -1, data.zoneId or -1)
     end
 end
 
@@ -624,7 +624,7 @@ function MT.OnMapChanged()
         local zone = MapSearch.Locations:getCurrentMapZone()
         if zone and zone.zoneId ~= MapSearch.initialMapZoneId then
             local mapId = GetCurrentMapId()
-            logger:Debug(zo_strformat("Moved to zoneId=<<1>> mapId=<<2>>", zone.zoneId, mapId or 0))
+            MS.log("Moved to zoneId=%d mapId=%d", zone.zoneId, mapId or 0)
             MT.filter = MS.FILTER_NONE
             MT:updateFilterControl()
             MT.editControl:SetText("")
@@ -636,9 +636,9 @@ function MT.OnMapChanged()
                 MT.filter = MS.FILTER_NONE
                 MT:updateFilterControl()
                 MT.editControl:SetText("")
-                -- logger:Debug("ZONES")
+                -- MS.log("ZONES")
             else
-                logger:Debug("Not moved; zoneIndex: "..(zoneIndex or 0).."; zoneId: "..(zoneId or 0).."(initial "..(MapSearch.initialMapZoneId or 0)..")")
+                MS.log("Not moved; zoneIndex: "..(zoneIndex or 0).."; zoneId: "..(zoneId or 0).."(initial "..(MapSearch.initialMapZoneId or 0)..")")
             end
         end
         -- MT:buildScrollList()
