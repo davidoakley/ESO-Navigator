@@ -431,13 +431,25 @@ function MT:init()
 	
 end
 
+local function getMapIdByZoneId(zoneId)
+    local mapIndex
+    if zoneId == 2 then -- Tamriel
+        return 27
+    elseif zoneId == 981 then -- Brass Fortress
+        return 1348
+    else
+        return GetMapIdByZoneId(zoneId)
+    end
+end
+
 function MT:onTextChanged(editbox, listcontrol)
 	local searchString = string.lower(editbox:GetText())
     if searchString == "z:" then
-        local mapIndex = GetMapIndexByZoneId(2) -- Tamriel
-        if mapIndex then
-            WORLD_MAP_MANAGER:SetMapByIndex(mapIndex)
-        end
+        local mapId = getMapIdByZoneId(2) -- Tamriel
+        MS.log("MT:onTextChanged mapId %d", mapId or -1)
+        -- if mapId then
+        WORLD_MAP_MANAGER:SetMapById(mapId)
+        -- end
         MT.filter = MS.FILTER_NONE
         editbox:SetText("")
         editbox.editTextChanged = false
@@ -567,15 +579,6 @@ local function showWayshrineMenu(owner, data)
             MT:ImmediateRefresh()
         end
     end)
-end
-
-local function getMapIdByZoneId(zoneId)
-    local mapIndex
-    if zoneId == 981 then -- Brass Fortress
-        return 1348
-    else
-        return GetMapIdByZoneId(zoneId)
-    end
 end
 
 function MT:selectResult(control, data, mouseButton)
