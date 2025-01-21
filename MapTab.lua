@@ -561,7 +561,7 @@ function MT:selectResult(control, data, mouseButton)
             end
         end
     elseif mouseButton == 2 then
-        if data.nodeIndex or data.zoneId then
+        if data.nodeIndex or data.poiType == POI_TYPE_ZONE then
             showWayshrineMenu(control, data)
         end
     else
