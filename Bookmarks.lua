@@ -49,7 +49,7 @@ function Bookmarks:add(entry)
     end
 
     table.insert(self.list, entry)
-    -- logger:Debug("Bookmarks:add("..nodeIndex..")")
+    -- MS.log("Bookmarks:add("..nodeIndex..")")
     self:save()
 end
 
@@ -57,7 +57,7 @@ function Bookmarks:remove(entry)
     local i = self:getIndex(entry)
     if i then
         table.remove(self.list, i)
-        logger:Debug("Bookmarks:remove("..i..")")
+        MS.log("Bookmarks:remove("..i..")")
         self:save()    
     end
 end

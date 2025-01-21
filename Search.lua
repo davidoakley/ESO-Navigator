@@ -53,7 +53,7 @@ function Search.run(searchTerm, filter)
     searchTerm = searchTerm and string.lower(searchTerm) or ""
     searchTerm = searchTerm:gsub("[^%w ]", "")
 
-    -- logger:Debug(string.format("Search.run('%s', %d)", searchTerm, filter))
+    -- MS.log("Search.run('%s', %d)", searchTerm, filter)
 
     if filter == MS.FILTER_NONE and searchTerm == "" then
         return {}

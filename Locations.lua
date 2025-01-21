@@ -20,11 +20,11 @@ POI_TYPE_GUILDMATE = 103
 POI_TYPE_ZONE = 104
 
 function Locs:initialise()
-    logger:Debug("Locs:initialise() starts")
+    MS.log("Locs:initialise() starts")
     -- self:setupNodes()
-    -- logger:Debug("Locs:initialise() setupPlayerZones")
+    -- MS.log("Locs:initialise() setupPlayerZones")
     -- self:setupPlayerZones()
-    logger:Debug("Locs:initialise() ends")
+    MS.log("Locs:initialise() ends")
 end
 
 function Locs:IsZone(zoneId)
@@ -99,7 +99,7 @@ function Locs:setupNodes()
                                 nodes = {}
                             }
                         else
-                            logger:Debug(zo_strformat("setupNodes: not zone: zoneId <<1>> name <<2>>", zoneId, zoneName))
+                            MS.log("setupNodes: not zone: zoneId %d name %s", zoneId, zoneName)
                         end
                     end
 
@@ -107,7 +107,7 @@ function Locs:setupNodes()
                         nodeInfo.zoneId = zoneId
                         table.insert(self.zones[zoneId].nodes, nodeInfo)
                     -- else
-                    --     logger:Debug("Locs:setupNodes: node "..i.." '"..nodeInfo.name.."' in non-parent zoneId "..nodeZoneId)
+                    --     MS.log("Locs:setupNodes: node "..i.." '"..nodeInfo.name.."' in non-parent zoneId "..nodeZoneId)
                     end
 				end
 			end
@@ -167,7 +167,7 @@ function Locs:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon, known
         --     nodeInfo.name = string.sub(nodeInfo.name, 1, #nodeInfo.name - 6)
         -- end
     else
-        logger:Warn("Unknown POI " .. i .. " '" .. name .. "' type " .. typePOI .. " " .. (glowIcon or "-"))
+        MS.logWarning("Unknown POI " .. i .. " '" .. name .. "' type " .. typePOI .. " " .. (glowIcon or "-"))
         -- if glowIcon ~= nil and glowIcon:find("/esoui/art/icons/poi/poi_") and glowIcon:find("_glow.dds") then
         --     nodeInfo.icon = glowIcon:gsub("_glow.dds", "_complete.dds")
         -- end
@@ -187,7 +187,7 @@ function Locs:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon, known
     -- if self.zones[nodeZoneId] then
     --     table.insert(self.zones[nodeZoneId].nodes, nodeInfo)
     -- else
-    --     logger:Debug("Locs:setupNodes: node "..i.." '"..nodeInfo.name.."' in non-parent zoneId "..nodeZoneId)
+    --     MS.log("Locs:setupNodes: node "..i.." '"..nodeInfo.name.."' in non-parent zoneId "..nodeZoneId)
     -- end
     return nodeInfo
 end
@@ -455,10 +455,10 @@ function Locs:getCurrentMapZoneId()
     local mapId = GetCurrentMapId()
     local _, mapType, _, zoneIndex, _ = GetMapInfoById(mapId)
     local zoneId = GetZoneId(zoneIndex)
-    -- logger:Debug("Locs:getCurrentMapZone zoneId = "..zoneId.." type "..mapType)
+    -- MS.log("Locs:getCurrentMapZone zoneId = "..zoneId.." type "..mapType)
     if mapType == MAPTYPE_SUBZONE and not self:IsZone(zoneId) then
         zoneId = GetParentZoneId(zoneId)
-        -- logger:Debug("Locs:getCurrentMapZone parent zoneId = "..zoneId)
+        -- MS.log("Locs:getCurrentMapZone parent zoneId = "..zoneId)
     end
 
     return zoneId
@@ -472,17 +472,17 @@ function Locs:getCurrentMapZone()
     local mapId = GetCurrentMapId()
     local _, mapType, _, zoneIndex, _ = GetMapInfoById(mapId)
     local zoneId = GetZoneId(zoneIndex)
-    -- logger:Debug("Locs:getCurrentMapZone zoneId = "..zoneId.." type "..mapType)
+    -- MS.log("Locs:getCurrentMapZone zoneId = "..zoneId.." type "..mapType)
     if zoneId == 2 then
         return {
             zoneId = 2
         }
     elseif mapType == MAPTYPE_SUBZONE and not self:IsZone(zoneId) then
         zoneId = GetParentZoneId(zoneId)
-        -- logger:Debug("Locs:getCurrentMapZone parent zoneId = "..zoneId)
+        -- MS.log("Locs:getCurrentMapZone parent zoneId = "..zoneId)
     end
     if not self.zones[zoneId] then
-        logger:Debug("Locs:getCurrentMapZone no info on zoneId "..zoneId)
+        MS.log("Locs:getCurrentMapZone no info on zoneId "..zoneId)
     end
     return self.zones[zoneId]
 end

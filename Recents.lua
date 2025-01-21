@@ -13,9 +13,9 @@ function Recents:init()
     if _G["FasterTravel"] ~= nil and
        _G["FasterTravel"].settings ~= nil and
        _G["FasterTravel"].settings.recentsEnabled then
-        logger:Debug("FasterTravel is active")
+        MS.log("FasterTravel is active")
         FTrecent = _G["FasterTravel"].settings.recent
-        -- logger:Debug(FT.settings.recent)
+        -- MS.log("%s", FT.settings.recent)
     else
         self:addTravelDialogCallbacks()
         self:hook(true)
@@ -31,16 +31,16 @@ function Recents:insert(nodeIndex)
     for i = 1, #self.nodes do
         if self.nodes[i] == nodeIndex then
             table.remove(self.nodes, i)
-            logger:Debug("Recents:insert("..nodeIndex..") removed existing entry #"..i)
+            MS.log("Recents:insert("..nodeIndex..") removed existing entry #"..i)
             break
         end
     end
     if #self.nodes >= self.maxEntries then
         table.remove(self.nodes)
-        logger:Debug("Recents:insert("..nodeIndex..") removed overflow entry #"..#self.nodes)
+        MS.log("Recents:insert("..nodeIndex..") removed overflow entry #"..#self.nodes)
     end
     table.insert(self.nodes, 1, nodeIndex)
-    logger:Debug("Recents:insert("..nodeIndex..")")
+    MS.log("Recents:insert("..nodeIndex..")")
     self:save()
 end
 
@@ -69,7 +69,7 @@ function Recents:onPlayerActivated()
     if FTrecent ~= nil and #FTrecent >= 1 then
         -- Pull the most recent nodeIndex from FasterTravel
         local nodeIndex = FTrecent[1].nodeIndex
-        logger:Debug("Recents:onPlayerActivated: adding recent from FasterTravel: "..nodeIndex)
+        MS.log("Recents:onPlayerActivated: adding recent from FasterTravel: "..nodeIndex)
         self:insert(nodeIndex)
     end
 end
@@ -83,7 +83,7 @@ local travelDialogs = {
 -- replacement callbacks factory
 local function MyCallbackFactory(name)
     return function(dialog)
-        logger:Debug("Callback %s", name)
+        MS.log("Callback %s", name)
         local node = dialog.data
         if node.nodeIndex then -- is nil when travelling to house since U29
             Recents:insert(node.nodeIndex)
@@ -102,18 +102,18 @@ function Recents.addTravelDialogCallbacks()
 			ESO_Dialogs[name].buttons and
 			ESO_Dialogs[name].buttons[1] then 
 				data.saved_callback = ESO_Dialogs[name].buttons[1].callback -- may be nil
-                logger:Debug("Saved callback for travel dialog '"..name.."'")
+                MS.log("Saved callback for travel dialog '"..name.."'")
         end
 		-- create new callbacks
-        logger:Debug("Adding callback for travel dialog '"..name.."'")
+        MS.log("Adding callback for travel dialog '"..name.."'")
 		data.my_callback = MyCallbackFactory(name)
 	end
 end
 
 Recents.__Hook_Checker = function(name, node, params, ...)
-    logger:Debug("HookChecker: %s", name)
+    MS.log("HookChecker: %s", name)
     if travelDialogs[name] then
-        logger:Debug("Hook checkpoint TRAVEL")
+        MS.log("Hook checkpoint TRAVEL")
         -- replace callbacks
         for name, data in pairs(travelDialogs) do
             if 	ESO_Dialogs[name] and 
@@ -123,10 +123,7 @@ Recents.__Hook_Checker = function(name, node, params, ...)
                         if ESO_Dialogs[name].buttons[1].callback == data.saved_callback then
                             ESO_Dialogs[name].buttons[1].callback = data.my_callback
                         else
-                            logger:Debug(
-                                "Something nasty going on - who else modifies %s dialog?!",
-                                name
-                            )
+                            MS.log("Something nasty going on - who else modifies %s dialog?!", name)
                         end
                     end
             else --[[
@@ -141,7 +138,7 @@ Recents.__Hook_Checker = function(name, node, params, ...)
             end
         end
     else
-        logger:Debug("Hook checkpoint NON-TRAVEL")
+        MS.log("Hook checkpoint NON-TRAVEL")
         -- restore original callbacks
         for name, data in pairs(travelDialogs) do
             if 	ESO_Dialogs[name] and 
@@ -151,10 +148,7 @@ Recents.__Hook_Checker = function(name, node, params, ...)
                         if ESO_Dialogs[name].buttons[1].callback == data.my_callback then
                             ESO_Dialogs[name].buttons[1].callback = data.saved_callback
                         else
-                            logger:Debug(
-                                "Something nasty going on - who else modifies %s dialog?!",
-                                name
-                            )
+                            MS.log("Something nasty going on - who else modifies %s dialog?!", name)
                         end
                     end
             end
