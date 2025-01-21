@@ -29,7 +29,7 @@ function Chat:Init()
         for i = 1, #zoneList do
             list[zoneList[i].name] = zoneList[i].name
         end
-        logger:Info("Chat.AutoCompleteProvider:GetResultList: "..#list)
+        MS.log("Chat.AutoCompleteProvider:GetResultList: "..#list)
         return list
     end
 
