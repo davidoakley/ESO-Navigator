@@ -586,7 +586,7 @@ function MT:selectResult(control, data, mouseButton)
             MT.filter = MS.FILTER_NONE
             self.editControl:SetText("")
 
-            local mapZoneId = MapSearch.Locations:getCurrentMapZone()
+            local mapZoneId = MapSearch.Locations:getCurrentMapZoneId()
             MS.log("selectResult: data.zoneId %d mapZoneId %d", data.zoneId, mapZoneId)
             if data.zoneId ~= mapZoneId then
                 local mapId = getMapIdByZoneId(data.zoneId)
