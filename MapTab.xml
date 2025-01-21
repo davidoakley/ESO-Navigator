@@ -109,7 +109,11 @@
 				MapSearch.logger:Debug("MapSearch_MapTab.OnEffectivelyShown")
 				self.visible = true
 				MapSearch.Locations:initialise()
-			    MapSearch.MapTab:buildScrollList()
+				if self.needsRefresh then
+					self:ImmediateRefresh()
+				else
+				    MapSearch.MapTab:buildScrollList()
+				end
 			</OnEffectivelyShown>
 			<OnEffectivelyHidden>
 				MapSearch.logger:Debug("MapSearch_MapTab.OnEffectivelyHidden")
