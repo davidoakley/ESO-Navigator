@@ -13,7 +13,7 @@ function MapSearch:loadSettings()
       registerForRefresh = true,
       registerForDefaults = true,
     }
-    self.settingsPanel = LAM:RegisterAddonPanel(self.menuName, panelData)
+    self.settingsPanel = LAM:RegisterAddonPanel(self.settingsName, panelData)
   
     local optionsTable = {}
   
@@ -64,6 +64,6 @@ function MapSearch:loadSettings()
       end,
     })
 
-    LAM:RegisterOptionControls(self.menuName, optionsTable)
+    LAM:RegisterOptionControls(self.settingsName, optionsTable)
   end
   

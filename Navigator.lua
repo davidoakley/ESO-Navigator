@@ -1,6 +1,7 @@
 MapSearch = {
   name = "Navigator",
   menuName = "Navigator",          -- A UNIQUE identifier for menu object.
+  settingsName = "NavigatorSettings",
   author = "SirNightstorm",
   appVersion = "0",
   svName = "Navigator_SavedVariables",
