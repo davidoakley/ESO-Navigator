@@ -11,7 +11,8 @@ MapSearch = {
     bookmarkNodes = {},
     defaultTab = false,
     autoFocus = false,
-    tpCommand = "/nav"
+    tpCommand = "/nav",
+    loggingEnabled = false
   },
   Location = {},
   Wayshrine = {},
@@ -37,7 +38,10 @@ local Utils = MS.Utils
 local _events = {}
 
 function MS.log(...)
+  ---@diagnostic disable-next-line: undefined-field
+  if MS.saved and MS.saved.loggingEnabled then
     logger:Debug(string.format(...))
+  end
 end
 
 function MS.logWarning(...)
