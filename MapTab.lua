@@ -509,7 +509,7 @@ function MT:resetFilter()
 	logger.Debug("MT.resetFilter")
     self.filter = MS.FILTER_NONE
     self:hideFilterControl()
-    self:immediateRefresh()
+    self:ImmediateRefresh()
 	ZO_ScrollList_ResetToTop(self.listControl)
 end
 
