@@ -121,9 +121,7 @@ end
 local function SetPlayersDirty(eventCode)
   -- logger:Debug("SetPlayersDirty("..eventCode..")")
   MS.Locations:ClearPlayers()
-  if MS.mapVisible then
-    MS.MapTab:executeSearch(MS.MapTab.searchString, true)
-  end
+  MS.MapTab:queueRefresh()
 end
 
 function MS.showSearch()

@@ -5,6 +5,31 @@ local Utils = MapSearch.Utils
 local logger = MapSearch.logger
 
 MT.filter = MS.FILTER_NONE
+MT.needsRefresh = false
+
+function MT:queueRefresh()
+    if not self.needsRefresh then
+        self.needsRefresh = true
+        if self.visible and not self.menuOpen then
+            zo_callLater(function()
+                if self.needsRefresh and self.visible and not self.menuOpen then
+                    self:ImmediateRefresh()
+                else
+                    -- logger:Debug("MT:queueRefresh: skipped")
+                end
+            end, 50)
+            -- logger:Debug("MT:queueRefresh: queued")
+        else
+            -- logger:Debug("MT:queueRefresh: not queued")
+        end
+    end
+end
+
+function MT:ImmediateRefresh()
+    -- logger:Debug("MT:ImmediateRefresh")
+    self:executeSearch(self.searchString, true)
+    self.needsRefresh = false
+end
 
 function MT:layoutRow(rowControl, data, scrollList)
 	local name = data.name
@@ -307,7 +332,7 @@ function MT:executeSearch(searchString, keepTargetNode)
     results = Search.run(searchString or "", MT.filter)
 
 	MapSearch.results = results
-    if not keepTargetNode or MapSearch.targetNode >= MT.resultCount then
+    if not keepTargetNode or MapSearch.targetNode >= (MT.resultCount or 0) then
     	MapSearch.targetNode = 0
     end
 
@@ -431,7 +456,7 @@ function MT:onTextChanged(editbox, listcontrol)
         self.editControl.editTextChanged = true
     end
 
-	self:executeSearch(searchString)
+    self:ImmediateRefresh()
 end
 
 function MT:selectCurrentResult()
@@ -482,18 +507,18 @@ end
 
 function MT:resetFilter()
 	logger.Debug("MT.resetFilter")
-    MT.filter = MS.FILTER_NONE
-    MT:hideFilterControl()
-	self:executeSearch("")
+    self.filter = MS.FILTER_NONE
+    self:hideFilterControl()
+    self:immediateRefresh()
 	ZO_ScrollList_ResetToTop(self.listControl)
 end
 
 function MT:resetSearch(lose_focus)
 	logger.Debug("MT.resetSearch")
 	self.editControl:SetText("")
-    MT.filter = MS.FILTER_NONE
-    MT:hideFilterControl()
-	self:executeSearch("")
+    self.filter = MS.FILTER_NONE
+    self:hideFilterControl()
+    self:ImmediateRefresh()
 
 	-- if lose_focus then
 	-- 	editbox:LoseFocus()
@@ -518,19 +543,30 @@ local function showWayshrineMenu(owner, data)
 
     local bookmarks = MapSearch.Bookmarks
 	if bookmarks:contains(entry) then
+        MT.menuOpen = true
 		AddMenuItem("Remove Bookmark", function()
 			bookmarks:remove(entry)
 			ClearMenu()
-            MT:executeSearch(MT.searchString)
+            MT.menuOpen = false
+            MT:ImmediateRefresh()
 		end)
 	else
+        MT.menuOpen = true
 		AddMenuItem("Add Bookmark", function()
 			bookmarks:add(entry)
 			ClearMenu()
-            MT:executeSearch(MT.searchString)
+            MT.menuOpen = false
+            MT:ImmediateRefresh()
 		end)
 	end
 	ShowMenu(owner)
+    SetMenuHiddenCallback(function()
+        logger:Debug("SetMenuHiddenCallback: Menu hidden")
+        MT.menuOpen = false
+        if MT.needsRefresh then
+            MT:ImmediateRefresh()
+        end
+    end)
 end
 
 local function getMapIdByZoneId(zoneId)
