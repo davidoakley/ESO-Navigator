@@ -334,6 +334,7 @@ function Locs:getHouseList()
             elseif node.bookmarked then
                 node.weight = 1.2
             end
+            node.known = true
             table.insert(nodes, node)
         end
     end
