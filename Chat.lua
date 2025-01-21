@@ -29,7 +29,7 @@ function Chat:Init()
         for i = 1, #zoneList do
             list[zoneList[i].name] = zoneList[i].name
         end
-        logger:Info("Chat.AutoCompleteProvider:GetResultList: "..#list)
+        MS.log("Chat.AutoCompleteProvider:GetResultList: "..#list)
         return list
     end
 
@@ -40,6 +40,9 @@ function Chat:Init()
 
         local searchResult
 
+        if text:sub(1, 1) == "*" then
+            return {}
+        end
         if text:sub(1, 1) == "@" then
             if #text >= 2 then
                 searchResult = MS.Search.run(text:sub(2), MS.FILTER_PLAYERS)
@@ -65,6 +68,14 @@ end
 function Chat:TP(text)
     local MT = MS.MapTab
     local Locs = MS.Locations
+
+    if text == "*logon" then
+        MS.saved.loggingEnabled = true
+        CHAT_SYSTEM:AddMessage("Logging enabled")
+    elseif text == "*logoff" then
+        MS.saved.loggingEnabled = false
+        CHAT_SYSTEM:AddMessage("Logging disabled")
+    end
 
     local searchResult = MS.Search.run(text, MS.FILTER_NONE)
     if #searchResult == 0 then

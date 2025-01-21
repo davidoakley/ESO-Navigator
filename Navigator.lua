@@ -11,7 +11,8 @@ MapSearch = {
     bookmarkNodes = {},
     defaultTab = false,
     autoFocus = false,
-    tpCommand = "/nav"
+    tpCommand = "/nav",
+    loggingEnabled = false
   },
   Location = {},
   Wayshrine = {},
@@ -25,12 +26,30 @@ MapSearch = {
 }
 local MS = MapSearch
 
-local logger = LibDebugLogger(MS.name)
+local logger
+
+if LibDebugLogger then
+  logger = LibDebugLogger(MS.name)
+end
 MS.logger = logger
 
 local Utils = MS.Utils
 
 local _events = {}
+
+function MS.log(...)
+  ---@diagnostic disable-next-line: undefined-field
+  if MS.saved and MS.saved.loggingEnabled then
+    logger:Debug(string.format(...))
+  end
+end
+
+function MS.logWarning(...)
+  ---@diagnostic disable-next-line: undefined-field
+  if MS.saved and MS.saved.loggingEnabled then
+    logger:Warn(string.format(...))
+  end
+end
 
 local function GetUniqueEventId(id)
   local count = _events[id] or 0
@@ -78,15 +97,15 @@ local function OnMapStateChange(oldState, newState)
     MS.mapVisible = true
     local zone = MS.Locations:getCurrentMapZone()
     MS.initialMapZoneId = zone and zone.zoneId or nil
-    logger:Debug(zo_strformat("WorldMap showing; initialMapZoneId=<<1>>", MS.initialMapZoneId or 0))
+    MS.log("WorldMap showing; initialMapZoneId=%d", MS.initialMapZoneId or 0)
     PushActionLayerByName("Map")
     KEYBIND_STRIP:AddKeybindButtonGroup(ButtonGroup)
     if MS.saved and MS.saved["defaultTab"] then
       WORLD_MAP_INFO:SelectTab(MAPSEARCH_TAB_SEARCH)
     end
-    logger:Debug("WorldMap showing done")
+    MS.log("WorldMap showing done")
   elseif newState == SCENE_HIDDEN then
-    logger:Debug("WorldMap hidden")
+    MS.log("WorldMap hidden")
     MS.mapVisible = false
     KEYBIND_STRIP:RemoveKeybindButtonGroup(ButtonGroup)
     RemoveActionLayerByName("Map")
@@ -94,45 +113,45 @@ local function OnMapStateChange(oldState, newState)
 end
 
 local function OnMapChanged()
-  logger:Debug("OnMapChanged")
+  MS.log("OnMapChanged")
   MS.MapTab.OnMapChanged()
 end
 
 local function OnStartFastTravel(eventCode, nodeIndex)
-  logger:Debug("OnStartFastTravel: "..eventCode..", "..nodeIndex)
+  MS.log("OnStartFastTravel: "..eventCode..", "..nodeIndex)
   MS.isRecall = false
 end
 
 local function OnEndFastTravel()
-  logger:Debug("OnEndFastTravel")
+  MS.log("OnEndFastTravel")
   MS.isRecall = true
 end
 
 local function OnPlayerActivated()
-  logger:Debug("OnPlayerActivated")
+  MS.log("OnPlayerActivated")
   MS.Recents:onPlayerActivated()
 end
 
 local function OnPOIUpdated()
-  logger:Debug("OnPOIUpdated")
+  MS.log("OnPOIUpdated")
   MS.Locations:clearKnownNodes()
 end
 
 local function SetPlayersDirty(eventCode)
-  -- logger:Debug("SetPlayersDirty("..eventCode..")")
+  -- MS.log("SetPlayersDirty("..eventCode..")")
   MS.Locations:ClearPlayers()
   MS.MapTab:queueRefresh()
 end
 
 function MS.showSearch()
-  logger:Debug("showSearch")
+  MS.log("showSearch")
   local tabVisible = MapSearch.MapTab.visible
   MAIN_MENU_KEYBOARD:ShowScene("worldMap")
   WORLD_MAP_INFO:SelectTab(MAPSEARCH_TAB_SEARCH)
   MS.MapTab:resetSearch(false)
   if MapSearch.saved.autoFocus or tabVisible then
     MS.MapTab.editControl:TakeFocus()
-    logger:Debug("showSearch: setting editControl focus")
+    MS.log("showSearch: setting editControl focus")
   end
 end
 
@@ -153,11 +172,11 @@ local function moveTabToFirst()
   buttons[#buttons] = nil
   table.insert(buttons, 1, ourButton)
   WORLD_MAP_INFO.modeBar:UpdateButtons(false)
-  logger:Debug("Menu re-ordered")
+  MS.log("Menu re-ordered")
 end
 
 function MS:initialize()
-  logger:Debug("initialize starts")
+  MS.log("initialize starts")
   -- https://wiki.esoui.com/How_to_add_buttons_to_the_keybind_strip
 
   self.saved = ZO_SavedVars:NewAccountWide(self.svName, 1, nil, self.default)
@@ -196,7 +215,7 @@ function MS:initialize()
   WORLD_MAP_INFO.modeBar:Add(MAPSEARCH_TAB_SEARCH, { self.MapTab.fragment }, { pressed = pressed, highlight = highlight, normal = normal })
   moveTabToFirst()
 
-  logger:Debug("Initialize exits")
+  MS.log("Initialize exits")
 end
 
 local function OnAddOnLoaded(_, addonName)
