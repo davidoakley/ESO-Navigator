@@ -57,6 +57,7 @@ function Recents:getRecents()
         for i = 1, #self.nodes do
             local node = MS.Utils.shallowCopy(nodeMap[self.nodes[i]])
             node.known = MS.Locations:isKnownNode(node.nodeIndex)
+            node.bookmarked = MS.Bookmarks:contains(node)
             table.insert(results, node)
         end
     end

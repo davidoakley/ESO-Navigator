@@ -201,7 +201,7 @@ local function buildList(scrollData, title, list)
             nodeData.suffix = (nodeData.suffix or "") .. "|t23:23:/esoui/art/icons/servicemappins/servicepin_guildkiosk.dds:inheritcolor|t"
         end
 
-        if MapSearch.Bookmarks:contains(nodeData) then
+        if nodeData.bookmarked then --MapSearch.Bookmarks:contains(nodeData) then
             nodeData.suffix = (nodeData.suffix or "") .. "|t25:25:Navigator/media/bookmark.dds:inheritcolor|t"
         end
 

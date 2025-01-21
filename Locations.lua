@@ -299,6 +299,7 @@ function Locs:getKnownNodes(zoneId)
             local bookmarked = MS.Bookmarks:contains(self.nodes[i])
             node.known = true
             node.weight = 1.0
+            node.bookmarked = bookmarked
             if node.poiType == POI_TYPE_WAYSHRINE and MS.isRecall then
                 node.weight = bookmarked and 0.9 or 0.8
             elseif node.poiType == POI_TYPE_HOUSE and not node.owned then
@@ -424,7 +425,8 @@ function Locs:getZoneList()
             zoneName = info.name,
             icon = "Navigator/media/zone.dds",
             poiType = POI_TYPE_ZONE,
-            known = true
+            known = true,
+            bookmarked = MS.Bookmarks:contains(info)
         })
     end
 
