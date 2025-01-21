@@ -200,7 +200,7 @@ local function buildList(scrollData, title, list)
             end
             nodeData.suffix = (nodeData.suffix or "") .. "|t23:23:/esoui/art/icons/servicemappins/servicepin_guildkiosk.dds:inheritcolor|t"
         end
-        if MapSearch.Bookmarks:contains(listEntry.nodeIndex) then
+        if MapSearch.Bookmarks:containsNodeIndex(listEntry.nodeIndex) then
             nodeData.suffix = (nodeData.suffix or "") .. "|t25:25:Navigator/media/bookmark.dds:inheritcolor|t"
         end
 
@@ -506,15 +506,15 @@ local function showWayshrineMenu(owner, nodeIndex)
 	ClearMenu()
 
     local bookmarks = MapSearch.Bookmarks
-	if bookmarks:contains(nodeIndex) then
+	if bookmarks:containsNodeIndex(nodeIndex) then
 		AddMenuItem("Remove Bookmark", function()
-			bookmarks:remove(nodeIndex)
+			bookmarks:removeNodeIndex(nodeIndex)
 			ClearMenu()
             MT:executeSearch(MT.searchString)
 		end)
 	else
 		AddMenuItem("Add Bookmark", function()
-			bookmarks:add(nodeIndex)
+			bookmarks:add({ nodeIndex = nodeIndex })
 			ClearMenu()
             MT:executeSearch(MT.searchString)
 		end)

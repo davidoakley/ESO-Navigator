@@ -296,7 +296,7 @@ function Locs:getKnownNodes(zoneId)
         local index = self.nodes[i].nodeIndex
         if self:isKnownNode(index) and (not zoneId or self.nodes[i].zoneId == zoneId) then
             local node = Utils.shallowCopy(self.nodes[i])
-            local bookmarked = MS.Bookmarks:contains(index)
+            local bookmarked = MS.Bookmarks:containsNodeIndex(index)
             node.known = true
             node.weight = 1.0
             if node.poiType == POI_TYPE_WAYSHRINE and MS.isRecall then
@@ -325,7 +325,7 @@ function Locs:getHouseList()
         local index = self.nodes[i].nodeIndex
         if self:isKnownNode(index) and self.nodes[i].poiType == POI_TYPE_HOUSE then
             local node = Utils.shallowCopy(self.nodes[i])
-            if MS.Bookmarks:contains(index) then
+            if MS.Bookmarks:containsNodeIndex(index) then
                 node.bookmarked = true
             end
             if not node.owned then
