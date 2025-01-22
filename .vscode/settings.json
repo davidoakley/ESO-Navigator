@@ -26,7 +26,8 @@
         "CHAT_SYSTEM",
         "SCENE_MANAGER",
         "JumpToFriend",
-        "JumpToGuildMember"
+        "JumpToGuildMember",
+        "SetMenuHiddenCallback"
     ],
     "Lua.diagnostics.globalsRegex": [
         "^ZO_.*",
