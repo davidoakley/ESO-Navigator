@@ -100,7 +100,7 @@ local function OnMapStateChange(oldState, newState)
     MS.log("WorldMap showing; initialMapZoneId=%d", MS.initialMapZoneId or 0)
     PushActionLayerByName("Map")
     KEYBIND_STRIP:AddKeybindButtonGroup(ButtonGroup)
-    if MS.saved and MS.saved["defaultTab"] then
+    if MS.saved and MS.saved["defaultTab"] and not FasterTravel then
       WORLD_MAP_INFO:SelectTab(MAPSEARCH_TAB_SEARCH)
     end
     MS.log("WorldMap showing done")
@@ -219,7 +219,9 @@ function MS:initialize()
   local pressed = "Navigator/media/tabicon_down.dds"
 
   WORLD_MAP_INFO.modeBar:Add(MAPSEARCH_TAB_SEARCH, { self.MapTab.fragment }, { pressed = pressed, highlight = highlight, normal = normal })
-  moveTabToFirst()
+  if self.saved["defaultTab"] and not FasterTravel then
+    moveTabToFirst()
+  end
 
   MS.log("Initialize exits")
 end

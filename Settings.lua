@@ -27,6 +27,14 @@ function MapSearch:loadSettings()
           end,
         width = "full", --or "half",
         requiresReload = true,
+        disabled = function() return FasterTravel ~= nil end,
+        warning = function()
+          if FasterTravel then
+            return "Navigator cannot auto-select its tab when the Faster Travel addon is also enabled"
+          else
+            return nil
+          end
+        end
     })
 
     table.insert(optionsTable, {
@@ -38,6 +46,7 @@ function MapSearch:loadSettings()
         sv.autoFocus = value
         end,
       width = "full",
+      warning = "When active, the 'M' key can't be used to immediately exit the map; use 'Escape' instead."
     })
 
     table.insert(optionsTable, {
@@ -50,19 +59,26 @@ function MapSearch:loadSettings()
       width = "full",
       default = MapSearch.default.tpCommand,
       requiresReload = true,
+      warning = function()
+        if PITHKA and PITHKA.SV and PITHKA.SV.options.enableTeleport then
+          return "|c8080FFPithka's Achievement Tracker|r has its teleport command enabled, which also uses '/tp'"
+        else
+          return nil
+        end
+      end
     })
 
-    table.insert(optionsTable, 	{
-      type = "description",
-      -- title = "My Description",
-      text = function()
-        if PITHKA and PITHKA.SV and PITHKA.SV.options.enableTeleport then
-          return "|cFFFF00|t24:24:/esoui/art/miscellaneous/eso_icon_warning.dds:inheritcolor|t|r |c8080FFPithka's Achievement Tracker|r has its teleport command enabled, which also uses '/tp'"
-        else
-          return ""
-        end
-      end,
-    })
+    -- table.insert(optionsTable, 	{
+    --   type = "description",
+    --   -- title = "My Description",
+    --   text = function()
+    --     if PITHKA and PITHKA.SV and PITHKA.SV.options.enableTeleport then
+    --       return "|cFFFF00|t24:24:/esoui/art/miscellaneous/eso_icon_warning.dds:inheritcolor|t|r |c8080FFPithka's Achievement Tracker|r has its teleport command enabled, which also uses '/tp'"
+    --     else
+    --       return ""
+    --     end
+    --   end,
+    -- })
 
     LAM:RegisterOptionControls(self.settingsName, optionsTable)
   end
