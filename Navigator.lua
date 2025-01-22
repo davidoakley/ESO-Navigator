@@ -206,6 +206,12 @@ function MS:initialize()
     EVENT_GUILD_MEMBER_CHARACTER_ZONE_CHANGED, EVENT_FRIEND_CHARACTER_ZONE_CHANGED,
     EVENT_FRIEND_ADDED, EVENT_FRIEND_REMOVED)
 
+  addEvent(EVENT_GUILD_MEMBER_PLAYER_STATUS_CHANGED, function(_, guildId, DisplayName, oldStatus, newStatus)
+    if newStatus == PLAYER_STATUS_OFFLINE or (oldStatus == PLAYER_STATUS_OFFLINE and newStatus == PLAYER_STATUS_ONLINE) then
+      SetPlayersDirty()
+    end
+  end)
+
 
   -- local normal, highlight, pressed = GetPaths("/esoui/art/guild/guildhistory_indexicon_guildstore_", "up.dds", "over.dds", "down.dds")
   local normal = "Navigator/media/tabicon_up.dds"
