@@ -37,29 +37,11 @@ function MT:layoutRow(rowControl, data, scrollList)
     local icon = data.icon
     local iconColour = data.colour and { data.colour:UnpackRGBA() } or
                        (data.known and { 1.0, 1.0, 1.0, 1.0 } or { 0.51, 0.51, 0.44, 1.0 })
-    local isFree = true
 
     if data.suffix ~= nil then
         name = name .. " |c82826F" .. data.suffix .. "|r"
     end
 
-    if MapSearch.isRecall and data.poiType == POI_TYPE_WAYSHRINE and data.known and data.nodeIndex then
-        local _, timeLeft = GetRecallCooldown()
-
-        if timeLeft == 0 then
-            local currencyType = CURT_MONEY
-            local currencyAmount = GetRecallCost(data.nodeIndex)
-            local formatType = ZO_CURRENCY_FORMAT_AMOUNT_ICON
-            local currencyString = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(currencyType, currencyAmount, formatType))
-            local costText = string.format(GetString(SI_TOOLTIP_RECALL_COST) .. "%s", currencyString)
-            if tooltipText then
-                tooltipText = costText .. "; " .. tooltipText
-            else
-                tooltipText = costText
-            end
-            isFree = false
-        end
-    end
 
 	if data.icon ~= nil then
         rowControl.icon:SetColor(unpack(iconColour))
@@ -69,7 +51,7 @@ function MT:layoutRow(rowControl, data, scrollList)
 		rowControl.icon:SetHidden(true)
 	end
 
-    rowControl.cost:SetHidden(isFree)
+    rowControl.cost:SetHidden(data.isFree)
 
 	rowControl.keybind:SetHidden(not data.isSelected or not data.known or not self.editControl:HasFocus())
     rowControl.bg:SetHidden(not data.isSelected)
@@ -201,6 +183,25 @@ local function nameComparison(x, y)
 	return (x.barename or x.name) < (y.barename or y.name)
 end
 
+local function addDeveloperTooltip(nodeData)
+    local items = {
+        "bareName='" .. (nodeData.barename or '-').."'",
+        "searchName='" .. Utils.SearchName(nodeData.name or '-').."'",
+        "weight="..(nodeData.weight or 0)
+    }
+    if nodeData.nodeIndex then
+        table.insert(items, "nodeIndex="..(nodeData.nodeIndex or "-"))
+    end
+    if nodeData.zoneId then
+        table.insert(items, "zoneId="..(nodeData.zoneId or "-"))
+    end
+    if nodeData.tooltip then
+        table.insert(items, 1, nodeData.tooltip)
+    end
+
+    nodeData.tooltip = table.concat(items, "; ")
+end
+
 local function buildList(scrollData, title, list)
     if #list > 0 then
         local recentEntry = ZO_ScrollList_CreateDataEntry(0, { name = title })
@@ -230,10 +231,27 @@ local function buildList(scrollData, title, list)
             nodeData.suffix = (nodeData.suffix or "") .. "|t25:25:Navigator/media/bookmark.dds:inheritcolor|t"
         end
 
+        if not nodeData.known then
+            nodeData.tooltip = "Not known by this character"
+        end
+
+        nodeData.isFree = true
+        if MapSearch.isRecall and nodeData.poiType == POI_TYPE_WAYSHRINE and nodeData.known and nodeData.nodeIndex then
+            local _, timeLeft = GetRecallCooldown()
+    
+            if timeLeft == 0 then
+                local currencyType = CURT_MONEY
+                local currencyAmount = GetRecallCost(nodeData.nodeIndex)
+                local formatType = ZO_CURRENCY_FORMAT_AMOUNT_ICON
+                local currencyString = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(currencyType, currencyAmount, formatType))
+                nodeData.tooltip = string.format(GetString(SI_TOOLTIP_RECALL_COST) .. "%s", currencyString)
+                nodeData.isFree = false
+            end
+        end
+    
+    
         if MapSearch.isDeveloper then
-            -- resultNode.name = resultNode.name .. " |c808080[" .. resultNode.match .. "]|r"
-            nodeData.tooltip = "nodeIndex " .. (nodeData.nodeIndex or "-") .. "; bareName '" .. (nodeData.barename or '-') ..
-              "; weight "..(nodeData.weight or 0)
+            addDeveloperTooltip(nodeData)
         end
 
 		local entry = ZO_ScrollList_CreateDataEntry(1, nodeData)
