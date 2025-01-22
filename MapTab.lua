@@ -186,7 +186,7 @@ end
 local function addDeveloperTooltip(nodeData)
     local items = {
         "bareName='" .. (nodeData.barename or '-').."'",
-        "searchName='" .. Utils.SearchName(nodeData.name or '-').."'",
+        "searchName='" .. Utils.SearchName(nodeData.originalName or nodeData.name or '-').."'",
         "weight="..(nodeData.weight or 0)
     }
     if nodeData.nodeIndex then

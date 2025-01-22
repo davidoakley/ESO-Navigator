@@ -13,7 +13,8 @@ MS.FILTER_PLAYERS = 1
 MS.FILTER_HOUSES = 4
 
 local function match(object, searchTerm)
-    local name = Utils.SearchName(object.name) -- object.barename or object.name
+    local name = Utils.SearchName(object.originalName or object.name) -- object.barename or object.name
+    searchTerm = Utils.removeAccents(searchTerm)
 
     local result = fzy.filter(searchTerm, {name})
 
