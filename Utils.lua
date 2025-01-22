@@ -46,6 +46,32 @@ function Utils.bareName(name)
 	return r
 end
 
+function Utils.SearchName(name)
+	local r = name --Utils.shortName(name)
+	if _lang == "en" then
+		r = r:gsub("^Dungeon: ", "", 1):gsub("^Trial: ", "", 1)
+		-- r = r:gsub("^The ", "", 1)
+	elseif _lang == "fr" then
+		r = r:gsub("^Oratoire. ", "", 1):gsub("^Donjon.-:.", "", 1):gsub("^Épreuve.-:.", "", 1)
+		-- r = r:gsub("^d'", "", 1):gsub("^des ", "", 1):gsub("^de ", "", 1):gsub("^du ", "", 1)
+		-- r = r:gsub("^la ", "", 1):gsub("^l' ", "", 1)
+	elseif _lang == "de" then
+		r = r:gsub("Wegschrein ", "", 1)
+		-- r = r:gsub("^am ", "", 1):gsub("^bei ", "", 1)
+		-- r = r:gsub("^von ", "", 1):gsub("^der ", "", 1):gsub("^des ", "", 1)
+	elseif _lang == "ru" then
+		r = r:gsub("Дорожное святилище ", "", 1):gsub("^Подземелье: ", "", 1):gsub("^Испытание: ", "", 1)
+	end
+
+	r = r:gsub(" II$", " II 2", 1):gsub(" I$", " I 1", 1)
+
+	-- r = r:lower()
+
+	-- r = r:gsub("-", " ")
+	-- r = r:gsub("[^%w ]", "")
+	return r
+end
+
 function Utils.shallowCopy(t)
     local t2 = {}
     for k,v in pairs(t) do
