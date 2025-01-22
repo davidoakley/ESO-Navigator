@@ -7,7 +7,7 @@ function MapSearch:loadSettings()
     local panelData = {
       type = "panel",
       name = self.menuName,
-      displayName = self.menuName,
+      displayName = self.displayName,
       author = self.author, -- DynamicFPS.Colorize(DynamicFPS.author, "AAF0BB"),
       version = self.appVersion,
       registerForRefresh = true,

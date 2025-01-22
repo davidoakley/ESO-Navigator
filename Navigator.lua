@@ -1,6 +1,7 @@
 MapSearch = {
   name = "Navigator",
   menuName = "Navigator",          -- A UNIQUE identifier for menu object.
+  displayName = "|c66CC66N|r|c66CCFFavigator|r",
   settingsName = "NavigatorSettings",
   author = "SirNightstorm",
   appVersion = "0",
@@ -38,15 +39,13 @@ local Utils = MS.Utils
 local _events = {}
 
 function MS.log(...)
-  ---@diagnostic disable-next-line: undefined-field
-  if MS.saved and MS.saved.loggingEnabled then
+  if MS.saved and MS.saved["loggingEnabled"] then
     logger:Debug(string.format(...))
   end
 end
 
 function MS.logWarning(...)
-  ---@diagnostic disable-next-line: undefined-field
-  if MS.saved and MS.saved.loggingEnabled then
+  if MS.saved and MS.saved["loggingEnabled"] then
     logger:Warn(string.format(...))
   end
 end
