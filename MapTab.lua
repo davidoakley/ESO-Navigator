@@ -201,6 +201,25 @@ local function nameComparison(x, y)
 	return (x.barename or x.name) < (y.barename or y.name)
 end
 
+local function addDeveloperTooltip(nodeData)
+    local items = {
+        "bareName='" .. (nodeData.barename or '-').."'",
+        "searchName='" .. Utils.SearchName(nodeData.name or '-').."'",
+        "weight="..(nodeData.weight or 0)
+    }
+    if nodeData.nodeIndex then
+        table.insert(items, "nodeIndex="..(nodeData.nodeIndex or "-"))
+    end
+    if nodeData.zoneId then
+        table.insert(items, "zoneId="..(nodeData.zoneId or "-"))
+    end
+    if nodeData.tooltip then
+        table.insert(items, 1, nodeData.tooltip)
+    end
+
+    nodeData.tooltip = table.concat(items, "; ")
+end
+
 local function buildList(scrollData, title, list)
     if #list > 0 then
         local recentEntry = ZO_ScrollList_CreateDataEntry(0, { name = title })
@@ -231,9 +250,7 @@ local function buildList(scrollData, title, list)
         end
 
         if MapSearch.isDeveloper then
-            -- resultNode.name = resultNode.name .. " |c808080[" .. resultNode.match .. "]|r"
-            nodeData.tooltip = "nodeIndex " .. (nodeData.nodeIndex or "-") .. "; bareName '" .. (nodeData.barename or '-') ..
-              "; weight "..(nodeData.weight or 0)
+            addDeveloperTooltip(nodeData)
         end
 
 		local entry = ZO_ScrollList_CreateDataEntry(1, nodeData)
