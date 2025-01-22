@@ -231,7 +231,7 @@ local function buildList(scrollData, title, list)
             nodeData.suffix = (nodeData.suffix or "") .. "|t25:25:Navigator/media/bookmark.dds:inheritcolor|t"
         end
 
-        if not nodeData.known then
+        if not nodeData.known and nodeData.nodeIndex then
             nodeData.tooltip = "Not known by this character"
         end
 
