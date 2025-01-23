@@ -82,8 +82,8 @@ end
 
 local ButtonGroup = {
   {
-    name = "Search", --GetString(SI_BINDING_NAME_FASTER_TRAVEL_REJUMP),
-    keybind = "MAPSEARCH_OPENTAB", --"UI_SHORTCUT_QUICK_SLOTS", --"MAPSEARCH_SEARCH",
+    name = GetString(NAVIGATOR_KEYBIND_SEARCH),
+    keybind = "NAVIGATOR_OPENTAB", --"UI_SHORTCUT_QUICK_SLOTS", --"NAVIGATOR_SEARCH",
     order = 200,
     visible = function() return true end,
     callback = function() MS.showSearch() end,
@@ -100,7 +100,7 @@ local function OnMapStateChange(oldState, newState)
     PushActionLayerByName("Map")
     KEYBIND_STRIP:AddKeybindButtonGroup(ButtonGroup)
     if MS.saved and MS.saved["defaultTab"] and not FasterTravel then
-      WORLD_MAP_INFO:SelectTab(MAPSEARCH_TAB_SEARCH)
+      WORLD_MAP_INFO:SelectTab(NAVIGATOR_TAB_SEARCH)
     end
     MS.log("WorldMap showing done")
   elseif newState == SCENE_HIDDEN then
@@ -146,23 +146,12 @@ function MS.showSearch()
   MS.log("showSearch")
   local tabVisible = MapSearch.MapTab.visible
   MAIN_MENU_KEYBOARD:ShowScene("worldMap")
-  WORLD_MAP_INFO:SelectTab(MAPSEARCH_TAB_SEARCH)
+  WORLD_MAP_INFO:SelectTab(NAVIGATOR_TAB_SEARCH)
   MS.MapTab:resetSearch(false)
   if MapSearch.saved.autoFocus or tabVisible then
     MS.MapTab.editControl:TakeFocus()
     MS.log("showSearch: setting editControl focus")
   end
-end
-
-function MS:CreateStrings()
-  -- Make this properly localisable!
-  local openTabBinding = ZO_Keybindings_GetHighestPriorityNarrationStringFromAction("MAPSEARCH_OPENTAB") or '-'
-  -- openTabBinding = ZO_Keybindings_GenerateTextKeyMarkup(openTabBinding)
-  ZO_CreateStringId("MAPSEARCH_SEARCH","Search locations, zones or @players")
-  ZO_CreateStringId("MAPSEARCH_SEARCH_KEYPRESS","Search ("..openTabBinding..")")
-  ZO_CreateStringId("MAPSEARCH_OPENTAB","Open Navigator tab (on Map screen)")
-  ZO_CreateStringId("SI_BINDING_NAME_MAPSEARCH_SEARCH", "Open Map Navigator")
-  ZO_CreateStringId("MAPSEARCH_TAB_SEARCH","Navigator")
 end
 
 local function moveTabToFirst()
@@ -179,8 +168,6 @@ function MS:initialize()
   -- https://wiki.esoui.com/How_to_add_buttons_to_the_keybind_strip
 
   self.saved = ZO_SavedVars:NewAccountWide(self.svName, 1, nil, self.default)
-
-  self:CreateStrings()
 
   SCENE_MANAGER:GetScene('worldMap'):RegisterCallback("StateChange", OnMapStateChange)
 
@@ -217,7 +204,7 @@ function MS:initialize()
   local highlight = "Navigator/media/tabicon_over.dds"
   local pressed = "Navigator/media/tabicon_down.dds"
 
-  WORLD_MAP_INFO.modeBar:Add(MAPSEARCH_TAB_SEARCH, { self.MapTab.fragment }, { pressed = pressed, highlight = highlight, normal = normal })
+  WORLD_MAP_INFO.modeBar:Add(NAVIGATOR_TAB_SEARCH, { self.MapTab.fragment }, { pressed = pressed, highlight = highlight, normal = normal })
   if self.saved["defaultTab"] and not FasterTravel then
     moveTabToFirst()
   end

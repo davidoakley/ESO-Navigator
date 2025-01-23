@@ -14,7 +14,7 @@ function Chat:Init()
     local command = self.lsc:Register()
     command:AddAlias(MS.saved.tpCommand)
     command:SetCallback(function(input) self:TP(input) end)
-    command:SetDescription("Navigator: Teleports to the given zone, wayshrine, house or player")
+    command:SetDescription(GetString(NAVIGATOR_SLASH_DESCRIPTION))
 
     ---@class Chat.AutoCompleteProvider
     Chat.AutoCompleteProvider = LibSlashCommander.AutoCompleteProvider:Subclass()
@@ -72,13 +72,16 @@ function Chat:TP(text)
     if text == "*logon" then
         MS.saved.loggingEnabled = true
         CHAT_SYSTEM:AddMessage("Logging enabled")
+        return
     elseif text == "*logoff" then
         MS.saved.loggingEnabled = false
         CHAT_SYSTEM:AddMessage("Logging disabled")
+        return
     end
 
     local searchResult = MS.Search.run(text, MS.FILTER_NONE)
     if #searchResult == 0 then
+        CHAT_SYSTEM:AddMessage(GetString(SI_JUMPRESULT20))
         return
     end
 
@@ -93,13 +96,13 @@ function Chat:TP(text)
     if zoneId then
         local node = Locs:getPlayerInZone(zoneId)
         if not node then
-            CHAT_SYSTEM:AddMessage("Failed to find a player in "..data.zoneName)
+            CHAT_SYSTEM:AddMessage(zo_strformat(GetString(NAVIGATOR_PLAYER_NOT_IN_ZONE), data.zoneName))
             return
         end
 
         -- local userID, poiType, zoneId, zoneName = node.userID, node.poiType, node.zoneId, node.zoneName
 
-        CHAT_SYSTEM:AddMessage("Jumping to "..node.zoneName.." via "..node.userID)
+        CHAT_SYSTEM:AddMessage(zo_strformat(GetString(NAVIGATOR_TRAVELING_TO_ZONE_VIA_PLAYER), node.zoneName, node.userID))
         SCENE_MANAGER:Hide("worldMap")
 
         if node.poiType == POI_TYPE_FRIEND then
@@ -108,7 +111,7 @@ function Chat:TP(text)
             JumpToGuildMember(node.userID)
         end
     else
-        CHAT_SYSTEM:AddMessage("Sorry, I wasn't able to process that result")
+        -- CHAT_SYSTEM:AddMessage("Sorry, I wasn't able to process that result")
     end
 end
 
