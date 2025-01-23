@@ -7,6 +7,9 @@
 ## OptionalDependsOn: LibDebugLogger>=180 pChat FasterTravel LibSlashCommander LibWorldMapInfoTab
 ## SavedVariables: Navigator_SavedVariables
 
+lang/en.lua
+lang/$(language).lua
+
 Navigator.lua
 fzy.lua
 Data.lua

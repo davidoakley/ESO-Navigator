@@ -72,6 +72,7 @@ function Locs:setupNodes()
            and zoneId ~= 643 -- Imperial Sewers
            and zoneId ~= 1283 -- The Shambles
            then
+            zoneName = Utils.FormatSimpleName(zoneName)
 			local zoneIndex = GetZoneIndex(zoneId)
 			local numPOIs = GetNumPOIs(zoneIndex)
 			for poiIndex = 1, numPOIs do
@@ -91,7 +92,7 @@ function Locs:setupNodes()
 
                     if not self.zones[zoneId] then
                         if self:IsZone(zoneId) then
-                            local zoneName = GetZoneNameById(zoneId)
+                            -- local zoneName = GetZoneNameById(zoneId)
                             self.zones[zoneId] = {
                                 name = zoneName,
                                 zoneId = zoneId,
@@ -122,9 +123,11 @@ function Locs:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon, known
         self.harborageIndex = i
     end
 
+    name = Utils.FormatSimpleName(name)
+
     local nodeInfo = {
         nodeIndex = i,
-        name = name,
+        name = Utils.DisplayName(name),
         originalName = name,
         type = typePOI,
         zoneId = nodeZoneId,
@@ -136,17 +139,17 @@ function Locs:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon, known
     if typePOI == 6 then
         nodeInfo.poiType = POI_TYPE_GROUP_DUNGEON
         nodeInfo.icon = "esoui/art/icons/poi/poi_groupinstance_complete.dds"
-        if name:find("Dungeon: ") then
-            nodeInfo.name = string.sub(nodeInfo.name, 10, #nodeInfo.name)
-        end
-        nodeInfo.suffix = "Dungeon"
+        -- if name:find("Dungeon: ") then
+        --     nodeInfo.name = string.sub(nodeInfo.name, 10, #nodeInfo.name)
+        -- end
+        nodeInfo.suffix = GetString(NAVIGATOR_DUNGEON)
     elseif typePOI == 3 then
         nodeInfo.poiType = POI_TYPE_TRIAL
         nodeInfo.icon = "esoui/art/tutorial/poi_raiddungeon_complete.dds"
-        if nodeInfo.name:find("Trial: ") then
-            nodeInfo.name = string.sub(nodeInfo.name, 8, #nodeInfo.name)
-        end
-        nodeInfo.suffix = "Trial"
+        -- if nodeInfo.name:find("Trial: ") then
+        --     nodeInfo.name = string.sub(nodeInfo.name, 8, #nodeInfo.name)
+        -- end
+        nodeInfo.suffix = GetString(NAVIGATOR_TRIAL)
     elseif typePOI == 7 then
         nodeInfo.poiType = POI_TYPE_HOUSE
         nodeInfo.owned = (icon:find("poi_group_house_owned") ~= nil) --(icon == "/esoui/art/icons/poi/poi_group_house_owned.dds")
@@ -156,13 +159,13 @@ function Locs:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon, known
         --     nodeInfo.icon = "esoui/art/tutorial/poi_raiddungeon_complete.dds"
     elseif typePOI == 1 then
         nodeInfo.poiType = POI_TYPE_WAYSHRINE
-        if name:find(" Wayshrine") then
-            nodeInfo.name = string.sub(nodeInfo.name, 1, #nodeInfo.name - 10)
-        end
+        -- if name:find(" Wayshrine") then
+        --     nodeInfo.name = string.sub(nodeInfo.name, 1, #nodeInfo.name - 10)
+        -- end
     elseif glowIcon == "/esoui/art/icons/poi/poi_soloinstance_glow.dds" or
            glowIcon == "/esoui/art/icons/poi/poi_groupinstance_glow.dds" then
         nodeInfo.poiType = POI_TYPE_ARENA
-        nodeInfo.suffix = "Arena"
+        nodeInfo.suffix = GetString(NAVIGATOR_ARENA)
         -- if name:find(" Arena") then
         --     nodeInfo.name = string.sub(nodeInfo.name, 1, #nodeInfo.name - 6)
         -- end
@@ -196,7 +199,7 @@ function Locs:addPlayerZone(zoneId, zoneName, userID, icon, poiType)
     if self.zones[zoneId] and CanJumpToPlayerInZone(zoneId) then
         local zoneInfo = {
             zoneId = zoneId,
-            zoneName = zoneName,
+            zoneName = Utils.FormatSimpleName(zoneName),
             userID = userID,
             icon = icon,
             poiType = poiType
