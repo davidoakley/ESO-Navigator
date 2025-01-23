@@ -277,7 +277,13 @@ function MT:UpdateEditDefaultText()
 	end
 end
 
-function MT:buildScrollList()
+function MT:buildScrollList(keepScrollPosition)
+    local scrollPosition = 0
+    if keepScrollPosition then
+        scrollPosition = ZO_ScrollList_GetScrollValue(self.listControl)
+        -- MS.log("MT:buildScrollList: pos=%d", scrollPosition)
+    end
+
 	ZO_ScrollList_Clear(self.listControl)
 
 	self:UpdateEditDefaultText()
@@ -330,7 +336,9 @@ function MT:buildScrollList()
 
 	ZO_ScrollList_Commit(self.listControl)
 
-    if MT.resultCount > 0 then
+    if keepScrollPosition then
+        ZO_ScrollList_ScrollAbsolute(self.listControl, scrollPosition)
+    elseif MT.resultCount > 0 then
         -- FIXME: this doesn't account for the headings
         ZO_ScrollList_ScrollDataIntoView(self.listControl, MapSearch.targetNode + 1, nil, true)
     end
@@ -345,10 +353,12 @@ function MT:executeSearch(searchString, keepTargetNode)
 
 	MapSearch.results = results
     if not keepTargetNode or MapSearch.targetNode >= (MT.resultCount or 0) then
+        -- MS.log("executeSearch: reset targetNode keep=%d, oldTarget=%d, count=%d", keepTargetNode and 1 or 0, MapSearch.targetNode, (MT.resultCount or 0))
     	MapSearch.targetNode = 0
+        keepTargetNode = false
     end
 
-	MT:buildScrollList()
+	MT:buildScrollList(keepTargetNode)
     MT:updateFilterControl()
 end
 
