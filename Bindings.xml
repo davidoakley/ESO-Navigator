@@ -1,7 +1,7 @@
 <Bindings>
 	<Layer name="SI_KEYBINDINGS_LAYER_GENERAL">
 		<Category name="Navigator">
-			<Action name="MAPSEARCH_SEARCH" rebindable="true">
+			<Action name="NAVIGATOR_SEARCH" rebindable="true">
 				<Down>MapSearch.showSearch()</Down>
 			</Action>
 		</Category>
@@ -9,7 +9,7 @@
 	
 	<Layer name="Map">
 		<Category>
-			<Action name="MAPSEARCH_OPENTAB" hideAction="false" inheritsBindFrom="CYCLE_PREFERRED_ENEMY_TARGET">
+			<Action name="NAVIGATOR_OPENTAB" hideAction="false" inheritsBindFrom="CYCLE_PREFERRED_ENEMY_TARGET">
 				<Down>MapSearch.showSearch()</Down>
 			</Action>
 		</Category>

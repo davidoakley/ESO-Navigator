@@ -142,14 +142,14 @@ function Locs:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon, known
         -- if name:find("Dungeon: ") then
         --     nodeInfo.name = string.sub(nodeInfo.name, 10, #nodeInfo.name)
         -- end
-        nodeInfo.suffix = "Dungeon"
+        nodeInfo.suffix = GetString(NAVIGATOR_DUNGEON)
     elseif typePOI == 3 then
         nodeInfo.poiType = POI_TYPE_TRIAL
         nodeInfo.icon = "esoui/art/tutorial/poi_raiddungeon_complete.dds"
         -- if nodeInfo.name:find("Trial: ") then
         --     nodeInfo.name = string.sub(nodeInfo.name, 8, #nodeInfo.name)
         -- end
-        nodeInfo.suffix = "Trial"
+        nodeInfo.suffix = GetString(NAVIGATOR_TRIAL)
     elseif typePOI == 7 then
         nodeInfo.poiType = POI_TYPE_HOUSE
         nodeInfo.owned = (icon:find("poi_group_house_owned") ~= nil) --(icon == "/esoui/art/icons/poi/poi_group_house_owned.dds")
@@ -159,13 +159,13 @@ function Locs:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon, known
         --     nodeInfo.icon = "esoui/art/tutorial/poi_raiddungeon_complete.dds"
     elseif typePOI == 1 then
         nodeInfo.poiType = POI_TYPE_WAYSHRINE
-        if name:find(" Wayshrine") then
-            nodeInfo.name = string.sub(nodeInfo.name, 1, #nodeInfo.name - 10)
-        end
+        -- if name:find(" Wayshrine") then
+        --     nodeInfo.name = string.sub(nodeInfo.name, 1, #nodeInfo.name - 10)
+        -- end
     elseif glowIcon == "/esoui/art/icons/poi/poi_soloinstance_glow.dds" or
            glowIcon == "/esoui/art/icons/poi/poi_groupinstance_glow.dds" then
         nodeInfo.poiType = POI_TYPE_ARENA
-        nodeInfo.suffix = "Arena"
+        nodeInfo.suffix = GetString(NAVIGATOR_ARENA)
         -- if name:find(" Arena") then
         --     nodeInfo.name = string.sub(nodeInfo.name, 1, #nodeInfo.name - 6)
         -- end
@@ -199,7 +199,7 @@ function Locs:addPlayerZone(zoneId, zoneName, userID, icon, poiType)
     if self.zones[zoneId] and CanJumpToPlayerInZone(zoneId) then
         local zoneInfo = {
             zoneId = zoneId,
-            zoneName = zoneName,
+            zoneName = Utils.FormatSimpleName(zoneName),
             userID = userID,
             icon = icon,
             poiType = poiType
