@@ -185,7 +185,7 @@ function Utils.DisplayName(name)
 		r = r:gsub("^Donjon.-:.", "", 1):gsub("^Épreuve.-:.", "", 1)
 		r = r:gsub("^Oratoire ", "O. ", 1)
 	elseif _lang == "de" then
-		r = r:gsub("Wegschrein ", "WS ", 1)
+		r = r:gsub("Wegschrein ", "WS ", 1):gsub(" .Verlies.", "", 1):gsub(" .Prüfung.", "", 1)
 	elseif _lang == "ru" then
 		r = r:gsub("^Дорожное святилище ", "ДС ", 1)
 	end
@@ -227,9 +227,9 @@ function Utils.SearchName(name)
 		-- r = r:gsub("^d'", "", 1):gsub("^des ", "", 1):gsub("^de ", "", 1):gsub("^du ", "", 1)
 		-- r = r:gsub("^la ", "", 1):gsub("^l' ", "", 1)
 	elseif _lang == "de" then
-		r = r:gsub("Wegschrein ", "", 1)
-		-- r = r:gsub("^am ", "", 1):gsub("^bei ", "", 1)
-		-- r = r:gsub("^von ", "", 1):gsub("^der ", "", 1):gsub("^des ", "", 1)
+		r = r:gsub("Wegschrein ", "", 1):gsub(" \\(Verlies\\)", "", 1):gsub(" \\(Prüfung\\)", "", 1)
+		r = r:gsub("^am ", "", 1):gsub("^bei ", "", 1)
+		r = r:gsub("^von ", "", 1):gsub("^der ", "", 1):gsub("^des ", "", 1)
 	elseif _lang == "ru" then
 		r = r:gsub("Дорожное святилище ", "", 1):gsub("^Подземелье: ", "", 1):gsub("^Испытание: ", "", 1)
 	end
