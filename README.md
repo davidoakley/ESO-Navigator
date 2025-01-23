@@ -22,9 +22,7 @@ This add-on is brand-new, and has only been tested by me! I would appreciate fri
 
 ## Required Libraries ##
 
-- **LibAddonMenu-2.0**
-- **LibDebugLogger**
-
+- **LibAddonMenu-2.0** - required to provide a Settings panel
 
 ## Optional Libraries ##
 
