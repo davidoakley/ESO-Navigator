@@ -121,7 +121,7 @@ local function jumpToPlayer(node)
 
     if not Locs.players[userID] or Locs.players[userID].zoneId ~= zoneId then
         -- Player has disappeared or moved!
-        CHAT_SYSTEM:AddMessage(userID .. " is no longer in "..zoneName)
+        CHAT_SYSTEM:AddMessage(zo_strformat(GetString(NAVIGATOR_PLAYER_NOT_IN_ZONE), userID, zoneName))
 
         if Locs.playerZones[zoneId] then
             node = Locs.playerZones[zoneId]
@@ -133,7 +133,7 @@ local function jumpToPlayer(node)
         end
     end
 
-    CHAT_SYSTEM:AddMessage("Jumping to "..zoneName.." via "..userID)
+    CHAT_SYSTEM:AddMessage(zo_strformat(GetString(NAVIGATOR_TRAVELING_TO_ZONE_VIA_PLAYER), zoneName, userID))
     SCENE_MANAGER:Hide("worldMap")
 
     if poiType == POI_TYPE_FRIEND then
@@ -232,7 +232,7 @@ local function buildList(scrollData, title, list)
         end
 
         if not nodeData.known and nodeData.nodeIndex then
-            nodeData.tooltip = "Not known by this character"
+            nodeData.tooltip = GetString(NAVIGATOR_NOT_KNOWN)
         end
 
         nodeData.isFree = true
@@ -267,7 +267,9 @@ function MT:UpdateEditDefaultText()
 	local searchString = self.editControl:GetText()
 	if searchString == "" then
 		-- reinstate default text
-        local s = self.editControl:HasFocus() and GetString(MAPSEARCH_SEARCH) or GetString(MAPSEARCH_SEARCH_KEYPRESS)
+        local openTabBinding = ZO_Keybindings_GetHighestPriorityNarrationStringFromAction("NAVIGATOR_OPENTAB") or '-'
+        local s = zo_strformat(self.editControl:HasFocus() and GetString(NAVIGATOR_SEARCH) or GetString(NAVIGATOR_SEARCH_KEYPRESS),
+            openTabBinding)
 		ZO_EditDefaultText_Initialize(self.editControl, s)
 	else
 		-- remove default text
@@ -278,45 +280,37 @@ end
 function MT:buildScrollList()
 	ZO_ScrollList_Clear(self.listControl)
 
-	local searchString = self.editControl:GetText()
-	if searchString == "" then
-		-- reinstate default text
-        local s = self.editControl:HasFocus() and GetString(MAPSEARCH_SEARCH) or GetString(MAPSEARCH_SEARCH_KEYPRESS)
-		ZO_EditDefaultText_Initialize(self.editControl, s)
-	else
-		-- remove default text
-		ZO_EditDefaultText_Disable(self.editControl)
-	end
+	self:UpdateEditDefaultText()
 
     local scrollData = ZO_ScrollList_GetDataList(self.listControl)
 
     MT.resultCount = 0
-    buildList(scrollData, "Results", MapSearch.results)
+    buildList(scrollData, GetString(NAVIGATOR_CATEGORY_RESULTS), MapSearch.results)
 
     local currentZoneId = MapSearch.Locations:getCurrentMapZoneId()
     if #MapSearch.results == 0 then
         if self:IsViewingInitialZone() and currentZoneId ~= 2 then
-            buildList(scrollData, "Bookmarks", MapSearch.Bookmarks:getBookmarks())
-            buildList(scrollData, "Recent", MapSearch.Recents:getRecents())
+            buildList(scrollData, GetString(NAVIGATOR_CATEGORY_BOOKMARKS), MapSearch.Bookmarks:getBookmarks())
+            buildList(scrollData, GetString(NAVIGATOR_CATEGORY_RECENT), MapSearch.Recents:getRecents())
         end
 
         local zone = MapSearch.Locations:getCurrentMapZone()
         if zone and zone.zoneId == 2 then
             local list = MapSearch.Locations:getZoneList()
             table.sort(list, nameComparison)
-            buildList(scrollData, "Zones", list)
+            buildList(scrollData, GetString(NAVIGATOR_CATEGORY_ZONES), list)
         elseif zone then
             local list = MapSearch.Locations:getKnownNodes(zone.zoneId)
 
             if MapSearch.isRecall then
                 local playerInfo = MapSearch.Locations:getPlayerInZone(zone.zoneId)
                 if playerInfo then
-                    playerInfo.name = "Jump to " .. zone.name
+                    playerInfo.name = zo_strformat(GetString(NAVIGATOR_TRAVEL_TO_ZONE), zone.name)
                     -- playerInfo.suffix = "via " .. playerInfo.suffix
                     playerInfo.colour = ZO_SECOND_CONTRAST_TEXT
                 else
                     playerInfo = {
-                        name = "No players to recall to",
+                        name = GetString(NAVIGATOR_NO_TRAVEL_PLAYER),
                         barename = "",
                         zoneId = zone.zoneId,
                         zoneName = GetZoneNameById(zone.zoneId),
