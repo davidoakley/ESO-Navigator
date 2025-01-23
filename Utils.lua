@@ -183,7 +183,9 @@ function Utils.DisplayName(name)
 	elseif _lang == "fr" then
 		-- r = r:gsub("^oratoire de ", "", 1):gsub("^oratoire d'", "", 1)
 		r = r:gsub("^Donjon.-:.", "", 1):gsub("^Épreuve.-:.", "", 1)
-		r = r:gsub("^Oratoire ", "O. ", 1)
+		-- r = r:gsub("^Oratoire ", "O. ", 1)
+		r = r:gsub("^Oratoire de la ", "La ", 1):gsub("^Oratoire des ", "Les ", 1):gsub("^Oratoire du ", "Le ", 1)
+		     :gsub("^Oratoire de ", "", 1):gsub("^Oratoire d'", "", 1)
 	elseif _lang == "de" then
 		r = r:gsub("Wegschrein ", "WS ", 1):gsub(" .Verlies.", "", 1):gsub(" .Prüfung.", "", 1)
 	elseif _lang == "ru" then
@@ -223,7 +225,7 @@ function Utils.SearchName(name)
 		-- r = r:gsub("^The ", "", 1)
 	elseif _lang == "fr" then
 		r = r:gsub("^Oratoire du ", "", 1):gsub("^Oratoire de la ", "", 1):gsub("^Oratoire des ", "", 1)
-		r = r:gsub("^Oratoire de ", "", 1):gsub("^Donjon.-:.", "", 1):gsub("^Épreuve.-:.", "", 1)
+		r = r:gsub("^Oratoire de ", "", 1):gsub("^Donjon.-:.", "", 1):gsub("^Épreuve.-:.", "", 1):gsub("^Epreuve.-:.", "", 1)
 		-- r = r:gsub("^d'", "", 1):gsub("^des ", "", 1):gsub("^de ", "", 1):gsub("^du ", "", 1)
 		-- r = r:gsub("^la ", "", 1):gsub("^l' ", "", 1)
 	elseif _lang == "de" then
