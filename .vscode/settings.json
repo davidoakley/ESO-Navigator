@@ -10,7 +10,6 @@
     "Lua.diagnostics.globals": [
         "LibAddonMenu2",
         "LibDebugLogger",
-        "MAPSEARCH_TAB_SEARCH",
         "KEYBIND_STRIP",
         "WORLD_MAP_INFO",
         "WORLD_MAP_MANAGER",
@@ -18,10 +17,9 @@
         "MAIN_MENU_KEYBOARD",
         "SI_TOOLTIP_RECALL_COST",
         "SI_NUMBER_FORMAT",
-        "MAPSEARCH_SEARCH",
-        "MAPSEARCH_SEARCH_KEYPRESS",
         "MapSearch_MapTab",
         "PITHKA",
+        "FasterTravel",
         "LibSlashCommander",
         "CHAT_SYSTEM",
         "SCENE_MANAGER",
@@ -32,6 +30,7 @@
     "Lua.diagnostics.globalsRegex": [
         "^ZO_.*",
         "^zo_.*",
-        "^SI_[A-Z_]+"
+        "^SI_[A-Z_]+",
+        "NAVIGATOR_.*"
     ]
 }
