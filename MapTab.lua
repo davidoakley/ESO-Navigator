@@ -622,9 +622,10 @@ function MT:selectResult(control, data, mouseButton)
             self.editControl:SetText("")
 
             local mapZoneId = MapSearch.Locations:getCurrentMapZoneId()
-            MS.log("selectResult: data.zoneId %d mapZoneId %d", data.zoneId, mapZoneId)
-            if data.zoneId ~= mapZoneId then
-                local mapId = getMapIdByZoneId(data.zoneId)
+            local currentMapId = GetCurrentMapId()
+            local mapId = data.mapId or getMapIdByZoneId(data.zoneId)
+            MS.log("selectResult: data.zoneId %d data.mapId %d mapZoneId %d mapId %d", data.zoneId, data.mapId or 0, mapZoneId, mapId)
+            if data.zoneId ~= mapZoneId or (data.mapId and data.mapId ~= currentMapId) then
                 MS.log("selectResult: mapId %d", mapId or 0)
                 if mapId then
                     WORLD_MAP_MANAGER:SetMapById(mapId)

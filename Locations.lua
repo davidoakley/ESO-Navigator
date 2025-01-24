@@ -118,6 +118,19 @@ function Locs:setupNodes()
 		end
 	end
 
+    self:AddExtraZone(2, 27) -- Sort of true, but called 'Clean Test'
+    self:AddExtraZone(1, 439) -- Fake!
+end
+
+function Locs:AddExtraZone(zoneId, mapId)
+    local name, _, _, zoneIndex, _ = GetMapInfoById(mapId)
+    self.zones[zoneId] = {
+        name = name,
+        zoneId = zoneId,
+        index = zoneIndex,
+        mapId = mapId,
+        nodes = {}
+    }
 end
 
 function Locs:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon, known)
@@ -437,6 +450,7 @@ function Locs:getZoneList()
             barename = Utils.bareName(info.name),
             zoneId = zoneID,
             zoneName = info.name,
+            mapId = info.mapId,
             icon = "Navigator/media/zone.dds",
             poiType = POI_TYPE_ZONE,
             known = true,
