@@ -1,7 +1,7 @@
 <GuiXml>
     <Controls>
 	
-	    <Control name="MapSearch_WorldMapCategoryRow" virtual="true">
+	    <Control name="MapSearch_WorldMapCategoryRow" virtual="true" mouseEnabled="true">
 			<OnInitialized>
 				self.offsetX = 30
 				self.label = self:GetNamedChild("Label")
@@ -16,18 +16,39 @@
 					<Anchor point="TOPLEFT" offsetX="0" offsetY="14" />
 					<TextureCoords top="0" bottom="1" left="0" right="1"/>
 				</Texture>-->
-				<Label name="$(parent)Label" inherits="ZO_SelectableLabel" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
+				<Label name="$(parent)Label" inherits="ZO_SelectableLabel" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" mouseEnabled="false">
 					<Anchor point="TOPLEFT" offsetX="0" offsetY="14"/>
-					<OnMouseDown>
-						--self:GetParent():RowMouseDown(button)
-					</OnMouseDown>
-					<OnMouseUp>
-						--MapSearch.MapTab:rowMouseUp()
-					</OnMouseUp>
 				</Label>
             </Controls>
+			<OnMouseUp>
+				MapSearch.MapTab:CategoryRowMouseUp(self, button, upInside)
+			</OnMouseUp>
         </Control>
-		
+
+	    <Control name="MapSearch_WorldMapCollapsedCategoryRow" virtual="true" mouseEnabled="true">
+			<OnInitialized>
+				self.offsetX = 30
+				self.label = self:GetNamedChild("Label")
+				self.icon = self:GetNamedChild("Icon")
+				--self.icon:SetDrawLayer(self.label:GetDrawLayer() + 1)
+				self.label.GetTextColor = function() return GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SELECTED) end
+			</OnInitialized>
+            <Dimensions x="285" y="40"/>
+            <Controls>
+				<Texture name="$(parent)Icon" textureFile="EsoUI/Art/Buttons/plus_up.dds" hidden="false" mouseEnabled="false">
+					<Dimensions x="25" y="25"/>
+					<Anchor point="TOPLEFT" offsetX="0" offsetY="14" />
+					<TextureCoords top="0" bottom="1" left="0" right="1"/>
+				</Texture>
+				<Label name="$(parent)Label" inherits="ZO_SelectableLabel" font="ZoFontHeader2" xcolor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" mouseEnabled="false">
+					<Anchor point="TOPLEFT" relativeTo="$(parent)Icon" relativePoint="TOPRIGHT" offsetX="4" offsetY="0"/>
+				</Label>
+            </Controls>
+			<OnMouseUp>
+				MapSearch.MapTab:CategoryRowMouseUp(self, button, upInside)
+			</OnMouseUp>
+        </Control>
+
         <Control name="MapSearch_WorldMapWayshrineRow" virtual="true" mouseEnabled="true">
 			<OnInitialized>
 				self.offsetX = 30
@@ -85,7 +106,7 @@
 				</Label>
             </Controls>
 			<OnMouseUp>
-				MapSearch.MapTab:rowMouseUp(self, button, upInside)
+				MapSearch.MapTab:RowMouseUp(self, button, upInside)
 			</OnMouseUp>
         </Control>
         
@@ -104,6 +125,7 @@
 
 				ZO_ScrollList_AddDataType(self.listControl, 0, "MapSearch_WorldMapCategoryRow", 50, function(...) self:layoutCategoryRow(...) end, nil, nil, nil)
 				ZO_ScrollList_AddDataType(self.listControl, 1, "MapSearch_WorldMapWayshrineRow", 25, function(...) self:layoutRow(...) end, nil, nil, nil)
+				ZO_ScrollList_AddDataType(self.listControl, 2, "MapSearch_WorldMapCollapsedCategoryRow", 40, function(...) self:layoutCategoryRow(...) end, nil, nil, nil)
 	        </OnInitialized>
 			<OnEffectivelyShown>
 				MapSearch.log("MapSearch_MapTab.OnEffectivelyShown")
