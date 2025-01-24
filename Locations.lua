@@ -138,11 +138,13 @@ function Locs:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon, known
 
     if typePOI == 6 then
         nodeInfo.poiType = POI_TYPE_GROUP_DUNGEON
-        nodeInfo.icon = "esoui/art/icons/poi/poi_groupinstance_complete.dds"
+        if i ~= 550 then -- not Infinite Archive
+            nodeInfo.suffix = GetString(NAVIGATOR_DUNGEON)
+            --     nodeInfo.icon = "esoui/art/icons/poi/poi_groupinstance_complete.dds"
+        end
         -- if name:find("Dungeon: ") then
         --     nodeInfo.name = string.sub(nodeInfo.name, 10, #nodeInfo.name)
         -- end
-        nodeInfo.suffix = GetString(NAVIGATOR_DUNGEON)
     elseif typePOI == 3 then
         nodeInfo.poiType = POI_TYPE_TRIAL
         nodeInfo.icon = "esoui/art/tutorial/poi_raiddungeon_complete.dds"
