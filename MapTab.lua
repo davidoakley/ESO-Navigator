@@ -236,16 +236,18 @@ local function buildList(scrollData, title, list)
         end
 
         nodeData.isFree = true
-        if MapSearch.isRecall and nodeData.poiType == POI_TYPE_WAYSHRINE and nodeData.known and nodeData.nodeIndex then
+        if MapSearch.isRecall and nodeData.known and nodeData.nodeIndex then -- and nodeData.poiType == POI_TYPE_WAYSHRINE
             local _, timeLeft = GetRecallCooldown()
     
             if timeLeft == 0 then
                 local currencyType = CURT_MONEY
                 local currencyAmount = GetRecallCost(nodeData.nodeIndex)
-                local formatType = ZO_CURRENCY_FORMAT_AMOUNT_ICON
-                local currencyString = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(currencyType, currencyAmount, formatType))
-                nodeData.tooltip = string.format(GetString(SI_TOOLTIP_RECALL_COST) .. "%s", currencyString)
-                nodeData.isFree = false
+                if currencyAmount > 0 then
+                    local formatType = ZO_CURRENCY_FORMAT_AMOUNT_ICON
+                    local currencyString = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(currencyType, currencyAmount, formatType))
+                    nodeData.tooltip = string.format(GetString(SI_TOOLTIP_RECALL_COST) .. "%s", currencyString)
+                    nodeData.isFree = false
+                end
             end
         end
     
