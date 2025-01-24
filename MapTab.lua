@@ -37,12 +37,11 @@ function MT:layoutRow(rowControl, data, scrollList)
     local tooltipText = data.tooltip
     local icon = data.icon
     local iconColour = data.colour and { data.colour:UnpackRGBA() } or
-                       (data.known and { 1.0, 1.0, 1.0, 1.0 } or { 0.51, 0.51, 0.44, 1.0 })
+                       ((data.known and not data.disabled) and { 1.0, 1.0, 1.0, 1.0 } or { 0.51, 0.51, 0.44, 1.0 })
 
     if data.suffix ~= nil then
         name = name .. " |c82826F" .. data.suffix .. "|r"
     end
-
 
 	if data.icon ~= nil then
         rowControl.icon:SetColor(unpack(iconColour))
@@ -64,12 +63,12 @@ function MT:layoutRow(rowControl, data, scrollList)
 
 	rowControl.label:SetText(name)
 
-	if data.isSelected and data.known then
+	if data.isSelected and data.known and not data.disabled then
 		rowControl.label:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
-    elseif data.colour ~= nil then
+    elseif data.colour ~= nil and not data.disabled then
         MapSearch.colour = data.colour
 		rowControl.label:SetColor(data.colour:UnpackRGBA())
-    elseif data.known then
+    elseif data.known and not data.disabled then
 		rowControl.label:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
     else
 		rowControl.label:SetColor(0.51, 0.51, 0.44, 1.0)
@@ -82,7 +81,7 @@ function MT:layoutRow(rowControl, data, scrollList)
     end)
     rowControl:SetHandler("OnMouseExit", function(_)
         ZO_Tooltips_HideTextTooltip()
-        if data.isSelected then
+        if data.isSelected and data.known and not data.disabled then
             rowControl.label:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
         end
     end )
@@ -145,7 +144,7 @@ local function jumpToPlayer(node)
 end
 
 function MT:jumpToNode(node)
-    if not node.known then
+    if not node.known or node.disabled then
         return
     end
 
@@ -319,7 +318,7 @@ function MT:buildScrollList(keepScrollPosition)
         elseif zone then
             local list = MapSearch.Locations:getKnownNodes(zone.zoneId)
 
-            if MapSearch.isRecall then
+            if MapSearch.isRecall and zone.zoneId ~= 181 then -- not Cyrodiil
                 local playerInfo = MapSearch.Locations:getPlayerInZone(zone.zoneId)
                 if playerInfo then
                     playerInfo.name = zo_strformat(GetString(NAVIGATOR_TRAVEL_TO_ZONE), zone.name)
