@@ -6,6 +6,8 @@ This is an Add-on designed to make getting from place to place in ESO easier. It
 
 This add-on is brand-new, and has only been tested by me! I would appreciate friendly feedback as to how it can be improved or how it isn't working the way you'd expect.
 
+Navigator currently works in **English** and is partially localised and tested in **French**; other languages may have varying levels of functionality or brokenness... Please get in touch if you'd like to help!
+
 ## Features ##
 
 - A new **Navigator tab** on the World Map, which can be configured to be the default tab
@@ -15,7 +17,7 @@ This add-on is brand-new, and has only been tested by me! I would appreciate fri
   - Houses
   - Dungeons, Arenas or Trials
   - @Usernames
-- **Results appear as you type**, with weightings given depending on the target (more for owned houses, or bookmarked locations, less for unowned houses or wayshrines with a recall cost, for instance)
+- **Results appear as you type**, with weightings given depending on the target (higher for owned houses, or bookmarked locations, lower for unowned houses or wayshrines with a recall cost, for instance)
 - **Keyboard navigation** - focus the edit box with `Tab`, type your search, choose result using the up and down cursor keys and then select by pressing `Enter`
 - **`/nav` chat command** to jump to a destination (configurable to be `/tp` instead)
 - **Bookmarks** (right-click a result to add or remove)
