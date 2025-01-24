@@ -6,6 +6,7 @@ local logger = MapSearch.logger
 
 MT.filter = MS.FILTER_NONE
 MT.needsRefresh = false
+MT.collapsedCategories = {}
 
 function MT:queueRefresh()
     if not self.needsRefresh then
@@ -202,10 +203,20 @@ local function addDeveloperTooltip(nodeData)
     nodeData.tooltip = table.concat(items, "; ")
 end
 
-local function buildList(scrollData, title, list)
+local function buildCategoryHeader(scrollData, id, title, list, collapsed)
     if #list > 0 then
-        local recentEntry = ZO_ScrollList_CreateDataEntry(0, { name = title })
+        local recentEntry = ZO_ScrollList_CreateDataEntry(collapsed and 2 or 0, { id = id, name = title })
         table.insert(scrollData, recentEntry)
+    end
+end
+
+local function buildList(scrollData, id, title, list)
+    local collapsed = MT.collapsedCategories[id] and true or false
+
+    buildCategoryHeader(scrollData, id, title, list, collapsed)
+
+    if collapsed then
+        return
     end
 
     local currentNodeIndex = MT.resultCount
@@ -293,20 +304,18 @@ function MT:buildScrollList(keepScrollPosition)
     local scrollData = ZO_ScrollList_GetDataList(self.listControl)
 
     MT.resultCount = 0
-    buildList(scrollData, GetString(NAVIGATOR_CATEGORY_RESULTS), MapSearch.results)
+    buildList(scrollData, "results", GetString(NAVIGATOR_CATEGORY_RESULTS), MapSearch.results)
 
     local currentZoneId = MapSearch.Locations:getCurrentMapZoneId()
     if #MapSearch.results == 0 then
-        if self:IsViewingInitialZone() and currentZoneId ~= 2 then
-            buildList(scrollData, GetString(NAVIGATOR_CATEGORY_BOOKMARKS), MapSearch.Bookmarks:getBookmarks())
-            buildList(scrollData, GetString(NAVIGATOR_CATEGORY_RECENT), MapSearch.Recents:getRecents())
-        end
+        buildList(scrollData, "bookmarks", GetString(NAVIGATOR_CATEGORY_BOOKMARKS), MapSearch.Bookmarks:getBookmarks())
+        buildList(scrollData, "recents", GetString(NAVIGATOR_CATEGORY_RECENT), MapSearch.Recents:getRecents())
 
         local zone = MapSearch.Locations:getCurrentMapZone()
         if zone and zone.zoneId == 2 then
             local list = MapSearch.Locations:getZoneList()
             table.sort(list, nameComparison)
-            buildList(scrollData, GetString(NAVIGATOR_CATEGORY_ZONES), list)
+            buildList(scrollData, "zones", GetString(NAVIGATOR_CATEGORY_ZONES), list)
         elseif zone then
             local list = MapSearch.Locations:getKnownNodes(zone.zoneId)
 
@@ -332,7 +341,7 @@ function MT:buildScrollList(keepScrollPosition)
             end
 
             table.sort(list, weightComparison)
-            buildList(scrollData, zone.name, list)
+            buildList(scrollData, "results", zone.name, list)
         end
     end
 
@@ -632,12 +641,20 @@ function MT:selectResult(control, data, mouseButton)
     end
 end
 
-function MT:rowMouseUp(control, mouseButton, upInside)
-	--MapSearch.clickedControl = { control, mouseButton, upInside }
-
+function MT:RowMouseUp(control, mouseButton, upInside)
 	if upInside then
 		local data = ZO_ScrollList_GetData(control)
         self:selectResult(control, data, mouseButton)
+	end
+end
+
+function MT:CategoryRowMouseUp(control, mouseButton, upInside)
+	if upInside then
+		local data = ZO_ScrollList_GetData(control)
+        MS.log("Toggling category %s", data.id)
+        self.collapsedCategories[data.id] = not self.collapsedCategories[data.id]
+        MT:buildScrollList(true)
+        MT:updateFilterControl()
 	end
 end
 
@@ -652,11 +669,15 @@ function MT:OnMapChanged()
         self.currentMapId = mapId
         local zone = MapSearch.Locations:getCurrentMapZone()
         if zone and zone.zoneId ~= MapSearch.initialMapZoneId then
-            MS.log("OnMapChanged: now zoneId=%d mapId=%d", zone.zoneId, mapId or 0)
-            self.filter = MS.FILTER_NONE
-            self:updateFilterControl()
-            self.editControl:SetText("")
+            self.collapsedCategories = { bookmarks = true, recents = true }
+        else
+            self.collapsedCategories = {}
         end
+        MS.log("OnMapChanged: now zoneId=%d mapId=%d", zone and zone.zoneId or 0, mapId or 0)
+        self.filter = MS.FILTER_NONE
+        self:updateFilterControl()
+        self.editControl:SetText("")
+        -- end
         self:executeSearch("")
     end
 end
