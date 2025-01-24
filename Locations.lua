@@ -29,9 +29,11 @@ end
 
 function Locs:IsZone(zoneId)
     if (zoneId == GetParentZoneId(zoneId)
+       or zoneId==267 -- Eyevea
        or zoneId==981 -- The Brass Fortress
-       or zoneId==1413 -- Apocrypha
        or zoneId==1027 -- Artaeum
+       or zoneId==1413 -- Apocrypha
+       or zoneId==1463 -- The Scholarium
        ) and not (
           zoneId==2 -- Tamriel
        or zoneId==181 -- Cyrodiil
@@ -92,7 +94,6 @@ function Locs:setupNodes()
 
                     if not self.zones[zoneId] then
                         if self:IsZone(zoneId) then
-                            -- local zoneName = GetZoneNameById(zoneId)
                             self.zones[zoneId] = {
                                 name = zoneName,
                                 zoneId = zoneId,
