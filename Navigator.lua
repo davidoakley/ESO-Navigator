@@ -112,13 +112,13 @@ local function OnMapStateChange(oldState, newState)
 end
 
 local function OnMapChanged()
-  MS.log("OnMapChanged")
-  MS.MapTab.OnMapChanged()
+  MS.MapTab:OnMapChanged()
 end
 
 local function OnStartFastTravel(eventCode, nodeIndex)
   MS.log("OnStartFastTravel: "..eventCode..", "..nodeIndex)
   MS.isRecall = false
+  MS.MapTab:ImmediateRefresh()
 end
 
 local function OnEndFastTravel()

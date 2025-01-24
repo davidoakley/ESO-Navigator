@@ -646,30 +646,18 @@ function MT:IsViewingInitialZone()
     return not zone or zone.zoneId == MapSearch.initialMapZoneId
 end
 
-function MT.OnMapChanged()
-    if MapSearch.mapVisible then
+function MT:OnMapChanged()
+    local mapId = GetCurrentMapId()
+    if MapSearch.mapVisible and mapId ~= self.currentMapId then
+        self.currentMapId = mapId
         local zone = MapSearch.Locations:getCurrentMapZone()
         if zone and zone.zoneId ~= MapSearch.initialMapZoneId then
-            local mapId = GetCurrentMapId()
-            MS.log("Moved to zoneId=%d mapId=%d", zone.zoneId, mapId or 0)
-            MT.filter = MS.FILTER_NONE
-            MT:updateFilterControl()
-            MT.editControl:SetText("")
-        else
-            local mapId = GetCurrentMapId()
-            local _, mapType, _, zoneIndex, _ = GetMapInfoById(mapId)
-            local zoneId = GetZoneId(zoneIndex)
-            if zoneId == 2 then -- Tamriel
-                MT.filter = MS.FILTER_NONE
-                MT:updateFilterControl()
-                MT.editControl:SetText("")
-                -- MS.log("ZONES")
-            else
-                MS.log("Not moved; zoneIndex: "..(zoneIndex or 0).."; zoneId: "..(zoneId or 0).."(initial "..(MapSearch.initialMapZoneId or 0)..")")
-            end
+            MS.log("OnMapChanged: now zoneId=%d mapId=%d", zone.zoneId, mapId or 0)
+            self.filter = MS.FILTER_NONE
+            self:updateFilterControl()
+            self.editControl:SetText("")
         end
-        -- MT:buildScrollList()
-        MT:executeSearch("")
+        self:executeSearch("")
     end
 end
 
