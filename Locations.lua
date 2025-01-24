@@ -34,9 +34,11 @@ function Locs:IsZone(zoneId)
        or zoneId==1027 -- Artaeum
        or zoneId==1413 -- Apocrypha
        or zoneId==1463 -- The Scholarium
-       ) and not (
-          zoneId==2 -- Tamriel
-       or zoneId==181 -- Cyrodiil
+       )
+       and not (
+        zoneId == 642 -- The Earth Forge
+    --       zoneId==2 -- Tamriel
+    --    or zoneId==181 -- Cyrodiil
        )
        then
         return true
@@ -183,6 +185,11 @@ function Locs:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon, known
 
     if icon == "/esoui/art/icons/icon_missing.dds" then
         nodeInfo.icon = "/esoui/art/crafting/crafting_smithing_notrait.dds"
+    end
+
+    if nodeInfo.zoneId == 181 and nodeInfo.poiType == POI_TYPE_WAYSHRINE then -- Cyrodiil
+        nodeInfo.icon = "/esoui/art/crafting/crafting_smithing_notrait.dds"
+        nodeInfo.disabled = true
     end
 
     local traders = MS.Data.traderCounts[i]
