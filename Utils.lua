@@ -200,6 +200,7 @@ function Utils.bareName(name)
 	r = Utils.removeAccents(r)
 	if _lang == "en" then
 		r = r:gsub("^Dungeon: ", "", 1):gsub("^Trial: ", "", 1):gsub("^The ", "", 1)
+		     :gsub(" Wayshrine$", "", 1)
 	elseif _lang == "fr" then
 		r = r:gsub("\\^.*$", "", 1)
 		r = r:gsub("^O. ", "", 1):gsub("^Donjon.-:.", "", 1):gsub("^Épreuve.-:.", "", 1)
