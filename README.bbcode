@@ -1,0 +1,60 @@
+[IMG_RIGHT]https://raw.githubusercontent.com/davidoakley/ESO-Navigator/refs/heads/main/_src/tabicon-assets/tabicon_large.png[/IMG_RIGHT]
+[FONT="Book Antiqua"][SIZE="7"][b][COLOR="Lime"]N[/COLOR][COLOR="Cyan"]avigator[/COLOR][/b][/SIZE]
+[B][SIZE="4"][COLOR="DeepSkyBlue"]A map searching and navigation Add-on[/COLOR][/SIZE][/B][/FONT]
+
+This is an Add-on designed to make getting from place to place in ESO easier. It provides a context-sensitive tab on the World Map and a sophisticated search box where you can enter wayshrines, zones or other destinations with results appearing as you type.
+
+[FONT="Book Antiqua"][size=6][b][COLOR="Cyan"]Please Note[/COLOR][/b][/size][/FONT]
+
+[B]Navigator[/B] is brand-new, and has only been tested by me! You can see a [url=https://github.com/davidoakley/ESO-Navigator/issues?q=is%3Aissue%20label%3Abug]list of currently known/fixed issues[/url] on GitHub. I would appreciate friendly feedback as to how it can be improved or how it isn't working the way you'd expect. It currently works in [b]English[/b] and is partially localised and tested in [b]French[/b]; other languages may have varying levels of functionality or brokenness... Please get in touch if you'd like to help!
+
+[FONT="Book Antiqua"][size=6][b][COLOR="Cyan"]Features[/COLOR][/b][/size][/FONT]
+[LIST][*] A new [b]Navigator tab[/b] on the World Map, which can be configured to be the default tab
+[*] A [b]search box[/b] (focussed by using the [b][FONT="Courier New"][COLOR="LemonChiffon"]Tab[/COLOR][/FONT][/b] key) where you can enter
+[LIST]
+[*] Wayshrines
+[*] Zones
+[*] Houses
+[*] Dungeons, Arenas or Trials
+[*] @Usernames
+[/LIST]
+[*] [b]Results appear as you type[/b], with weightings given depending on the target (higher for owned houses, or bookmarked locations, lower for unowned houses or wayshrines with a recall cost, for instance)
+[*] [b]Keyboard navigation[/b] - focus the edit box with [b][FONT="Courier New"][COLOR="LemonChiffon"]Tab[/COLOR][/FONT][/b], type your search, choose result using the up and down cursor keys and then select by pressing [b][FONT="Courier New"][COLOR="LemonChiffon"]Enter[/COLOR][/FONT][/b]
+[*] [b][FONT="Courier New"]/nav[/FONT] chat command[/b] to jump to a destination (configurable to be [b][FONT="Courier New"]/tp[/FONT][/b] instead)
+[*] [b]Bookmarks[/b] (right-click a result to add or remove)[/LIST]
+
+[FONT="Book Antiqua"][size=6][b][COLOR="Cyan"]Libraries[/COLOR][/b][/size][/FONT]
+[LIST][*][size=4][b][COLOR="DeepSkyBlue"]Required[/COLOR][/b][/size]
+[list][*][url=https://www.esoui.com/downloads/info7-LibAddonMenu-2.0.html][b][COLOR="PaleGreen"]LibAddonMenu-2.0[/COLOR][/b][/url] - required to provide a Settings panel[/list]
+[*][size=4][b][COLOR="DeepSkyBlue"]Optional[/COLOR][/b][/size]
+[list][*][url=https://www.esoui.com/downloads/info1508-LibSlashCommander.html][b][COLOR="PaleGreen"]LibSlashCommander[/COLOR][/b][/url]- used to enable the [b][FONT="Courier New"]/nav[/FONT][/b] command
+[*][url=https://www.esoui.com/downloads/info1568-LibWorldMapInfoTab.html][b][COLOR="PaleGreen"]LibWorldMapInfoTab[/COLOR][/b][/url] - automatically scaled World Map tab icons if you have multiple AddOns[/list]
+[/LIST]
+
+Although not required, [b]Navigator[/b] works best with [url=https://www.esoui.com/downloads/info2103-PerfectPixel.html][b]PerfectPixel[/b][/url], which expands the map side bar to show a lot more content.
+
+[FONT="Book Antiqua"][size=6][b][COLOR="Cyan"]Search Tips[/COLOR][/b][/size][/FONT]
+
+Search results use the [url=https://github.com/jhawthorn/fzy][b][FONT="Courier New"]fzy[/FONT][/b][/url] algorithm. It attempts to present the best matches first. The following considerations are weighted when sorting:
+- It prefers consecutive characters: [b][FONT="Courier New"]dag[/FONT][/b] matches [b][FONT="Courier New"]Daggerfall[/FONT][/b] over [b][FONT="Courier New"]Dragonstar[/FONT][/b].
+- It prefers matching the beginning of words: [b][FONT="Courier New"]cc[/FONT][/b] matches [b][FONT="Courier New"]Clockwork City[/FONT][/b] over [b][FONT="Courier New"]Cradlecrush[/FONT][/b]
+- It prefers shorter matches: [b][FONT="Courier New"]fortr[/FONT][/b] matches [b][FONT="Courier New"]Brass Fortress[/FONT][/b] over [b][FONT="Courier New"]Fort Redmane[/FONT][/b].
+- It prefers shorter candidates: [b][FONT="Courier New"]Wayr[/FONT][/b] matches [b][FONT="Courier New"]Wayrest[/FONT][/b] over [b][FONT="Courier New"]Wayrest Sewers[/FONT][/b].
+
+You can filter a search by typing a prefix:
+
+[list][*][b][FONT="Courier New"]p:[/FONT][/b] or [b][FONT="Courier New"]@[/FONT][/b] - List and filter by [b]players[/b] by username
+[*][b][FONT="Courier New"]h:[/FONT][/b] - List and filter by [b]houses[/b]
+[*][b][FONT="Courier New"]z:[/FONT][/b] - Jump to the Tamriel map to list all [b]zone[/b] names[/list]
+
+When filtering, press [b][FONT="Courier New"][COLOR="LemonChiffon"]Backspace[/COLOR][/FONT][/b] to delete the filter and return to normal search mode
+
+[FONT="Book Antiqua"][size=6][b][COLOR="Cyan"]Acknowledgements[/COLOR][/b][/size][/FONT]
+
+I've learned a lot about add-on development, API usage and how to solve various sticky problems by reviewing many existing add-on code, including the existing, excellent travel add-ons [url=https://www.esoui.com/downloads/info1089-FasterTravelWayshrinesmenuTeleporter.html]Faster Travel[/url] and [url=https://www.esoui.com/downloads/info2143-BeamMeUp-TeleporterFastTravel.html]BeamMeUp[/url].
+
+[FONT="Book Antiqua"][size=6][b][COLOR="Cyan"]Licence[/COLOR][/b][/size][/FONT]
+
+This Add-on is not created by, affiliated with, or sponsored by, ZeniMax Media Inc. or its affiliates. The Elder Scrolls® and related logos are registered trademarks or trademarks of ZeniMax Media Inc. in the United States and/or other countries. All rights reserved.
+
+You can read the full terms at https://account.elderscrollsonline.com/add-on-terms
