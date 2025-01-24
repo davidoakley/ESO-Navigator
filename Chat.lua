@@ -96,7 +96,7 @@ function Chat:TP(text)
     if zoneId then
         local node = Locs:getPlayerInZone(zoneId)
         if not node then
-            CHAT_SYSTEM:AddMessage(zo_strformat(GetString(NAVIGATOR_PLAYER_NOT_IN_ZONE), data.zoneName))
+            CHAT_SYSTEM:AddMessage(zo_strformat(GetString(NAVIGATOR_NO_PLAYER_IN_ZONE), data.zoneName))
             return
         end
 
