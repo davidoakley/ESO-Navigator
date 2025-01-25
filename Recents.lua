@@ -27,7 +27,7 @@ function Recents:insert(nodeIndex)
     end
 
     local node = MS.Locations:GetNode(nodeIndex)
-    if node and node.zoneId == 181 and node.poiType == POI_TYPE_WAYSHRINE then -- Cyrodiil
+    if node and node.zoneId == MS.ZONE_CYRODIIL and node.poiType == POI_TYPE_WAYSHRINE then
         MS.log("Recents:insert("..nodeIndex..") - not adding Cyrodiil wayshrine")
         return
     end

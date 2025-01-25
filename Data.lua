@@ -1,6 +1,8 @@
 local MS = MapSearch
 local Data = MS.Data or {}
 
+MS.ZONE_CYRODIIL = 181
+
 -- Trader Locations, copied from Faster Travel by SimonIllyan, XanDDemoX, upyachka, Valandil
 local trader_counts = { -- nodeIndex -> traders_count
     [  1] = 1, -- Wyrd Tree Wayshrine

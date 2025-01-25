@@ -319,7 +319,7 @@ function MT:buildScrollList(keepScrollPosition)
         elseif zone then
             local list = MapSearch.Locations:getKnownNodes(zone.zoneId)
 
-            if MapSearch.isRecall and zone.zoneId ~= 181 then -- not Cyrodiil
+            if MapSearch.isRecall and zone.zoneId ~= MS.ZONE_CYRODIIL then
                 local playerInfo = MapSearch.Locations:getPlayerInZone(zone.zoneId)
                 if playerInfo then
                     playerInfo.name = zo_strformat(GetString(NAVIGATOR_TRAVEL_TO_ZONE), zone.name)
