@@ -10,7 +10,6 @@ local Locs = MS.Locations or {
     harborageIndex = nil
 }
 local Utils = MS.Utils
-local logger = MS.logger -- LibDebugLogger("MapSearch")
 
 POI_TYPE_NONE = -1
 POI_TYPE_TRIAL = 100
@@ -20,11 +19,6 @@ POI_TYPE_GUILDMATE = 103
 POI_TYPE_ZONE = 104
 
 function Locs:initialise()
-    MS.log("Locs:initialise() starts")
-    -- self:setupNodes()
-    -- MS.log("Locs:initialise() setupPlayerZones")
-    -- self:setupPlayerZones()
-    MS.log("Locs:initialise() ends")
 end
 
 function Locs:IsZone(zoneId)

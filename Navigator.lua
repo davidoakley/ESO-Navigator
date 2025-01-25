@@ -103,7 +103,7 @@ local function OnMapStateChange(oldState, newState)
       WORLD_MAP_INFO:SelectTab(NAVIGATOR_TAB_SEARCH)
     end
 
-    if MS.initialMapZoneId > 2 then
+    if not zone or zone.zoneId > 2 then
       MS.MapTab.collapsedCategories = {}
     else
       MS.MapTab.collapsedCategories = { bookmarks = true, recents = true }
