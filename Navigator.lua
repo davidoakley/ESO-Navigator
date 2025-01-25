@@ -102,6 +102,13 @@ local function OnMapStateChange(oldState, newState)
     if MS.saved and MS.saved["defaultTab"] and not FasterTravel then
       WORLD_MAP_INFO:SelectTab(NAVIGATOR_TAB_SEARCH)
     end
+
+    if MS.initialMapZoneId > 2 then
+      MS.MapTab.collapsedCategories = {}
+    else
+      MS.MapTab.collapsedCategories = { bookmarks = true, recents = true }
+    end
+
     MS.log("WorldMap showing done")
   elseif newState == SCENE_HIDDEN then
     MS.log("WorldMap hidden")
