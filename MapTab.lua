@@ -136,9 +136,9 @@ local function jumpToPlayer(node)
     CHAT_SYSTEM:AddMessage(zo_strformat(GetString(NAVIGATOR_TRAVELING_TO_ZONE_VIA_PLAYER), zoneName, userID))
     SCENE_MANAGER:Hide("worldMap")
 
-    if poiType == POI_TYPE_FRIEND then
+    if poiType == MS.POI_FRIEND then
         JumpToFriend(userID)
-    elseif poiType == POI_TYPE_GUILDMATE then
+    elseif poiType == MS.POI_GUILDMATE then
         JumpToGuildMember(userID)
     end
 end
@@ -154,7 +154,7 @@ function MT:jumpToNode(node)
     ZO_Dialogs_ReleaseDialog("FAST_TRAVEL_CONFIRM")
 	ZO_Dialogs_ReleaseDialog("RECALL_CONFIRM")
 
-    if node.poiType == POI_TYPE_FRIEND or node.poiType == POI_TYPE_GUILDMATE then
+    if node.poiType == MS.POI_FRIEND or node.poiType == MS.POI_GUILDMATE then
         jumpToPlayer(node)
         return
     end
@@ -246,7 +246,7 @@ local function buildList(scrollData, id, title, list)
         end
 
         nodeData.isFree = true
-        if MapSearch.isRecall and nodeData.known and nodeData.nodeIndex then -- and nodeData.poiType == POI_TYPE_WAYSHRINE
+        if MapSearch.isRecall and nodeData.known and nodeData.nodeIndex then -- and nodeData.poiType == MS.POI_WAYSHRINE
             local _, timeLeft = GetRecallCooldown()
     
             if timeLeft == 0 then
@@ -332,7 +332,7 @@ function MT:buildScrollList(keepScrollPosition)
                         zoneId = zone.zoneId,
                         zoneName = GetZoneNameById(zone.zoneId),
                         icon = "/esoui/art/crafting/crafting_smithing_notrait.dds",
-                        poiType = POI_TYPE_NONE,
+                        poiType = MS.POI_NONE,
                         known = false
                     }
                     end
@@ -620,7 +620,7 @@ function MT:selectResult(control, data, mouseButton)
     if mouseButton == 1 then
         if data.nodeIndex or data.userID then
             self:jumpToNode(data)
-        elseif data.poiType == POI_TYPE_ZONE then
+        elseif data.poiType == MS.POI_ZONE then
             MT.filter = MS.FILTER_NONE
             self.editControl:SetText("")
 
@@ -636,7 +636,7 @@ function MT:selectResult(control, data, mouseButton)
             end
         end
     elseif mouseButton == 2 then
-        if data.nodeIndex or data.poiType == POI_TYPE_ZONE then
+        if data.nodeIndex or data.poiType == MS.POI_ZONE then
             showWayshrineMenu(control, data)
         end
     else

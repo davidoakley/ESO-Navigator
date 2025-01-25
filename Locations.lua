@@ -11,13 +11,6 @@ local Locs = MS.Locations or {
 }
 local Utils = MS.Utils
 
-POI_TYPE_NONE = -1
-POI_TYPE_TRIAL = 100
-POI_TYPE_ARENA = 101
-POI_TYPE_FRIEND = 102
-POI_TYPE_GUILDMATE = 103
-POI_TYPE_ZONE = 104
-
 function Locs:initialise()
 end
 
@@ -147,7 +140,7 @@ function Locs:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon, known
     }
 
     if typePOI == 6 then
-        nodeInfo.poiType = POI_TYPE_GROUP_DUNGEON
+        nodeInfo.poiType = MS.POI_GROUP_DUNGEON
         if i ~= 550 then -- not Infinite Archive
             nodeInfo.suffix = GetString(NAVIGATOR_DUNGEON)
             --     nodeInfo.icon = "esoui/art/icons/poi/poi_groupinstance_complete.dds"
@@ -156,27 +149,27 @@ function Locs:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon, known
         --     nodeInfo.name = string.sub(nodeInfo.name, 10, #nodeInfo.name)
         -- end
     elseif typePOI == 3 then
-        nodeInfo.poiType = POI_TYPE_TRIAL
+        nodeInfo.poiType = MS.POI_TRIAL
         nodeInfo.icon = "esoui/art/tutorial/poi_raiddungeon_complete.dds"
         -- if nodeInfo.name:find("Trial: ") then
         --     nodeInfo.name = string.sub(nodeInfo.name, 8, #nodeInfo.name)
         -- end
         nodeInfo.suffix = GetString(NAVIGATOR_TRIAL)
     elseif typePOI == 7 then
-        nodeInfo.poiType = POI_TYPE_HOUSE
+        nodeInfo.poiType = MS.POI_HOUSE
         nodeInfo.owned = (icon:find("poi_group_house_owned") ~= nil) --(icon == "/esoui/art/icons/poi/poi_group_house_owned.dds")
         -- elseif name:find(" Arena") then
-        --     nodeInfo.poiType = POI_TYPE_ARENA
+        --     nodeInfo.poiType = MS.POI_ARENA
         --     -- nodeInfo.name = string.sub(nodeInfo.name, 1, #nodeInfo.name - 6)
         --     nodeInfo.icon = "esoui/art/tutorial/poi_raiddungeon_complete.dds"
     elseif typePOI == 1 then
-        nodeInfo.poiType = POI_TYPE_WAYSHRINE
+        nodeInfo.poiType = MS.POI_WAYSHRINE
         -- if name:find(" Wayshrine") then
         --     nodeInfo.name = string.sub(nodeInfo.name, 1, #nodeInfo.name - 10)
         -- end
     elseif glowIcon == "/esoui/art/icons/poi/poi_soloinstance_glow.dds" or
            glowIcon == "/esoui/art/icons/poi/poi_groupinstance_glow.dds" then
-        nodeInfo.poiType = POI_TYPE_ARENA
+        nodeInfo.poiType = MS.POI_ARENA
         nodeInfo.suffix = GetString(NAVIGATOR_ARENA)
         -- if name:find(" Arena") then
         --     nodeInfo.name = string.sub(nodeInfo.name, 1, #nodeInfo.name - 6)
@@ -194,7 +187,7 @@ function Locs:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon, known
         nodeInfo.icon = "/esoui/art/crafting/crafting_smithing_notrait.dds"
     end
 
-    if nodeInfo.zoneId == MS.ZONE_CYRODIIL and nodeInfo.poiType == POI_TYPE_WAYSHRINE then
+    if nodeInfo.zoneId == MS.ZONE_CYRODIIL and nodeInfo.poiType == MS.POI_WAYSHRINE then
         nodeInfo.icon = "/esoui/art/crafting/crafting_smithing_notrait.dds"
         nodeInfo.disabled = true
     end
@@ -246,7 +239,7 @@ function Locs:setupPlayerZones()
 
             if playerStatus ~= PLAYER_STATUS_OFFLINE and userID~=myID then
                 local _, _, zoneName, _, _, _, _, zoneId = GetGuildMemberCharacterInfo(guildID, i)
-                self:addPlayerZone(zoneId, zoneName, userID, "/esoui/art/menubar/gamepad/gp_playermenu_icon_character.dds", POI_TYPE_GUILDMATE)
+                self:addPlayerZone(zoneId, zoneName, userID, "/esoui/art/menubar/gamepad/gp_playermenu_icon_character.dds", MS.POI_GUILDMATE)
             end
         end
     end
@@ -258,7 +251,7 @@ function Locs:setupPlayerZones()
 		if playerStatus ~= PLAYER_STATUS_OFFLINE and secsSinceLogoff == 0 then
             local hasChar, _, zoneName, _, _, _, _, zoneId = GetFriendCharacterInfo(i)
             if hasChar then
-                self:addPlayerZone(zoneId, zoneName, userID, "/esoui/art/menubar/gamepad/gp_playermenu_icon_character.dds", POI_TYPE_FRIEND)
+                self:addPlayerZone(zoneId, zoneName, userID, "/esoui/art/menubar/gamepad/gp_playermenu_icon_character.dds", MS.POI_FRIEND)
             end
         end
     end
@@ -327,9 +320,9 @@ function Locs:getKnownNodes(zoneId)
             node.known = true
             node.weight = 1.0
             node.bookmarked = bookmarked
-            if node.poiType == POI_TYPE_WAYSHRINE and MS.isRecall then
+            if node.poiType == MS.POI_WAYSHRINE and MS.isRecall then
                 node.weight = bookmarked and 0.9 or 0.8
-            elseif node.poiType == POI_TYPE_HOUSE and not node.owned then
+            elseif node.poiType == MS.POI_HOUSE and not node.owned then
                 node.weight = 0.7
             elseif bookmarked then
                 node.weight = 1.2
@@ -351,7 +344,7 @@ function Locs:getHouseList()
     local nodes = {}
     for i = 1, #self.nodes do
         local index = self.nodes[i].nodeIndex
-        if self:isKnownNode(index) and self.nodes[i].poiType == POI_TYPE_HOUSE then
+        if self:isKnownNode(index) and self.nodes[i].poiType == MS.POI_HOUSE then
             local node = Utils.shallowCopy(self.nodes[i])
             if MS.Bookmarks:contains(node) then
                 node.bookmarked = true
@@ -453,7 +446,7 @@ function Locs:getZoneList()
             zoneName = info.name,
             mapId = info.mapId,
             icon = "Navigator/media/zone.dds",
-            poiType = POI_TYPE_ZONE,
+            poiType = MS.POI_ZONE,
             known = true,
             bookmarked = MS.Bookmarks:contains(info)
         })
@@ -474,7 +467,7 @@ function Locs:getZone(zoneId)
         zoneId = zoneId,
         zoneName = info.name,
         icon = "Navigator/media/zone.dds",
-        poiType = POI_TYPE_ZONE,
+        poiType = MS.POI_ZONE,
         known = true
     }
 end
