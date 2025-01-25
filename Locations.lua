@@ -32,7 +32,7 @@ function Locs:IsZone(zoneId)
        and not (
         zoneId == 642 -- The Earth Forge
     --       zoneId==2 -- Tamriel
-    --    or zoneId==181 -- Cyrodiil
+    --    or zoneId==MS.ZONE_CYRODIIL
        )
        then
         return true
@@ -194,7 +194,7 @@ function Locs:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon, known
         nodeInfo.icon = "/esoui/art/crafting/crafting_smithing_notrait.dds"
     end
 
-    if nodeInfo.zoneId == 181 and nodeInfo.poiType == POI_TYPE_WAYSHRINE then -- Cyrodiil
+    if nodeInfo.zoneId == MS.ZONE_CYRODIIL and nodeInfo.poiType == POI_TYPE_WAYSHRINE then
         nodeInfo.icon = "/esoui/art/crafting/crafting_smithing_notrait.dds"
         nodeInfo.disabled = true
     end
