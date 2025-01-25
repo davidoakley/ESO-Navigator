@@ -469,6 +469,8 @@ local function getMapIdByZoneId(zoneId)
         return 27
     elseif zoneId == 981 then -- Brass Fortress
         return 1348
+    elseif zoneId == 1463 then -- The Scholarium
+        return 2515
     else
         return GetMapIdByZoneId(zoneId)
     end
