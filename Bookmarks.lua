@@ -78,9 +78,13 @@ function Bookmarks:getBookmarks()
     for i = 1, #self.list do
         local entry = self.list[i]
         if entry.nodeIndex and nodeMap then
-            local node = MS.Utils.shallowCopy(nodeMap[entry.nodeIndex])
-            node.known = MS.Locations:isKnownNode(entry.nodeIndex)
-            local traders = MS.Data.traderCounts[entry.nodeIndex]
+            local nodeIndex = entry.nodeIndex
+            if MS.Locations:IsHarborage(nodeIndex) then
+                nodeIndex = MS.Locations:GetHarborage()
+            end
+            local node = MS.Utils.shallowCopy(nodeMap[nodeIndex])
+            node.known = MS.Locations:isKnownNode(nodeIndex)
+            local traders = MS.Data.traderCounts[nodeIndex]
             if traders and traders > 0 then
                 node.traders = traders
             end

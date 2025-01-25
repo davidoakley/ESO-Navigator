@@ -271,11 +271,6 @@ function Locs:isKnownNode(nodeIndex)
         self:setupNodes()
     end
 
-    if nodeIndex == 211 or nodeIndex == 212 then
-        -- The Harborage is always stored as index 210
-        nodeIndex = 210
-    end
-
     if self.knownNodes[nodeIndex] ~= nil then
         return self.knownNodes[nodeIndex]
     else
@@ -506,6 +501,20 @@ function Locs:getCurrentMapZone()
         MS.log("Locs:getCurrentMapZone no info on zoneId "..zoneId)
     end
     return self.zones[zoneId]
+end
+
+function Locs:IsHarborage(nodeIndex)
+	return nodeIndex >= 210 and nodeIndex <= 212
+end
+
+function Locs:GetHarborage()
+    for i = 210, 212 do
+        if self:isKnownNode(i) then
+            return i
+        end
+    end
+    MS.log("Locs:GetHarborage failed to find harborage")
+    return 210
 end
 
 MapSearch.Locations = Locs
