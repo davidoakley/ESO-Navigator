@@ -136,16 +136,10 @@
 				else
 				    MapSearch.MapTab:buildScrollList()
 				end
-				if WORLD_MAP_INFO.modeBar.label then
-            		WORLD_MAP_INFO.modeBar.label:SetHidden(true)
-				end
 			</OnEffectivelyShown>
 			<OnEffectivelyHidden>
 				MapSearch.log("MapSearch_MapTab.OnEffectivelyHidden")
 				self.visible = false
-				if WORLD_MAP_INFO.modeBar.label then
-            		WORLD_MAP_INFO.modeBar.label:SetHidden(false)
-				end
 			</OnEffectivelyHidden>
             <Controls>
 				<Backdrop name="$(parent)Search" tier="HIGH" XedgeColor="000000" inherits="ZO_SingleLineEditBackdrop_Keyboard" maxHeight="40" mouseEnabled="true">

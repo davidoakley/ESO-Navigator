@@ -37,12 +37,11 @@ function MT:layoutRow(rowControl, data, scrollList)
     local tooltipText = data.tooltip
     local icon = data.icon
     local iconColour = data.colour and { data.colour:UnpackRGBA() } or
-                       (data.known and { 1.0, 1.0, 1.0, 1.0 } or { 0.51, 0.51, 0.44, 1.0 })
+                       ((data.known and not data.disabled) and { 1.0, 1.0, 1.0, 1.0 } or { 0.51, 0.51, 0.44, 1.0 })
 
     if data.suffix ~= nil then
         name = name .. " |c82826F" .. data.suffix .. "|r"
     end
-
 
 	if data.icon ~= nil then
         rowControl.icon:SetColor(unpack(iconColour))
@@ -64,12 +63,12 @@ function MT:layoutRow(rowControl, data, scrollList)
 
 	rowControl.label:SetText(name)
 
-	if data.isSelected and data.known then
+	if data.isSelected and data.known and not data.disabled then
 		rowControl.label:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
-    elseif data.colour ~= nil then
+    elseif data.colour ~= nil and not data.disabled then
         MapSearch.colour = data.colour
 		rowControl.label:SetColor(data.colour:UnpackRGBA())
-    elseif data.known then
+    elseif data.known and not data.disabled then
 		rowControl.label:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
     else
 		rowControl.label:SetColor(0.51, 0.51, 0.44, 1.0)
@@ -82,7 +81,7 @@ function MT:layoutRow(rowControl, data, scrollList)
     end)
     rowControl:SetHandler("OnMouseExit", function(_)
         ZO_Tooltips_HideTextTooltip()
-        if data.isSelected then
+        if data.isSelected and data.known and not data.disabled then
             rowControl.label:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
         end
     end )
@@ -145,7 +144,7 @@ local function jumpToPlayer(node)
 end
 
 function MT:jumpToNode(node)
-    if not node.known then
+    if not node.known or node.disabled then
         return
     end
 
@@ -319,7 +318,7 @@ function MT:buildScrollList(keepScrollPosition)
         elseif zone then
             local list = MapSearch.Locations:getKnownNodes(zone.zoneId)
 
-            if MapSearch.isRecall then
+            if MapSearch.isRecall and zone.zoneId ~= 181 then -- not Cyrodiil
                 local playerInfo = MapSearch.Locations:getPlayerInZone(zone.zoneId)
                 if playerInfo then
                     playerInfo.name = zo_strformat(GetString(NAVIGATOR_TRAVEL_TO_ZONE), zone.name)
@@ -470,6 +469,8 @@ local function getMapIdByZoneId(zoneId)
         return 27
     elseif zoneId == 981 then -- Brass Fortress
         return 1348
+    elseif zoneId == 1463 then -- The Scholarium
+        return 2515
     else
         return GetMapIdByZoneId(zoneId)
     end
@@ -623,9 +624,10 @@ function MT:selectResult(control, data, mouseButton)
             self.editControl:SetText("")
 
             local mapZoneId = MapSearch.Locations:getCurrentMapZoneId()
-            MS.log("selectResult: data.zoneId %d mapZoneId %d", data.zoneId, mapZoneId)
-            if data.zoneId ~= mapZoneId then
-                local mapId = getMapIdByZoneId(data.zoneId)
+            local currentMapId = GetCurrentMapId()
+            local mapId = data.mapId or getMapIdByZoneId(data.zoneId)
+            MS.log("selectResult: data.zoneId %d data.mapId %d mapZoneId %d mapId %d", data.zoneId, data.mapId or 0, mapZoneId, mapId)
+            if data.zoneId ~= mapZoneId or (data.mapId and data.mapId ~= currentMapId) then
                 MS.log("selectResult: mapId %d", mapId or 0)
                 if mapId then
                     WORLD_MAP_MANAGER:SetMapById(mapId)
@@ -668,12 +670,12 @@ function MT:OnMapChanged()
     if MapSearch.mapVisible and mapId ~= self.currentMapId then
         self.currentMapId = mapId
         local zone = MapSearch.Locations:getCurrentMapZone()
-        if zone and zone.zoneId ~= MapSearch.initialMapZoneId then
-            self.collapsedCategories = { bookmarks = true, recents = true }
+        MS.log("OnMapChanged: now zoneId=%d mapId=%d initial=%d", zone and zone.zoneId or 0, mapId or 0, MapSearch.initialMapZoneId or 0)
+        if zone.zoneId <= 2 then
+            MS.MapTab.collapsedCategories = { bookmarks = true, recents = true }
         else
-            self.collapsedCategories = {}
+            MS.MapTab.collapsedCategories = {}
         end
-        MS.log("OnMapChanged: now zoneId=%d mapId=%d", zone and zone.zoneId or 0, mapId or 0)
         self.filter = MS.FILTER_NONE
         self:updateFilterControl()
         self.editControl:SetText("")

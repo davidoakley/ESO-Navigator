@@ -102,6 +102,13 @@ local function OnMapStateChange(oldState, newState)
     if MS.saved and MS.saved["defaultTab"] and not FasterTravel then
       WORLD_MAP_INFO:SelectTab(NAVIGATOR_TAB_SEARCH)
     end
+
+    if MS.initialMapZoneId > 2 then
+      MS.MapTab.collapsedCategories = {}
+    else
+      MS.MapTab.collapsedCategories = { bookmarks = true, recents = true }
+    end
+
     MS.log("WorldMap showing done")
   elseif newState == SCENE_HIDDEN then
     MS.log("WorldMap hidden")
@@ -159,6 +166,12 @@ local function moveTabToFirst()
   local ourButton = buttons[#buttons]
   buttons[#buttons] = nil
   table.insert(buttons, 1, ourButton)
+
+  local buttonData = WORLD_MAP_INFO.modeBar.buttonData
+  local ourData = buttonData[#buttonData]
+  buttonData[#buttonData] = nil
+  table.insert(buttonData, 1, ourData)
+
   WORLD_MAP_INFO.modeBar:UpdateButtons(false)
   MS.log("Menu re-ordered")
 end
@@ -198,13 +211,17 @@ function MS:initialize()
     end
   end)
 
+  local buttonData = {
+    pressed = "Navigator/media/tabicon_down.dds",
+    highlight = "Navigator/media/tabicon_over.dds",
+    normal = "Navigator/media/tabicon_up.dds",
+    callback = function()
+      -- Hide the modebar title
+      WORLD_MAP_INFO.modeBar.label:SetText("")
+    end
+  }
 
-  -- local normal, highlight, pressed = GetPaths("/esoui/art/guild/guildhistory_indexicon_guildstore_", "up.dds", "over.dds", "down.dds")
-  local normal = "Navigator/media/tabicon_up.dds"
-  local highlight = "Navigator/media/tabicon_over.dds"
-  local pressed = "Navigator/media/tabicon_down.dds"
-
-  WORLD_MAP_INFO.modeBar:Add(NAVIGATOR_TAB_SEARCH, { self.MapTab.fragment }, { pressed = pressed, highlight = highlight, normal = normal })
+  WORLD_MAP_INFO.modeBar:Add(NAVIGATOR_TAB_SEARCH, { self.MapTab.fragment }, buttonData)
   if self.saved["defaultTab"] and not FasterTravel then
     moveTabToFirst()
   end
