@@ -670,12 +670,12 @@ function MT:OnMapChanged()
     if MapSearch.mapVisible and mapId ~= self.currentMapId then
         self.currentMapId = mapId
         local zone = MapSearch.Locations:getCurrentMapZone()
-        if zone and zone.zoneId ~= MapSearch.initialMapZoneId then
-            self.collapsedCategories = { bookmarks = true, recents = true }
+        MS.log("OnMapChanged: now zoneId=%d mapId=%d initial=%d", zone and zone.zoneId or 0, mapId or 0, MapSearch.initialMapZoneId or 0)
+        if zone.zoneId <= 2 then
+            MS.MapTab.collapsedCategories = { bookmarks = true, recents = true }
         else
-            self.collapsedCategories = {}
+            MS.MapTab.collapsedCategories = {}
         end
-        MS.log("OnMapChanged: now zoneId=%d mapId=%d", zone and zone.zoneId or 0, mapId or 0)
         self.filter = MS.FILTER_NONE
         self:updateFilterControl()
         self.editControl:SetText("")
