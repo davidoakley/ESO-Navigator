@@ -50,6 +50,17 @@ function MapSearch:loadSettings()
     })
 
     table.insert(optionsTable, {
+      type = "slider",
+      name = "Entries in Recent list",
+      min = 0,
+      max = 20,
+      getFunc = function() return sv.recentsCount end,
+      setFunc = function(value) sv.recentsCount = value end,
+      width = "full",
+      default = 10
+    })  
+
+    table.insert(optionsTable, {
       type = "dropdown",
       name = "Teleport chat command:",
       tooltip = "Select what name to give the chat slash command",
