@@ -105,9 +105,9 @@ function Chat:TP(text)
         CHAT_SYSTEM:AddMessage(zo_strformat(GetString(NAVIGATOR_TRAVELING_TO_ZONE_VIA_PLAYER), node.zoneName, node.userID))
         SCENE_MANAGER:Hide("worldMap")
 
-        if node.poiType == POI_TYPE_FRIEND then
+        if node.poiType == MS.POI_FRIEND then
             JumpToFriend(node.userID)
-        elseif node.poiType == POI_TYPE_GUILDMATE then
+        elseif node.poiType == MS.POI_GUILDMATE then
             JumpToGuildMember(node.userID)
         end
     else

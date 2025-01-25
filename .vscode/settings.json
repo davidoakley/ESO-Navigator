@@ -25,7 +25,9 @@
         "SCENE_MANAGER",
         "JumpToFriend",
         "JumpToGuildMember",
-        "SetMenuHiddenCallback"
+        "SetMenuHiddenCallback",
+        "SafeAddVersion",
+        "SafeAddString"
     ],
     "Lua.diagnostics.globalsRegex": [
         "^ZO_.*",
