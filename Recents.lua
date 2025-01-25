@@ -26,6 +26,12 @@ function Recents:insert(nodeIndex)
         nodeIndex = 210
     end
 
+    local node = MS.Locations:GetNode(nodeIndex)
+    if node and node.zoneId == 181 and node.poiType == POI_TYPE_WAYSHRINE then -- Cyrodiil
+        MS.log("Recents:insert("..nodeIndex..") - not adding Cyrodiil wayshrine")
+        return
+    end
+
     for i = 1, #self.nodes do
         if self.nodes[i] == nodeIndex then
             table.remove(self.nodes, i)
