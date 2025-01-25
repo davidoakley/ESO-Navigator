@@ -312,6 +312,13 @@ function Locs:getNodeMap()
     return self.nodeMap
 end
 
+function Locs:GetNode(nodeIndex)
+    if self.nodeMap == nil then
+        self:setupNodes()
+    end
+    return self.nodeMap[nodeIndex]
+end
+
 function Locs:getKnownNodes(zoneId)
     if self.nodes == nil then
         self:setupNodes()

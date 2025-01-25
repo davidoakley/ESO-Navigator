@@ -8,12 +8,12 @@ MapSearch = {
   svName = "Navigator_SavedVariables",
   default = {
     recentNodes = {},
-    maxRecent = 10,
     bookmarkNodes = {},
     defaultTab = false,
     autoFocus = false,
     tpCommand = "/nav",
-    loggingEnabled = false
+    loggingEnabled = false,
+    recentsCount = 10
   },
   Location = {},
   Wayshrine = {},

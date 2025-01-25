@@ -1,14 +1,12 @@
 local MS = MapSearch
 local Recents = MS.Recents or {
     nodes = {},
-    maxEntries = 10
+    maxStored = 20
 }
-local logger = MS.logger
 local FTrecent = nil
 
 function Recents:init()
     self.nodes = MS.saved.recentNodes or {}
-    self.maxEntries = MS.saved.maxRecent or 10
 
     if _G["FasterTravel"] ~= nil and
        _G["FasterTravel"].settings ~= nil and
@@ -28,6 +26,12 @@ function Recents:insert(nodeIndex)
         nodeIndex = 210
     end
 
+    local node = MS.Locations:GetNode(nodeIndex)
+    if node and node.zoneId == 181 and node.poiType == POI_TYPE_WAYSHRINE then -- Cyrodiil
+        MS.log("Recents:insert("..nodeIndex..") - not adding Cyrodiil wayshrine")
+        return
+    end
+
     for i = 1, #self.nodes do
         if self.nodes[i] == nodeIndex then
             table.remove(self.nodes, i)
@@ -35,7 +39,7 @@ function Recents:insert(nodeIndex)
             break
         end
     end
-    if #self.nodes >= self.maxEntries then
+    if #self.nodes >= self.maxStored then
         table.remove(self.nodes)
         MS.log("Recents:insert("..nodeIndex..") removed overflow entry #"..#self.nodes)
     end
@@ -46,10 +50,9 @@ end
 
 function Recents:save()
     MS.saved.recentNodes = self.nodes
-    MS.saved.maxRecent = self.maxEntries
 end
 
-function Recents:getRecents()
+function Recents:getRecents(count)
     local results = {}
     local nodeMap = MS.Locations:getNodeMap()
 
@@ -59,6 +62,10 @@ function Recents:getRecents()
             node.known = MS.Locations:isKnownNode(node.nodeIndex)
             node.bookmarked = MS.Bookmarks:contains(node)
             table.insert(results, node)
+
+            if #results >= count then
+                return results
+            end
         end
     end
 
