@@ -677,7 +677,7 @@ function MT:OnMapChanged()
         else
             self.collapsedCategories = {}
         end
-        self.MapSearch.targetNode = 0
+        MapSearch.targetNode = 0
         self.filter = MS.FILTER_NONE
         self:updateFilterControl()
         self.editControl:SetText("")
