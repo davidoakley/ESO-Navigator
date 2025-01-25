@@ -58,8 +58,12 @@ function Recents:getRecents(count)
 
     if nodeMap ~= nil then
         for i = 1, #self.nodes do
-            local node = MS.Utils.shallowCopy(nodeMap[self.nodes[i]])
-            node.known = MS.Locations:isKnownNode(node.nodeIndex)
+            local nodeIndex = nodeMap[self.nodes[i]].nodeIndex or 0
+            if MS.Locations:IsHarborage(nodeIndex) then
+                nodeIndex = MS.Locations:GetHarborage()
+            end
+            local node = MS.Utils.shallowCopy(nodeMap[nodeIndex])
+            node.known = MS.Locations:isKnownNode(nodeIndex)
             node.bookmarked = MS.Bookmarks:contains(node)
             table.insert(results, node)
 
