@@ -307,8 +307,9 @@ function MT:buildScrollList(keepScrollPosition)
 
     local currentZoneId = MapSearch.Locations:getCurrentMapZoneId()
     if #MapSearch.results == 0 then
+        local recentCount = MS.saved.recentsCount
         buildList(scrollData, "bookmarks", GetString(NAVIGATOR_CATEGORY_BOOKMARKS), MapSearch.Bookmarks:getBookmarks())
-        buildList(scrollData, "recents", GetString(NAVIGATOR_CATEGORY_RECENT), MapSearch.Recents:getRecents())
+        buildList(scrollData, "recents", GetString(NAVIGATOR_CATEGORY_RECENT), MapSearch.Recents:getRecents(recentCount))
 
         local zone = MapSearch.Locations:getCurrentMapZone()
         if zone and zone.zoneId == 2 then
