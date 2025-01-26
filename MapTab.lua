@@ -2,7 +2,6 @@ local MT = MapSearch_MapTab -- from XML
 local MS = MapSearch
 local Search = MapSearch.Search
 local Utils = MapSearch.Utils
-local logger = MapSearch.logger
 
 MT.filter = MS.FILTER_NONE
 MT.needsRefresh = false
@@ -553,7 +552,7 @@ function MT:previousCategory()
 end
 
 function MT:resetFilter()
-	logger.Debug("MT.resetFilter")
+	MS.log("MT.resetFilter")
     self.filter = MS.FILTER_NONE
     self:hideFilterControl()
     self:ImmediateRefresh()
@@ -561,7 +560,7 @@ function MT:resetFilter()
 end
 
 function MT:resetSearch(lose_focus)
-	logger.Debug("MT.resetSearch")
+	MS.log("MT.resetSearch")
 	self.editControl:SetText("")
     self.filter = MS.FILTER_NONE
     self:hideFilterControl()
@@ -584,7 +583,7 @@ local function showWayshrineMenu(owner, data)
     elseif data.zoneId then
         entry.zoneId = data.zoneId
     else
-        logger.Debug("showWayshrineMenu: unrecognised data")
+        MS.log("showWayshrineMenu: unrecognised data")
         return
     end
 
