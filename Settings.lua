@@ -1,6 +1,5 @@
 function MapSearch:loadSettings()
     local LAM = LibAddonMenu2
-    local logger = MapSearch.logger
     local sv = self.saved
     if sv == nil then return end
   
@@ -19,8 +18,8 @@ function MapSearch:loadSettings()
   
     table.insert(optionsTable, {
         type = "checkbox",
-        name = "Auto-select Search tab",
-        tooltip = "Automatically selects the Search tab when the Maps screen is opened.",
+        name = "Auto-select Navigator tab",
+        tooltip = "Automatically selects the Navigator tab when the Maps screen is opened.",
         getFunc = function() return sv.defaultTab end,
         setFunc = function(value)
           sv.defaultTab = value
@@ -30,7 +29,7 @@ function MapSearch:loadSettings()
         disabled = function() return FasterTravel ~= nil end,
         warning = function()
           if FasterTravel then
-            return "Navigator cannot auto-select its tab when the Faster Travel addon is also enabled"
+            return "Navigator cannot auto-select its tab when the |c99FFFFFaster Travel|r addon is also enabled"
           else
             return nil
           end
@@ -60,24 +59,31 @@ function MapSearch:loadSettings()
       default = 10
     })  
 
-    table.insert(optionsTable, {
-      type = "dropdown",
-      name = "Teleport chat command:",
-      tooltip = "Select what name to give the chat slash command",
-      choices = {"None", "/nav", "/tp"},
-      getFunc = function() return sv.tpCommand end,
-      setFunc = function(value) sv.tpCommand = value end,
-      width = "full",
-      default = MapSearch.default.tpCommand,
-      requiresReload = true,
-      warning = function()
-        if PITHKA and PITHKA.SV and PITHKA.SV.options.enableTeleport then
-          return "|c8080FFPithka's Achievement Tracker|r has its teleport command enabled, which also uses '/tp'"
-        else
-          return nil
+    if LibSlashCommander then
+      table.insert(optionsTable, {
+        type = "dropdown",
+        name = "Chat command:",
+        tooltip = "Select what name to give the chat slash command",
+        choices = {"None", "/nav", "/tp"},
+        getFunc = function() return sv.tpCommand end,
+        setFunc = function(value) sv.tpCommand = value end,
+        width = "full",
+        default = MapSearch.default.tpCommand,
+        requiresReload = true,
+        warning = function()
+          if PITHKA and PITHKA.SV and PITHKA.SV.options.enableTeleport then
+            return "|c8080FFPithka's Achievement Tracker|r has its teleport command enabled, which also uses '/tp'"
+          else
+            return nil
+          end
         end
-      end
-    })
+      })
+    else
+      table.insert(optionsTable, 	{
+        type = "description",
+        text = "|cFFFF00|t24:24:/esoui/art/miscellaneous/eso_icon_warning.dds:inheritcolor|t|r Navigator's chat command is only available if the |c99FFFFLibSlashCommander|r add-on is installed and enabled"
+      })
+    end
 
     -- table.insert(optionsTable, 	{
     --   type = "description",
