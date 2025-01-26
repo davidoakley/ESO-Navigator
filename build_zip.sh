@@ -16,6 +16,7 @@ mkdir -p _build/Navigator
 
 cp *.lua *.txt *.xml _build/Navigator
 cp -r media _build/Navigator/media
+cp -r lang _build/Navigator/lang
 
 cd _build
 
