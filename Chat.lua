@@ -3,7 +3,6 @@ local Chat = MS.Chat or {
     lsc = nil,
     AutoCompleteProvider = nil
 }
-local logger = MS.logger
 
 function Chat:Init()
     self.lsc = LibSlashCommander
