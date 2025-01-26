@@ -2,7 +2,6 @@ local Search = MapSearch.Search or {}
 local MS = MapSearch
 local Utils = MS.Utils
 local Locations = MS.Locations
-local logger = MS.logger -- LibDebugLogger("MapSearch")
 local colors = MS.ansicolors
 local fzy = MS.fzy
 

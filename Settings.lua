@@ -1,6 +1,5 @@
 function MapSearch:loadSettings()
     local LAM = LibAddonMenu2
-    local logger = MapSearch.logger
     local sv = self.saved
     if sv == nil then return end
   

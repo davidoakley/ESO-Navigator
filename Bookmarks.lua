@@ -2,7 +2,6 @@ local MS = MapSearch
 local Bookmarks = MS.Bookmarks or {
     list = {},
 }
-local logger = MS.logger
 
 function Bookmarks:init()
     self.list = MS.saved.bookmarks or {}
