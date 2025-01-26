@@ -32,20 +32,19 @@ local logger
 if LibDebugLogger then
   logger = LibDebugLogger(MS.name)
 end
-MS.logger = logger
 
 local Utils = MS.Utils
 
 local _events = {}
 
 function MS.log(...)
-  if MS.saved and MS.saved["loggingEnabled"] then
+  if logger and MS.saved and MS.saved["loggingEnabled"] then
     logger:Debug(string.format(...))
   end
 end
 
 function MS.logWarning(...)
-  if MS.saved and MS.saved["loggingEnabled"] then
+  if logger and MS.saved and MS.saved["loggingEnabled"] then
     logger:Warn(string.format(...))
   end
 end
