@@ -162,6 +162,7 @@ function Locs:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon, known
         --     nodeInfo.poiType = MS.POI_ARENA
         --     -- nodeInfo.name = string.sub(nodeInfo.name, 1, #nodeInfo.name - 6)
         --     nodeInfo.icon = "esoui/art/tutorial/poi_raiddungeon_complete.dds"
+        nodeInfo.freeRecall = true
     elseif typePOI == 1 then
         nodeInfo.poiType = MS.POI_WAYSHRINE
         -- if name:find(" Wayshrine") then
@@ -315,7 +316,7 @@ function Locs:getKnownNodes(zoneId)
             node.known = true
             node.weight = 1.0
             node.bookmarked = bookmarked
-            if node.poiType == MS.POI_WAYSHRINE and MS.isRecall then
+            if not node.freeRecall and MS.isRecall then
                 node.weight = bookmarked and 0.9 or 0.8
             elseif node.poiType == MS.POI_HOUSE and not node.owned then
                 node.weight = 0.7
@@ -442,6 +443,7 @@ function Locs:getZoneList()
             mapId = info.mapId,
             icon = "Navigator/media/zone.dds",
             poiType = MS.POI_ZONE,
+            weight = MS.isRecall and 1.0 or 0.9,
             known = true,
             bookmarked = MS.Bookmarks:contains(info)
         })
@@ -463,6 +465,7 @@ function Locs:getZone(zoneId)
         zoneName = info.name,
         icon = "Navigator/media/zone.dds",
         poiType = MS.POI_ZONE,
+        weight = MS.isRecall and 1.0 or 0.9,
         known = true
     }
 end
