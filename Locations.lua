@@ -143,43 +143,23 @@ function Locs:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon, known
         nodeInfo.poiType = MS.POI_GROUP_DUNGEON
         if i ~= 550 then -- not Infinite Archive
             nodeInfo.suffix = GetString(NAVIGATOR_DUNGEON)
-            --     nodeInfo.icon = "esoui/art/icons/poi/poi_groupinstance_complete.dds"
         end
-        -- if name:find("Dungeon: ") then
-        --     nodeInfo.name = string.sub(nodeInfo.name, 10, #nodeInfo.name)
-        -- end
     elseif typePOI == 3 then
         nodeInfo.poiType = MS.POI_TRIAL
         nodeInfo.icon = "esoui/art/tutorial/poi_raiddungeon_complete.dds"
-        -- if nodeInfo.name:find("Trial: ") then
-        --     nodeInfo.name = string.sub(nodeInfo.name, 8, #nodeInfo.name)
-        -- end
         nodeInfo.suffix = GetString(NAVIGATOR_TRIAL)
     elseif typePOI == 7 then
         nodeInfo.poiType = MS.POI_HOUSE
-        nodeInfo.owned = (icon:find("poi_group_house_owned") ~= nil) --(icon == "/esoui/art/icons/poi/poi_group_house_owned.dds")
-        -- elseif name:find(" Arena") then
-        --     nodeInfo.poiType = MS.POI_ARENA
-        --     -- nodeInfo.name = string.sub(nodeInfo.name, 1, #nodeInfo.name - 6)
-        --     nodeInfo.icon = "esoui/art/tutorial/poi_raiddungeon_complete.dds"
+        nodeInfo.owned = (icon:find("poi_group_house_owned") ~= nil)
         nodeInfo.freeRecall = true
     elseif typePOI == 1 then
         nodeInfo.poiType = MS.POI_WAYSHRINE
-        -- if name:find(" Wayshrine") then
-        --     nodeInfo.name = string.sub(nodeInfo.name, 1, #nodeInfo.name - 10)
-        -- end
     elseif glowIcon == "/esoui/art/icons/poi/poi_soloinstance_glow.dds" or
            glowIcon == "/esoui/art/icons/poi/poi_groupinstance_glow.dds" then
         nodeInfo.poiType = MS.POI_ARENA
         nodeInfo.suffix = GetString(NAVIGATOR_ARENA)
-        -- if name:find(" Arena") then
-        --     nodeInfo.name = string.sub(nodeInfo.name, 1, #nodeInfo.name - 6)
-        -- end
     else
         MS.logWarning("Unknown POI " .. i .. " '" .. name .. "' type " .. typePOI .. " " .. (glowIcon or "-"))
-        -- if glowIcon ~= nil and glowIcon:find("/esoui/art/icons/poi/poi_") and glowIcon:find("_glow.dds") then
-        --     nodeInfo.icon = glowIcon:gsub("_glow.dds", "_complete.dds")
-        -- end
     end
 
     nodeInfo.barename = Utils.bareName(nodeInfo.name)
@@ -198,11 +178,6 @@ function Locs:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon, known
         nodeInfo.traders = traders
     end
 
-    -- if self.zones[nodeZoneId] then
-    --     table.insert(self.zones[nodeZoneId].nodes, nodeInfo)
-    -- else
-    --     MS.log("Locs:setupNodes: node "..i.." '"..nodeInfo.name.."' in non-parent zoneId "..nodeZoneId)
-    -- end
     return nodeInfo
 end
 
