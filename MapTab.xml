@@ -194,8 +194,8 @@
 								end
 							</OnEffectivelyShown>
 							<OnFocusGained>
-								MapSearch.MapTab:UpdateEditDefaultText()
 								MapSearch.MapTab:buildScrollList()
+								zo_callLater(function() MapSearch.MapTab:UpdateEditDefaultText() end, 10)
 							</OnFocusGained>
 							<OnFocusLost>
 								MapSearch.MapTab:UpdateEditDefaultText()
