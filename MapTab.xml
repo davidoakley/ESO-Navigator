@@ -78,7 +78,7 @@
 					<TextureCoords top="0" bottom="1" left="0" right="1"/>
 				</Texture>
 
-				<Label name="$(parent)Keybind" font="$(MEDIUM_FONT)|$(KB_16)" text="NAVIGATOR_KEY_ENTER" xlayer="OVERLAY" horizontalAlignment="CENTER">
+				<Label name="$(parent)Keybind" font="$(MEDIUM_FONT)|$(KB_16)" text="NAVIGATOR_KEY_ENTER" layer="OVERLAY" horizontalAlignment="CENTER">
 					<Anchor point="TOPRIGHT" offsetX="-8" offsetY="1"/>
 					<Controls>
 						<Backdrop name="$(parent)Bg" inherits="ZO_LargeKeyBackdrop" alpha="1">
