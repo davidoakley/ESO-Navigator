@@ -21,6 +21,11 @@ mkstr("NAVIGATOR_CATEGORY_BOOKMARKS", "Bookmarks")
 mkstr("NAVIGATOR_CATEGORY_RECENT", "Recent")
 mkstr("NAVIGATOR_CATEGORY_ZONES", "Zones")
 
+-- Result hints
+mkstr("NAVIGATOR_HINT_NORESULTS", "No results found")
+mkstr("NAVIGATOR_HINT_NORECENTS", "Destinations that you travel to will automatically appear here")
+mkstr("NAVIGATOR_HINT_NOBOOKMARKS", "Right click a destination to create (or delete) a bookmark for it")
+
 -- Enter key label (keep it short!)
 mkstr("NAVIGATOR_KEY_ENTER", "Enter")
 
