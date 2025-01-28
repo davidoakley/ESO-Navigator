@@ -23,7 +23,7 @@ cp -r lang _build/Navigator/lang
 cd _build
 
 sed -i "s/## Version: .*/## Version: $VERSION/g" Navigator/Navigator.txt
-sed -i "s/## AddOnVersion: .*/## Version: $ADDONVERSION/g" Navigator/Navigator.txt
+sed -i "s/## AddOnVersion: .*/## AddOnVersion: $ADDONVERSION/g" Navigator/Navigator.txt
 sed -i "s/  appVersion = ".*",/  appVersion = \"$VERSION\",/g" Navigator/Navigator.lua
 
 zip -r "Navigator-v$VERSION.zip" Navigator
