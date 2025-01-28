@@ -112,6 +112,10 @@ function MT:layoutCategoryRow(rowControl, data, scrollList)
 	rowControl.label:SetText(data.name)
 end
 
+function MT:layoutHintRow(rowControl, data, scrollList)
+	rowControl.label:SetText(data.hint or "-")
+end
+
 local function jumpToPlayer(node)
     local userID, poiType, zoneId, zoneName = node.userID, node.poiType, node.zoneId, node.zoneName
     local Locs = MapSearch.Locations
@@ -201,74 +205,84 @@ local function addDeveloperTooltip(nodeData)
     nodeData.tooltip = table.concat(items, "; ")
 end
 
-local function buildCategoryHeader(scrollData, id, title, list, collapsed)
-    if #list > 0 then
-        local recentEntry = ZO_ScrollList_CreateDataEntry(collapsed and 2 or 0, { id = id, name = title })
-        table.insert(scrollData, recentEntry)
-    end
+local function buildCategoryHeader(scrollData, id, title, collapsed)
+    title = tonumber(title) ~= nil and GetString(title) or title
+    local recentEntry = ZO_ScrollList_CreateDataEntry(collapsed and 2 or 0, { id = id, name = title })
+    table.insert(scrollData, recentEntry)
 end
 
-local function buildList(scrollData, id, title, list)
+local function buildResult(listEntry, currentNodeIndex)
+    local nodeData = Utils.shallowCopy(listEntry)
+    nodeData.isSelected = (currentNodeIndex == MapSearch.targetNode)
+    nodeData.dataIndex = currentNodeIndex
+
+    -- MS.log("%s: traders %d", nodeData.barename, nodeData.traders or 0)
+    if listEntry.traders and listEntry.traders > 0 then
+        if listEntry.traders >= 5 then
+            nodeData.suffix = "|t20:23:Navigator/media/city_narrow.dds:inheritcolor|t"
+        elseif listEntry.traders >= 2 then
+            nodeData.suffix = "|t20:23:Navigator/media/town_narrow.dds:inheritcolor|t"
+        end
+        nodeData.suffix = (nodeData.suffix or "") .. "|t23:23:/esoui/art/icons/servicemappins/servicepin_guildkiosk.dds:inheritcolor|t"
+    end
+
+    if nodeData.bookmarked then --MapSearch.Bookmarks:contains(nodeData) then
+        nodeData.suffix = (nodeData.suffix or "") .. "|t25:25:Navigator/media/bookmark.dds:inheritcolor|t"
+    end
+
+    if not nodeData.known and nodeData.nodeIndex then
+        nodeData.tooltip = GetString(NAVIGATOR_NOT_KNOWN)
+    end
+
+    nodeData.isFree = true
+    if MapSearch.isRecall and nodeData.known and nodeData.nodeIndex then -- and nodeData.poiType == MS.POI_WAYSHRINE
+        local _, timeLeft = GetRecallCooldown()
+
+        if timeLeft == 0 then
+            local currencyType = CURT_MONEY
+            local currencyAmount = GetRecallCost(nodeData.nodeIndex)
+            if currencyAmount > 0 then
+                local formatType = ZO_CURRENCY_FORMAT_AMOUNT_ICON
+                local currencyString = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(currencyType, currencyAmount, formatType))
+                nodeData.tooltip = string.format(GetString(SI_TOOLTIP_RECALL_COST) .. "%s", currencyString)
+                nodeData.isFree = false
+            end
+        end
+    end
+
+
+    if MapSearch.isDeveloper then
+        addDeveloperTooltip(nodeData)
+    end
+
+    return nodeData
+end
+
+local function buildList(scrollData, id, title, list, defaultString)
     local collapsed = MT.collapsedCategories[id] and true or false
 
-    buildCategoryHeader(scrollData, id, title, list, collapsed)
+    buildCategoryHeader(scrollData, id, title, collapsed)
 
     if collapsed then
         return
+    elseif #list == 0 and defaultString then
+        list = {{ hint = GetString(defaultString) }}
     end
 
     local currentNodeIndex = MT.resultCount
 
     for i = 1, #list do
-        local listEntry = list[i]
+        if list[i].hint then
+            local entry = ZO_ScrollList_CreateDataEntry(3, { hint = list[i].hint })
+            table.insert(scrollData, entry)
+        else
+            local nodeData = buildResult(list[i], currentNodeIndex)
 
-        local nodeData = Utils.shallowCopy(listEntry)
-		nodeData.isSelected = (currentNodeIndex == MapSearch.targetNode)
-        nodeData.dataIndex = currentNodeIndex
+            local entry = ZO_ScrollList_CreateDataEntry(1, nodeData)
+            table.insert(scrollData, entry)
 
-        -- MS.log("%s: traders %d", nodeData.barename, nodeData.traders or 0)
-        if listEntry.traders and listEntry.traders > 0 then
-            if listEntry.traders >= 5 then
-                nodeData.suffix = "|t20:23:Navigator/media/city_narrow.dds:inheritcolor|t"
-            elseif listEntry.traders >= 2 then
-                nodeData.suffix = "|t20:23:Navigator/media/town_narrow.dds:inheritcolor|t"
-            end
-            nodeData.suffix = (nodeData.suffix or "") .. "|t23:23:/esoui/art/icons/servicemappins/servicepin_guildkiosk.dds:inheritcolor|t"
+            currentNodeIndex = currentNodeIndex + 1
         end
-
-        if nodeData.bookmarked then --MapSearch.Bookmarks:contains(nodeData) then
-            nodeData.suffix = (nodeData.suffix or "") .. "|t25:25:Navigator/media/bookmark.dds:inheritcolor|t"
-        end
-
-        if not nodeData.known and nodeData.nodeIndex then
-            nodeData.tooltip = GetString(NAVIGATOR_NOT_KNOWN)
-        end
-
-        nodeData.isFree = true
-        if MapSearch.isRecall and nodeData.known and nodeData.nodeIndex then -- and nodeData.poiType == MS.POI_WAYSHRINE
-            local _, timeLeft = GetRecallCooldown()
-    
-            if timeLeft == 0 then
-                local currencyType = CURT_MONEY
-                local currencyAmount = GetRecallCost(nodeData.nodeIndex)
-                if currencyAmount > 0 then
-                    local formatType = ZO_CURRENCY_FORMAT_AMOUNT_ICON
-                    local currencyString = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(currencyType, currencyAmount, formatType))
-                    nodeData.tooltip = string.format(GetString(SI_TOOLTIP_RECALL_COST) .. "%s", currencyString)
-                    nodeData.isFree = false
-                end
-            end
-        end
-    
-    
-        if MapSearch.isDeveloper then
-            addDeveloperTooltip(nodeData)
-        end
-
-		local entry = ZO_ScrollList_CreateDataEntry(1, nodeData)
-		table.insert(scrollData, entry)
-
-        currentNodeIndex = currentNodeIndex + 1
     end
 
     MT.resultCount = currentNodeIndex
@@ -301,20 +315,23 @@ function MT:buildScrollList(keepScrollPosition)
 
     local scrollData = ZO_ScrollList_GetDataList(self.listControl)
 
+    local isSearching = #MapSearch.results > 0 or (self.searchString and self.searchString ~= "")
     MT.resultCount = 0
-    buildList(scrollData, "results", GetString(NAVIGATOR_CATEGORY_RESULTS), MapSearch.results)
+    if isSearching then
+        buildList(scrollData, "results", NAVIGATOR_CATEGORY_RESULTS, MapSearch.results, NAVIGATOR_HINT_NORESULTS)
+    else
+        local bookmarks = MapSearch.Bookmarks:getBookmarks()
+        buildList(scrollData, "bookmarks", NAVIGATOR_CATEGORY_BOOKMARKS, bookmarks, NAVIGATOR_HINT_NOBOOKMARKS)
 
-    local currentZoneId = MapSearch.Locations:getCurrentMapZoneId()
-    if #MapSearch.results == 0 then
         local recentCount = MS.saved.recentsCount
-        buildList(scrollData, "bookmarks", GetString(NAVIGATOR_CATEGORY_BOOKMARKS), MapSearch.Bookmarks:getBookmarks())
-        buildList(scrollData, "recents", GetString(NAVIGATOR_CATEGORY_RECENT), MapSearch.Recents:getRecents(recentCount))
+        local recents = MapSearch.Recents:getRecents(recentCount)
+        buildList(scrollData, "recents", NAVIGATOR_CATEGORY_RECENT, recents, NAVIGATOR_HINT_NORECENTS)
 
         local zone = MapSearch.Locations:getCurrentMapZone()
         if zone and zone.zoneId == 2 then
             local list = MapSearch.Locations:getZoneList()
             table.sort(list, nameComparison)
-            buildList(scrollData, "zones", GetString(NAVIGATOR_CATEGORY_ZONES), list)
+            buildList(scrollData, "zones", NAVIGATOR_CATEGORY_ZONES, list)
         elseif zone then
             local list = MapSearch.Locations:getKnownNodes(zone.zoneId)
 
