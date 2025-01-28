@@ -40,7 +40,7 @@
 					<Anchor point="TOPLEFT" offsetX="0" offsetY="14" />
 					<TextureCoords top="0" bottom="1" left="0" right="1"/>
 				</Texture>
-				<Label name="$(parent)Label" inherits="ZO_SelectableLabel" font="ZoFontHeader2" xcolor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" mouseEnabled="false">
+				<Label name="$(parent)Label" inherits="ZO_SelectableLabel" font="ZoFontHeader2"  modifyTextType="UPPERCASE" mouseEnabled="false">
 					<Anchor point="TOPLEFT" relativeTo="$(parent)Icon" relativePoint="TOPRIGHT" offsetX="4" offsetY="0"/>
 				</Label>
             </Controls>
@@ -78,7 +78,7 @@
 					<TextureCoords top="0" bottom="1" left="0" right="1"/>
 				</Texture>
 
-				<Label name="$(parent)Keybind" font="$(MEDIUM_FONT)|$(KB_16)" text="NAVIGATOR_KEY_ENTER" xlayer="OVERLAY" horizontalAlignment="CENTER">
+				<Label name="$(parent)Keybind" font="$(MEDIUM_FONT)|$(KB_16)" text="NAVIGATOR_KEY_ENTER"  horizontalAlignment="CENTER">
 					<Anchor point="TOPRIGHT" offsetX="-8" offsetY="1"/>
 					<Controls>
 						<Backdrop name="$(parent)Bg" inherits="ZO_LargeKeyBackdrop" alpha="1">
@@ -156,7 +156,7 @@
 				self.visible = false
 			</OnEffectivelyHidden>
             <Controls>
-				<Backdrop name="$(parent)Search" tier="HIGH" XedgeColor="000000" inherits="ZO_SingleLineEditBackdrop_Keyboard" maxHeight="40" mouseEnabled="true">
+				<Backdrop name="$(parent)Search" tier="HIGH"  inherits="ZO_SingleLineEditBackdrop_Keyboard"  mouseEnabled="true">
 					<Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="0" offsetY="-30"/>
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT" offsetX="0" offsetY="-30" />
 
@@ -181,7 +181,7 @@
 							/>
 						</Button>
 
-						<EditBox name="$(parent)Edit" maxInputCharacters="30" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText" newLineEnabled="true" XkeyboardEnabled="true">
+						<EditBox name="$(parent)Edit" maxInputCharacters="30" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText" newLineEnabled="true" >
 							<!--<Anchor point="TOPLEFT" relativeTo="$(parent)Filter" relativePoint="TOPRIGHT" offsetX="0" offsetY="-1" />-->
 							<Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="2" offsetY="-1" />
 							<Anchor point="TOPRIGHT" relativeTo="$(parent)Clear" relativePoint="TOPLEFT" offsetX="-4" offsetY="-1" />
