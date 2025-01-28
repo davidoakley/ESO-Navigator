@@ -229,11 +229,16 @@ function MS:initialize()
 end
 
 local function OnAddOnLoaded(_, addonName)
-  if addonName ~= "Navigator" then return end
+    if addonName ~= "Navigator" then return end
 
-  MS:initialize()
+    MS:initialize()
 
-  EVENT_MANAGER:UnregisterForEvent(MS.name, EVENT_ADD_ON_LOADED)
+    if PP and PP.ADDON_NAME then
+        PP.ScrollBar(MapSearch_MapTabListScrollBar)
+        ZO_Scroll_SetMaxFadeDistance(MapSearch_MapTabList, PP.savedVars.ListStyle.list_fade_distance)
+    end
+
+    EVENT_MANAGER:UnregisterForEvent(MS.name, EVENT_ADD_ON_LOADED)
 end
 
 EVENT_MANAGER:RegisterForEvent(MS.name, EVENT_ADD_ON_LOADED, OnAddOnLoaded)
