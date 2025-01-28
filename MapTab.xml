@@ -181,7 +181,7 @@
 							/>
 						</Button>
 
-						<EditBox name="$(parent)Edit" maxInputCharacters="30" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText" newLineEnabled="true" XkeyboardEnabled="true">
+						<EditBox name="$(parent)Edit" maxInputCharacters="30" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText" newLineEnabled="true" keyboardEnabled="true">
 							<!--<Anchor point="TOPLEFT" relativeTo="$(parent)Filter" relativePoint="TOPRIGHT" offsetX="0" offsetY="-1" />-->
 							<Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="2" offsetY="-1" />
 							<Anchor point="TOPRIGHT" relativeTo="$(parent)Clear" relativePoint="TOPLEFT" offsetX="-4" offsetY="-1" />
