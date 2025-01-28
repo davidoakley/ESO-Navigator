@@ -109,8 +109,21 @@
 				MapSearch.MapTab:RowMouseUp(self, button, upInside)
 			</OnMouseUp>
         </Control>
-        
-        
+
+        <Control name="MapSearch_WorldMapHintRow" virtual="true" mouseEnabled="false">
+			<OnInitialized>
+				self.offsetX = 30
+				self.label = self:GetNamedChild("Label")
+			</OnInitialized>
+            <Dimensions x="285" y="70"/>
+            <Controls>
+				<Label name="$(parent)Label" font="ZoFontGame" horizontalAlignment="CENTER" verticalAlignment="CENTER" maxLineCount="3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" mouseEnabled="false">
+					<AnchorFill/>
+				</Label>
+            </Controls>
+        </Control>
+
+
         <TopLevelControl name="MapSearch_MapTab" inherits="ZO_WorldMapInfoContent">
             <OnInitialized>
 				MapSearch.log("MapSearch_MapTab.OnInitialized")
@@ -126,6 +139,7 @@
 				ZO_ScrollList_AddDataType(self.listControl, 0, "MapSearch_WorldMapCategoryRow", 50, function(...) self:layoutCategoryRow(...) end, nil, nil, nil)
 				ZO_ScrollList_AddDataType(self.listControl, 1, "MapSearch_WorldMapWayshrineRow", 25, function(...) self:layoutRow(...) end, nil, nil, nil)
 				ZO_ScrollList_AddDataType(self.listControl, 2, "MapSearch_WorldMapCollapsedCategoryRow", 40, function(...) self:layoutCategoryRow(...) end, nil, nil, nil)
+				ZO_ScrollList_AddDataType(self.listControl, 3, "MapSearch_WorldMapHintRow", 70, function(...) self:layoutHintRow(...) end, nil, nil, nil)
 	        </OnInitialized>
 			<OnEffectivelyShown>
 				MapSearch.log("MapSearch_MapTab.OnEffectivelyShown")
@@ -194,8 +208,8 @@
 								end
 							</OnEffectivelyShown>
 							<OnFocusGained>
-								MapSearch.MapTab:UpdateEditDefaultText()
 								MapSearch.MapTab:buildScrollList()
+								zo_callLater(function() MapSearch.MapTab:UpdateEditDefaultText() end, 10)
 							</OnFocusGained>
 							<OnFocusLost>
 								MapSearch.MapTab:UpdateEditDefaultText()
