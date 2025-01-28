@@ -34,5 +34,15 @@
         "^zo_.*",
         "^SI_[A-Z_]+",
         "NAVIGATOR_.*"
-    ]
+    ],
+    "xml.fileAssociations": [
+        {
+            "pattern": "**/Bindings.xml",
+            "systemId": "ESO-Navigator/test/.xml_xsd/esobindings.xsd"
+        },
+        {
+            "pattern": "**/MapTab.xml",
+            "systemId": "ESO-Navigator/test/.xml_xsd/esoui101045.xsd"
+        }
+    ],
 }
