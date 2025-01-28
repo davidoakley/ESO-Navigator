@@ -4,8 +4,8 @@
 ## APIVersion: 101044
 ## Version: 0
 ## AddOnVersion: 0
-## DependsOn: LibAddonMenu-2.0
-## OptionalDependsOn: LibDebugLogger>=180 pChat FasterTravel LibSlashCommander LibWorldMapInfoTab
+## DependsOn: LibAddonMenu-2.0>=37
+## OptionalDependsOn: LibDebugLogger>=263 pChat>=10006030 FasterTravel>=030105 LibSlashCommander>=36 LibWorldMapInfoTab>=127
 ## SavedVariables: Navigator_SavedVariables
 
 lang/en.lua
