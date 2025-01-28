@@ -156,7 +156,7 @@
 				self.visible = false
 			</OnEffectivelyHidden>
             <Controls>
-				<Backdrop name="$(parent)Search" tier="HIGH" XedgeColor="000000" inherits="ZO_SingleLineEditBackdrop_Keyboard" maxHeight="40" mouseEnabled="true">
+				<Backdrop name="$(parent)Search" tier="HIGH" edgeColor="000000" inherits="ZO_SingleLineEditBackdrop_Keyboard" maxHeight="40" mouseEnabled="true">
 					<Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="0" offsetY="-30"/>
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT" offsetX="0" offsetY="-30" />
 
