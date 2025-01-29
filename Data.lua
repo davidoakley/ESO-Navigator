@@ -11,7 +11,7 @@ MS.POI_GUILDMATE = 4
 MS.POI_ZONE = 5
 MS.POI_WAYSHRINE = 6
 MS.POI_GROUP_DUNGEON = 7
-MS.POI_GROUP_HOUSE = 8
+MS.POI_HOUSE = 8
 
 -- Trader Locations, copied from Faster Travel by SimonIllyan, XanDDemoX, upyachka, Valandil
 local trader_counts = { -- nodeIndex -> traders_count
