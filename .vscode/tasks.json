@@ -8,7 +8,7 @@
             "label": "Build zip file",
             "type": "shell",
             "detail": "Create a zip file for distribution",
-            "command": "bash ./build_zip.sh",
+            "command": "python ./build_zip.py",
             "problemMatcher": []
         }
     ]
