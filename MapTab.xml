@@ -235,6 +235,9 @@
 							<OnPageUp>
 								MapSearch.MapTab:previousCategory()
 							</OnPageUp>
+							<OnTab>
+								MapSearch.MapTab.editControl:LoseFocus()
+							</OnTab>
 						</EditBox>						
 					</Controls>
 				</Backdrop>
