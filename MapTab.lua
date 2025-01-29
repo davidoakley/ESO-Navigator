@@ -52,7 +52,7 @@ function MT:layoutRow(rowControl, data, scrollList)
 
     rowControl.cost:SetHidden(data.isFree)
 
-	rowControl.keybind:SetHidden(not data.isSelected or not data.known or not self.editControl:HasFocus())
+    rowControl.keybind:SetHidden(not data.isSelected)
     rowControl.bg:SetHidden(not data.isSelected)
     if data.isSelected then
         rowControl.label:SetAnchor(TOPRIGHT, rowControl.keybind, TOPLEFT, -4, -1)
@@ -211,9 +211,9 @@ local function buildCategoryHeader(scrollData, id, title, collapsed)
     table.insert(scrollData, recentEntry)
 end
 
-local function buildResult(listEntry, currentNodeIndex)
+local function buildResult(listEntry, currentNodeIndex, isSelected)
     local nodeData = Utils.shallowCopy(listEntry)
-    nodeData.isSelected = (currentNodeIndex == MapSearch.targetNode)
+    nodeData.isSelected = isSelected
     nodeData.dataIndex = currentNodeIndex
 
     -- MS.log("%s: traders %d", nodeData.barename, nodeData.traders or 0)
@@ -260,6 +260,7 @@ end
 
 local function buildList(scrollData, id, title, list, defaultString)
     local collapsed = MT.collapsedCategories[id] and true or false
+    local hasFocus = MT.editControl:HasFocus()
 
     buildCategoryHeader(scrollData, id, title, collapsed)
 
@@ -276,7 +277,8 @@ local function buildList(scrollData, id, title, list, defaultString)
             local entry = ZO_ScrollList_CreateDataEntry(3, { hint = list[i].hint })
             table.insert(scrollData, entry)
         else
-            local nodeData = buildResult(list[i], currentNodeIndex)
+            local isSelected = hasFocus and list[i].known and (currentNodeIndex == MapSearch.targetNode)
+            local nodeData = buildResult(list[i], currentNodeIndex, isSelected)
 
             local entry = ZO_ScrollList_CreateDataEntry(1, nodeData)
             table.insert(scrollData, entry)
