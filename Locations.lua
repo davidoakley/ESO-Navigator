@@ -1,4 +1,4 @@
-local MS = MapSearch
+local MS = Navigator
 local Locs = MS.Locations or {
     nodes = nil,
     nodeMap = nil,
@@ -495,4 +495,4 @@ function Locs:GetHarborage()
     return 210
 end
 
-MapSearch.Locations = Locs
+MS.Locations = Locs

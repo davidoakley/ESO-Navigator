@@ -1,4 +1,4 @@
-local MS = MapSearch
+local MS = Navigator
 local Recents = MS.Recents or {
     nodes = {},
     maxStored = 20

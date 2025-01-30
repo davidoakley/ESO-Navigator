@@ -1,4 +1,4 @@
-local MS = MapSearch
+local MS = Navigator
 local Data = MS.Data or {}
 
 MS.ZONE_CYRODIIL = 181
