@@ -47,7 +47,7 @@ function Locs:setupNodes()
         local nodeZoneId = GetParentZoneId(GetZoneId(zoneIndex))
 
         if not isLocked and name ~= "" and (typePOI == 1 or glowIcon ~= nil) then
-            local nodeInfo = self:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon, known)
+            local nodeInfo = self:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon)
 
             table.insert(self.nodes, nodeInfo)
             self.nodeMap[i] = nodeInfo
@@ -74,7 +74,7 @@ function Locs:setupNodes()
                     if zoneId==1146 then -- the Dragonguard Sanctuary wayshrine in Tideholm
                         zoneId = 1133 -- should appear in Southern Elsweyr
 					elseif zoneId == 57 and poiIndex == 60 then -- zone Deshaan, POI 60 is DC2!
-						for k, v in pairs(nodeMap) do
+						for _, v in pairs(nodeMap) do
 							if v.nodeIndex == 264 then
 								nodeInfo = v
 							end
@@ -120,7 +120,7 @@ function Locs:AddExtraZone(zoneId, mapId)
     }
 end
 
-function Locs:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon, known)
+function Locs:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon)
     if i >= 210 and i <= 212 then
         -- Save this character's alliance's Harborage
         self.harborageIndex = i
@@ -250,7 +250,7 @@ function Locs:isKnownNode(nodeIndex)
     if self.knownNodes[nodeIndex] ~= nil then
         return self.knownNodes[nodeIndex]
     else
-        local known, name, Xcord, Ycord, icon, glowIcon, typePOI, onMap, isLocked = GetFastTravelNodeInfo(nodeIndex)
+        local known, _, _, _, _, _, _, _, _ = GetFastTravelNodeInfo(nodeIndex)
         self.knownNodes[nodeIndex] = known
         return known
     end

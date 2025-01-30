@@ -31,7 +31,7 @@ function MT:ImmediateRefresh()
     self.needsRefresh = false
 end
 
-function MT:layoutRow(rowControl, data, scrollList)
+function MT:layoutRow(rowControl, data, _)
 	local name = data.name
     local tooltipText = data.tooltip
     local icon = data.icon
@@ -108,11 +108,11 @@ function MT:updateFilterControl()
     end
 end
 
-function MT:layoutCategoryRow(rowControl, data, scrollList)
+function MT:layoutCategoryRow(rowControl, data, _)
 	rowControl.label:SetText(data.name)
 end
 
-function MT:layoutHintRow(rowControl, data, scrollList)
+function MT:layoutHintRow(rowControl, data, _)
 	rowControl.label:SetText(data.hint or "-")
 end
 
@@ -152,7 +152,7 @@ function MT:jumpToNode(node)
     end
 
     local isRecall = Nav.isRecall
-	local nodeIndex,name,refresh,clicked = node.nodeIndex,node.originalName,node.refresh,node.clicked
+	local nodeIndex,name = node.nodeIndex,node.originalName
 
     ZO_Dialogs_ReleaseDialog("FAST_TRAVEL_CONFIRM")
 	ZO_Dialogs_ReleaseDialog("RECALL_CONFIRM")
@@ -483,7 +483,6 @@ function MT:init()
 end
 
 local function getMapIdByZoneId(zoneId)
-    local mapIndex
     if zoneId == 2 then -- Tamriel
         return 27
     elseif zoneId == 981 then -- Brass Fortress
@@ -495,7 +494,7 @@ local function getMapIdByZoneId(zoneId)
     end
 end
 
-function MT:onTextChanged(editbox, listcontrol)
+function MT:onTextChanged(editbox)
 	local searchString = string.lower(editbox:GetText())
     if searchString == "z:" then
         local mapId = getMapIdByZoneId(2) -- Tamriel
@@ -578,16 +577,13 @@ function MT:resetFilter()
 	ZO_ScrollList_ResetToTop(self.listControl)
 end
 
-function MT:resetSearch(lose_focus)
+function MT:resetSearch()
 	Nav.log("MT.resetSearch")
 	self.editControl:SetText("")
     self.filter = Nav.FILTER_NONE
     self:hideFilterControl()
     self:ImmediateRefresh()
 
-	-- if lose_focus then
-	-- 	editbox:LoseFocus()
-	-- end
 	--ZO_EditDefaultText_Initialize(editbox, GetString(FASTER_TRAVEL_WAYSHRINES_SEARCH))
 	--ResetVisibility(listcontrol)
 	ZO_ScrollList_ResetToTop(self.listControl)
@@ -669,7 +665,7 @@ function MT:RowMouseUp(control, mouseButton, upInside)
 	end
 end
 
-function MT:CategoryRowMouseUp(control, mouseButton, upInside)
+function MT:CategoryRowMouseUp(control, _, upInside)
 	if upInside then
 		local data = ZO_ScrollList_GetData(control)
         Nav.log("Toggling category %s", data.id)
