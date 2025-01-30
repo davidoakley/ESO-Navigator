@@ -1,19 +1,19 @@
-local MS = Navigator
-local Recents = MS.Recents or {
+local Nav = Navigator
+local Recents = Nav.Recents or {
     nodes = {},
     maxStored = 20
 }
 local FTrecent = nil
 
 function Recents:init()
-    self.nodes = MS.saved.recentNodes or {}
+    self.nodes = Nav.saved.recentNodes or {}
 
     if _G["FasterTravel"] ~= nil and
        _G["FasterTravel"].settings ~= nil and
        _G["FasterTravel"].settings.recentsEnabled then
-        MS.log("FasterTravel is active")
+        Nav.log("FasterTravel is active")
         FTrecent = _G["FasterTravel"].settings.recent
-        -- MS.log("%s", FT.settings.recent)
+        -- Nav.log("%s", FT.settings.recent)
     else
         self:addTravelDialogCallbacks()
         self:hook(true)
@@ -26,45 +26,45 @@ function Recents:insert(nodeIndex)
         nodeIndex = 210
     end
 
-    local node = MS.Locations:GetNode(nodeIndex)
-    if node and node.zoneId == MS.ZONE_CYRODIIL and node.poiType == POI_TYPE_WAYSHRINE then
-        MS.log("Recents:insert("..nodeIndex..") - not adding Cyrodiil wayshrine")
+    local node = Nav.Locations:GetNode(nodeIndex)
+    if node and node.zoneId == Nav.ZONE_CYRODIIL and node.poiType == Nav.POI_WAYSHRINE then
+        Nav.log("Recents:insert("..nodeIndex..") - not adding Cyrodiil wayshrine")
         return
     end
 
     for i = 1, #self.nodes do
         if self.nodes[i] == nodeIndex then
             table.remove(self.nodes, i)
-            MS.log("Recents:insert("..nodeIndex..") removed existing entry #"..i)
+            Nav.log("Recents:insert("..nodeIndex..") removed existing entry #"..i)
             break
         end
     end
     if #self.nodes >= self.maxStored then
         table.remove(self.nodes)
-        MS.log("Recents:insert("..nodeIndex..") removed overflow entry #"..#self.nodes)
+        Nav.log("Recents:insert("..nodeIndex..") removed overflow entry #"..#self.nodes)
     end
     table.insert(self.nodes, 1, nodeIndex)
-    MS.log("Recents:insert("..nodeIndex..")")
+    Nav.log("Recents:insert("..nodeIndex..")")
     self:save()
 end
 
 function Recents:save()
-    MS.saved.recentNodes = self.nodes
+    Nav.saved.recentNodes = self.nodes
 end
 
 function Recents:getRecents(count)
     local results = {}
-    local nodeMap = MS.Locations:getNodeMap()
+    local nodeMap = Nav.Locations:getNodeMap()
 
     if nodeMap ~= nil then
         for i = 1, #self.nodes do
             local nodeIndex = nodeMap[self.nodes[i]].nodeIndex or 0
-            if MS.Locations:IsHarborage(nodeIndex) then
-                nodeIndex = MS.Locations:GetHarborage()
+            if Nav.Locations:IsHarborage(nodeIndex) then
+                nodeIndex = Nav.Locations:GetHarborage()
             end
-            local node = MS.Utils.shallowCopy(nodeMap[nodeIndex])
-            node.known = MS.Locations:isKnownNode(nodeIndex)
-            node.bookmarked = MS.Bookmarks:contains(node)
+            local node = Nav.Utils.shallowCopy(nodeMap[nodeIndex])
+            node.known = Nav.Locations:isKnownNode(nodeIndex)
+            node.bookmarked = Nav.Bookmarks:contains(node)
             table.insert(results, node)
 
             if #results >= count then
@@ -80,7 +80,7 @@ function Recents:onPlayerActivated()
     if FTrecent ~= nil and #FTrecent >= 1 then
         -- Pull the most recent nodeIndex from FasterTravel
         local nodeIndex = FTrecent[1].nodeIndex
-        MS.log("Recents:onPlayerActivated: adding recent from FasterTravel: "..nodeIndex)
+        Nav.log("Recents:onPlayerActivated: adding recent from FasterTravel: "..nodeIndex)
         self:insert(nodeIndex)
     end
 end
@@ -94,7 +94,7 @@ local travelDialogs = {
 -- replacement callbacks factory
 local function MyCallbackFactory(name)
     return function(dialog)
-        MS.log("Callback %s", name)
+        Nav.log("Callback %s", name)
         local node = dialog.data
         if node.nodeIndex then -- is nil when travelling to house since U29
             Recents:insert(node.nodeIndex)
@@ -113,18 +113,18 @@ function Recents.addTravelDialogCallbacks()
 			ESO_Dialogs[name].buttons and
 			ESO_Dialogs[name].buttons[1] then 
 				data.saved_callback = ESO_Dialogs[name].buttons[1].callback -- may be nil
-                MS.log("Saved callback for travel dialog '"..name.."'")
+                Nav.log("Saved callback for travel dialog '"..name.."'")
         end
 		-- create new callbacks
-        MS.log("Adding callback for travel dialog '"..name.."'")
+        Nav.log("Adding callback for travel dialog '"..name.."'")
 		data.my_callback = MyCallbackFactory(name)
 	end
 end
 
 Recents.__Hook_Checker = function(name, node, params, ...)
-    MS.log("HookChecker: %s", name)
+    Nav.log("HookChecker: %s", name)
     if travelDialogs[name] then
-        MS.log("Hook checkpoint TRAVEL")
+        Nav.log("Hook checkpoint TRAVEL")
         -- replace callbacks
         for name, data in pairs(travelDialogs) do
             if 	ESO_Dialogs[name] and 
@@ -134,7 +134,7 @@ Recents.__Hook_Checker = function(name, node, params, ...)
                         if ESO_Dialogs[name].buttons[1].callback == data.saved_callback then
                             ESO_Dialogs[name].buttons[1].callback = data.my_callback
                         else
-                            MS.log("Something nasty going on - who else modifies %s dialog?!", name)
+                            Nav.log("Something nasty going on - who else modifies %s dialog?!", name)
                         end
                     end
             else --[[
@@ -149,7 +149,7 @@ Recents.__Hook_Checker = function(name, node, params, ...)
             end
         end
     else
-        MS.log("Hook checkpoint NON-TRAVEL")
+        Nav.log("Hook checkpoint NON-TRAVEL")
         -- restore original callbacks
         for name, data in pairs(travelDialogs) do
             if 	ESO_Dialogs[name] and 
@@ -159,7 +159,7 @@ Recents.__Hook_Checker = function(name, node, params, ...)
                         if ESO_Dialogs[name].buttons[1].callback == data.my_callback then
                             ESO_Dialogs[name].buttons[1].callback = data.saved_callback
                         else
-                            MS.log("Something nasty going on - who else modifies %s dialog?!", name)
+                            Nav.log("Something nasty going on - who else modifies %s dialog?!", name)
                         end
                     end
             end
@@ -176,4 +176,4 @@ function Recents:hook(enabled)
     end
 end
 
-MS.Recents = Recents
+Nav.Recents = Recents
