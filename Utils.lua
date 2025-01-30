@@ -1,5 +1,5 @@
-local MS = Navigator
-local Utils = MS.Utils or {}
+local Nav = Navigator
+local Utils = Nav.Utils or {}
 
 local _lang
 
@@ -272,4 +272,4 @@ function Utils.tableContains(table, element)
     return false
 end
 
-MS.Utils = Utils
+Nav.Utils = Utils
