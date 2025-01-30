@@ -34,7 +34,7 @@ function Chat:Init()
 
     command:SetAutoComplete(self.AutoCompleteProvider:New())
 
-    command.GetAutoCompleteResults = function(self, text)
+    command.GetAutoCompleteResults = function(_, text)
         local results = {}
 
         local searchResult
@@ -65,7 +65,6 @@ function Chat:Init()
 end
 
 function Chat:TP(text)
-    local MT = Nav.MapTab
     local Locs = Nav.Locations
 
     if text == "*logon" then

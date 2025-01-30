@@ -33,8 +33,6 @@ if LibDebugLogger then
   logger = LibDebugLogger(Nav.name)
 end
 
-local Utils = Nav.Utils
-
 local _events = {}
 
 function Nav.log(...)
@@ -90,7 +88,7 @@ local ButtonGroup = {
     alignment = KEYBIND_STRIP_ALIGN_CENTER,
   }
 
-local function OnMapStateChange(oldState, newState)
+local function OnMapStateChange(_, newState)
   if newState == SCENE_SHOWING then
     Nav.mapVisible = true
     local zone = Nav.Locations:getCurrentMapZone()
@@ -142,7 +140,7 @@ local function OnPOIUpdated()
   Nav.Locations:clearKnownNodes()
 end
 
-local function SetPlayersDirty(eventCode)
+local function SetPlayersDirty(_)
   -- Nav.log("SetPlayersDirty("..eventCode..")")
   Nav.Locations:ClearPlayers()
   Nav.MapTab:queueRefresh()
@@ -153,7 +151,7 @@ function Nav.showSearch()
   local tabVisible = Nav.MapTab.visible
   MAIN_MENU_KEYBOARD:ShowScene("worldMap")
   WORLD_MAP_INFO:SelectTab(NAVIGATOR_TAB_SEARCH)
-  Nav.MapTab:resetSearch(false)
+  Nav.MapTab:resetSearch()
   if Nav.saved.autoFocus or tabVisible then
     Nav.MapTab.editControl:TakeFocus()
     Nav.log("showSearch: setting editControl focus")
@@ -204,7 +202,7 @@ function Nav:initialize()
     EVENT_GUILD_MEMBER_CHARACTER_ZONE_CHANGED, EVENT_FRIEND_CHARACTER_ZONE_CHANGED,
     EVENT_FRIEND_ADDED, EVENT_FRIEND_REMOVED)
 
-  addEvent(EVENT_GUILD_MEMBER_PLAYER_STATUS_CHANGED, function(_, guildId, DisplayName, oldStatus, newStatus)
+  addEvent(EVENT_GUILD_MEMBER_PLAYER_STATUS_CHANGED, function(_, _, _, oldStatus, newStatus)
     if newStatus == PLAYER_STATUS_OFFLINE or (oldStatus == PLAYER_STATUS_OFFLINE and newStatus == PLAYER_STATUS_ONLINE) then
       SetPlayersDirty()
     end

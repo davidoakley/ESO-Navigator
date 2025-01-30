@@ -3,7 +3,7 @@ local Recents = Nav.Recents or {
     nodes = {},
     maxStored = 20
 }
-local FTrecent = nil
+local FTrecent
 
 function Recents:init()
     self.nodes = Nav.saved.recentNodes or {}
@@ -121,12 +121,12 @@ function Recents.addTravelDialogCallbacks()
 	end
 end
 
-Recents.__Hook_Checker = function(name, node, params, ...)
+Recents.__Hook_Checker = function(name, node, _, ...)
     Nav.log("HookChecker: %s", name)
     if travelDialogs[name] then
         Nav.log("Hook checkpoint TRAVEL")
         -- replace callbacks
-        for name, data in pairs(travelDialogs) do
+        for _, data in pairs(travelDialogs) do
             if 	ESO_Dialogs[name] and 
                 ESO_Dialogs[name].buttons and
                 ESO_Dialogs[name].buttons[1] then 
@@ -151,7 +151,7 @@ Recents.__Hook_Checker = function(name, node, params, ...)
     else
         Nav.log("Hook checkpoint NON-TRAVEL")
         -- restore original callbacks
-        for name, data in pairs(travelDialogs) do
+        for _, data in pairs(travelDialogs) do
             if 	ESO_Dialogs[name] and 
                 ESO_Dialogs[name].buttons and
                 ESO_Dialogs[name].buttons[1] then 
