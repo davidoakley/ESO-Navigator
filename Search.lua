@@ -1,5 +1,5 @@
-local Search = MapSearch.Search or {}
-local MS = MapSearch
+local MS = Navigator
+local Search = MS.Search or {}
 local Utils = MS.Utils
 local Locations = MS.Locations
 local colors = MS.ansicolors
@@ -81,7 +81,7 @@ function Search.highlightResult(result, matchChars)
     for i = 1, #result do
         local c = result:sub(i, i)
         if Utils.tableContains(matchChars, i) then
-            if MapSearch.isCLI then
+            if MS.isCLI then
                 out = out..'%{underline}'..c..'%{reset}'
             else
                 out = out..c
@@ -93,4 +93,4 @@ function Search.highlightResult(result, matchChars)
     return colors(out)
 end
 
-MapSearch.Search = Search
+MS.Search = Search

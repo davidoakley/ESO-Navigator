@@ -1,7 +1,7 @@
-local MT = MapSearch_MapTab -- from XML
-local MS = MapSearch
-local Search = MapSearch.Search
-local Utils = MapSearch.Utils
+local MT = Navigator_MapTab -- from XML
+local MS = Navigator
+local Search = MS.Search
+local Utils = MS.Utils
 
 MT.filter = MS.FILTER_NONE
 MT.needsRefresh = false
@@ -65,7 +65,7 @@ function MT:layoutRow(rowControl, data, scrollList)
 	if data.isSelected and data.known and not data.disabled then
 		rowControl.label:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
     elseif data.colour ~= nil and not data.disabled then
-        MapSearch.colour = data.colour
+        MS.colour = data.colour
 		rowControl.label:SetColor(data.colour:UnpackRGBA())
     elseif data.known and not data.disabled then
 		rowControl.label:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
@@ -118,7 +118,7 @@ end
 
 local function jumpToPlayer(node)
     local userID, poiType, zoneId, zoneName = node.userID, node.poiType, node.zoneId, node.zoneName
-    local Locs = MapSearch.Locations
+    local Locs = MS.Locations
 
     Locs:setupPlayerZones()
 
@@ -151,7 +151,7 @@ function MT:jumpToNode(node)
         return
     end
 
-    local isRecall = MapSearch.isRecall
+    local isRecall = MS.isRecall
 	local nodeIndex,name,refresh,clicked = node.nodeIndex,node.originalName,node.refresh,node.clicked
 
     ZO_Dialogs_ReleaseDialog("FAST_TRAVEL_CONFIRM")
@@ -162,7 +162,7 @@ function MT:jumpToNode(node)
         return
     end
 
-	name = name or select(2, MapSearch.Wayshrine.Data.GetNodeInfo(nodeIndex)) -- just in case
+	name = name or select(2, MS.Wayshrine.Data.GetNodeInfo(nodeIndex)) -- just in case
 	local id = (isRecall == true and "RECALL_CONFIRM") or "FAST_TRAVEL_CONFIRM"
 	if isRecall == true then
 		local _, timeLeft = GetRecallCooldown()
@@ -226,7 +226,7 @@ local function buildResult(listEntry, currentNodeIndex, isSelected)
         nodeData.suffix = (nodeData.suffix or "") .. "|t23:23:/esoui/art/icons/servicemappins/servicepin_guildkiosk.dds:inheritcolor|t"
     end
 
-    if nodeData.bookmarked then --MapSearch.Bookmarks:contains(nodeData) then
+    if nodeData.bookmarked then --MS.Bookmarks:contains(nodeData) then
         nodeData.suffix = (nodeData.suffix or "") .. "|t25:25:Navigator/media/bookmark.dds:inheritcolor|t"
     end
 
@@ -235,7 +235,7 @@ local function buildResult(listEntry, currentNodeIndex, isSelected)
     end
 
     nodeData.isFree = true
-    if MapSearch.isRecall and nodeData.known and nodeData.nodeIndex then -- and nodeData.poiType == MS.POI_WAYSHRINE
+    if MS.isRecall and nodeData.known and nodeData.nodeIndex then -- and nodeData.poiType == MS.POI_WAYSHRINE
         local _, timeLeft = GetRecallCooldown()
 
         if timeLeft == 0 then
@@ -251,7 +251,7 @@ local function buildResult(listEntry, currentNodeIndex, isSelected)
     end
 
 
-    if MapSearch.isDeveloper then
+    if MS.isDeveloper then
         addDeveloperTooltip(nodeData)
     end
 
@@ -277,7 +277,7 @@ local function buildList(scrollData, id, title, list, defaultString)
             local entry = ZO_ScrollList_CreateDataEntry(3, { hint = list[i].hint })
             table.insert(scrollData, entry)
         else
-            local isSelected = hasFocus and list[i].known and (currentNodeIndex == MapSearch.targetNode)
+            local isSelected = hasFocus and list[i].known and (currentNodeIndex == MS.targetNode)
             local nodeData = buildResult(list[i], currentNodeIndex, isSelected)
 
             local entry = ZO_ScrollList_CreateDataEntry(1, nodeData)
@@ -317,28 +317,28 @@ function MT:buildScrollList(keepScrollPosition)
 
     local scrollData = ZO_ScrollList_GetDataList(self.listControl)
 
-    local isSearching = #MapSearch.results > 0 or (self.searchString and self.searchString ~= "")
+    local isSearching = #MS.results > 0 or (self.searchString and self.searchString ~= "")
     MT.resultCount = 0
     if isSearching then
-        buildList(scrollData, "results", NAVIGATOR_CATEGORY_RESULTS, MapSearch.results, NAVIGATOR_HINT_NORESULTS)
+        buildList(scrollData, "results", NAVIGATOR_CATEGORY_RESULTS, MS.results, NAVIGATOR_HINT_NORESULTS)
     else
-        local bookmarks = MapSearch.Bookmarks:getBookmarks()
+        local bookmarks = MS.Bookmarks:getBookmarks()
         buildList(scrollData, "bookmarks", NAVIGATOR_CATEGORY_BOOKMARKS, bookmarks, NAVIGATOR_HINT_NOBOOKMARKS)
 
         local recentCount = MS.saved.recentsCount
-        local recents = MapSearch.Recents:getRecents(recentCount)
+        local recents = MS.Recents:getRecents(recentCount)
         buildList(scrollData, "recents", NAVIGATOR_CATEGORY_RECENT, recents, NAVIGATOR_HINT_NORECENTS)
 
-        local zone = MapSearch.Locations:getCurrentMapZone()
+        local zone = MS.Locations:getCurrentMapZone()
         if zone and zone.zoneId == 2 then
-            local list = MapSearch.Locations:getZoneList()
+            local list = MS.Locations:getZoneList()
             table.sort(list, nameComparison)
             buildList(scrollData, "zones", NAVIGATOR_CATEGORY_ZONES, list)
         elseif zone then
-            local list = MapSearch.Locations:getKnownNodes(zone.zoneId)
+            local list = MS.Locations:getKnownNodes(zone.zoneId)
 
-            if MapSearch.isRecall and zone.zoneId ~= MS.ZONE_CYRODIIL then
-                local playerInfo = MapSearch.Locations:getPlayerInZone(zone.zoneId)
+            if MS.isRecall and zone.zoneId ~= MS.ZONE_CYRODIIL then
+                local playerInfo = MS.Locations:getPlayerInZone(zone.zoneId)
                 if playerInfo then
                     playerInfo.name = zo_strformat(GetString(NAVIGATOR_TRAVEL_TO_ZONE), zone.name)
                     -- playerInfo.suffix = "via " .. playerInfo.suffix
@@ -369,7 +369,7 @@ function MT:buildScrollList(keepScrollPosition)
         ZO_ScrollList_ScrollAbsolute(self.listControl, scrollPosition)
     elseif MT.resultCount > 0 then
         -- FIXME: this doesn't account for the headings
-        ZO_ScrollList_ScrollDataIntoView(self.listControl, MapSearch.targetNode + 1, nil, true)
+        ZO_ScrollList_ScrollDataIntoView(self.listControl, MS.targetNode + 1, nil, true)
     end
 end
 
@@ -380,10 +380,10 @@ function MT:executeSearch(searchString, keepTargetNode)
 
     results = Search.run(searchString or "", MT.filter)
 
-	MapSearch.results = results
-    if not keepTargetNode or MapSearch.targetNode >= (MT.resultCount or 0) then
-        -- MS.log("executeSearch: reset targetNode keep=%d, oldTarget=%d, count=%d", keepTargetNode and 1 or 0, MapSearch.targetNode, (MT.resultCount or 0))
-    	MapSearch.targetNode = 0
+	MS.results = results
+    if not keepTargetNode or MS.targetNode >= (MT.resultCount or 0) then
+        -- MS.log("executeSearch: reset targetNode keep=%d, oldTarget=%d, count=%d", keepTargetNode and 1 or 0, MS.targetNode, (MT.resultCount or 0))
+    	MS.targetNode = 0
         keepTargetNode = false
     end
 
@@ -398,7 +398,7 @@ function MT:getTargetDataIndex()
 
     for i = 1, #scrollData do
         if scrollData[i].typeId == 1 then -- wayshrine row
-            if currentNodeIndex == MapSearch.targetNode then
+            if currentNodeIndex == MS.targetNode then
                 return i
             end
             currentNodeIndex = currentNodeIndex + 1
@@ -427,7 +427,7 @@ function MT:getNextCategoryFirstIndex()
     end
 
     local currentIndex = self:getTargetDataIndex()
-    local currentNodeIndex = MapSearch.targetNode + 1
+    local currentNodeIndex = MS.targetNode + 1
 
     local i = currentIndex + 1
     local foundCategory = false
@@ -533,40 +533,40 @@ end
 
 function MT:nextResult()
     local known = false
-    local startNode = MapSearch.targetNode
+    local startNode = MS.targetNode
     repeat
-    	MapSearch.targetNode = (MapSearch.targetNode + 1) % MT.resultCount
+    	MS.targetNode = (MS.targetNode + 1) % MT.resultCount
         local node = self:getTargetNode()
         if node and node.known then
             known = true
         end
-    until known or MapSearch.targetNode == startNode
+    until known or MS.targetNode == startNode
 	self:buildScrollList()
 end
 
 function MT:previousResult()
     local known = false
-    local startNode = MapSearch.targetNode
+    local startNode = MS.targetNode
     repeat
-        MapSearch.targetNode = MapSearch.targetNode - 1
-        if MapSearch.targetNode < 0 then
-            MapSearch.targetNode = MT.resultCount - 1
+        MS.targetNode = MS.targetNode - 1
+        if MS.targetNode < 0 then
+            MS.targetNode = MT.resultCount - 1
         end
         local node = self:getTargetNode()
         if node and node.known then
             known = true
         end
-    until known or MapSearch.targetNode == startNode
+    until known or MS.targetNode == startNode
 	self:buildScrollList()
 end
 
 function MT:nextCategory()
-    MapSearch.targetNode = self:getNextCategoryFirstIndex()
+    MS.targetNode = self:getNextCategoryFirstIndex()
 	self:buildScrollList()
 end
 
 function MT:previousCategory()
-    -- MapSearch.targetNode = self:getPreviousCategoryFirstIndex()
+    -- MS.targetNode = self:getPreviousCategoryFirstIndex()
 	-- self:buildScrollList()
 end
 
@@ -606,7 +606,7 @@ local function showWayshrineMenu(owner, data)
         return
     end
 
-    local bookmarks = MapSearch.Bookmarks
+    local bookmarks = MS.Bookmarks
 	if bookmarks:contains(entry) then
         MT.menuOpen = true
 		AddMenuItem("Remove Bookmark", function()
@@ -642,7 +642,7 @@ function MT:selectResult(control, data, mouseButton)
             MT.filter = MS.FILTER_NONE
             self.editControl:SetText("")
 
-            local mapZoneId = MapSearch.Locations:getCurrentMapZoneId()
+            local mapZoneId = MS.Locations:getCurrentMapZoneId()
             local currentMapId = GetCurrentMapId()
             local mapId = data.mapId or getMapIdByZoneId(data.zoneId)
             MS.log("selectResult: data.zoneId %d data.mapId %d mapZoneId %d mapId %d", data.zoneId, data.mapId or 0, mapZoneId, mapId)
@@ -680,22 +680,22 @@ function MT:CategoryRowMouseUp(control, mouseButton, upInside)
 end
 
 function MT:IsViewingInitialZone()
-    local zone = MapSearch.Locations:getCurrentMapZone()
-    return not zone or zone.zoneId == MapSearch.initialMapZoneId
+    local zone = MS.Locations:getCurrentMapZone()
+    return not zone or zone.zoneId == MS.initialMapZoneId
 end
 
 function MT:OnMapChanged()
     local mapId = GetCurrentMapId()
-    if MapSearch.mapVisible and mapId ~= self.currentMapId then
+    if MS.mapVisible and mapId ~= self.currentMapId then
         self.currentMapId = mapId
-        local zone = MapSearch.Locations:getCurrentMapZone()
-        MS.log("OnMapChanged: now zoneId=%d mapId=%d initial=%d", zone and zone.zoneId or 0, mapId or 0, MapSearch.initialMapZoneId or 0)
+        local zone = MS.Locations:getCurrentMapZone()
+        MS.log("OnMapChanged: now zoneId=%d mapId=%d initial=%d", zone and zone.zoneId or 0, mapId or 0, MS.initialMapZoneId or 0)
         if zone and zone.zoneId <= 2 then
             self.collapsedCategories = { bookmarks = true, recents = true }
         else
             self.collapsedCategories = {}
         end
-        MapSearch.targetNode = 0
+        MS.targetNode = 0
         self.filter = MS.FILTER_NONE
         self:updateFilterControl()
         self.editControl:SetText("")
@@ -704,4 +704,4 @@ function MT:OnMapChanged()
     end
 end
 
-MapSearch.MapTab = MT
+MS.MapTab = MT

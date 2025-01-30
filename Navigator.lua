@@ -1,4 +1,4 @@
-MapSearch = {
+Navigator = {
   name = "Navigator",
   menuName = "Navigator",          -- A UNIQUE identifier for menu object.
   displayName = "|c66CC66N|r|c66CCFFavigator|r",
@@ -25,7 +25,7 @@ MapSearch = {
   targetNode = 0,
   mapVisible = false,
 }
-local MS = MapSearch
+local MS = Navigator
 
 local logger
 
@@ -150,11 +150,11 @@ end
 
 function MS.showSearch()
   MS.log("showSearch")
-  local tabVisible = MapSearch.MapTab.visible
+  local tabVisible = MS.MapTab.visible
   MAIN_MENU_KEYBOARD:ShowScene("worldMap")
   WORLD_MAP_INFO:SelectTab(NAVIGATOR_TAB_SEARCH)
   MS.MapTab:resetSearch(false)
-  if MapSearch.saved.autoFocus or tabVisible then
+  if MS.saved.autoFocus or tabVisible then
     MS.MapTab.editControl:TakeFocus()
     MS.log("showSearch: setting editControl focus")
   end
@@ -234,28 +234,11 @@ local function OnAddOnLoaded(_, addonName)
     MS:initialize()
 
     if PP and PP.ADDON_NAME then
-        PP.ScrollBar(MapSearch_MapTabListScrollBar)
-        ZO_Scroll_SetMaxFadeDistance(MapSearch_MapTabList, PP.savedVars.ListStyle.list_fade_distance)
+        PP.ScrollBar(Navigator_MapTabListScrollBar)
+        ZO_Scroll_SetMaxFadeDistance(Navigator_MapTabList, PP.savedVars.ListStyle.list_fade_distance)
     end
 
     EVENT_MANAGER:UnregisterForEvent(MS.name, EVENT_ADD_ON_LOADED)
 end
 
 EVENT_MANAGER:RegisterForEvent(MS.name, EVENT_ADD_ON_LOADED, OnAddOnLoaded)
-
---[[SLASH_COMMANDS["/mapsearch"] = function (extra)
-  if extra == 'save' then
-      MapSearch.Locations:initialise()
-      -- buildLocations()
-      MapSearch.saved.locations = Utils.deepCopy(MS.Search.locations)
-      MapSearch.saved.zones = Utils.deepCopy(MS.Search.zones)
-      MapSearch.saved.result = Utils.deepCopy(MS.Search.result)
-      d("Written MapSearch data to Saved Preferences")
-  elseif extra == 'clear' then
-      MapSearch.saved.categories = nil
-      MapSearch.saved.locations = nil
-      MapSearch.saved.zones = nil
-      MapSearch.saved.result = nil
-      d("Cleared MapSearch data from Saved Preferences")
-  end
-end ]]--

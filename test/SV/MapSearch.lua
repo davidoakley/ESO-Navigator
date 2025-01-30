@@ -1,4 +1,4 @@
-MapSearch_SavedVariables =
+Navigator_SavedVariables =
 {
     ["Default"] = 
     {

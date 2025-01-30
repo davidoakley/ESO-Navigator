@@ -1,4 +1,4 @@
-local MS = MapSearch
+local MS = Navigator
 local Bookmarks = MS.Bookmarks or {
     list = {},
 }

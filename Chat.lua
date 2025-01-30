@@ -1,4 +1,4 @@
-local MS = MapSearch
+local MS = Navigator
 local Chat = MS.Chat or {
     lsc = nil,
     AutoCompleteProvider = nil

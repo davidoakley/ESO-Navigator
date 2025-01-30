@@ -273,4 +273,4 @@ function fzy.get_implementation_name()
   return "lua"
 end
 
-MapSearch.fzy = fzy
+Navigator.fzy = fzy
