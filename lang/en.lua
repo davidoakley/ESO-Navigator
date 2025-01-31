@@ -40,6 +40,7 @@ mkstr("NAVIGATOR_NOT_KNOWN", "Not known by this character")
 -- Actions
 mkstr("NAVIGATOR_NO_TRAVEL_PLAYER", "No players to travel to")
 mkstr("NAVIGATOR_TRAVEL_TO_ZONE", "Travel to <<1>>")
+mkstr("NAVIGATOR_CANNOT_TRAVEL_TO_PLAYER", "Unable to travel to player <<1>>")
 
 -- Chat box output
 mkstr("NAVIGATOR_NO_PLAYER_IN_ZONE", "Failed to find a player to travel to in <<1>>")
