@@ -118,16 +118,15 @@ end
 
 local function jumpToPlayer(node)
     local userID, poiType, zoneId, zoneName = node.userID, node.poiType, node.zoneId, node.zoneName
-    local Locs = Nav.Locations
 
     Nav.Players:SetupPlayerZones()
 
-    if not Locs.players[userID] or Locs.players[userID].zoneId ~= zoneId then
+    if not Nav.Players.players[userID] or Nav.Players.players[userID].zoneId ~= zoneId then
         -- Player has disappeared or moved!
         CHAT_SYSTEM:AddMessage(zo_strformat(GetString(NAVIGATOR_PLAYER_NOT_IN_ZONE), userID, zoneName))
 
-        if Locs.playerZones[zoneId] then
-            node = Locs.playerZones[zoneId]
+        if Nav.Players.playerZones[zoneId] then
+            node = Nav.Players.playerZones[zoneId]
             userID, poiType, zoneId, zoneName = node.userID, node.poiType, node.zoneId, node.zoneName
         else
             -- Eeek! Refresh the search results and finish
