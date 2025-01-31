@@ -142,7 +142,7 @@ end
 
 local function SetPlayersDirty(_)
   -- Nav.log("SetPlayersDirty("..eventCode..")")
-  Nav.Locations:ClearPlayers()
+  Nav.Players:ClearPlayers()
   Nav.MapTab:queueRefresh()
 end
 

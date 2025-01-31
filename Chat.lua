@@ -65,8 +65,6 @@ function Chat:Init()
 end
 
 function Chat:TP(text)
-    local Locs = Nav.Locations
-
     if text == "*logon" then
         Nav.saved.loggingEnabled = true
         CHAT_SYSTEM:AddMessage("Logging enabled")
@@ -92,7 +90,7 @@ function Chat:TP(text)
 
     local zoneId = data.zoneId
     if zoneId then
-        local node = Locs:getPlayerInZone(zoneId)
+        local node = Nav.Players:GetPlayerInZone(zoneId)
         if not node then
             CHAT_SYSTEM:AddMessage(zo_strformat(GetString(NAVIGATOR_NO_PLAYER_IN_ZONE), data.zoneName))
             return

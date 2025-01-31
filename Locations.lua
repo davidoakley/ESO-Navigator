@@ -3,8 +3,6 @@ local Locs = Nav.Locations or {
     nodes = nil,
     nodeMap = nil,
     zones = nil,
-    players = nil,
-    playerZones = nil,
     mapIndices = nil,
     knownNodes = {},
     harborageIndex = nil
@@ -181,63 +179,6 @@ function Locs:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon)
     return nodeInfo
 end
 
-function Locs:addPlayerZone(zoneId, zoneName, userID, icon, poiType)
-    if self.zones[zoneId] and CanJumpToPlayerInZone(zoneId) then
-        local zoneInfo = {
-            zoneId = zoneId,
-            zoneName = Utils.FormatSimpleName(zoneName),
-            userID = userID,
-            icon = icon,
-            poiType = poiType
-        }
-
-        self.players[userID] = zoneInfo
-        self.playerZones[zoneId] = zoneInfo
-    end
-end
-
-function Locs:setupPlayerZones()
-    if not self.zones then
-        self:setupNodes()
-    end
-
-    local myID = GetDisplayName()
-    self.playerZones = {}
-    self.players = {}
-
-    local guildCount = GetNumGuilds()
-    for guild = 1, guildCount do
-        local guildID = GetGuildId(guild)
-        local guildMembers = GetNumGuildMembers(guildID)
-
-        for i=1, guildMembers do
-            local userID, _, _, playerStatus = GetGuildMemberInfo(guildID, i)
-
-            if playerStatus ~= PLAYER_STATUS_OFFLINE and userID~=myID then
-                local _, _, zoneName, _, _, _, _, zoneId = GetGuildMemberCharacterInfo(guildID, i)
-                self:addPlayerZone(zoneId, zoneName, userID, "/esoui/art/menubar/gamepad/gp_playermenu_icon_character.dds", Nav.POI_GUILDMATE)
-            end
-        end
-    end
-
-    local friendCount = GetNumFriends()
-    for i = 1, friendCount do
-		local userID, _, playerStatus, secsSinceLogoff = GetFriendInfo(i)
-
-		if playerStatus ~= PLAYER_STATUS_OFFLINE and secsSinceLogoff == 0 then
-            local hasChar, _, zoneName, _, _, _, _, zoneId = GetFriendCharacterInfo(i)
-            if hasChar then
-                self:addPlayerZone(zoneId, zoneName, userID, "/esoui/art/menubar/gamepad/gp_playermenu_icon_character.dds", Nav.POI_FRIEND)
-            end
-        end
-    end
-end
-
-function Locs:ClearPlayers()
-    self.playerZones = nil
-    self.players = nil
-end
-
 function Locs:clearKnownNodes()
     self.knownNodes = {}
 end
@@ -332,74 +273,11 @@ function Locs:getHouseList()
     return nodes
 end
 
-function Locs:getPlayerList()
-    if self.players == nil then
-        self:setupPlayerZones()
+function Locs:GetZones()
+    if not self.zones then
+        self:setupNodes()
     end
-
-    local nodes = {}
-    for userID, info in pairs(self.players) do
-        table.insert(nodes, {
-            name = userID,
-            barename = userID:sub(2), -- remove '@' prefix
-            zoneId = info.zoneId,
-            zoneName = info.zoneName,
-            icon = info.icon,
-            suffix = info.zoneName,
-            poiType = info.poiType,
-            userID = userID,
-            known = true
-        })
-    end
-
-    return nodes
-end
-
-function Locs:getPlayerZoneList()
-    local nodes = {}
-
-    if self.playerZones == nil then
-        self:setupPlayerZones()
-    end
-
-    for zoneID, info in pairs(self.playerZones) do
-        table.insert(nodes, {
-            name = info.zoneName,
-            barename = Utils.bareName(info.zoneName),
-            zoneId = zoneID,
-            zoneName = info.zoneName,
-            icon = "Navigator/media/zone.dds",
-            suffix = info.userID,
-            poiType = info.poiType,
-            userID = info.userID,
-            known = true
-        })
-    end
-
-    return nodes
-end
-
-function Locs:getPlayerInZone(zoneId)
-    if self.playerZones == nil then
-        self:setupPlayerZones()
-    end
-
-    local info = self.playerZones[zoneId]
-    if info then
-        return {
-            name = info.zoneName,
-            barename = Utils.bareName(info.zoneName),
-            zoneId = zoneId,
-            zoneName = info.zoneName,
-            icon = info.icon,
-            -- suffix = info.userID,
-            poiType = info.poiType,
-            userID = info.userID,
-            known = true
-        }
-    else
-        return nil
-    end
+    return self.zones
 end
 
 function Locs:getZoneList()

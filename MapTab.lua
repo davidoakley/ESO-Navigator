@@ -120,7 +120,7 @@ local function jumpToPlayer(node)
     local userID, poiType, zoneId, zoneName = node.userID, node.poiType, node.zoneId, node.zoneName
     local Locs = Nav.Locations
 
-    Locs:setupPlayerZones()
+    Nav.Players:SetupPlayerZones()
 
     if not Locs.players[userID] or Locs.players[userID].zoneId ~= zoneId then
         -- Player has disappeared or moved!
@@ -338,7 +338,7 @@ function MT:buildScrollList(keepScrollPosition)
             local list = Nav.Locations:getKnownNodes(zone.zoneId)
 
             if Nav.isRecall and zone.zoneId ~= Nav.ZONE_CYRODIIL then
-                local playerInfo = Nav.Locations:getPlayerInZone(zone.zoneId)
+                local playerInfo = Nav.Players:GetPlayerInZone(zone.zoneId)
                 if playerInfo then
                     playerInfo.name = zo_strformat(GetString(NAVIGATOR_TRAVEL_TO_ZONE), zone.name)
                     -- playerInfo.suffix = "via " .. playerInfo.suffix
