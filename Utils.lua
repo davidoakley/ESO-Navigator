@@ -1,4 +1,5 @@
-local Utils = MapSearch.Utils or {}
+local Nav = Navigator
+local Utils = Nav.Utils or {}
 
 local _lang
 
@@ -176,7 +177,7 @@ function Utils.DisplayName(name)
 	-- 	r = r:gsub("^Дорожное святилище ", "ДС ", 1)
 	-- end
 	-- return r
-	-- MapSearch.log("CurrentLanguage: %s", _lang)
+
 	-- local r = name
 	if _lang == "en" then
 		r = r:gsub("^Dungeon: ", "", 1):gsub("^Trial: ", "", 1):gsub("^The ", "", 1)
@@ -271,4 +272,4 @@ function Utils.tableContains(table, element)
     return false
 end
 
-MapSearch.Utils = Utils
+Nav.Utils = Utils

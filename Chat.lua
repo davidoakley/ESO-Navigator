@@ -1,5 +1,5 @@
-local MS = MapSearch
-local Chat = MS.Chat or {
+local Nav = Navigator
+local Chat = Nav.Chat or {
     lsc = nil,
     AutoCompleteProvider = nil
 }
@@ -11,7 +11,7 @@ function Chat:Init()
     end
 
     local command = self.lsc:Register()
-    command:AddAlias(MS.saved.tpCommand)
+    command:AddAlias(Nav.saved.tpCommand)
     command:SetCallback(function(input) self:TP(input) end)
     command:SetDescription(GetString(NAVIGATOR_SLASH_DESCRIPTION))
 
@@ -23,18 +23,18 @@ function Chat:Init()
     end
 
     function Chat.AutoCompleteProvider:GetResultList()
-        local zoneList = MS.Locations:getZoneList()
+        local zoneList = Nav.Locations:getZoneList()
         local list = {}
         for i = 1, #zoneList do
             list[zoneList[i].name] = zoneList[i].name
         end
-        MS.log("Chat.AutoCompleteProvider:GetResultList: "..#list)
+        Nav.log("Chat.AutoCompleteProvider:GetResultList: "..#list)
         return list
     end
 
     command:SetAutoComplete(self.AutoCompleteProvider:New())
 
-    command.GetAutoCompleteResults = function(self, text)
+    command.GetAutoCompleteResults = function(_, text)
         local results = {}
 
         local searchResult
@@ -44,12 +44,12 @@ function Chat:Init()
         end
         if text:sub(1, 1) == "@" then
             if #text >= 2 then
-                searchResult = MS.Search.run(text:sub(2), MS.FILTER_PLAYERS)
+                searchResult = Nav.Search.run(text:sub(2), Nav.FILTER_PLAYERS)
             else
                 searchResult = {}
             end
         else
-            searchResult = MS.Search.run(text, MS.FILTER_NONE)
+            searchResult = Nav.Search.run(text, Nav.FILTER_NONE)
         end
 
         local count = (#searchResult <= 1) and #searchResult or 1
@@ -65,20 +65,19 @@ function Chat:Init()
 end
 
 function Chat:TP(text)
-    local MT = MS.MapTab
-    local Locs = MS.Locations
+    local Locs = Nav.Locations
 
     if text == "*logon" then
-        MS.saved.loggingEnabled = true
+        Nav.saved.loggingEnabled = true
         CHAT_SYSTEM:AddMessage("Logging enabled")
         return
     elseif text == "*logoff" then
-        MS.saved.loggingEnabled = false
+        Nav.saved.loggingEnabled = false
         CHAT_SYSTEM:AddMessage("Logging disabled")
         return
     end
 
-    local searchResult = MS.Search.run(text, MS.FILTER_NONE)
+    local searchResult = Nav.Search.run(text, Nav.FILTER_NONE)
     if #searchResult == 0 then
         CHAT_SYSTEM:AddMessage(GetString(SI_JUMPRESULT20))
         return
@@ -87,7 +86,7 @@ function Chat:TP(text)
     local data = searchResult[1]
 
     if data.nodeIndex then
-        MS.MapTab:jumpToNode(data)
+        Nav.MapTab:jumpToNode(data)
         return
     end
 
@@ -104,9 +103,9 @@ function Chat:TP(text)
         CHAT_SYSTEM:AddMessage(zo_strformat(GetString(NAVIGATOR_TRAVELING_TO_ZONE_VIA_PLAYER), node.zoneName, node.userID))
         SCENE_MANAGER:Hide("worldMap")
 
-        if node.poiType == MS.POI_FRIEND then
+        if node.poiType == Nav.POI_FRIEND then
             JumpToFriend(node.userID)
-        elseif node.poiType == MS.POI_GUILDMATE then
+        elseif node.poiType == Nav.POI_GUILDMATE then
             JumpToGuildMember(node.userID)
         end
     else
@@ -114,4 +113,4 @@ function Chat:TP(text)
     end
 end
 
-MS.Chat = Chat
+Nav.Chat = Chat

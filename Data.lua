@@ -1,17 +1,17 @@
-local MS = MapSearch
-local Data = MS.Data or {}
+local Nav = Navigator
+local Data = Nav.Data or {}
 
-MS.ZONE_CYRODIIL = 181
+Nav.ZONE_CYRODIIL = 181
 
-MS.POI_NONE = -1
-MS.POI_TRIAL = 1
-MS.POI_ARENA = 2
-MS.POI_FRIEND = 3
-MS.POI_GUILDMATE = 4
-MS.POI_ZONE = 5
-MS.POI_WAYSHRINE = 6
-MS.POI_GROUP_DUNGEON = 7
-MS.POI_HOUSE = 8
+Nav.POI_NONE = -1
+Nav.POI_TRIAL = 1
+Nav.POI_ARENA = 2
+Nav.POI_FRIEND = 3
+Nav.POI_GUILDMATE = 4
+Nav.POI_ZONE = 5
+Nav.POI_WAYSHRINE = 6
+Nav.POI_GROUP_DUNGEON = 7
+Nav.POI_HOUSE = 8
 
 -- Trader Locations, copied from Faster Travel by SimonIllyan, XanDDemoX, upyachka, Valandil
 local trader_counts = { -- nodeIndex -> traders_count
@@ -97,4 +97,4 @@ local trader_counts = { -- nodeIndex -> traders_count
 
 Data.traderCounts = trader_counts
 
-MS.Data = Data
+Nav.Data = Data

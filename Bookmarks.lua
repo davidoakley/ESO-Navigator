@@ -1,21 +1,21 @@
-local MS = MapSearch
-local Bookmarks = MS.Bookmarks or {
+local Nav = Navigator
+local Bookmarks = Nav.Bookmarks or {
     list = {},
 }
 
 function Bookmarks:init()
-    self.list = MS.saved.bookmarks or {}
+    self.list = Nav.saved.bookmarks or {}
 end
 
 --[[ function Bookmarks:importOldBookmarks()
-    local nodes = MS.saved.bookmarkNodes
+    local nodes = Nav.saved.bookmarkNodes
     local list = {}
 
     for i = 1, #nodes do
         table.insert(list, { nodeIndex = nodes[i] })
     end
 
-    MS.saved.bookmarks = list
+    Nav.saved.bookmarks = list
 end -- ]]
 
 function Bookmarks:getIndex(entry)
@@ -48,7 +48,7 @@ function Bookmarks:add(entry)
     end
 
     table.insert(self.list, entry)
-    -- MS.log("Bookmarks:add("..nodeIndex..")")
+    -- Nav.log("Bookmarks:add("..nodeIndex..")")
     self:save()
 end
 
@@ -56,7 +56,7 @@ function Bookmarks:remove(entry)
     local i = self:getIndex(entry)
     if i then
         table.remove(self.list, i)
-        MS.log("Bookmarks:remove("..i..")")
+        Nav.log("Bookmarks:remove("..i..")")
         self:save()    
     end
 end
@@ -67,29 +67,29 @@ function Bookmarks:contains(entry)
 end
 
 function Bookmarks:save()
-    MS.saved.bookmarks = self.list
+    Nav.saved.bookmarks = self.list
 end
 
 function Bookmarks:getBookmarks()
     local results = {}
-    local nodeMap = MS.Locations:getNodeMap()
+    local nodeMap = Nav.Locations:getNodeMap()
 
     for i = 1, #self.list do
         local entry = self.list[i]
         if entry.nodeIndex and nodeMap then
             local nodeIndex = entry.nodeIndex
-            if MS.Locations:IsHarborage(nodeIndex) then
-                nodeIndex = MS.Locations:GetHarborage()
+            if Nav.Locations:IsHarborage(nodeIndex) then
+                nodeIndex = Nav.Locations:GetHarborage()
             end
-            local node = MS.Utils.shallowCopy(nodeMap[nodeIndex])
-            node.known = MS.Locations:isKnownNode(nodeIndex)
-            local traders = MS.Data.traderCounts[nodeIndex]
+            local node = Nav.Utils.shallowCopy(nodeMap[nodeIndex])
+            node.known = Nav.Locations:isKnownNode(nodeIndex)
+            local traders = Nav.Data.traderCounts[nodeIndex]
             if traders and traders > 0 then
                 node.traders = traders
             end
             table.insert(results, node)
         elseif entry.zoneId then
-            local zone = MS.Locations:getZone(entry.zoneId)
+            local zone = Nav.Locations:getZone(entry.zoneId)
             if zone then
                 table.insert(results, zone)
             end
@@ -99,4 +99,4 @@ function Bookmarks:getBookmarks()
     return results
 end
 
-MS.Bookmarks = Bookmarks
+Nav.Bookmarks = Bookmarks

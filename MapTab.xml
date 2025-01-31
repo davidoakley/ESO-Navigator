@@ -1,7 +1,7 @@
 <GuiXml>
     <Controls>
 	
-	    <Control name="MapSearch_WorldMapCategoryRow" virtual="true" mouseEnabled="true">
+	    <Control name="Navigator_CategoryRow" virtual="true" mouseEnabled="true">
 			<OnInitialized>
 				self.offsetX = 30
 				self.label = self:GetNamedChild("Label")
@@ -21,11 +21,11 @@
 				</Label>
             </Controls>
 			<OnMouseUp>
-				MapSearch.MapTab:CategoryRowMouseUp(self, button, upInside)
+				Navigator.MapTab:CategoryRowMouseUp(self, button, upInside)
 			</OnMouseUp>
         </Control>
 
-	    <Control name="MapSearch_WorldMapCollapsedCategoryRow" virtual="true" mouseEnabled="true">
+	    <Control name="Navigator_CollapsedCategoryRow" virtual="true" mouseEnabled="true">
 			<OnInitialized>
 				self.offsetX = 30
 				self.label = self:GetNamedChild("Label")
@@ -45,11 +45,11 @@
 				</Label>
             </Controls>
 			<OnMouseUp>
-				MapSearch.MapTab:CategoryRowMouseUp(self, button, upInside)
+				Navigator.MapTab:CategoryRowMouseUp(self, button, upInside)
 			</OnMouseUp>
         </Control>
 
-        <Control name="MapSearch_WorldMapWayshrineRow" virtual="true" mouseEnabled="true">
+        <Control name="Navigator_WayshrineRow" virtual="true" mouseEnabled="true">
 			<OnInitialized>
 				self.offsetX = 30
 				self.label = self:GetNamedChild("Label")
@@ -106,11 +106,11 @@
 				</Label>
             </Controls>
 			<OnMouseUp>
-				MapSearch.MapTab:RowMouseUp(self, button, upInside)
+				Navigator.MapTab:RowMouseUp(self, button, upInside)
 			</OnMouseUp>
         </Control>
 
-        <Control name="MapSearch_WorldMapHintRow" virtual="true" mouseEnabled="false">
+        <Control name="Navigator_HintRow" virtual="true" mouseEnabled="false">
 			<OnInitialized>
 				self.offsetX = 30
 				self.label = self:GetNamedChild("Label")
@@ -124,9 +124,9 @@
         </Control>
 
 
-        <TopLevelControl name="MapSearch_MapTab" inherits="ZO_WorldMapInfoContent">
+        <TopLevelControl name="Navigator_MapTab" inherits="ZO_WorldMapInfoContent">
             <OnInitialized>
-				MapSearch.log("MapSearch_MapTab.OnInitialized")
+				Navigator.log("Navigator_MapTab.OnInitialized")
 				self.visible = false
                 self.listControl = self:GetNamedChild("List")
 				self.searchControl = self:GetNamedChild("Search")
@@ -136,23 +136,23 @@
 				self.fragment = ZO_FadeSceneFragment:New(self)
 				self.fragment.duration = 100
 
-				ZO_ScrollList_AddDataType(self.listControl, 0, "MapSearch_WorldMapCategoryRow", 50, function(...) self:layoutCategoryRow(...) end, nil, nil, nil)
-				ZO_ScrollList_AddDataType(self.listControl, 1, "MapSearch_WorldMapWayshrineRow", 25, function(...) self:layoutRow(...) end, nil, nil, nil)
-				ZO_ScrollList_AddDataType(self.listControl, 2, "MapSearch_WorldMapCollapsedCategoryRow", 40, function(...) self:layoutCategoryRow(...) end, nil, nil, nil)
-				ZO_ScrollList_AddDataType(self.listControl, 3, "MapSearch_WorldMapHintRow", 70, function(...) self:layoutHintRow(...) end, nil, nil, nil)
+				ZO_ScrollList_AddDataType(self.listControl, 0, "Navigator_CategoryRow", 50, function(...) self:layoutCategoryRow(...) end, nil, nil, nil)
+				ZO_ScrollList_AddDataType(self.listControl, 1, "Navigator_WayshrineRow", 25, function(...) self:layoutRow(...) end, nil, nil, nil)
+				ZO_ScrollList_AddDataType(self.listControl, 2, "Navigator_CollapsedCategoryRow", 40, function(...) self:layoutCategoryRow(...) end, nil, nil, nil)
+				ZO_ScrollList_AddDataType(self.listControl, 3, "Navigator_HintRow", 70, function(...) self:layoutHintRow(...) end, nil, nil, nil)
 	        </OnInitialized>
 			<OnEffectivelyShown>
-				MapSearch.log("MapSearch_MapTab.OnEffectivelyShown")
+				Navigator.log("Navigator_MapTab.OnEffectivelyShown")
 				self.visible = true
-				MapSearch.Locations:initialise()
+				Navigator.Locations:initialise()
 				if self.needsRefresh then
 					self:ImmediateRefresh()
 				else
-				    MapSearch.MapTab:buildScrollList()
+				    Navigator.MapTab:buildScrollList()
 				end
 			</OnEffectivelyShown>
 			<OnEffectivelyHidden>
-				MapSearch.log("MapSearch_MapTab.OnEffectivelyHidden")
+				Navigator.log("Navigator_MapTab.OnEffectivelyHidden")
 				self.visible = false
 			</OnEffectivelyHidden>
             <Controls>
@@ -173,7 +173,7 @@
 
 						<Button name="$(parent)Clear" tier="HIGH">
 							<Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT" offsetX="-5" offsetY="5"/>
-							<OnMouseUp>MapSearch.MapTab:resetSearch(false)</OnMouseUp>
+							<OnMouseUp>Navigator.MapTab:resetSearch()</OnMouseUp>
 							<Dimensions x="23" y="23" />
 							<Textures 	normal="EsoUI/art/buttons/decline_up.dds"
 										pressed="EsoUI/art/buttons/decline_down.dds"
@@ -188,55 +188,55 @@
 							<OnInitialized>
 							</OnInitialized>
 							<OnBackspace>
-								--MapSearch.log("OnBackspace: pos="..self:GetCursorPosition().." changed="..(self.editTextChanged and 1 or 0))
+								--Navigator.log("OnBackspace: pos="..self:GetCursorPosition().." changed="..(self.editTextChanged and 1 or 0))
 								if self:GetCursorPosition() == 0 and not self.editTextChanged then
-									MapSearch.MapTab:resetFilter()
+									Navigator.MapTab:resetFilter()
 								end
 								self.editTextChanged = false
 							</OnBackspace>
 							<OnEnter>
-								MapSearch.MapTab:selectCurrentResult()
+								Navigator.MapTab:selectCurrentResult()
 							</OnEnter>
 							<OnEscape>
 								-- self:LoseFocus()
 								SCENE_MANAGER:Hide("worldMap")
 							</OnEscape>
 							<OnEffectivelyShown>
-								MapSearch.MapTab:resetSearch(false)
-								if MapSearch.saved.autoFocus then
+								Navigator.MapTab:resetSearch()
+								if Navigator.saved.autoFocus then
 									self:TakeFocus()
 								end
 							</OnEffectivelyShown>
 							<OnFocusGained>
-								MapSearch.MapTab:buildScrollList()
-								zo_callLater(function() MapSearch.MapTab:UpdateEditDefaultText() end, 10)
+								Navigator.MapTab:buildScrollList()
+								zo_callLater(function() Navigator.MapTab:UpdateEditDefaultText() end, 10)
 							</OnFocusGained>
 							<OnFocusLost>
-								MapSearch.MapTab:UpdateEditDefaultText()
-								MapSearch.MapTab:buildScrollList()
+								Navigator.MapTab:UpdateEditDefaultText()
+								Navigator.MapTab:buildScrollList()
 							</OnFocusLost>
 							<OnTextChanged>
-								--MapSearch.log("onTextChanged: pos="..self:GetCursorPosition())
-								MapSearch.MapTab:onTextChanged(self, MapSearch_MapTabList)
+								--Navigator.log("onTextChanged: pos="..self:GetCursorPosition())
+								Navigator.MapTab:onTextChanged(self)
 							</OnTextChanged>
 							<OnMouseDown>
 								self:TakeFocus()
 								ZO_EditDefaultText_Disable(self)
 							</OnMouseDown>
 							<OnDownArrow>
-								MapSearch.MapTab:nextResult()
+								Navigator.MapTab:nextResult()
 							</OnDownArrow>
 							<OnUpArrow>
-								MapSearch.MapTab:previousResult()
+								Navigator.MapTab:previousResult()
 							</OnUpArrow>
 							<OnPageDown>
-								MapSearch.MapTab:nextCategory()
+								Navigator.MapTab:nextCategory()
 							</OnPageDown>
 							<OnPageUp>
-								MapSearch.MapTab:previousCategory()
+								Navigator.MapTab:previousCategory()
 							</OnPageUp>
 							<OnTab>
-								MapSearch.MapTab.editControl:LoseFocus()
+								Navigator.MapTab.editControl:LoseFocus()
 							</OnTab>
 						</EditBox>						
 					</Controls>

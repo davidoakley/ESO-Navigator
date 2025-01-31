@@ -1,12 +1,12 @@
-MapSearch = {}
-MapSearch.Wayshrine = {}
-MapSearch.Location = {}
-MapSearch.Options = {}
-MapSearch.Utils = {}
-MapSearch.Search = {}
-MapSearch.logger = {}
+Navigator = {}
+Navigator.Wayshrine = {}
+Navigator.Location = {}
+Navigator.Options = {}
+Navigator.Utils = {}
+Navigator.Search = {}
+Navigator.logger = {}
 
-MapSearch.logger.Info = function(obj, text)
+Navigator.logger.Info = function(obj, text)
     print(" # "..text)
 end
 SLASH_COMMANDS = {}
@@ -14,8 +14,8 @@ SLASH_COMMANDS = {}
 function GetCVar(lang) return "en"  end
 
 require("fzy")
-MapSearch.ansicolors = require('ansicolors')
-require("test.SV.MapSearch")
+Navigator.ansicolors = require('ansicolors')
+require("test.SV.Navigator")
 require("WayshrineData")
 require("LocationData")
 require("Utils")
@@ -23,18 +23,18 @@ require("Search")
 require("Wayshrine")
 
 
-MapSearch.isCLI = true
+Navigator.isCLI = true
 
 local inspect = require('test.inspect')
-local Search = MapSearch.Search
+local Search = Navigator.Search
 
 POI_TYPE_WAYSHRINE = 1
 POI_TYPE_GROUP_DUNGEON = 6
 POI_TYPE_HOUSE = 7
 
-MapSearch.Search.categories = MapSearch_SavedVariables.Default["@SirNightstorm"]["$AccountWide"].categories
-MapSearch.Search.locations = MapSearch_SavedVariables.Default["@SirNightstorm"]["$AccountWide"].locations
-MapSearch.Search.zones = MapSearch_SavedVariables.Default["@SirNightstorm"]["$AccountWide"].zones
+Navigator.Search.categories = Navigator_SavedVariables.Default["@SirNightstorm"]["$AccountWide"].categories
+Navigator.Search.locations = Navigator_SavedVariables.Default["@SirNightstorm"]["$AccountWide"].locations
+Navigator.Search.zones = Navigator_SavedVariables.Default["@SirNightstorm"]["$AccountWide"].zones
 
 local typeLabels = {
     [POI_TYPE_WAYSHRINE] = 'W',
@@ -70,12 +70,12 @@ local function executeSearch(searchString)
 	if searchString ~= nil and #searchString > 0 then
 		results = Search.run(searchString)
 	else
-		results = {} --MapSearch.categories
+		results = {} --Navigator.categories
 	end
 
-	MapSearch.results = results
-	MapSearch.targetNode = 0
-	-- MapSearch.saved.categories = categories
+	Navigator.results = results
+	Navigator.targetNode = 0
+	-- Navigator.saved.categories = categories
 
 	--buildScrollList(control, results)
     dumpResults(results)

@@ -1,5 +1,5 @@
-local MS = MapSearch
-local Locs = MS.Locations or {
+local Nav = Navigator
+local Locs = Nav.Locations or {
     nodes = nil,
     nodeMap = nil,
     zones = nil,
@@ -9,7 +9,7 @@ local Locs = MS.Locations or {
     knownNodes = {},
     harborageIndex = nil
 }
-local Utils = MS.Utils
+local Utils = Nav.Utils
 
 function Locs:initialise()
 end
@@ -25,7 +25,7 @@ function Locs:IsZone(zoneId)
        and not (
         zoneId == 642 -- The Earth Forge
     --       zoneId==2 -- Tamriel
-    --    or zoneId==MS.ZONE_CYRODIIL
+    --    or zoneId==Nav.ZONE_CYRODIIL
        )
        then
         return true
@@ -47,7 +47,7 @@ function Locs:setupNodes()
         local nodeZoneId = GetParentZoneId(GetZoneId(zoneIndex))
 
         if not isLocked and name ~= "" and (typePOI == 1 or glowIcon ~= nil) then
-            local nodeInfo = self:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon, known)
+            local nodeInfo = self:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon)
 
             table.insert(self.nodes, nodeInfo)
             self.nodeMap[i] = nodeInfo
@@ -74,7 +74,7 @@ function Locs:setupNodes()
                     if zoneId==1146 then -- the Dragonguard Sanctuary wayshrine in Tideholm
                         zoneId = 1133 -- should appear in Southern Elsweyr
 					elseif zoneId == 57 and poiIndex == 60 then -- zone Deshaan, POI 60 is DC2!
-						for k, v in pairs(nodeMap) do
+						for _, v in pairs(nodeMap) do
 							if v.nodeIndex == 264 then
 								nodeInfo = v
 							end
@@ -90,7 +90,7 @@ function Locs:setupNodes()
                                 nodes = {}
                             }
                         else
-                            MS.log("setupNodes: not zone: zoneId %d name %s", zoneId, zoneName)
+                            Nav.log("setupNodes: not zone: zoneId %d name %s", zoneId, zoneName)
                         end
                     end
 
@@ -98,7 +98,7 @@ function Locs:setupNodes()
                         nodeInfo.zoneId = zoneId
                         table.insert(self.zones[zoneId].nodes, nodeInfo)
                     -- else
-                    --     MS.log("Locs:setupNodes: node "..i.." '"..nodeInfo.name.."' in non-parent zoneId "..nodeZoneId)
+                    --     Nav.log("Locs:setupNodes: node "..i.." '"..nodeInfo.name.."' in non-parent zoneId "..nodeZoneId)
                     end
 				end
 			end
@@ -120,7 +120,7 @@ function Locs:AddExtraZone(zoneId, mapId)
     }
 end
 
-function Locs:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon, known)
+function Locs:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon)
     if i >= 210 and i <= 212 then
         -- Save this character's alliance's Harborage
         self.harborageIndex = i
@@ -140,26 +140,26 @@ function Locs:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon, known
     }
 
     if typePOI == 6 then
-        nodeInfo.poiType = MS.POI_GROUP_DUNGEON
+        nodeInfo.poiType = Nav.POI_GROUP_DUNGEON
         if i ~= 550 then -- not Infinite Archive
             nodeInfo.suffix = GetString(NAVIGATOR_DUNGEON)
         end
     elseif typePOI == 3 then
-        nodeInfo.poiType = MS.POI_TRIAL
+        nodeInfo.poiType = Nav.POI_TRIAL
         nodeInfo.icon = "esoui/art/tutorial/poi_raiddungeon_complete.dds"
         nodeInfo.suffix = GetString(NAVIGATOR_TRIAL)
     elseif typePOI == 7 then
-        nodeInfo.poiType = MS.POI_GROUP_HOUSE
+        nodeInfo.poiType = Nav.POI_GROUP_HOUSE
         nodeInfo.owned = (icon:find("poi_group_house_owned") ~= nil)
         nodeInfo.freeRecall = true
     elseif typePOI == 1 then
-        nodeInfo.poiType = MS.POI_WAYSHRINE
+        nodeInfo.poiType = Nav.POI_WAYSHRINE
     elseif glowIcon == "/esoui/art/icons/poi/poi_soloinstance_glow.dds" or
            glowIcon == "/esoui/art/icons/poi/poi_groupinstance_glow.dds" then
-        nodeInfo.poiType = MS.POI_ARENA
+        nodeInfo.poiType = Nav.POI_ARENA
         nodeInfo.suffix = GetString(NAVIGATOR_ARENA)
     else
-        MS.logWarning("Unknown POI " .. i .. " '" .. name .. "' type " .. typePOI .. " " .. (glowIcon or "-"))
+        Nav.logWarning("Unknown POI " .. i .. " '" .. name .. "' type " .. typePOI .. " " .. (glowIcon or "-"))
     end
 
     nodeInfo.barename = Utils.bareName(nodeInfo.name)
@@ -168,12 +168,12 @@ function Locs:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon, known
         nodeInfo.icon = "/esoui/art/crafting/crafting_smithing_notrait.dds"
     end
 
-    if nodeInfo.zoneId == MS.ZONE_CYRODIIL and nodeInfo.poiType == MS.POI_WAYSHRINE then
+    if nodeInfo.zoneId == Nav.ZONE_CYRODIIL and nodeInfo.poiType == Nav.POI_WAYSHRINE then
         nodeInfo.icon = "/esoui/art/crafting/crafting_smithing_notrait.dds"
         nodeInfo.disabled = true
     end
 
-    local traders = MS.Data.traderCounts[i]
+    local traders = Nav.Data.traderCounts[i]
     if traders and traders > 0 then
         nodeInfo.traders = traders
     end
@@ -215,7 +215,7 @@ function Locs:setupPlayerZones()
 
             if playerStatus ~= PLAYER_STATUS_OFFLINE and userID~=myID then
                 local _, _, zoneName, _, _, _, _, zoneId = GetGuildMemberCharacterInfo(guildID, i)
-                self:addPlayerZone(zoneId, zoneName, userID, "/esoui/art/menubar/gamepad/gp_playermenu_icon_character.dds", MS.POI_GUILDMATE)
+                self:addPlayerZone(zoneId, zoneName, userID, "/esoui/art/menubar/gamepad/gp_playermenu_icon_character.dds", Nav.POI_GUILDMATE)
             end
         end
     end
@@ -227,7 +227,7 @@ function Locs:setupPlayerZones()
 		if playerStatus ~= PLAYER_STATUS_OFFLINE and secsSinceLogoff == 0 then
             local hasChar, _, zoneName, _, _, _, _, zoneId = GetFriendCharacterInfo(i)
             if hasChar then
-                self:addPlayerZone(zoneId, zoneName, userID, "/esoui/art/menubar/gamepad/gp_playermenu_icon_character.dds", MS.POI_FRIEND)
+                self:addPlayerZone(zoneId, zoneName, userID, "/esoui/art/menubar/gamepad/gp_playermenu_icon_character.dds", Nav.POI_FRIEND)
             end
         end
     end
@@ -250,7 +250,7 @@ function Locs:isKnownNode(nodeIndex)
     if self.knownNodes[nodeIndex] ~= nil then
         return self.knownNodes[nodeIndex]
     else
-        local known, name, Xcord, Ycord, icon, glowIcon, typePOI, onMap, isLocked = GetFastTravelNodeInfo(nodeIndex)
+        local known, _, _, _, _, _, _, _, _ = GetFastTravelNodeInfo(nodeIndex)
         self.knownNodes[nodeIndex] = known
         return known
     end
@@ -287,13 +287,13 @@ function Locs:getKnownNodes(zoneId)
         local index = self.nodes[i].nodeIndex
         if self:isKnownNode(index) and (not zoneId or self.nodes[i].zoneId == zoneId) then
             local node = Utils.shallowCopy(self.nodes[i])
-            local bookmarked = MS.Bookmarks:contains(self.nodes[i])
+            local bookmarked = Nav.Bookmarks:contains(self.nodes[i])
             node.known = true
             node.weight = 1.0
             node.bookmarked = bookmarked
-            if not node.freeRecall and MS.isRecall then
+            if not node.freeRecall and Nav.isRecall then
                 node.weight = bookmarked and 0.9 or 0.8
-            elseif node.poiType == MS.POI_GROUP_HOUSE and not node.owned then
+            elseif node.poiType == Nav.POI_GROUP_HOUSE and not node.owned then
                 node.weight = 0.7
             elseif bookmarked then
                 node.weight = 1.2
@@ -315,9 +315,9 @@ function Locs:getHouseList()
     local nodes = {}
     for i = 1, #self.nodes do
         local index = self.nodes[i].nodeIndex
-        if self:isKnownNode(index) and self.nodes[i].poiType == MS.POI_GROUP_HOUSE then
+        if self:isKnownNode(index) and self.nodes[i].poiType == Nav.POI_GROUP_HOUSE then
             local node = Utils.shallowCopy(self.nodes[i])
-            if MS.Bookmarks:contains(node) then
+            if Nav.Bookmarks:contains(node) then
                 node.bookmarked = true
             end
             if not node.owned then
@@ -417,10 +417,10 @@ function Locs:getZoneList()
             zoneName = info.name,
             mapId = info.mapId,
             icon = "Navigator/media/zone.dds",
-            poiType = MS.POI_ZONE,
-            weight = MS.isRecall and 1.0 or 0.9,
+            poiType = Nav.POI_ZONE,
+            weight = Nav.isRecall and 1.0 or 0.9,
             known = true,
-            bookmarked = MS.Bookmarks:contains(info)
+            bookmarked = Nav.Bookmarks:contains(info)
         })
     end
 
@@ -439,8 +439,8 @@ function Locs:getZone(zoneId)
         zoneId = zoneId,
         zoneName = info.name,
         icon = "Navigator/media/zone.dds",
-        poiType = MS.POI_ZONE,
-        weight = MS.isRecall and 1.0 or 0.9,
+        poiType = Nav.POI_ZONE,
+        weight = Nav.isRecall and 1.0 or 0.9,
         known = true
     }
 end
@@ -449,10 +449,10 @@ function Locs:getCurrentMapZoneId()
     local mapId = GetCurrentMapId()
     local _, mapType, _, zoneIndex, _ = GetMapInfoById(mapId)
     local zoneId = GetZoneId(zoneIndex)
-    -- MS.log("Locs:getCurrentMapZone zoneId = "..zoneId.." type "..mapType)
+    -- Nav.log("Locs:getCurrentMapZone zoneId = "..zoneId.." type "..mapType)
     if mapType == MAPTYPE_SUBZONE and not self:IsZone(zoneId) then
         zoneId = GetParentZoneId(zoneId)
-        -- MS.log("Locs:getCurrentMapZone parent zoneId = "..zoneId)
+        -- Nav.log("Locs:getCurrentMapZone parent zoneId = "..zoneId)
     end
 
     return zoneId
@@ -466,17 +466,17 @@ function Locs:getCurrentMapZone()
     local mapId = GetCurrentMapId()
     local _, mapType, _, zoneIndex, _ = GetMapInfoById(mapId)
     local zoneId = GetZoneId(zoneIndex)
-    -- MS.log("Locs:getCurrentMapZone zoneId = "..zoneId.." type "..mapType)
+    -- Nav.log("Locs:getCurrentMapZone zoneId = "..zoneId.." type "..mapType)
     if zoneId == 2 then
         return {
             zoneId = 2
         }
     elseif mapType == MAPTYPE_SUBZONE and not self:IsZone(zoneId) then
         zoneId = GetParentZoneId(zoneId)
-        -- MS.log("Locs:getCurrentMapZone parent zoneId = "..zoneId)
+        -- Nav.log("Locs:getCurrentMapZone parent zoneId = "..zoneId)
     end
     if not self.zones[zoneId] then
-        MS.log("Locs:getCurrentMapZone no info on zoneId "..zoneId)
+        Nav.log("Locs:getCurrentMapZone no info on zoneId "..zoneId)
     end
     return self.zones[zoneId]
 end
@@ -491,8 +491,8 @@ function Locs:GetHarborage()
             return i
         end
     end
-    MS.log("Locs:GetHarborage failed to find harborage")
+    Nav.log("Locs:GetHarborage failed to find harborage")
     return 210
 end
 
-MapSearch.Locations = Locs
+Nav.Locations = Locs

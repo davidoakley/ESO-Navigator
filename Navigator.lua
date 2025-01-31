@@ -1,4 +1,4 @@
-MapSearch = {
+Navigator = {
   name = "Navigator",
   menuName = "Navigator",          -- A UNIQUE identifier for menu object.
   displayName = "|c66CC66N|r|c66CCFFavigator|r",
@@ -25,26 +25,24 @@ MapSearch = {
   targetNode = 0,
   mapVisible = false,
 }
-local MS = MapSearch
+local Nav = Navigator
 
 local logger
 
 if LibDebugLogger then
-  logger = LibDebugLogger(MS.name)
+  logger = LibDebugLogger(Nav.name)
 end
-
-local Utils = MS.Utils
 
 local _events = {}
 
-function MS.log(...)
-  if logger and MS.saved and MS.saved["loggingEnabled"] then
+function Nav.log(...)
+  if logger and Nav.saved and Nav.saved["loggingEnabled"] then
     logger:Debug(string.format(...))
   end
 end
 
-function MS.logWarning(...)
-  if logger and MS.saved and MS.saved["loggingEnabled"] then
+function Nav.logWarning(...)
+  if logger and Nav.saved and Nav.saved["loggingEnabled"] then
     logger:Warn(string.format(...))
   end
 end
@@ -57,7 +55,7 @@ local function GetUniqueEventId(id)
 end
 
 local function getEventName(id)
-  return table.concat({ MS.name, tostring(id), tostring(GetUniqueEventId(id)) }, "_")
+  return table.concat({ Nav.name, tostring(id), tostring(GetUniqueEventId(id)) }, "_")
 end
 
 local function addEvent(id, func)
@@ -71,7 +69,7 @@ local function addEvents(func, ...)
   for i = 1, count do
   id = select(i, ...)
   if not id then
-    df('%s element %d is nil.  Please report.', MS.name, i)
+    df('%s element %d is nil.  Please report.', Nav.name, i)
   else
     addEvent(id, func)
   end
@@ -85,78 +83,78 @@ local ButtonGroup = {
     keybind = "NAVIGATOR_OPENTAB", --"UI_SHORTCUT_QUICK_SLOTS", --"NAVIGATOR_SEARCH",
     order = 200,
     visible = function() return true end,
-    callback = function() MS.showSearch() end,
+    callback = function() Nav.showSearch() end,
     },
     alignment = KEYBIND_STRIP_ALIGN_CENTER,
   }
 
-local function OnMapStateChange(oldState, newState)
+local function OnMapStateChange(_, newState)
   if newState == SCENE_SHOWING then
-    MS.mapVisible = true
-    local zone = MS.Locations:getCurrentMapZone()
-    MS.initialMapZoneId = zone and zone.zoneId or nil
-    MS.log("WorldMap showing; initialMapZoneId=%d", MS.initialMapZoneId or 0)
+    Nav.mapVisible = true
+    local zone = Nav.Locations:getCurrentMapZone()
+    Nav.initialMapZoneId = zone and zone.zoneId or nil
+    Nav.log("WorldMap showing; initialMapZoneId=%d", Nav.initialMapZoneId or 0)
     PushActionLayerByName("Map")
     KEYBIND_STRIP:AddKeybindButtonGroup(ButtonGroup)
-    if MS.saved and MS.saved["defaultTab"] and not FasterTravel then
+    if Nav.saved and Nav.saved["defaultTab"] and not FasterTravel then
       WORLD_MAP_INFO:SelectTab(NAVIGATOR_TAB_SEARCH)
     end
 
     if not zone or zone.zoneId > 2 then
-      MS.MapTab.collapsedCategories = {}
+      Nav.MapTab.collapsedCategories = {}
     else
-      MS.MapTab.collapsedCategories = { bookmarks = true, recents = true }
+      Nav.MapTab.collapsedCategories = { bookmarks = true, recents = true }
     end
 
-    MS.log("WorldMap showing done")
+    Nav.log("WorldMap showing done")
   elseif newState == SCENE_HIDDEN then
-    MS.log("WorldMap hidden")
-    MS.mapVisible = false
+    Nav.log("WorldMap hidden")
+    Nav.mapVisible = false
     KEYBIND_STRIP:RemoveKeybindButtonGroup(ButtonGroup)
     RemoveActionLayerByName("Map")
   end
 end
 
 local function OnMapChanged()
-  MS.MapTab:OnMapChanged()
+  Nav.MapTab:OnMapChanged()
 end
 
 local function OnStartFastTravel(eventCode, nodeIndex)
-  MS.log("OnStartFastTravel: "..eventCode..", "..nodeIndex)
-  MS.isRecall = false
-  MS.MapTab:ImmediateRefresh()
+  Nav.log("OnStartFastTravel: "..eventCode..", "..nodeIndex)
+  Nav.isRecall = false
+  Nav.MapTab:ImmediateRefresh()
 end
 
 local function OnEndFastTravel()
-  MS.log("OnEndFastTravel")
-  MS.isRecall = true
+  Nav.log("OnEndFastTravel")
+  Nav.isRecall = true
 end
 
 local function OnPlayerActivated()
-  MS.log("OnPlayerActivated")
-  MS.Recents:onPlayerActivated()
+  Nav.log("OnPlayerActivated")
+  Nav.Recents:onPlayerActivated()
 end
 
 local function OnPOIUpdated()
-  MS.log("OnPOIUpdated")
-  MS.Locations:clearKnownNodes()
+  Nav.log("OnPOIUpdated")
+  Nav.Locations:clearKnownNodes()
 end
 
-local function SetPlayersDirty(eventCode)
-  -- MS.log("SetPlayersDirty("..eventCode..")")
-  MS.Locations:ClearPlayers()
-  MS.MapTab:queueRefresh()
+local function SetPlayersDirty(_)
+  -- Nav.log("SetPlayersDirty("..eventCode..")")
+  Nav.Locations:ClearPlayers()
+  Nav.MapTab:queueRefresh()
 end
 
-function MS.showSearch()
-  MS.log("showSearch")
-  local tabVisible = MapSearch.MapTab.visible
+function Nav.showSearch()
+  Nav.log("showSearch")
+  local tabVisible = Nav.MapTab.visible
   MAIN_MENU_KEYBOARD:ShowScene("worldMap")
   WORLD_MAP_INFO:SelectTab(NAVIGATOR_TAB_SEARCH)
-  MS.MapTab:resetSearch(false)
-  if MapSearch.saved.autoFocus or tabVisible then
-    MS.MapTab.editControl:TakeFocus()
-    MS.log("showSearch: setting editControl focus")
+  Nav.MapTab:resetSearch()
+  if Nav.saved.autoFocus or tabVisible then
+    Nav.MapTab.editControl:TakeFocus()
+    Nav.log("showSearch: setting editControl focus")
   end
 end
 
@@ -172,11 +170,11 @@ local function moveTabToFirst()
   table.insert(buttonData, 1, ourData)
 
   WORLD_MAP_INFO.modeBar:UpdateButtons(false)
-  MS.log("Menu re-ordered")
+  Nav.log("Menu re-ordered")
 end
 
-function MS:initialize()
-  MS.log("initialize starts")
+function Nav:initialize()
+  Nav.log("initialize starts")
   -- https://wiki.esoui.com/How_to_add_buttons_to_the_keybind_strip
 
   self.saved = ZO_SavedVars:NewAccountWide(self.svName, 1, nil, self.default)
@@ -204,7 +202,7 @@ function MS:initialize()
     EVENT_GUILD_MEMBER_CHARACTER_ZONE_CHANGED, EVENT_FRIEND_CHARACTER_ZONE_CHANGED,
     EVENT_FRIEND_ADDED, EVENT_FRIEND_REMOVED)
 
-  addEvent(EVENT_GUILD_MEMBER_PLAYER_STATUS_CHANGED, function(_, guildId, DisplayName, oldStatus, newStatus)
+  addEvent(EVENT_GUILD_MEMBER_PLAYER_STATUS_CHANGED, function(_, _, _, oldStatus, newStatus)
     if newStatus == PLAYER_STATUS_OFFLINE or (oldStatus == PLAYER_STATUS_OFFLINE and newStatus == PLAYER_STATUS_ONLINE) then
       SetPlayersDirty()
     end
@@ -225,37 +223,20 @@ function MS:initialize()
     moveTabToFirst()
   end
 
-  MS.log("Initialize exits")
+  Nav.log("Initialize exits")
 end
 
 local function OnAddOnLoaded(_, addonName)
     if addonName ~= "Navigator" then return end
 
-    MS:initialize()
+    Nav:initialize()
 
     if PP and PP.ADDON_NAME then
-        PP.ScrollBar(MapSearch_MapTabListScrollBar)
-        ZO_Scroll_SetMaxFadeDistance(MapSearch_MapTabList, PP.savedVars.ListStyle.list_fade_distance)
+        PP.ScrollBar(Navigator_MapTabListScrollBar)
+        ZO_Scroll_SetMaxFadeDistance(Navigator_MapTabList, PP.savedVars.ListStyle.list_fade_distance)
     end
 
-    EVENT_MANAGER:UnregisterForEvent(MS.name, EVENT_ADD_ON_LOADED)
+    EVENT_MANAGER:UnregisterForEvent(Nav.name, EVENT_ADD_ON_LOADED)
 end
 
-EVENT_MANAGER:RegisterForEvent(MS.name, EVENT_ADD_ON_LOADED, OnAddOnLoaded)
-
---[[SLASH_COMMANDS["/mapsearch"] = function (extra)
-  if extra == 'save' then
-      MapSearch.Locations:initialise()
-      -- buildLocations()
-      MapSearch.saved.locations = Utils.deepCopy(MS.Search.locations)
-      MapSearch.saved.zones = Utils.deepCopy(MS.Search.zones)
-      MapSearch.saved.result = Utils.deepCopy(MS.Search.result)
-      d("Written MapSearch data to Saved Preferences")
-  elseif extra == 'clear' then
-      MapSearch.saved.categories = nil
-      MapSearch.saved.locations = nil
-      MapSearch.saved.zones = nil
-      MapSearch.saved.result = nil
-      d("Cleared MapSearch data from Saved Preferences")
-  end
-end ]]--
+EVENT_MANAGER:RegisterForEvent(Nav.name, EVENT_ADD_ON_LOADED, OnAddOnLoaded)
