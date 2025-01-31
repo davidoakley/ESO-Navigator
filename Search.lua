@@ -62,7 +62,7 @@ function Search.run(searchTerm, filter)
     local result = {}
 
     if filter == Nav.FILTER_PLAYERS then
-        addSearchResults(result, searchTerm, Locations:getPlayerList())
+        addSearchResults(result, searchTerm, Nav.Players:GetPlayerList())
     elseif filter == Nav.FILTER_HOUSES then
         addSearchResults(result, searchTerm, Locations:getHouseList())
     else

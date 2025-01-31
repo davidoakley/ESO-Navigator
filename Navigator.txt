@@ -17,6 +17,7 @@ Data.lua
 Utils.lua
 Settings.lua
 Locations.lua
+Players.lua
 Search.lua
 Chat.lua
 
