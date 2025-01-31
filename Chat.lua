@@ -1,7 +1,8 @@
 local Nav = Navigator
 local Chat = Nav.Chat or {
     lsc = nil,
-    AutoCompleteProvider = nil
+    AutoCompleteProvider = nil,
+    result = nil
 }
 
 function Chat:Init()
@@ -35,33 +36,40 @@ function Chat:Init()
     command:SetAutoComplete(self.AutoCompleteProvider:New())
 
     command.GetAutoCompleteResults = function(_, text)
-        local results = {}
-
-        local searchResult
-
         if text:sub(1, 1) == "*" then
+            Chat.result = nil
             return {}
         end
-        if text:sub(1, 1) == "@" then
-            if #text >= 2 then
-                searchResult = Nav.Search.run(text:sub(2), Nav.FILTER_PLAYERS)
-            else
-                searchResult = {}
-            end
-        else
-            searchResult = Nav.Search.run(text, Nav.FILTER_NONE)
-        end
 
-        local count = (#searchResult <= 1) and #searchResult or 1
-        for i = 1, count do
-            local listEntry = searchResult[i]
-            results[listEntry.name] = listEntry.name
-        end
+        local result = Chat:Search(text)
+
+        local results = result and { [result.name] = result.name } or {}
 
         return results
     end
 
     self.command = command
+end
+
+function Chat:Search(text)
+    local searchResult
+    self.search = text
+
+    if text:sub(1, 1) == "@" then
+        if #text >= 2 then
+            searchResult = Nav.Search.run(text:sub(2), Nav.FILTER_PLAYERS)
+        else
+            searchResult = {}
+        end
+    else
+        searchResult = Nav.Search.run(text, Nav.FILTER_NONE)
+    end
+
+    if #searchResult >= 1 then
+        self.result = searchResult[1]
+    end
+
+    return self.result
 end
 
 function Chat:TP(text)
@@ -75,24 +83,29 @@ function Chat:TP(text)
         return
     end
 
-    local searchResult = Nav.Search.run(text, Nav.FILTER_NONE)
-    if #searchResult == 0 then
-        CHAT_SYSTEM:AddMessage(GetString(SI_JUMPRESULT20))
+    local result = self.result or self:Search(text)
+
+    if result and self.search and self.search:sub(1, 1) == "@" then
+        if result.poiType == Nav.POI_FRIEND then
+            JumpToFriend(result.userID)
+        elseif result.poiType == Nav.POI_GUILDMATE then
+            JumpToGuildMember(result.userID)
+        else
+            CHAT_SYSTEM:AddMessage(zo_strformat(GetString(NAVIGATOR_CANNOT_TRAVEL_TO_PLAYER), result.userID))
+        end
         return
     end
 
-    local data = searchResult[1]
-
-    if data.nodeIndex then
-        Nav.MapTab:jumpToNode(data)
+    if result.nodeIndex then
+        Nav.MapTab:jumpToNode(result)
         return
     end
 
-    local zoneId = data.zoneId
+    local zoneId = result.zoneId
     if zoneId then
         local node = Nav.Players:GetPlayerInZone(zoneId)
         if not node then
-            CHAT_SYSTEM:AddMessage(zo_strformat(GetString(NAVIGATOR_NO_PLAYER_IN_ZONE), data.zoneName))
+            CHAT_SYSTEM:AddMessage(zo_strformat(GetString(NAVIGATOR_NO_PLAYER_IN_ZONE), result.zoneName))
             return
         end
 
