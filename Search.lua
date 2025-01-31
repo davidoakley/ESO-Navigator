@@ -1,15 +1,15 @@
-local Search = MapSearch.Search or {}
-local MS = MapSearch
-local Utils = MS.Utils
-local Locations = MS.Locations
-local colors = MS.ansicolors
-local fzy = MS.fzy
+local Nav = Navigator
+local Search = Nav.Search or {}
+local Utils = Nav.Utils
+local Locations = Nav.Locations
+local colors = Nav.ansicolors
+local fzy = Nav.fzy
 
 Search.categories = nil
 
-MS.FILTER_NONE = 0
-MS.FILTER_PLAYERS = 1
-MS.FILTER_HOUSES = 4
+Nav.FILTER_NONE = 0
+Nav.FILTER_PLAYERS = 1
+Nav.FILTER_HOUSES = 4
 
 local function match(object, searchTerm)
     local name = Utils.SearchName(object.originalName or object.name) -- object.barename or object.name
@@ -53,17 +53,17 @@ function Search.run(searchTerm, filter)
     searchTerm = searchTerm and string.lower(searchTerm) or ""
     searchTerm = searchTerm:gsub("[^%w ]", "")
 
-    -- MS.log("Search.run('%s', %d)", searchTerm, filter)
+    -- Nav.log("Search.run('%s', %d)", searchTerm, filter)
 
-    if filter == MS.FILTER_NONE and searchTerm == "" then
+    if filter == Nav.FILTER_NONE and searchTerm == "" then
         return {}
     end
 
     local result = {}
 
-    if filter == MS.FILTER_PLAYERS then
+    if filter == Nav.FILTER_PLAYERS then
         addSearchResults(result, searchTerm, Locations:getPlayerList())
-    elseif filter == MS.FILTER_HOUSES then
+    elseif filter == Nav.FILTER_HOUSES then
         addSearchResults(result, searchTerm, Locations:getHouseList())
     else
         addSearchResults(result, searchTerm, Locations:getKnownNodes())
@@ -81,7 +81,7 @@ function Search.highlightResult(result, matchChars)
     for i = 1, #result do
         local c = result:sub(i, i)
         if Utils.tableContains(matchChars, i) then
-            if MapSearch.isCLI then
+            if Nav.isCLI then
                 out = out..'%{underline}'..c..'%{reset}'
             else
                 out = out..c
@@ -93,4 +93,4 @@ function Search.highlightResult(result, matchChars)
     return colors(out)
 end
 
-MapSearch.Search = Search
+Nav.Search = Search

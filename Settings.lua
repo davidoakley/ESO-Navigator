@@ -1,4 +1,4 @@
-function MapSearch:loadSettings()
+function Navigator:loadSettings()
     local LAM = LibAddonMenu2
     local sv = self.saved
     if sv == nil then return end
@@ -68,7 +68,7 @@ function MapSearch:loadSettings()
         getFunc = function() return sv.tpCommand end,
         setFunc = function(value) sv.tpCommand = value end,
         width = "full",
-        default = MapSearch.default.tpCommand,
+        default = self.default.tpCommand,
         requiresReload = true,
         warning = function()
           if PITHKA and PITHKA.SV and PITHKA.SV.options.enableTeleport then
