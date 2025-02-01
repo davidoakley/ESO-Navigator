@@ -85,7 +85,12 @@ function Chat:TP(text)
 
     local result = self.result or self:Search(text)
 
-    if result and self.search and self.search:sub(1, 1) == "@" then
+    if not result then
+        CHAT_SYSTEM:AddMessage(GetString(NAVIGATOR_HINT_NORESULTS))
+        return
+    end
+
+    if self.search and self.search:sub(1, 1) == "@" then
         if result.poiType == Nav.POI_FRIEND then
             JumpToFriend(result.userID)
         elseif result.poiType == Nav.POI_GUILDMATE then
@@ -99,11 +104,8 @@ function Chat:TP(text)
     if result.nodeIndex then
         Nav.MapTab:jumpToNode(result)
         return
-    end
-
-    local zoneId = result.zoneId
-    if zoneId then
-        local node = Nav.Players:GetPlayerInZone(zoneId)
+    elseif result.zoneId then
+        local node = Nav.Players:GetPlayerInZone(result.zoneId)
         if not node then
             CHAT_SYSTEM:AddMessage(zo_strformat(GetString(NAVIGATOR_NO_PLAYER_IN_ZONE), result.zoneName))
             return
