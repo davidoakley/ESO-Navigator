@@ -180,7 +180,7 @@ function Utils.DisplayName(name)
 
 	-- local r = name
 	if _lang == "en" then
-		r = r:gsub("^Dungeon: ", "", 1):gsub("^Trial: ", "", 1):gsub("^The ", "", 1)
+		r = r:gsub("^Dungeon: ", "", 1):gsub("^Trial: ", "", 1) --:gsub("^The ", "", 1)
 		     :gsub(" Wayshrine$", "", 1)
 	elseif _lang == "fr" then
 		-- r = r:gsub("^oratoire de ", "", 1):gsub("^oratoire d'", "", 1)
