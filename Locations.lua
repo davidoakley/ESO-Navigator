@@ -19,6 +19,7 @@ function Locs:IsZone(zoneId)
        or zoneId==1027 -- Artaeum
        or zoneId==1413 -- Apocrypha
        or zoneId==1463 -- The Scholarium
+       or zoneId==1272 -- Atoll of Immolation
        )
        and not (
         zoneId == 642 -- The Earth Forge
@@ -105,6 +106,7 @@ function Locs:setupNodes()
 
     self:AddExtraZone(2, 27) -- Sort of true, but called 'Clean Test'
     self:AddExtraZone(1, 439) -- Fake!
+    self:AddExtraZone(1272, 2000) -- Atoll Of Immolation
 end
 
 function Locs:AddExtraZone(zoneId, mapId)
@@ -344,7 +346,10 @@ function Locs:getCurrentMapZone()
     local mapId = GetCurrentMapId()
     local _, mapType, _, zoneIndex, _ = GetMapInfoById(mapId)
     local zoneId = GetZoneId(zoneIndex)
-    -- Nav.log("Locs:getCurrentMapZone zoneId = "..zoneId.." type "..mapType)
+    if mapId == 2000 then
+        zoneId = Nav.ZONE_ATOLLOFIMMOLATION
+    end
+    Nav.log("Locs:getCurrentMapZone mapId %d, zoneIndex %d, zoneId %d type %d", mapId, zoneIndex, zoneId, mapType)
     if zoneId == 2 then
         return {
             zoneId = 2
