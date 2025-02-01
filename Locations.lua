@@ -282,6 +282,23 @@ function Locs:GetZones()
     return self.zones
 end
 
+local function addZoneToList(nodes, name, zoneId, mapId, bookmarked, suffix)
+    table.insert(nodes, {
+        name = name,
+        barename = Utils.bareName(name),
+        zoneId = zoneId,
+        zoneName = name,
+        mapId = mapId,
+        icon = "Navigator/media/zone.dds",
+        poiType = Nav.POI_ZONE,
+        weight = Nav.isRecall and 1.0 or 0.9,
+        known = true,
+        bookmarked = bookmarked,
+        suffix = suffix
+    })
+
+end
+
 function Locs:getZoneList()
     local nodes = {}
 
@@ -289,19 +306,11 @@ function Locs:getZoneList()
         self:setupNodes()
     end
 
-    for zoneID, info in pairs(self.zones) do
-        table.insert(nodes, {
-            name = info.name,
-            barename = Utils.bareName(info.name),
-            zoneId = zoneID,
-            zoneName = info.name,
-            mapId = info.mapId,
-            icon = "Navigator/media/zone.dds",
-            poiType = Nav.POI_ZONE,
-            weight = Nav.isRecall and 1.0 or 0.9,
-            known = true,
-            bookmarked = Nav.Bookmarks:contains(info)
-        })
+    for zoneId, info in pairs(self.zones) do
+        addZoneToList(nodes, info.name, zoneId, info.mapId, Nav.Bookmarks:contains(info))
+        if zoneId == Nav.ZONE_ATOLLOFIMMOLATION then
+            addZoneToList(nodes, GetString(NAVIGATOR_LOCATION_OBLIVIONPORTAL), zoneId, info.mapId, Nav.Bookmarks:contains(info), info.name)
+        end
     end
 
     return nodes

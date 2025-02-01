@@ -49,3 +49,6 @@ mkstr("NAVIGATOR_TRAVELING_TO_ZONE_VIA_PLAYER", "Traveling to <<1>> via <<2>>")
 
 -- Chat slash command
 mkstr("NAVIGATOR_SLASH_DESCRIPTION", "Navigator: Teleports to the given zone, wayshrine, house or player")
+
+-- Location names
+mkstr("NAVIGATOR_LOCATION_OBLIVIONPORTAL", "Oblivion Portal")
