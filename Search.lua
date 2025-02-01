@@ -5,20 +5,16 @@ local Locations = Nav.Locations
 local colors = Nav.ansicolors
 local fzy = Nav.fzy
 
-Search.categories = nil
-
 Nav.FILTER_NONE = 0
 Nav.FILTER_PLAYERS = 1
 Nav.FILTER_HOUSES = 4
 
-local function match(object, searchTerm)
-    local name = Utils.SearchName(object.originalName or object.name) -- object.barename or object.name
-    searchTerm = Utils.removeAccents(searchTerm)
+Search.candidates = {}
 
-    local result = fzy.filter(searchTerm, {name})
-
-    if #result >= 1 then
-        return result[1][3] -- result[1][3], result[1][2]
+local function match(searchName, searchTerm)
+    if fzy.has_match(searchTerm, searchName, nil) then
+        local _, s = fzy.positions(searchTerm, searchName, nil)
+        return s
     else
         return 0
     end
@@ -31,10 +27,20 @@ local function matchComparison(x,y)
 	return (x.barename or x.name) < (y.barename or y.name)
 end
 
-local function addSearchResults(result, searchTerm, nodeList)
-    for i = 1, #nodeList do
-        local node = nodeList[i]
-        local matchLevel = searchTerm ~= "" and match(node, searchTerm) or 1.0
+function Search:AddCandidates(list)
+    for i = 1, #list do
+        local node = list[i]
+        local searchName = Utils.SearchName(node.originalName or node.name)
+        self.candidates[searchName] = node
+    end
+end
+
+function Search:Execute(searchTerm)
+    searchTerm = Utils.removeAccents(searchTerm)
+    local result = {}
+
+    for searchName, node in pairs(self.candidates) do
+        local matchLevel = searchTerm ~= "" and match(searchName, searchTerm) or 1.0
         if matchLevel > 0 then
             local resultNode = Utils.shallowCopy(node)
             if node.weight then
@@ -46,33 +52,36 @@ local function addSearchResults(result, searchTerm, nodeList)
             table.insert(result, resultNode)
         end
     end
+
+    return result
 end
 
+function Search:Run(searchTerm, filter)
+    self.candidates = {}
 
-function Search.run(searchTerm, filter)
     searchTerm = searchTerm and string.lower(searchTerm) or ""
     searchTerm = searchTerm:gsub("[^%w ]", "")
 
-    -- Nav.log("Search.run('%s', %d)", searchTerm, filter)
+    -- Nav.log("Search:Run('%s', %d)", searchTerm, filter)
 
     if filter == Nav.FILTER_NONE and searchTerm == "" then
         return {}
     end
 
-    local result = {}
-
     if filter == Nav.FILTER_PLAYERS then
-        addSearchResults(result, searchTerm, Nav.Players:GetPlayerList())
+        self:AddCandidates(Nav.Players:GetPlayerList())
     elseif filter == Nav.FILTER_HOUSES then
-        addSearchResults(result, searchTerm, Locations:getHouseList())
+        self:AddCandidates(Locations:getHouseList())
     else
-        addSearchResults(result, searchTerm, Locations:getKnownNodes())
-        addSearchResults(result, searchTerm, Locations:getZoneList())
+        self:AddCandidates(Locations:getKnownNodes())
+        self:AddCandidates(Locations:getZoneList())
     end
+
+    local result = self:Execute(searchTerm)
 
     table.sort(result, matchComparison)
 
-    Search.result = result
+    self.result = result
     return result
 end
   

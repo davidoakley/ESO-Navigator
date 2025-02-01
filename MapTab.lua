@@ -377,7 +377,7 @@ function MT:executeSearch(searchString, keepTargetNode)
 
     MT.searchString = searchString
 
-    results = Search.run(searchString or "", MT.filter)
+    results = Search:Run(searchString or "", MT.filter)
 
 	Nav.results = results
     if not keepTargetNode or Nav.targetNode >= (MT.resultCount or 0) then
