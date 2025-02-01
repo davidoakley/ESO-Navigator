@@ -4,7 +4,7 @@ This is an Add-on designed to make getting from place to place in ESO easier. It
 
 ## Please Note ##
 
-This add-on is brand-new, and has only been tested by me! I would appreciate friendly feedback as to how it can be improved or how it isn't working the way you'd expect.
+Navigator is new! I would appreciate friendly feedback as to how it can be improved or how it isn't working the way you'd expect.
 
 Navigator currently works in **English** and is partially localised and tested in **French**; other languages may have varying levels of functionality or brokenness... Please get in touch if you'd like to help!
 
