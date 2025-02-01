@@ -68,7 +68,7 @@ local function executeSearch(searchString)
 	local results
 
 	if searchString ~= nil and #searchString > 0 then
-		results = Search.run(searchString)
+		results = Search:Run(searchString)
 	else
 		results = {} --Navigator.categories
 	end
