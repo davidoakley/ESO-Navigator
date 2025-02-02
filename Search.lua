@@ -74,7 +74,7 @@ function Search:Run(searchTerm, filter)
         self:AddCandidates(Locations:getHouseList())
     else
         self:AddCandidates(Locations:getKnownNodes())
-        self:AddCandidates(Locations:getZoneList())
+        self:AddCandidates(Locations:getZoneList(true))
     end
 
     local result = self:Execute(searchTerm)

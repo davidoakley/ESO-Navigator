@@ -299,7 +299,7 @@ local function addZoneToList(nodes, name, zoneId, mapId, bookmarked, suffix)
 
 end
 
-function Locs:getZoneList()
+function Locs:getZoneList(includeAliases)
     local nodes = {}
 
     if not self.zones then
@@ -308,7 +308,7 @@ function Locs:getZoneList()
 
     for zoneId, info in pairs(self.zones) do
         addZoneToList(nodes, info.name, zoneId, info.mapId, Nav.Bookmarks:contains(info))
-        if zoneId == Nav.ZONE_ATOLLOFIMMOLATION then
+        if includeAliases and zoneId == Nav.ZONE_ATOLLOFIMMOLATION then
             addZoneToList(nodes, GetString(NAVIGATOR_LOCATION_OBLIVIONPORTAL), zoneId, info.mapId, Nav.Bookmarks:contains(info), info.name)
         end
     end
