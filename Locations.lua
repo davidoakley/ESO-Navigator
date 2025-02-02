@@ -170,7 +170,7 @@ function Locs:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon)
         nodeInfo.icon = "esoui/art/tutorial/poi_raiddungeon_complete.dds"
         nodeInfo.suffix = GetString(NAVIGATOR_TRIAL)
     elseif typePOI == 7 then
-        nodeInfo.poiType = Nav.POI_GROUP_HOUSE
+        nodeInfo.poiType = Nav.POI_HOUSE
         nodeInfo.owned = (icon:find("poi_group_house_owned") ~= nil)
         nodeInfo.freeRecall = true
     elseif typePOI == 1 then
@@ -257,7 +257,7 @@ function Locs:getKnownNodes(zoneId)
             node.bookmarked = bookmarked
             if not node.freeRecall and Nav.isRecall then
                 node.weight = bookmarked and 0.9 or 0.8
-            elseif node.poiType == Nav.POI_GROUP_HOUSE and not node.owned then
+            elseif node.poiType == Nav.POI_HOUSE and not node.owned then
                 node.weight = 0.7
             elseif bookmarked then
                 node.weight = 1.2
@@ -279,7 +279,7 @@ function Locs:getHouseList()
     local nodes = {}
     for i = 1, #self.nodes do
         local index = self.nodes[i].nodeIndex
-        if self:isKnownNode(index) and self.nodes[i].poiType == Nav.POI_GROUP_HOUSE then
+        if self:isKnownNode(index) and self.nodes[i].poiType == Nav.POI_HOUSE then
             local node = Utils.shallowCopy(self.nodes[i])
             if Nav.Bookmarks:contains(node) then
                 node.bookmarked = true
