@@ -32,15 +32,21 @@ function Locs:IsZone(zoneId)
     return false
 end
 
+local function uniqueName(name, x, z)
+    return string.format("%s:%.4f,%.4f", Utils.bareName(name), x, z)
+end
+
 function Locs:setupNodes()
     self.nodes = {}
     self.nodeMap = {}
     self.zones = {}
+    self.locMap = {}
 
     local totalNodes = GetNumFastTravelNodes()
-    local nodeMap = {}
+    local namelocMap = {} -- Match on barename and location
+    local locMap = {} -- Match on location
     for i = 1, totalNodes do
-        local known, name, _, _, icon, glowIcon, typePOI, _, isLocked = GetFastTravelNodeInfo(i)
+        local known, name, x, z, icon, glowIcon, typePOI, _, isLocked = GetFastTravelNodeInfo(i)
 
         local zoneIndex, _ = GetFastTravelNodePOIIndicies(i)
         local nodeZoneId = GetParentZoneId(GetZoneId(zoneIndex))
@@ -51,7 +57,11 @@ function Locs:setupNodes()
             table.insert(self.nodes, nodeInfo)
             self.nodeMap[i] = nodeInfo
             self.knownNodes[i] = known
-            nodeMap[Utils.bareName(name)] = nodeInfo
+            local uid = uniqueName(name, x, z)
+            if not namelocMap[uid] then
+                namelocMap[uid] = nodeInfo
+                locMap[string.format("%.4f,%.4f", x, z)] = nodeInfo
+            end
         end
     end
 
@@ -60,24 +70,29 @@ function Locs:setupNodes()
 		local zoneName = GetZoneNameById(zoneId)
 		if zoneName ~= nil and zoneName ~= ""
            and zoneId ~= 643 -- Imperial Sewers
-           and zoneId ~= 1283 -- The Shambles
+           --and zoneId ~= 1283 -- The Shambles
            then
             zoneName = Utils.FormatSimpleName(zoneName)
 			local zoneIndex = GetZoneIndex(zoneId)
 			local numPOIs = GetNumPOIs(zoneIndex)
 			for poiIndex = 1, numPOIs do
 				local poiName = GetPOIInfo(zoneIndex, poiIndex) -- might be wrong - "X" instead of "Dungeon: X"!
-				local nodeInfo = nodeMap[Utils.bareName(poiName)]  -- that's why we use BareName to strip prefix
+                local x, z = GetPOIMapInfo(zoneIndex, poiIndex)
+                local nodeInfo = namelocMap[uniqueName(poiName, x, z)]  -- that's why we use BareName to strip prefix
+                -- fix "Darkshade Caverns I" being returned for both DC1 and DC2
+                if zoneId == 57 and poiIndex == 60 then -- zone Deshaan, POI 60 is DC2!
+                    nodeInfo = self.nodeMap[264]
+                elseif not nodeInfo then
+                    nodeInfo = locMap[string.format("%.4f,%.4f", x, z)]
+                end
                 if poiName ~= "" and nodeInfo ~= nil  then -- teleportable POI
-					-- fix "Darkshade Caverns I" being returned for both DC1 and DC2
+                    nodeInfo.poiIndex = poiIndex
+
                     if zoneId==1146 then -- the Dragonguard Sanctuary wayshrine in Tideholm
                         zoneId = 1133 -- should appear in Southern Elsweyr
-					elseif zoneId == 57 and poiIndex == 60 then -- zone Deshaan, POI 60 is DC2!
-						for _, v in pairs(nodeMap) do
-							if v.nodeIndex == 264 then
-								nodeInfo = v
-							end
-						end
+                    elseif zoneId==1283 then
+                        zoneId = Nav.ZONE_FARGRAVE -- The Shambles -> Fargrave
+                        nodeInfo.mapId = 2082
 					end
 
                     if not self.zones[zoneId] then
@@ -103,6 +118,12 @@ function Locs:setupNodes()
 			end
 		end
 	end
+
+    for i = 1, #self.nodes do
+        if not self.nodes[i].poiIndex and self.nodes[i].zoneId ~= Nav.ZONE_CYRODIIL then
+            Nav.log(" x %s - nodeIndex %d", self.nodes[i].name, self.nodes[i].nodeIndex)
+        end
+    end
 
     self:AddExtraZone(2, 27) -- Sort of true, but called 'Clean Test'
     self:AddExtraZone(1, 439) -- Fake!
@@ -339,7 +360,9 @@ function Locs:getCurrentMapZoneId()
     local _, mapType, _, zoneIndex, _ = GetMapInfoById(mapId)
     local zoneId = GetZoneId(zoneIndex)
     -- Nav.log("Locs:getCurrentMapZone zoneId = "..zoneId.." type "..mapType)
-    if mapType == MAPTYPE_SUBZONE and not self:IsZone(zoneId) then
+    if mapId == 2119 then
+        zoneId = Nav.ZONE_FARGRAVE
+    elseif mapType == MAPTYPE_SUBZONE and not self:IsZone(zoneId) then
         zoneId = GetParentZoneId(zoneId)
         -- Nav.log("Locs:getCurrentMapZone parent zoneId = "..zoneId)
     end
@@ -357,8 +380,9 @@ function Locs:getCurrentMapZone()
     local zoneId = GetZoneId(zoneIndex)
     if mapId == 2000 then
         zoneId = Nav.ZONE_ATOLLOFIMMOLATION
+    elseif mapId == 2119 then
+        zoneId = Nav.ZONE_FARGRAVE
     end
-    Nav.log("Locs:getCurrentMapZone mapId %d, zoneIndex %d, zoneId %d type %d", mapId, zoneIndex, zoneId, mapType)
     if zoneId == 2 then
         return {
             zoneId = 2
