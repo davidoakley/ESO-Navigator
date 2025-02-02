@@ -615,6 +615,22 @@ local function showWayshrineMenu(owner, data)
             MT:PanToPOI(data, true)
             ClearMenu()
         end)
+    elseif data.zoneId and Nav.isRecall then
+        AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE), data.name), function()
+            local node = Nav.Players:GetPlayerInZone(data.zoneId)
+            if not node then
+                ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.GENERAL_ALERT_ERROR, GetString(NAVIGATOR_NO_PLAYER_IN_ZONE), data.name)
+                return
+            end
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(NAVIGATOR_TRAVELING_TO_ZONE_VIA_PLAYER), node.zoneName, node.userID)
+            zo_callLater(function() SCENE_MANAGER:Hide("worldMap") end, 10)
+            if node.poiType == Nav.POI_FRIEND then
+                JumpToFriend(node.userID)
+            elseif node.poiType == Nav.POI_GUILDMATE then
+                JumpToGuildMember(node.userID)
+            end
+            ClearMenu()
+        end)
     end
 
     local bookmarks = Nav.Bookmarks
