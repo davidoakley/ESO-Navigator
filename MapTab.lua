@@ -602,11 +602,25 @@ local function showWayshrineMenu(owner, data)
     end
 
     if data.nodeIndex then
-        local strId = (Nav.isRecall and data.poiType ~= Nav.POI_HOUSE) and SI_WORLD_MAP_ACTION_RECALL_TO_WAYSHRINE or SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE
-        AddMenuItem(zo_strformat(GetString(strId), data.name), function()
-            MT:jumpToNode(data)
-            ClearMenu()
-        end)
+        if data.poiType == Nav.POI_HOUSE then
+            local houseId = GetFastTravelNodeHouseId(data.nodeIndex)
+            AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_HOUSE_INSIDE), data.name), function()
+                RequestJumpToHouse(houseId, false)
+                zo_callLater(function() SCENE_MANAGER:Hide("worldMap") end, 10)
+                ClearMenu()
+            end)
+            AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_HOUSE_OUTSIDE), data.name), function()
+                RequestJumpToHouse(houseId, true)
+                zo_callLater(function() SCENE_MANAGER:Hide("worldMap") end, 10)
+                ClearMenu()
+            end)
+        else
+            local strId = (Nav.isRecall and data.poiType ~= Nav.POI_HOUSE) and SI_WORLD_MAP_ACTION_RECALL_TO_WAYSHRINE or SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE
+            AddMenuItem(zo_strformat(GetString(strId), data.name), function()
+                MT:jumpToNode(data)
+                ClearMenu()
+            end)
+        end
         AddMenuItem(GetString(NAVIGATOR_MENU_SHOWONMAP), function()
             MT:PanToPOI(data, false)
             ClearMenu()
