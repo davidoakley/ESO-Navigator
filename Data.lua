@@ -3,6 +3,7 @@ local Data = Nav.Data or {}
 
 Nav.ZONE_CYRODIIL = 181
 Nav.ZONE_ATOLLOFIMMOLATION = 1272
+Nav.ZONE_FARGRAVE = 1282
 
 Nav.POI_NONE = -1
 Nav.POI_TRIAL = 1

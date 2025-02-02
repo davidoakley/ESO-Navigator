@@ -601,24 +601,69 @@ local function showWayshrineMenu(owner, data)
         return
     end
 
+    if data.nodeIndex then
+        if data.poiType == Nav.POI_HOUSE then
+            local houseId = GetFastTravelNodeHouseId(data.nodeIndex)
+            AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_HOUSE_INSIDE), data.name), function()
+                RequestJumpToHouse(houseId, false)
+                zo_callLater(function() SCENE_MANAGER:Hide("worldMap") end, 10)
+                ClearMenu()
+            end)
+            AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_HOUSE_OUTSIDE), data.name), function()
+                RequestJumpToHouse(houseId, true)
+                zo_callLater(function() SCENE_MANAGER:Hide("worldMap") end, 10)
+                ClearMenu()
+            end)
+        else
+            local strId = (Nav.isRecall and data.poiType ~= Nav.POI_HOUSE) and SI_WORLD_MAP_ACTION_RECALL_TO_WAYSHRINE or SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE
+            AddMenuItem(zo_strformat(GetString(strId), data.name), function()
+                MT:jumpToNode(data)
+                ClearMenu()
+            end)
+        end
+        AddMenuItem(GetString(NAVIGATOR_MENU_SHOWONMAP), function()
+            MT:PanToPOI(data, false)
+            ClearMenu()
+        end)
+        AddMenuItem(GetString(NAVIGATOR_MENU_SETDESTINATION), function()
+            MT:PanToPOI(data, true)
+            ClearMenu()
+        end)
+    elseif data.zoneId and Nav.isRecall then
+        AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE), data.name), function()
+            local node = Nav.Players:GetPlayerInZone(data.zoneId)
+            if not node then
+                ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.GENERAL_ALERT_ERROR, GetString(NAVIGATOR_NO_PLAYER_IN_ZONE), data.name)
+                return
+            end
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(NAVIGATOR_TRAVELING_TO_ZONE_VIA_PLAYER), node.zoneName, node.userID)
+            zo_callLater(function() SCENE_MANAGER:Hide("worldMap") end, 10)
+            if node.poiType == Nav.POI_FRIEND then
+                JumpToFriend(node.userID)
+            elseif node.poiType == Nav.POI_GUILDMATE then
+                JumpToGuildMember(node.userID)
+            end
+            ClearMenu()
+        end)
+    end
+
     local bookmarks = Nav.Bookmarks
 	if bookmarks:contains(entry) then
-        MT.menuOpen = true
-		AddMenuItem("Remove Bookmark", function()
+		AddMenuItem(GetString(NAVIGATOR_MENU_REMOVEBOOKMARK), function()
 			bookmarks:remove(entry)
 			ClearMenu()
             MT.menuOpen = false
             MT:ImmediateRefresh()
 		end)
 	else
-        MT.menuOpen = true
-		AddMenuItem("Add Bookmark", function()
+		AddMenuItem(GetString(NAVIGATOR_MENU_ADDBOOKMARK), function()
 			bookmarks:add(entry)
 			ClearMenu()
             MT.menuOpen = false
             MT:ImmediateRefresh()
 		end)
 	end
+    MT.menuOpen = true
 	ShowMenu(owner)
     SetMenuHiddenCallback(function()
         Nav.log("SetMenuHiddenCallback: Menu hidden")
@@ -627,6 +672,33 @@ local function showWayshrineMenu(owner, data)
             MT:ImmediateRefresh()
         end
     end)
+end
+
+function MT:PanToPOI(node, setWaypoint)
+    local function panToPOI(zoneIndex, poiIndex)
+        local normalizedX, normalizedZ = GetPOIMapInfo(zoneIndex, poiIndex)
+        Nav.log("MT:PanToPOI: poiIndex=%d, %f,%f", poiIndex, normalizedX, normalizedZ)
+        if setWaypoint then
+            PingMap(MAP_PIN_TYPE_PLAYER_WAYPOINT, MAP_TYPE_LOCATION_CENTERED, normalizedX, normalizedZ)
+        end
+
+        local mapPanAndZoom = ZO_WorldMap_GetPanAndZoom()
+        mapPanAndZoom:PanToNormalizedPosition(normalizedX, normalizedZ, false)
+    end
+
+    local targetMapId = node.mapId or getMapIdByZoneId(node.zoneId)
+    local currentMapId = GetCurrentMapId()
+    local targetZoneIndex = GetZoneIndex(node.zoneId)
+
+    if targetMapId ~= currentMapId then
+        WORLD_MAP_MANAGER:SetMapById(targetMapId)
+
+        zo_callLater(function()
+            panToPOI(targetZoneIndex, node.poiIndex)
+        end, 100)
+    else
+        panToPOI(targetZoneIndex, node.poiIndex)
+    end
 end
 
 function MT:selectResult(control, data, mouseButton)
