@@ -81,6 +81,12 @@ function Chat:TP(text)
         Nav.saved.loggingEnabled = false
         CHAT_SYSTEM:AddMessage("Logging disabled")
         return
+    elseif text == "*mapinfo" then
+        local mapId = GetCurrentMapId()
+        local _, mapType, _, zoneIndex, _ = GetMapInfoById(mapId)
+        local zoneId = GetZoneId(zoneIndex)
+        CHAT_SYSTEM:AddMessage(string.format("Current Map: mapId %d, zoneIndex %d, zoneId %d type %d", mapId, zoneIndex, zoneId, mapType))
+        return
     end
 
     local result = self.result or self:Search(text)
