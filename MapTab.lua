@@ -602,7 +602,7 @@ local function showWayshrineMenu(owner, data)
     end
 
     if data.nodeIndex then
-        local strId = Nav.isRecall and SI_WORLD_MAP_ACTION_RECALL_TO_WAYSHRINE or SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE
+        local strId = (Nav.isRecall and data.poiType ~= Nav.POI_HOUSE) and SI_WORLD_MAP_ACTION_RECALL_TO_WAYSHRINE or SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE
         AddMenuItem(zo_strformat(GetString(strId), data.name), function()
             MT:jumpToNode(data)
             ClearMenu()
