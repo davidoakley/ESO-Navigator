@@ -694,6 +694,27 @@ local function showWayshrineMenu(owner, data)
     end)
 end
 
+local function showGroupMenu(owner, data)
+    ClearMenu()
+
+    AddMenuItem(GetString(SI_GROUP_LEAVE), function()
+        ZO_Dialogs_ShowDialog("GROUP_LEAVE_DIALOG")
+        ClearMenu()
+        MT.menuOpen = false
+        MT:ImmediateRefresh()
+    end)
+
+    MT.menuOpen = true
+    ShowMenu(owner)
+    SetMenuHiddenCallback(function()
+        Nav.log("SetMenuHiddenCallback: Menu hidden")
+        MT.menuOpen = false
+        if MT.needsRefresh then
+            MT:ImmediateRefresh()
+        end
+    end)
+end
+
 function MT:PanToPOI(node, setWaypoint)
     local function panToPOI(zoneIndex, poiIndex)
         local normalizedX, normalizedZ = GetPOIMapInfo(zoneIndex, poiIndex)
@@ -758,13 +779,20 @@ function MT:RowMouseUp(control, mouseButton, upInside)
 	end
 end
 
-function MT:CategoryRowMouseUp(control, _, upInside)
+function MT:CategoryRowMouseUp(control, mouseButton, upInside)
 	if upInside then
-		local data = ZO_ScrollList_GetData(control)
-        Nav.log("Toggling category %s", data.id)
-        self.collapsedCategories[data.id] = not self.collapsedCategories[data.id]
-        MT:buildScrollList(true)
-        MT:updateFilterControl()
+        --Nav.log("MT:CategoryRowMouseUp %d %s", mouseButton, )
+        local data = ZO_ScrollList_GetData(control)
+        if mouseButton == 2 then
+            if data.id == "group" then
+                showGroupMenu(control, data)
+            end
+        else
+            Nav.log("Toggling category %s", data.id)
+            self.collapsedCategories[data.id] = not self.collapsedCategories[data.id]
+            MT:buildScrollList(true)
+            MT:updateFilterControl()
+        end
 	end
 end
 
