@@ -111,7 +111,7 @@ function Players:GetPlayerInZone(zoneId)
 end
 
 local function groupComparison(x, y)
-    if x.isLeader then
+    if x.isLeader and not y.isLeader then -- There can be only one
         return true
     end
     return (x.barename or x.name) < (y.barename or y.name)
