@@ -10,7 +10,7 @@ local Players = Nav.Players or {
 }
 local Utils = Nav.Utils
 
-local function addPlayerZone(self, zones, zoneId, zoneName, userID, icon, poiType)
+local function addPlayerZone(self, zones, zoneId, zoneName, userID, icon, poiType, charName)
     if zones[zoneId] and CanJumpToPlayerInZone(zoneId) then
         local zoneInfo = {
             zoneId = zoneId,
@@ -22,6 +22,10 @@ local function addPlayerZone(self, zones, zoneId, zoneName, userID, icon, poiTyp
 
         self.players[userID] = zoneInfo
         self.playerZones[zoneId] = zoneInfo
+        if charName then
+            charName = zo_strformat("<<!AC:1>>", charName)
+            zoneInfo.charName = charName
+        end
     end
 end
 
@@ -41,8 +45,10 @@ function Players:SetupPlayerZones()
             local userID, _, _, playerStatus = GetGuildMemberInfo(guildID, i)
 
             if playerStatus ~= PLAYER_STATUS_OFFLINE and userID ~= myID then
-                local _, _, zoneName, _, _, _, _, zoneId = GetGuildMemberCharacterInfo(guildID, i)
-                addPlayerZone(self, zones, zoneId, zoneName, userID, "/esoui/art/menubar/gamepad/gp_playermenu_icon_character.dds", Nav.POI_GUILDMATE)
+                local hasChar, charName, zoneName, _, _, _, _, zoneId = GetGuildMemberCharacterInfo(guildID, i)
+                if hasChar then
+                    addPlayerZone(self, zones, zoneId, zoneName, userID, "/esoui/art/menubar/gamepad/gp_playermenu_icon_character.dds", Nav.POI_GUILDMATE, charName)
+                end
             end
         end
     end
@@ -52,9 +58,9 @@ function Players:SetupPlayerZones()
         local userID, _, playerStatus, secsSinceLogoff = GetFriendInfo(i)
 
         if playerStatus ~= PLAYER_STATUS_OFFLINE and secsSinceLogoff == 0 then
-            local hasChar, _, zoneName, _, _, _, _, zoneId = GetFriendCharacterInfo(i)
+            local hasChar, charName, zoneName, _, _, _, _, zoneId = GetFriendCharacterInfo(i)
             if hasChar then
-                addPlayerZone(self, zones, zoneId, zoneName, userID, "/esoui/art/menubar/gamepad/gp_playermenu_icon_character.dds", Nav.POI_FRIEND)
+                addPlayerZone(self, zones, zoneId, zoneName, userID, "/esoui/art/menubar/gamepad/gp_playermenu_icon_character.dds", Nav.POI_FRIEND, charName)
             end
         end
     end
@@ -128,13 +134,14 @@ function Players:GetGroupList()
         local unitTag = GetGroupUnitTagByIndex(i)
         if unitTag then
             local unitName = GetUnitName(unitTag)
+            local displayName = GetUnitDisplayName(unitTag) or '"'..unitName..'"'
             local zoneId = GetZoneId(GetUnitZoneIndex(unitTag))
             if CanJumpToPlayerInZone(zoneId) and IsUnitOnline(unitTag) and string.lower(unitName) ~= player then
                 local zoneName = GetZoneNameById(zoneId)
                 local isLeader = IsUnitGroupLeader(unitTag)
                 local icon = isLeader and "/esoui/art/icons/mapkey/mapkey_groupleader.dds" or "/esoui/art/icons/mapkey/mapkey_groupmember.dds" --"/esoui/art/compass/groupleader.dds" or "/esoui/art/compass/groupmember.dds"
                 table.insert(list, {
-                    name = unitName, -- Character nickname
+                    name = displayName, -- Character nickname
                     zoneId = zoneId,
                     zoneName = zoneName,
                     isLeader = isLeader,
