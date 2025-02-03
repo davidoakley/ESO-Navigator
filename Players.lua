@@ -110,4 +110,52 @@ function Players:GetPlayerInZone(zoneId)
     end
 end
 
+local function groupComparison(x, y)
+    if x.isLeader then
+        return true
+    end
+    return (x.barename or x.name) < (y.barename or y.name)
+end
+
+function Players:GetGroupList()
+    local list = {}
+
+    local gCount = GetGroupSize()
+
+    local player = string.lower(GetUnitName("player"))
+
+    for i = 1, gCount do
+        local unitTag = GetGroupUnitTagByIndex(i)
+        if unitTag then
+            local unitName = GetUnitName(unitTag)
+            local zoneId = GetZoneId(GetUnitZoneIndex(unitTag))
+            if CanJumpToPlayerInZone(zoneId) and IsUnitOnline(unitTag) and string.lower(unitName) ~= player then
+                local zoneName = GetZoneNameById(zoneId)
+                local isLeader = IsUnitGroupLeader(unitTag)
+                local icon = isLeader and "/esoui/art/icons/mapkey/mapkey_groupleader.dds" or "/esoui/art/icons/mapkey/mapkey_groupmember.dds" --"/esoui/art/compass/groupleader.dds" or "/esoui/art/compass/groupmember.dds"
+                table.insert(list, {
+                    name = unitName, -- Character nickname
+                    zoneId = zoneId,
+                    zoneName = zoneName,
+                    isLeader = isLeader,
+                    --charName = GetUniqueNameForCharacter(unitName),
+                    unitTag = unitTag, -- Format: group{index}
+                    poiType = Nav.POI_GROUPMATE,
+                    icon = icon,
+                    suffix = zoneName,
+                    known = true
+                })
+            end
+        end
+    end
+
+    table.sort(list, groupComparison)
+
+    return list
+end
+
+function Players:IsGroupLeader()
+    return string.lower(GetUnitName("player")) == string.lower(GetGroupLeaderUnitTag())
+end
+
 Nav.Players = Players

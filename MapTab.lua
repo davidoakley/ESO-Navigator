@@ -321,6 +321,11 @@ function MT:buildScrollList(keepScrollPosition)
     if isSearching then
         buildList(scrollData, "results", NAVIGATOR_CATEGORY_RESULTS, Nav.results, NAVIGATOR_HINT_NORESULTS)
     else
+        local group = Nav.Players:GetGroupList()
+        if #group > 0 then
+            buildList(scrollData, "group", SI_MAIN_MENU_GROUP, group)
+        end
+
         local bookmarks = Nav.Bookmarks:getBookmarks()
         buildList(scrollData, "bookmarks", NAVIGATOR_CATEGORY_BOOKMARKS, bookmarks, NAVIGATOR_HINT_NOBOOKMARKS)
 

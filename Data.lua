@@ -14,6 +14,11 @@ Nav.POI_ZONE = 5
 Nav.POI_WAYSHRINE = 6
 Nav.POI_GROUP_DUNGEON = 7
 Nav.POI_HOUSE = 8
+Nav.POI_GROUPMATE = 9
+
+function Nav.IsPlayer(poiType)
+    return poiType == Nav.POI_FRIEND or poiType == Nav.POI_GUILDMATE or poiType == Nav.POI_GROUPMATE
+end
 
 -- Trader Locations, copied from Faster Travel by SimonIllyan, XanDDemoX, upyachka, Valandil
 local trader_counts = { -- nodeIndex -> traders_count
