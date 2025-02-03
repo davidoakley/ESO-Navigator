@@ -606,6 +606,8 @@ local function showWayshrineMenu(owner, data)
         return
     end
 
+    local isPlayer = Nav.IsPlayer(data.poiType)
+
     if data.nodeIndex then
         if data.poiType == Nav.POI_HOUSE then
             local houseId = GetFastTravelNodeHouseId(data.nodeIndex)
@@ -652,22 +654,35 @@ local function showWayshrineMenu(owner, data)
         end)
     end
 
-    local bookmarks = Nav.Bookmarks
-	if bookmarks:contains(entry) then
-		AddMenuItem(GetString(NAVIGATOR_MENU_REMOVEBOOKMARK), function()
-			bookmarks:remove(entry)
-			ClearMenu()
-            MT.menuOpen = false
-            MT:ImmediateRefresh()
-		end)
-	else
-		AddMenuItem(GetString(NAVIGATOR_MENU_ADDBOOKMARK), function()
-			bookmarks:add(entry)
-			ClearMenu()
-            MT.menuOpen = false
-            MT:ImmediateRefresh()
-		end)
-	end
+    if isPlayer then
+        if Nav.Players:IsGroupLeader() and data.poiType == Nav.POI_GROUPMATE then
+            AddMenuItem(GetString(SI_GROUP_LIST_MENU_PROMOTE_TO_LEADER), function()
+                GroupPromote(data.unitTag)
+                --bookmarks:remove(entry)
+                ClearMenu()
+                MT.menuOpen = false
+                MT:ImmediateRefresh()
+            end)
+        end
+    else
+        local bookmarks = Nav.Bookmarks
+        if bookmarks:contains(entry) then
+            AddMenuItem(GetString(NAVIGATOR_MENU_REMOVEBOOKMARK), function()
+                bookmarks:remove(entry)
+                ClearMenu()
+                MT.menuOpen = false
+                MT:ImmediateRefresh()
+            end)
+        else
+            AddMenuItem(GetString(NAVIGATOR_MENU_ADDBOOKMARK), function()
+                bookmarks:add(entry)
+                ClearMenu()
+                MT.menuOpen = false
+                MT:ImmediateRefresh()
+            end)
+        end
+    end
+
     MT.menuOpen = true
 	ShowMenu(owner)
     SetMenuHiddenCallback(function()
@@ -726,8 +741,10 @@ function MT:selectResult(control, data, mouseButton)
             end
         end
     elseif mouseButton == 2 then
-        if data.nodeIndex or data.poiType == Nav.POI_ZONE then
+        if data.nodeIndex or data.poiType == Nav.POI_ZONE or Nav.IsPlayer(data.poiType) then
             showWayshrineMenu(control, data)
+        else
+            Nav.log("selectResult: unhandled mb2; poiType=%d zoneId=%d", data.poiType or -1, data.zoneId or -1)
         end
     else
         Nav.log("selectResult: unhandled; poiType=%d zoneId=%d", data.poiType or -1, data.zoneId or -1)
