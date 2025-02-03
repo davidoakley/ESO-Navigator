@@ -143,7 +143,8 @@ function Players:GetGroupList()
                     poiType = Nav.POI_GROUPMATE,
                     icon = icon,
                     suffix = zoneName,
-                    known = true
+                    known = true,
+                    weight = isLeader and 1.2 or 1.1
                 })
             end
         end

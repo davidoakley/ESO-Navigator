@@ -69,6 +69,7 @@ function Search:Run(searchTerm, filter)
     end
 
     if filter == Nav.FILTER_PLAYERS then
+        self:AddCandidates(Nav.Players:GetGroupList())
         self:AddCandidates(Nav.Players:GetPlayerList())
     elseif filter == Nav.FILTER_HOUSES then
         self:AddCandidates(Locations:getHouseList())
