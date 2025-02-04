@@ -57,7 +57,31 @@ function Players:SetupPlayers()
         if playerStatus ~= PLAYER_STATUS_OFFLINE and secsSinceLogoff == 0 then
             local hasChar, charName, zoneName, _, _, _, _, zoneId = GetFriendCharacterInfo(i)
             if hasChar then
-                addPlayerZone(self, zones, zoneId, zoneName, userID, "/esoui/art/menubar/gamepad/gp_playermenu_icon_character.dds", Nav.POI_FRIEND, charName)
+                local player = addPlayerZone(self, zones, zoneId, zoneName, userID, "/esoui/art/menubar/gamepad/gp_playermenu_icon_character.dds", Nav.POI_FRIEND, charName)
+                if player then
+                    player.weight = 1.1
+                end
+            end
+        end
+    end
+
+    local groupCount = GetGroupSize()
+    local playerName = string.lower(GetUnitName("player"))
+    for i = 1, groupCount do
+        local unitTag = GetGroupUnitTagByIndex(i)
+        if unitTag then
+            local charName = GetUnitName(unitTag)
+            local userID = GetUnitDisplayName(unitTag)
+            if IsUnitOnline(unitTag) and string.lower(charName) ~= playerName then
+                local zoneId = GetZoneId(GetUnitZoneIndex(unitTag))
+                local zoneName = GetZoneNameById(zoneId)
+                local isLeader = IsUnitGroupLeader(unitTag)
+                local icon = isLeader and "/esoui/art/icons/mapkey/mapkey_groupleader.dds" or "/esoui/art/icons/mapkey/mapkey_groupmember.dds"
+                local player = addPlayerZone(self, zones, zoneId, zoneName, userID or '"'..charName..'"', icon, Nav.POI_GROUPMATE, charName)
+                if player then
+                    player.unitTag = unitTag
+                    player.weight = isLeader and 1.3 or 1.2
+                end
             end
         end
     end
@@ -84,6 +108,7 @@ function Players:GetPlayerList()
             poiType = info.poiType,
             userID = userID,
             known = true,
+            weight = info.weight,
             canJumpToPlayer = info.canJumpToPlayer
         })
     end
@@ -123,36 +148,30 @@ local function groupComparison(x, y)
 end
 
 function Players:GetGroupList()
+    if self.players == nil then
+        self:SetupPlayers()
+    end
+    
     local list = {}
-
-    local gCount = GetGroupSize()
-
-    local player = string.lower(GetUnitName("player"))
-
-    for i = 1, gCount do
-        local unitTag = GetGroupUnitTagByIndex(i)
-        if unitTag then
-            local unitName = GetUnitName(unitTag)
-            local displayName = GetUnitDisplayName(unitTag) or '"'..unitName..'"'
-            local zoneId = GetZoneId(GetUnitZoneIndex(unitTag))
-            if CanJumpToPlayerInZone(zoneId) and IsUnitOnline(unitTag) and string.lower(unitName) ~= player then
-                local zoneName = GetZoneNameById(zoneId)
-                local isLeader = IsUnitGroupLeader(unitTag)
-                local icon = isLeader and "/esoui/art/icons/mapkey/mapkey_groupleader.dds" or "/esoui/art/icons/mapkey/mapkey_groupmember.dds" --"/esoui/art/compass/groupleader.dds" or "/esoui/art/compass/groupmember.dds"
-                table.insert(list, {
-                    name = displayName, -- Character nickname
-                    zoneId = zoneId,
-                    zoneName = zoneName,
-                    isLeader = isLeader,
-                    --charName = GetUniqueNameForCharacter(unitName),
-                    unitTag = unitTag, -- Format: group{index}
-                    poiType = Nav.POI_GROUPMATE,
-                    icon = icon,
-                    suffix = zoneName,
-                    known = true,
-                    weight = isLeader and 1.2 or 1.1
-                })
-            end
+    for userID, player in pairs(self.players) do
+        if player.poiType == Nav.POI_GROUPMATE then
+            table.insert(list, {
+                name = userID,
+                userID = userID,
+                unitName = player.unitName,
+                isLeader = player.isLeader,
+                unitTag = player.unitTag,
+                barename = userID:sub(2), -- remove '@' prefix
+                zoneId = player.zoneId,
+                zoneName = player.zoneName,
+                icon = player.icon,
+                suffix = player.zoneName,
+                poiType = player.poiType,
+                userID = userID,
+                known = true,
+                weight = weight,
+                canJumpToPlayer = player.canJumpToPlayer
+            })
         end
     end
 
