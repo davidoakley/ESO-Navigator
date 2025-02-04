@@ -631,6 +631,18 @@ local function showWayshrineMenu(owner, data)
                 zo_callLater(function() SCENE_MANAGER:Hide("worldMap") end, 10)
                 ClearMenu()
             end)
+            --TODO: Revisit: setting the primary residence didn't seem to be immediately visible
+            --if not data.isPrimary then
+            --    AddMenuItem(zo_strformat(GetString(SI_HOUSING_FURNITURE_SETTINGS_GENERAL_PRIMARY_RESIDENCE_BUTTON_TEXT), data.name), function()
+            --        local houseId = data.houseId or GetFastTravelNodeHouseId(data.nodeIndex)
+            --        SetHousingPrimaryHouse(houseId)
+            --        zo_callLater(function()
+            --            Nav.Locations:setupNodes()
+            --            MT:ImmediateRefresh()
+            --        end, 10)
+            --        ClearMenu()
+            --    end)
+            --end
         else
             local strId = (Nav.isRecall and data.poiType ~= Nav.POI_HOUSE) and SI_WORLD_MAP_ACTION_RECALL_TO_WAYSHRINE or SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE
             AddMenuItem(zo_strformat(GetString(strId), data.name), function()

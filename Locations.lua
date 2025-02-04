@@ -174,8 +174,12 @@ function Locs:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon)
         nodeInfo.poiType = Nav.POI_HOUSE
         nodeInfo.owned = (icon:find("poi_group_house_owned") ~= nil)
         nodeInfo.freeRecall = true
+        nodeInfo.houseId = GetFastTravelNodeHouseId(i)
+        if nodeInfo.houseId == GetHousingPrimaryHouse() then
+            nodeInfo.isPrimary = true
+            nodeInfo.icon = "/esoui/art/collections/gp_favorite_housing.dds"
+        end
         if Nav.saved.useHouseNicknames then
-            nodeInfo.houseId = GetFastTravelNodeHouseId(i)
             nodeInfo.collectibleId = GetCollectibleIdForHouse(nodeInfo.houseId)
             nodeInfo.nickname = GetCollectibleNickname(nodeInfo.collectibleId)
             nodeInfo.suffix = zo_strformat(GetString(SI_TOOLTIP_COLLECTIBLE_NICKNAME), nodeInfo.nickname)
@@ -269,6 +273,9 @@ function Locs:getKnownNodes(zoneId, includeAliases)
             elseif bookmarked then
                 node.weight = 1.2
             end
+            if node.isPrimary then
+                node.weight = node.weight + 0.1
+            end
             if node.traders and node.traders > 0 then
                 node.weight = node.weight * (1.0 + 0.02 * node.traders)
             end
@@ -304,6 +311,9 @@ function Locs:getHouseList(includeAliases)
                 node.weight = 0.7
             elseif node.bookmarked then
                 node.weight = 1.2
+            end
+            if node.isPrimary then
+                node.weight = node.weight + 0.1
             end
             node.known = true
             table.insert(nodes, node)
