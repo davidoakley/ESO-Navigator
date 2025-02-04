@@ -80,6 +80,7 @@ function Players:SetupPlayers()
                 local player = addPlayerZone(self, zones, zoneId, zoneName, userID or '"'..charName..'"', icon, Nav.POI_GROUPMATE, charName)
                 if player then
                     player.unitTag = unitTag
+                    player.isLeader = isLeader
                     player.weight = isLeader and 1.3 or 1.2
                 end
             end
@@ -98,6 +99,7 @@ local function createPlayerNode(player, setSuffix)
         unitName = player.unitName,
         isLeader = player.isLeader,
         unitTag = player.unitTag,
+        isLeader = player.isLeader,
         barename = player.userID:sub(2), -- remove '@' prefix
         zoneId = player.zoneId,
         zoneName = player.zoneName,
@@ -135,6 +137,8 @@ end
 local function groupComparison(x, y)
     if x.isLeader and not y.isLeader then -- There can be only one
         return true
+    elseif y.isLeader and not x.isLeader then
+        return false
     end
     return (x.barename or x.name) < (y.barename or y.name)
 end
@@ -143,8 +147,8 @@ function Players:GetGroupList()
     if self.players == nil then self:SetupPlayers() end
     
     local list = {}
-    for player in pairs(self.players) do
-        if player.poiType == Nav.POI_GROUPMATE then
+    for _, player in pairs(self.players) do
+        if player.poiType == Nav.POI_GROUPMATE and player.userID then
             table.insert(list, createPlayerNode(player, true))
         end
     end
