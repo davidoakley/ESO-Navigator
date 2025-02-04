@@ -87,11 +87,14 @@ function Bookmarks:getBookmarks()
             if traders and traders > 0 then
                 node.traders = traders
             end
+            node.isBookmark = true
             table.insert(results, node)
         elseif entry.zoneId then
             local zone = Nav.Locations:getZone(entry.zoneId)
             if zone then
-                table.insert(results, zone)
+                local node = Nav.Utils.shallowCopy(zone)
+                node.isBookmark = true
+                table.insert(results, node)
             end
         end
     end

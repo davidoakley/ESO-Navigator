@@ -604,16 +604,7 @@ end
 
 local function showWayshrineMenu(owner, data)
 	ClearMenu()
-
-    local entry = {}
-    if data.nodeIndex then
-        entry.nodeIndex = data.nodeIndex
-    elseif data.zoneId then
-        entry.zoneId = data.zoneId
-    else
-        Nav.log("showWayshrineMenu: unrecognised data")
-        return
-    end
+    local bookmarks = Nav.Bookmarks
 
     local isPlayer = Nav.IsPlayer(data.poiType)
 
@@ -676,15 +667,16 @@ local function showWayshrineMenu(owner, data)
             end)
         end
     else
-        local bookmarks = Nav.Bookmarks
-        if bookmarks:contains(entry) then
-            AddMenuItem(GetString(NAVIGATOR_MENU_REMOVEBOOKMARK), function()
-                bookmarks:remove(entry)
-                ClearMenu()
-                MT.menuOpen = false
-                MT:ImmediateRefresh()
-            end)
+        local entry
+        if data.nodeIndex then
+            entry = { nodeIndex = data.nodeIndex }
+        elseif data.zoneId then
+            entry = { zoneId = data.zoneId }
         else
+            Nav.log("showWayshrineMenu: unrecognised data")
+        end
+
+        if entry and not bookmarks:contains(entry) then
             AddMenuItem(GetString(NAVIGATOR_MENU_ADDBOOKMARK), function()
                 bookmarks:add(entry)
                 ClearMenu()
@@ -692,6 +684,15 @@ local function showWayshrineMenu(owner, data)
                 MT:ImmediateRefresh()
             end)
         end
+    end
+
+    if data.isBookmark then
+        AddMenuItem(GetString(NAVIGATOR_MENU_REMOVEBOOKMARK), function()
+            bookmarks:remove(data)
+            ClearMenu()
+            MT.menuOpen = false
+            MT:ImmediateRefresh()
+        end)
     end
 
     MT.menuOpen = true
