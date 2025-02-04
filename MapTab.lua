@@ -35,11 +35,13 @@ function MT:layoutRow(rowControl, data, _)
 	local name = data.name
     local tooltipText = data.tooltip
     local icon = data.icon
-    local iconColour = data.colour and { data.colour:UnpackRGBA() } or
+    local iconColour = (data.iconColour and { data.iconColour:UnpackRGBA() }) or
+                       (data.colour and { data.colour:UnpackRGBA() }) or
                        ((data.known and not data.disabled) and { 1.0, 1.0, 1.0, 1.0 } or { 0.51, 0.51, 0.44, 1.0 })
 
     if data.suffix ~= nil then
-        name = name .. " |c82826F" .. data.suffix .. "|r"
+        local colour = data.canJumpToPlayer and (data.zoneId == Nav.ZONE_CYRODIIL and "FFAB0F" or "76BCC3") or "82826F"
+        name = name .. " |c" .. colour .. data.suffix .. "|r"
     end
 
 	if data.icon ~= nil then
@@ -65,7 +67,6 @@ function MT:layoutRow(rowControl, data, _)
 	if data.isSelected and data.known and not data.disabled then
 		rowControl.label:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
     elseif data.colour ~= nil and not data.disabled then
-        Nav.colour = data.colour
 		rowControl.label:SetColor(data.colour:UnpackRGBA())
     elseif data.known and not data.disabled then
 		rowControl.label:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
@@ -249,6 +250,15 @@ local function buildResult(listEntry, currentNodeIndex, isSelected)
         end
     end
 
+    if not nodeData.colour then
+        if nodeData.poiType == Nav.POI_FRIEND then
+            nodeData.iconColour = ZO_ColorDef:New(0.9, 0.8, 0)
+        elseif nodeData.poiType == Nav.POI_GROUPMATE then
+            nodeData.iconColour = ZO_SELECTED_TEXT
+        elseif Nav.IsPlayer(nodeData.poiType) then
+            nodeData.iconColour = ZO_NORMAL_TEXT
+        end
+    end
 
     if Nav.isDeveloper then
         addDeveloperTooltip(nodeData)
