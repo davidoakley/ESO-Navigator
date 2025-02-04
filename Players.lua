@@ -91,50 +91,42 @@ function Players:ClearPlayers()
     self.players = nil
 end
 
+local function createPlayerNode(player, setSuffix)
+    return {
+        name = player.userID,
+        userID = player.userID,
+        unitName = player.unitName,
+        isLeader = player.isLeader,
+        unitTag = player.unitTag,
+        barename = player.userID:sub(2), -- remove '@' prefix
+        zoneId = player.zoneId,
+        zoneName = player.zoneName,
+        icon = player.icon,
+        suffix = setSuffix and player.zoneName,
+        poiType = player.poiType,
+        known = true,
+        weight = player.weight,
+        canJumpToPlayer = player.canJumpToPlayer
+    }
+end
+
 function Players:GetPlayerList()
-    if self.players == nil then
-        self:SetupPlayers()
-    end
+    if self.players == nil then self:SetupPlayers() end
 
     local nodes = {}
-    for userID, info in pairs(self.players) do
-        table.insert(nodes, {
-            name = userID,
-            barename = userID:sub(2), -- remove '@' prefix
-            zoneId = info.zoneId,
-            zoneName = info.zoneName,
-            icon = info.icon,
-            suffix = info.zoneName,
-            poiType = info.poiType,
-            userID = userID,
-            known = true,
-            weight = info.weight,
-            canJumpToPlayer = info.canJumpToPlayer
-        })
+    for _, player in pairs(self.players) do
+        table.insert(nodes, createPlayerNode(player, true))
     end
 
     return nodes
 end
 
 function Players:GetPlayerInZone(zoneId)
-    if self.players == nil then
-        self:SetupPlayers()
-    end
+    if self.players == nil then self:SetupPlayers() end
 
     for _, player in pairs(self.players) do
         if player.zoneId == zoneId then
-            return {
-                name = player.zoneName,
-                barename = Utils.bareName(player.zoneName),
-                zoneId = zoneId,
-                zoneName = player.zoneName,
-                icon = player.icon,
-                poiType = player.poiType,
-                userID = player.userID,
-                known = true,
-                weight = player.weight,
-                canJumpToPlayer = player.canJumpToPlayer
-            }
+            return createPlayerNode(player)
         end
     end
     return nil
@@ -148,30 +140,12 @@ local function groupComparison(x, y)
 end
 
 function Players:GetGroupList()
-    if self.players == nil then
-        self:SetupPlayers()
-    end
+    if self.players == nil then self:SetupPlayers() end
     
     local list = {}
-    for userID, player in pairs(self.players) do
+    for player in pairs(self.players) do
         if player.poiType == Nav.POI_GROUPMATE then
-            table.insert(list, {
-                name = userID,
-                userID = userID,
-                unitName = player.unitName,
-                isLeader = player.isLeader,
-                unitTag = player.unitTag,
-                barename = userID:sub(2), -- remove '@' prefix
-                zoneId = player.zoneId,
-                zoneName = player.zoneName,
-                icon = player.icon,
-                suffix = player.zoneName,
-                poiType = player.poiType,
-                userID = userID,
-                known = true,
-                weight = weight,
-                canJumpToPlayer = player.canJumpToPlayer
-            })
+            table.insert(list, createPlayerNode(player, true))
         end
     end
 
