@@ -695,7 +695,7 @@ local function showWayshrineMenu(owner, data)
         if data.nodeIndex then
             entry = { nodeIndex = data.nodeIndex }
         elseif data.zoneId then
-            entry = { zoneId = data.zoneId }
+            entry = { zoneId = data.zoneId, mapId = data.mapId }
         else
             Nav.log("showWayshrineMenu: unrecognised data")
         end

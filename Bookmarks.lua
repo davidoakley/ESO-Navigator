@@ -93,6 +93,7 @@ function Bookmarks:getBookmarks()
             local zone = Nav.Locations:getZone(entry.zoneId)
             if zone then
                 local node = Nav.Utils.shallowCopy(zone)
+                node.mapId = entry.mapId
                 node.isBookmark = true
                 table.insert(results, node)
             end
