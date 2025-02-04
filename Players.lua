@@ -5,31 +5,32 @@
 ---
 local Nav = Navigator
 local Players = Nav.Players or {
-    players = nil,
-    playerZones = nil
+    players = nil
 }
 local Utils = Nav.Utils
 
-local function addPlayerZone(self, zones, zoneId, zoneName, userID, icon, poiType)
-    if zones[zoneId] and CanJumpToPlayerInZone(zoneId) then
-        local zoneInfo = {
-            zoneId = zoneId,
-            zoneName = Utils.FormatSimpleName(zoneName),
-            userID = userID,
-            icon = icon,
-            poiType = poiType
-        }
+local function addPlayerZone(self, zones, zoneId, zoneName, userID, icon, poiType, charName)
+    local zoneInfo = {
+        zoneId = zoneId,
+        zoneName = Utils.FormatSimpleName(zoneName),
+        userID = userID,
+        icon = icon,
+        poiType = poiType,
+        canJumpToPlayer = zones[zoneId] and zones[zoneId].canJumpToPlayer
+    }
 
-        self.players[userID] = zoneInfo
-        self.playerZones[zoneId] = zoneInfo
+    self.players[userID] = zoneInfo
+    if charName then
+        charName = zo_strformat("<<!AC:1>>", charName)
+        zoneInfo.charName = charName
     end
+    return zoneInfo
 end
 
-function Players:SetupPlayerZones()
+function Players:SetupPlayers()
     local zones = Nav.Locations:GetZones()
 
     local myID = GetDisplayName()
-    self.playerZones = {}
     self.players = {}
 
     local guildCount = GetNumGuilds()
@@ -41,8 +42,10 @@ function Players:SetupPlayerZones()
             local userID, _, _, playerStatus = GetGuildMemberInfo(guildID, i)
 
             if playerStatus ~= PLAYER_STATUS_OFFLINE and userID ~= myID then
-                local _, _, zoneName, _, _, _, _, zoneId = GetGuildMemberCharacterInfo(guildID, i)
-                addPlayerZone(self, zones, zoneId, zoneName, userID, "/esoui/art/menubar/gamepad/gp_playermenu_icon_character.dds", Nav.POI_GUILDMATE)
+                local hasChar, charName, zoneName, _, _, _, _, zoneId = GetGuildMemberCharacterInfo(guildID, i)
+                if hasChar then
+                    addPlayerZone(self, zones, zoneId, zoneName, userID, "/esoui/art/menubar/gamepad/gp_playermenu_icon_character.dds", Nav.POI_GUILDMATE, charName)
+                end
             end
         end
     end
@@ -52,62 +55,111 @@ function Players:SetupPlayerZones()
         local userID, _, playerStatus, secsSinceLogoff = GetFriendInfo(i)
 
         if playerStatus ~= PLAYER_STATUS_OFFLINE and secsSinceLogoff == 0 then
-            local hasChar, _, zoneName, _, _, _, _, zoneId = GetFriendCharacterInfo(i)
+            local hasChar, charName, zoneName, _, _, _, _, zoneId = GetFriendCharacterInfo(i)
             if hasChar then
-                addPlayerZone(self, zones, zoneId, zoneName, userID, "/esoui/art/menubar/gamepad/gp_playermenu_icon_character.dds", Nav.POI_FRIEND)
+                local player = addPlayerZone(self, zones, zoneId, zoneName, userID, "/esoui/art/menubar/gamepad/gp_playermenu_icon_character.dds", Nav.POI_FRIEND, charName)
+                if player then
+                    player.weight = 1.1
+                end
+            end
+        end
+    end
+
+    local groupCount = GetGroupSize()
+    local playerName = string.lower(GetUnitName("player"))
+    for i = 1, groupCount do
+        local unitTag = GetGroupUnitTagByIndex(i)
+        if unitTag then
+            local charName = GetUnitName(unitTag)
+            local userID = GetUnitDisplayName(unitTag)
+            if IsUnitOnline(unitTag) and string.lower(charName) ~= playerName then
+                local zoneId = GetZoneId(GetUnitZoneIndex(unitTag))
+                local zoneName = GetZoneNameById(zoneId)
+                local isLeader = IsUnitGroupLeader(unitTag)
+                local icon = isLeader and "/esoui/art/icons/mapkey/mapkey_groupleader.dds" or "/esoui/art/icons/mapkey/mapkey_groupmember.dds"
+                local player = addPlayerZone(self, zones, zoneId, zoneName, userID or '"'..charName..'"', icon, Nav.POI_GROUPMATE, charName)
+                if player then
+                    player.unitTag = unitTag
+                    player.isLeader = isLeader
+                    player.weight = isLeader and 1.3 or 1.2
+                end
             end
         end
     end
 end
 
 function Players:ClearPlayers()
-    self.playerZones = nil
     self.players = nil
 end
 
+local function createPlayerNode(player, setSuffix)
+    return {
+        name = player.userID,
+        userID = player.userID,
+        unitName = player.unitName,
+        isLeader = player.isLeader,
+        unitTag = player.unitTag,
+        isLeader = player.isLeader,
+        barename = player.userID:sub(2), -- remove '@' prefix
+        zoneId = player.zoneId,
+        zoneName = player.zoneName,
+        icon = player.icon,
+        suffix = setSuffix and player.zoneName,
+        poiType = player.poiType,
+        known = true,
+        weight = player.weight,
+        canJumpToPlayer = player.canJumpToPlayer
+    }
+end
+
 function Players:GetPlayerList()
-    if self.players == nil then
-        self:SetupPlayerZones()
-    end
+    if self.players == nil then self:SetupPlayers() end
 
     local nodes = {}
-    for userID, info in pairs(self.players) do
-        table.insert(nodes, {
-            name = userID,
-            barename = userID:sub(2), -- remove '@' prefix
-            zoneId = info.zoneId,
-            zoneName = info.zoneName,
-            icon = info.icon,
-            suffix = info.zoneName,
-            poiType = info.poiType,
-            userID = userID,
-            known = true
-        })
+    for _, player in pairs(self.players) do
+        table.insert(nodes, createPlayerNode(player, true))
     end
 
     return nodes
 end
 
 function Players:GetPlayerInZone(zoneId)
-    if self.playerZones == nil then
-        self:SetupPlayerZones()
+    if self.players == nil then self:SetupPlayers() end
+
+    for _, player in pairs(self.players) do
+        if player.zoneId == zoneId then
+            return createPlayerNode(player)
+        end
+    end
+    return nil
+end
+
+local function groupComparison(x, y)
+    if x.isLeader and not y.isLeader then -- There can be only one
+        return true
+    elseif y.isLeader and not x.isLeader then
+        return false
+    end
+    return (x.barename or x.name) < (y.barename or y.name)
+end
+
+function Players:GetGroupList()
+    if self.players == nil then self:SetupPlayers() end
+    
+    local list = {}
+    for _, player in pairs(self.players) do
+        if player.poiType == Nav.POI_GROUPMATE and player.userID then
+            table.insert(list, createPlayerNode(player, true))
+        end
     end
 
-    local info = self.playerZones[zoneId]
-    if info then
-        return {
-            name = info.zoneName,
-            barename = Utils.bareName(info.zoneName),
-            zoneId = zoneId,
-            zoneName = info.zoneName,
-            icon = info.icon,
-            poiType = info.poiType,
-            userID = info.userID,
-            known = true
-        }
-    else
-        return nil
-    end
+    table.sort(list, groupComparison)
+
+    return list
+end
+
+function Players:IsGroupLeader()
+    return string.lower(GetUnitName("player")) == string.lower(GetGroupLeaderUnitTag())
 end
 
 Nav.Players = Players

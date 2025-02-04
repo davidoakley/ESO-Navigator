@@ -35,11 +35,13 @@ function MT:layoutRow(rowControl, data, _)
 	local name = data.name
     local tooltipText = data.tooltip
     local icon = data.icon
-    local iconColour = data.colour and { data.colour:UnpackRGBA() } or
+    local iconColour = (data.iconColour and { data.iconColour:UnpackRGBA() }) or
+                       (data.colour and { data.colour:UnpackRGBA() }) or
                        ((data.known and not data.disabled) and { 1.0, 1.0, 1.0, 1.0 } or { 0.51, 0.51, 0.44, 1.0 })
 
     if data.suffix ~= nil then
-        name = name .. " |c82826F" .. data.suffix .. "|r"
+        local colour = data.canJumpToPlayer and (data.zoneId == Nav.ZONE_CYRODIIL and "FFAB0F" or "76BCC3") or "82826F"
+        name = name .. " |c" .. colour .. data.suffix .. "|r"
     end
 
 	if data.icon ~= nil then
@@ -65,7 +67,6 @@ function MT:layoutRow(rowControl, data, _)
 	if data.isSelected and data.known and not data.disabled then
 		rowControl.label:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
     elseif data.colour ~= nil and not data.disabled then
-        Nav.colour = data.colour
 		rowControl.label:SetColor(data.colour:UnpackRGBA())
     elseif data.known and not data.disabled then
 		rowControl.label:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
@@ -116,32 +117,30 @@ function MT:layoutHintRow(rowControl, data, _)
 	rowControl.label:SetText(data.hint or "-")
 end
 
-local function jumpToPlayer(node)
-    local userID, poiType, zoneId, zoneName = node.userID, node.poiType, node.zoneId, node.zoneName
+local function jumpToPlayer(player)
+    Nav.Players:SetupPlayers()
 
-    Nav.Players:SetupPlayerZones()
-
-    if not Nav.Players.players[userID] or Nav.Players.players[userID].zoneId ~= zoneId then
+    if not Nav.Players.players[player.userID] or Nav.Players.players[player.userID].zoneId ~= player.zoneId then
         -- Player has disappeared or moved!
-        CHAT_SYSTEM:AddMessage(zo_strformat(GetString(NAVIGATOR_PLAYER_NOT_IN_ZONE), userID, zoneName))
+        CHAT_SYSTEM:AddMessage(zo_strformat(GetString(NAVIGATOR_PLAYER_NOT_IN_ZONE), player.userID, player.zoneName))
 
-        if Nav.Players.playerZones[zoneId] then
-            node = Nav.Players.playerZones[zoneId]
-            userID, poiType, zoneId, zoneName = node.userID, node.poiType, node.zoneId, node.zoneName
-        else
+        player = Nav.Players:GetPlayerInZone(zoneId)
+        if not player then
             -- Eeek! Refresh the search results and finish
             MT:buildScrollList()
             return
         end
     end
 
-    CHAT_SYSTEM:AddMessage(zo_strformat(GetString(NAVIGATOR_TRAVELING_TO_ZONE_VIA_PLAYER), zoneName, userID))
+    CHAT_SYSTEM:AddMessage(zo_strformat(GetString(NAVIGATOR_TRAVELING_TO_ZONE_VIA_PLAYER), player.zoneName, player.userID))
     SCENE_MANAGER:Hide("worldMap")
 
-    if poiType == Nav.POI_FRIEND then
-        JumpToFriend(userID)
-    elseif poiType == Nav.POI_GUILDMATE then
-        JumpToGuildMember(userID)
+    if player.poiType == Nav.POI_FRIEND then
+        JumpToFriend(player.userID)
+    elseif player.poiType == Nav.POI_GUILDMATE then
+        JumpToGuildMember(player.userID)
+    elseif player.poiType == Nav.POI_GROUPMATE then
+        JumpToGroupMember(player.userID or player.charName)
     end
 end
 
@@ -249,6 +248,15 @@ local function buildResult(listEntry, currentNodeIndex, isSelected)
         end
     end
 
+    if not nodeData.colour then
+        if nodeData.poiType == Nav.POI_FRIEND then
+            nodeData.iconColour = ZO_ColorDef:New(0.9, 0.8, 0)
+        elseif nodeData.poiType == Nav.POI_GROUPMATE then
+            nodeData.iconColour = ZO_SELECTED_TEXT
+        elseif Nav.IsPlayer(nodeData.poiType) then
+            nodeData.iconColour = ZO_NORMAL_TEXT
+        end
+    end
 
     if Nav.isDeveloper then
         addDeveloperTooltip(nodeData)
@@ -321,6 +329,11 @@ function MT:buildScrollList(keepScrollPosition)
     if isSearching then
         buildList(scrollData, "results", NAVIGATOR_CATEGORY_RESULTS, Nav.results, NAVIGATOR_HINT_NORESULTS)
     else
+        local group = Nav.Players:GetGroupList()
+        if #group > 0 then
+            buildList(scrollData, "group", SI_MAIN_MENU_GROUP, group)
+        end
+
         local bookmarks = Nav.Bookmarks:getBookmarks()
         buildList(scrollData, "bookmarks", NAVIGATOR_CATEGORY_BOOKMARKS, bookmarks, NAVIGATOR_HINT_NOBOOKMARKS)
 
@@ -601,6 +614,8 @@ local function showWayshrineMenu(owner, data)
         return
     end
 
+    local isPlayer = Nav.IsPlayer(data.poiType)
+
     if data.nodeIndex then
         if data.poiType == Nav.POI_HOUSE then
             local houseId = GetFastTravelNodeHouseId(data.nodeIndex)
@@ -629,42 +644,65 @@ local function showWayshrineMenu(owner, data)
             MT:PanToPOI(data, true)
             ClearMenu()
         end)
-    elseif data.zoneId and Nav.isRecall then
+    elseif data.zoneId and Nav.isRecall and data.canJumpToPlayer and data.zoneId ~= Nav.ZONE_CYRODIIL then
         AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE), data.name), function()
-            local node = Nav.Players:GetPlayerInZone(data.zoneId)
-            if not node then
-                ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.GENERAL_ALERT_ERROR, GetString(NAVIGATOR_NO_PLAYER_IN_ZONE), data.name)
-                return
-            end
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(NAVIGATOR_TRAVELING_TO_ZONE_VIA_PLAYER), node.zoneName, node.userID)
-            zo_callLater(function() SCENE_MANAGER:Hide("worldMap") end, 10)
-            if node.poiType == Nav.POI_FRIEND then
-                JumpToFriend(node.userID)
-            elseif node.poiType == Nav.POI_GUILDMATE then
-                JumpToGuildMember(node.userID)
-            end
+            zo_callLater(jumpToPlayer(data), 10)
             ClearMenu()
         end)
     end
 
-    local bookmarks = Nav.Bookmarks
-	if bookmarks:contains(entry) then
-		AddMenuItem(GetString(NAVIGATOR_MENU_REMOVEBOOKMARK), function()
-			bookmarks:remove(entry)
-			ClearMenu()
-            MT.menuOpen = false
-            MT:ImmediateRefresh()
-		end)
-	else
-		AddMenuItem(GetString(NAVIGATOR_MENU_ADDBOOKMARK), function()
-			bookmarks:add(entry)
-			ClearMenu()
-            MT.menuOpen = false
-            MT:ImmediateRefresh()
-		end)
-	end
+    if isPlayer then
+        if Nav.Players:IsGroupLeader() and data.poiType == Nav.POI_GROUPMATE then
+            AddMenuItem(GetString(SI_GROUP_LIST_MENU_PROMOTE_TO_LEADER), function()
+                GroupPromote(data.unitTag)
+                --bookmarks:remove(entry)
+                ClearMenu()
+                MT.menuOpen = false
+                MT:ImmediateRefresh()
+            end)
+        end
+    else
+        local bookmarks = Nav.Bookmarks
+        if bookmarks:contains(entry) then
+            AddMenuItem(GetString(NAVIGATOR_MENU_REMOVEBOOKMARK), function()
+                bookmarks:remove(entry)
+                ClearMenu()
+                MT.menuOpen = false
+                MT:ImmediateRefresh()
+            end)
+        else
+            AddMenuItem(GetString(NAVIGATOR_MENU_ADDBOOKMARK), function()
+                bookmarks:add(entry)
+                ClearMenu()
+                MT.menuOpen = false
+                MT:ImmediateRefresh()
+            end)
+        end
+    end
+
     MT.menuOpen = true
 	ShowMenu(owner)
+    SetMenuHiddenCallback(function()
+        Nav.log("SetMenuHiddenCallback: Menu hidden")
+        MT.menuOpen = false
+        if MT.needsRefresh then
+            MT:ImmediateRefresh()
+        end
+    end)
+end
+
+local function showGroupMenu(owner, data)
+    ClearMenu()
+
+    AddMenuItem(GetString(SI_GROUP_LEAVE), function()
+        ZO_Dialogs_ShowDialog("GROUP_LEAVE_DIALOG")
+        ClearMenu()
+        MT.menuOpen = false
+        MT:ImmediateRefresh()
+    end)
+
+    MT.menuOpen = true
+    ShowMenu(owner)
     SetMenuHiddenCallback(function()
         Nav.log("SetMenuHiddenCallback: Menu hidden")
         MT.menuOpen = false
@@ -703,8 +741,10 @@ end
 
 function MT:selectResult(control, data, mouseButton)
     if mouseButton == 1 then
-        if data.nodeIndex or data.userID then
+        if data.nodeIndex then
             self:jumpToNode(data)
+        elseif data.userID then
+            jumpToPlayer(data)
         elseif data.poiType == Nav.POI_ZONE then
             MT.filter = Nav.FILTER_NONE
             self.editControl:SetText("")
@@ -721,8 +761,10 @@ function MT:selectResult(control, data, mouseButton)
             end
         end
     elseif mouseButton == 2 then
-        if data.nodeIndex or data.poiType == Nav.POI_ZONE then
+        if data.nodeIndex or data.poiType == Nav.POI_ZONE or Nav.IsPlayer(data.poiType) then
             showWayshrineMenu(control, data)
+        else
+            Nav.log("selectResult: unhandled mb2; poiType=%d zoneId=%d", data.poiType or -1, data.zoneId or -1)
         end
     else
         Nav.log("selectResult: unhandled; poiType=%d zoneId=%d", data.poiType or -1, data.zoneId or -1)
@@ -736,13 +778,20 @@ function MT:RowMouseUp(control, mouseButton, upInside)
 	end
 end
 
-function MT:CategoryRowMouseUp(control, _, upInside)
+function MT:CategoryRowMouseUp(control, mouseButton, upInside)
 	if upInside then
-		local data = ZO_ScrollList_GetData(control)
-        Nav.log("Toggling category %s", data.id)
-        self.collapsedCategories[data.id] = not self.collapsedCategories[data.id]
-        MT:buildScrollList(true)
-        MT:updateFilterControl()
+        --Nav.log("MT:CategoryRowMouseUp %d %s", mouseButton, )
+        local data = ZO_ScrollList_GetData(control)
+        if mouseButton == 2 then
+            if data.id == "group" then
+                showGroupMenu(control, data)
+            end
+        else
+            Nav.log("Toggling category %s", data.id)
+            self.collapsedCategories[data.id] = not self.collapsedCategories[data.id]
+            MT:buildScrollList(true)
+            MT:updateFilterControl()
+        end
 	end
 end
 

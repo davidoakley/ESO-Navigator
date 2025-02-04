@@ -20,6 +20,7 @@ mkstr("NAVIGATOR_CATEGORY_RESULTS", "Results")
 mkstr("NAVIGATOR_CATEGORY_BOOKMARKS", "Bookmarks")
 mkstr("NAVIGATOR_CATEGORY_RECENT", "Recent")
 mkstr("NAVIGATOR_CATEGORY_ZONES", "Zones")
+mkstr("NAVIGATOR_CATEGORY_GROUP", "Group")
 
 -- Result hints
 mkstr("NAVIGATOR_HINT_NORESULTS", "No results found")
