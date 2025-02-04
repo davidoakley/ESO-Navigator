@@ -9,6 +9,7 @@
     <exclude-output />
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/_build" />
+      <excludeFolder url="file://$MODULE_DIR$/test" />
     </content>
     <orderEntry type="jdk" jdkName="Lua" jdkType="Lua SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

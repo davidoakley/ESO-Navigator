@@ -15,18 +15,9 @@ function GetDisplayName() end
 -- SOURCE FILE: ../../../zos/shared/EsoGameData/include/Localize.xml
 -- **********************************************************************************************************************
 EsoStringVersions = {}
-function SafeAddVersion(stringId, stringVersion)
-    if(stringId) then
-        EsoStringVersions[stringId] = stringVersion
-    end
+function SafeAddVersion(_, _)
 end
-function SafeAddString(stringId, stringValue, stringVersion)
-    if(stringId) then
-        local existingVersion = EsoStringVersions[stringId]
-        if((existingVersion == nil) or (existingVersion <= stringVersion)) then
-            EsoStrings[stringId] = stringValue
-        end
-    end
+function SafeAddString(_, _, _)
 end
 EsoStrings =
 {
@@ -12752,11 +12743,7 @@ SafeAddVersion(SI_CUSTOMER_SERVICE_SUBMIT_FAILED_BODY, 1)
 SafeAddVersion(SI_CUSTOMER_SERVICE_SUBMIT_FEEDBACK_SUBMIT_CONFIRMATION, 1)
 SafeAddVersion(SI_CUSTOMER_SERVICE_ASK_FOR_HELP_NO_QUEST_HINT, 1)
 -- Define a function to allow users/mods to add their own strings using the preferred string definition method on an order independent basis
-local nextCustomId = 5800
-function ZO_CreateStringId(stringId, stringToAdd)
-    _G[stringId] = nextCustomId
-    EsoStrings[nextCustomId] = stringToAdd
-    nextCustomId = nextCustomId + 1
+function ZO_CreateStringId(_, _)
 end
 
 
@@ -15087,7 +15074,7 @@ LOADING_SYSTEM_STATIC_OBJECTS = 4
 LOADING_SYSTEM_TERRAIN_GEOMETRY = 2
 LOADING_SYSTEM_TEXTURES = 9
 LOADING_SYSTEM_USER_INTERFACE = 6
-LOCATION_FONT = EsoUI/Common/Fonts/Univers67.otf|%d|soft-shadow-thin
+LOCATION_FONT = 'EsoUI/Common/Fonts/Univers67.otf|%d|soft-shadow-thin'
 LOCK_QUALITY_ADVANCED = 3
 LOCK_QUALITY_IMPOSSIBLE = 5
 LOCK_QUALITY_INTERMEDIATE = 2
