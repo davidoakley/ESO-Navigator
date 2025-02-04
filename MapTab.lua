@@ -646,20 +646,7 @@ local function showWayshrineMenu(owner, data)
         end)
     elseif data.zoneId and Nav.isRecall and data.canJumpToPlayer and data.zoneId ~= Nav.ZONE_CYRODIIL then
         AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE), data.name), function()
-            local node = isPlayer and data or Nav.Players:GetPlayerInZone(data.zoneId)
-            if not node then
-                ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.GENERAL_ALERT_ERROR, GetString(NAVIGATOR_NO_PLAYER_IN_ZONE), data.name)
-                return
-            end
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(NAVIGATOR_TRAVELING_TO_ZONE_VIA_PLAYER), node.zoneName, node.userID)
-            zo_callLater(function()
-                SCENE_MANAGER:Hide("worldMap")
-                if node.poiType == Nav.POI_FRIEND then
-                    JumpToFriend(node.userID)
-                elseif node.poiType == Nav.POI_GUILDMATE then
-                    JumpToGuildMember(node.userID)
-                end
-            end, 10)
+            zo_callLater(jumpToPlayer(data), 10)
             ClearMenu()
         end)
     end
