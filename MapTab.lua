@@ -117,32 +117,30 @@ function MT:layoutHintRow(rowControl, data, _)
 	rowControl.label:SetText(data.hint or "-")
 end
 
-local function jumpToPlayer(node)
-    local userID, poiType, zoneId, zoneName = node.userID, node.poiType, node.zoneId, node.zoneName
-
+local function jumpToPlayer(player)
     Nav.Players:SetupPlayers()
 
-    if not Nav.Players.players[userID] or Nav.Players.players[userID].zoneId ~= zoneId then
+    if not Nav.Players.players[player.userID] or Nav.Players.players[player.userID].zoneId ~= player.zoneId then
         -- Player has disappeared or moved!
-        CHAT_SYSTEM:AddMessage(zo_strformat(GetString(NAVIGATOR_PLAYER_NOT_IN_ZONE), userID, zoneName))
+        CHAT_SYSTEM:AddMessage(zo_strformat(GetString(NAVIGATOR_PLAYER_NOT_IN_ZONE), player.userID, player.zoneName))
 
-        if Nav.Players.playerZones[zoneId] then
-            node = Nav.Players.playerZones[zoneId]
-            userID, poiType, zoneId, zoneName = node.userID, node.poiType, node.zoneId, node.zoneName
-        else
+        player = Nav.Players:GetPlayerInZone(zoneId)
+        if not player then
             -- Eeek! Refresh the search results and finish
             MT:buildScrollList()
             return
         end
     end
 
-    CHAT_SYSTEM:AddMessage(zo_strformat(GetString(NAVIGATOR_TRAVELING_TO_ZONE_VIA_PLAYER), zoneName, userID))
+    CHAT_SYSTEM:AddMessage(zo_strformat(GetString(NAVIGATOR_TRAVELING_TO_ZONE_VIA_PLAYER), player.zoneName, player.userID))
     SCENE_MANAGER:Hide("worldMap")
 
-    if poiType == Nav.POI_FRIEND then
-        JumpToFriend(userID)
-    elseif poiType == Nav.POI_GUILDMATE then
-        JumpToGuildMember(userID)
+    if player.poiType == Nav.POI_FRIEND then
+        JumpToFriend(player.userID)
+    elseif player.poiType == Nav.POI_GUILDMATE then
+        JumpToGuildMember(player.userID)
+    elseif player.poiType == Nav.POI_GROUPMATE then
+        JumpToGroupMember(player.userID or player.charName)
     end
 end
 
@@ -646,20 +644,22 @@ local function showWayshrineMenu(owner, data)
             MT:PanToPOI(data, true)
             ClearMenu()
         end)
-    elseif data.zoneId and Nav.isRecall then
+    elseif data.zoneId and Nav.isRecall and data.canJumpToPlayer and data.zoneId ~= Nav.ZONE_CYRODIIL then
         AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE), data.name), function()
-            local node = Nav.Players:GetPlayerInZone(data.zoneId)
+            local node = isPlayer and data or Nav.Players:GetPlayerInZone(data.zoneId)
             if not node then
                 ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.GENERAL_ALERT_ERROR, GetString(NAVIGATOR_NO_PLAYER_IN_ZONE), data.name)
                 return
             end
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(NAVIGATOR_TRAVELING_TO_ZONE_VIA_PLAYER), node.zoneName, node.userID)
-            zo_callLater(function() SCENE_MANAGER:Hide("worldMap") end, 10)
-            if node.poiType == Nav.POI_FRIEND then
-                JumpToFriend(node.userID)
-            elseif node.poiType == Nav.POI_GUILDMATE then
-                JumpToGuildMember(node.userID)
-            end
+            zo_callLater(function()
+                SCENE_MANAGER:Hide("worldMap")
+                if node.poiType == Nav.POI_FRIEND then
+                    JumpToFriend(node.userID)
+                elseif node.poiType == Nav.POI_GUILDMATE then
+                    JumpToGuildMember(node.userID)
+                end
+            end, 10)
             ClearMenu()
         end)
     end
@@ -754,8 +754,10 @@ end
 
 function MT:selectResult(control, data, mouseButton)
     if mouseButton == 1 then
-        if data.nodeIndex or data.userID then
+        if data.nodeIndex then
             self:jumpToNode(data)
+        elseif data.userID then
+            jumpToPlayer(data)
         elseif data.poiType == Nav.POI_ZONE then
             MT.filter = Nav.FILTER_NONE
             self.editControl:SetText("")
