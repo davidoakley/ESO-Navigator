@@ -338,7 +338,7 @@ function Locs:GetZones()
     return self.zones
 end
 
-local function addZoneToList(nodes, name, zoneId, mapId, bookmarked, suffix)
+local function addZoneToList(nodes, name, zoneId, mapId, bookmarked, suffix, canJumpToPlayer)
     table.insert(nodes, {
         name = name,
         barename = Utils.bareName(name),
@@ -350,7 +350,8 @@ local function addZoneToList(nodes, name, zoneId, mapId, bookmarked, suffix)
         weight = Nav.isRecall and 1.0 or 0.9,
         known = true,
         bookmarked = bookmarked,
-        suffix = suffix
+        suffix = suffix,
+        canJumpToPlayer = canJumpToPlayer
     })
 
 end
@@ -365,7 +366,7 @@ function Locs:getZoneList(includeAliases)
     for zoneId, info in pairs(self.zones) do
         addZoneToList(nodes, info.name, zoneId, info.mapId, Nav.Bookmarks:contains(info))
         if includeAliases and zoneId == Nav.ZONE_ATOLLOFIMMOLATION then
-            addZoneToList(nodes, GetString(NAVIGATOR_LOCATION_OBLIVIONPORTAL), zoneId, info.mapId, Nav.Bookmarks:contains(info), info.name)
+            addZoneToList(nodes, GetString(NAVIGATOR_LOCATION_OBLIVIONPORTAL), zoneId, info.mapId, Nav.Bookmarks:contains(info), info.name, info.canJumpToPlayer)
         end
     end
 
@@ -386,7 +387,8 @@ function Locs:getZone(zoneId)
         icon = "Navigator/media/zone.dds",
         poiType = Nav.POI_ZONE,
         weight = Nav.isRecall and 1.0 or 0.9,
-        known = true
+        known = true,
+        canJumpToPlayer = info.canJumpToPlayer
     }
 end
 
