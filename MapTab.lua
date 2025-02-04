@@ -119,7 +119,7 @@ end
 local function jumpToPlayer(node)
     local userID, poiType, zoneId, zoneName = node.userID, node.poiType, node.zoneId, node.zoneName
 
-    Nav.Players:SetupPlayerZones()
+    Nav.Players:SetupPlayers()
 
     if not Nav.Players.players[userID] or Nav.Players.players[userID].zoneId ~= zoneId then
         -- Player has disappeared or moved!

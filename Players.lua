@@ -5,8 +5,7 @@
 ---
 local Nav = Navigator
 local Players = Nav.Players or {
-    players = nil,
-    playerZones = nil
+    players = nil
 }
 local Utils = Nav.Utils
 
@@ -21,7 +20,6 @@ local function addPlayerZone(self, zones, zoneId, zoneName, userID, icon, poiTyp
         }
 
         self.players[userID] = zoneInfo
-        self.playerZones[zoneId] = zoneInfo
         if charName then
             charName = zo_strformat("<<!AC:1>>", charName)
             zoneInfo.charName = charName
@@ -29,11 +27,10 @@ local function addPlayerZone(self, zones, zoneId, zoneName, userID, icon, poiTyp
     end
 end
 
-function Players:SetupPlayerZones()
+function Players:SetupPlayers()
     local zones = Nav.Locations:GetZones()
 
     local myID = GetDisplayName()
-    self.playerZones = {}
     self.players = {}
 
     local guildCount = GetNumGuilds()
@@ -67,13 +64,12 @@ function Players:SetupPlayerZones()
 end
 
 function Players:ClearPlayers()
-    self.playerZones = nil
     self.players = nil
 end
 
 function Players:GetPlayerList()
     if self.players == nil then
-        self:SetupPlayerZones()
+        self:SetupPlayers()
     end
 
     local nodes = {}
@@ -95,25 +91,27 @@ function Players:GetPlayerList()
 end
 
 function Players:GetPlayerInZone(zoneId)
-    if self.playerZones == nil then
-        self:SetupPlayerZones()
+    if self.players == nil then
+        self:SetupPlayers()
     end
 
-    local info = self.playerZones[zoneId]
-    if info then
-        return {
-            name = info.zoneName,
-            barename = Utils.bareName(info.zoneName),
-            zoneId = zoneId,
-            zoneName = info.zoneName,
-            icon = info.icon,
-            poiType = info.poiType,
-            userID = info.userID,
-            known = true
-        }
-    else
-        return nil
+    for _, player in pairs(self.players) do
+        if player.zoneId == zoneId then
+            return {
+                name = player.zoneName,
+                barename = Utils.bareName(player.zoneName),
+                zoneId = zoneId,
+                zoneName = player.zoneName,
+                icon = player.icon,
+                poiType = player.poiType,
+                userID = player.userID,
+                known = true,
+                weight = player.weight,
+                canJumpToPlayer = player.canJumpToPlayer
+            }
+        end
     end
+    return nil
 end
 
 local function groupComparison(x, y)
