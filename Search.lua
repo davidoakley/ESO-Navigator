@@ -61,6 +61,7 @@ function Search:Run(searchTerm, filter)
 
     searchTerm = searchTerm and string.lower(searchTerm) or ""
     searchTerm = searchTerm:gsub("[^%w ]", "")
+    local hasSearch = searchTerm ~= ""
 
     -- Nav.log("Search:Run('%s', %d)", searchTerm, filter)
 
@@ -71,9 +72,9 @@ function Search:Run(searchTerm, filter)
     if filter == Nav.FILTER_PLAYERS then
         self:AddCandidates(Nav.Players:GetPlayerList())
     elseif filter == Nav.FILTER_HOUSES then
-        self:AddCandidates(Locations:getHouseList())
+        self:AddCandidates(Locations:getHouseList(hasSearch))
     else
-        self:AddCandidates(Locations:getKnownNodes())
+        self:AddCandidates(Locations:getKnownNodes(nil, hasSearch))
         self:AddCandidates(Locations:getZoneList(true))
     end
 

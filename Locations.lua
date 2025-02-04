@@ -174,6 +174,12 @@ function Locs:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon)
         nodeInfo.poiType = Nav.POI_HOUSE
         nodeInfo.owned = (icon:find("poi_group_house_owned") ~= nil)
         nodeInfo.freeRecall = true
+        if Nav.saved.useHouseNicknames then
+            nodeInfo.houseId = GetFastTravelNodeHouseId(i)
+            nodeInfo.collectibleId = GetCollectibleIdForHouse(nodeInfo.houseId)
+            nodeInfo.nickname = GetCollectibleNickname(nodeInfo.collectibleId)
+            nodeInfo.suffix = zo_strformat(GetString(SI_TOOLTIP_COLLECTIBLE_NICKNAME), nodeInfo.nickname)
+        end
     elseif typePOI == 1 then
         nodeInfo.poiType = Nav.POI_WAYSHRINE
     elseif glowIcon == "/esoui/art/icons/poi/poi_soloinstance_glow.dds" or
@@ -242,7 +248,7 @@ function Locs:GetNode(nodeIndex)
     return self.nodeMap[nodeIndex]
 end
 
-function Locs:getKnownNodes(zoneId)
+function Locs:getKnownNodes(zoneId, includeAliases)
     if self.nodes == nil then
         self:setupNodes()
     end
@@ -267,12 +273,21 @@ function Locs:getKnownNodes(zoneId)
                 node.weight = node.weight * (1.0 + 0.02 * node.traders)
             end
             table.insert(nodes, node)
+
+            if includeAliases and node.poiType == Nav.POI_HOUSE and Nav.saved.useHouseNicknames then
+                local alias = Utils.shallowCopy(node)
+                alias.name = node.nickname
+                alias.suffix = node.name
+                alias.originalName = nil
+                alias.weight = 0.6
+                table.insert(nodes, alias)
+            end
         end
     end
     return nodes
 end
 
-function Locs:getHouseList()
+function Locs:getHouseList(includeAliases)
     if self.nodes == nil then
         self:setupNodes()
     end
@@ -292,6 +307,15 @@ function Locs:getHouseList()
             end
             node.known = true
             table.insert(nodes, node)
+
+            if includeAliases and node.poiType == Nav.POI_HOUSE and Nav.saved.useHouseNicknames then
+                local alias = Utils.shallowCopy(node)
+                alias.name = node.nickname
+                alias.suffix = node.name
+                alias.originalName = nil
+                alias.weight = 0.6
+                table.insert(nodes, alias)
+            end
         end
     end
     return nodes

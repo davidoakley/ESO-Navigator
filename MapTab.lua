@@ -619,13 +619,14 @@ local function showWayshrineMenu(owner, data)
 
     if data.nodeIndex then
         if data.poiType == Nav.POI_HOUSE then
-            local houseId = GetFastTravelNodeHouseId(data.nodeIndex)
             AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_HOUSE_INSIDE), data.name), function()
+                local houseId = data.houseId or GetFastTravelNodeHouseId(data.nodeIndex)
                 RequestJumpToHouse(houseId, false)
                 zo_callLater(function() SCENE_MANAGER:Hide("worldMap") end, 10)
                 ClearMenu()
             end)
             AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_HOUSE_OUTSIDE), data.name), function()
+                local houseId = data.houseId or GetFastTravelNodeHouseId(data.nodeIndex)
                 RequestJumpToHouse(houseId, true)
                 zo_callLater(function() SCENE_MANAGER:Hide("worldMap") end, 10)
                 ClearMenu()
