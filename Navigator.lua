@@ -13,7 +13,8 @@ Navigator = {
     autoFocus = false,
     tpCommand = "/nav",
     loggingEnabled = false,
-    recentsCount = 10
+    recentsCount = 10,
+    ignoreDefiniteArticlesInSort = false
   },
   Location = {},
   Wayshrine = {},

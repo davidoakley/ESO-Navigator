@@ -143,7 +143,11 @@ function Utils.removeAccents(str)
 	end
 	return str
 end
-  
+
+function Utils.trim(s)
+	s = string.gsub(s, "^%s*(.-)%s*$", "%1")
+	return s
+end
 
 function Utils.FormatSimpleName(str)
 	if str == nil or str == "" then return str end
@@ -246,6 +250,22 @@ function Utils.SearchName(name)
 	-- r = r:gsub("-", " ")
 	-- r = r:gsub("[^%w ]", "")
 	return r
+end
+
+function Utils.SortName(obj)
+	local name = type(obj) == "table" and obj.name or obj
+	name = string.lower(Utils.DisplayName(name))
+	name = Utils.removeAccents(name)
+
+	if Nav.saved.ignoreDefiniteArticlesInSort then
+		if _lang == "en" then
+			name = name:gsub("^The ", "", 1)
+		elseif _lang == "fr" then
+			name = name:gsub("^le ", "", 1):gsub("^la ", "", 1):gsub("^l'", "", 1):gsub("^les ", "", 1)
+		end
+	end
+
+	return Utils.trim(name)
 end
 
 function Utils.shallowCopy(t)
