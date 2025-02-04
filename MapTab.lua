@@ -651,7 +651,15 @@ local function showWayshrineMenu(owner, data)
         end)
     elseif data.zoneId and Nav.isRecall and data.canJumpToPlayer and data.zoneId ~= Nav.ZONE_CYRODIIL then
         AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE), data.name), function()
-            zo_callLater(jumpToPlayer(data), 10)
+            zo_callLater(function() jumpToPlayer(data) end, 10)
+            ClearMenu()
+        end)
+    elseif data.poiType == Nav.POI_PLAYERHOUSE then
+        AddMenuItem(GetString(SI_SOCIAL_MENU_VISIT_HOUSE), function()
+            zo_callLater(function()
+                SCENE_MANAGER:Hide("worldMap")
+                JumpToHouse(data.userID)
+            end, 10)
             ClearMenu()
         end)
     end
@@ -661,6 +669,21 @@ local function showWayshrineMenu(owner, data)
             AddMenuItem(GetString(SI_GROUP_LIST_MENU_PROMOTE_TO_LEADER), function()
                 GroupPromote(data.unitTag)
                 --bookmarks:remove(entry)
+                ClearMenu()
+                MT.menuOpen = false
+                MT:ImmediateRefresh()
+            end)
+        end
+        AddMenuItem(GetString(SI_SOCIAL_MENU_VISIT_HOUSE), function()
+            JumpToHouse(data.userID)
+            ClearMenu()
+            MT.menuOpen = false
+        end)
+
+        local bookmarkEntry = { userID = data.userID, action = "house" }
+        if not bookmarks:contains(bookmarkEntry) then
+            AddMenuItem(GetString(NAVIGATOR_MENU_ADDHOUSEBOOKMARK), function()
+                bookmarks:add(bookmarkEntry)
                 ClearMenu()
                 MT.menuOpen = false
                 MT:ImmediateRefresh()
@@ -758,6 +781,9 @@ function MT:selectResult(control, data, mouseButton)
     if mouseButton == 1 then
         if data.nodeIndex then
             self:jumpToNode(data)
+        elseif data.poiType == Nav.POI_PLAYERHOUSE then
+            JumpToHouse(data.userID)
+            SCENE_MANAGER:Hide("worldMap")
         elseif data.userID then
             jumpToPlayer(data)
         elseif data.poiType == Nav.POI_ZONE then
@@ -776,7 +802,7 @@ function MT:selectResult(control, data, mouseButton)
             end
         end
     elseif mouseButton == 2 then
-        if data.nodeIndex or data.poiType == Nav.POI_ZONE or Nav.IsPlayer(data.poiType) then
+        if data.nodeIndex or data.poiType == Nav.POI_ZONE or Nav.IsPlayer(data.poiType) or data.poiType == Nav.POI_PLAYERHOUSE then
             showWayshrineMenu(control, data)
         else
             Nav.log("selectResult: unhandled mb2; poiType=%d zoneId=%d", data.poiType or -1, data.zoneId or -1)
