@@ -15,6 +15,7 @@ Nav.POI_WAYSHRINE = 6
 Nav.POI_GROUP_DUNGEON = 7
 Nav.POI_HOUSE = 8
 Nav.POI_GROUPMATE = 9
+Nav.POI_PLAYERHOUSE = 10
 
 function Nav.IsPlayer(poiType)
     return poiType == Nav.POI_FRIEND or poiType == Nav.POI_GUILDMATE or poiType == Nav.POI_GROUPMATE

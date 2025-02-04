@@ -85,6 +85,18 @@ function Navigator:loadSettings()
       })
     end
 
+    table.insert(optionsTable, {
+        type = "checkbox",
+        name = "Show and search house nicknames",
+        --tooltip = "",
+        getFunc = function() return sv.useHouseNicknames end,
+        setFunc = function(value)
+            sv.useHouseNicknames = value
+            self.Locations:setupNodes()
+        end,
+        width = "full"
+    })
+
     -- table.insert(optionsTable, 	{
     --   type = "description",
     --   -- title = "My Description",

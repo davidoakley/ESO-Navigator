@@ -118,23 +118,32 @@ function MT:layoutHintRow(rowControl, data, _)
 end
 
 local function jumpToPlayer(player)
+    CHAT_SYSTEM:AddMessage(zo_strformat(GetString(NAVIGATOR_TRAVELING_TO_ZONE_VIA_PLAYER), player.zoneName, player.userID))
+    SCENE_MANAGER:Hide("worldMap")
+    Nav.log("Jump %s %d", player.userID, player.poiType)
+    if player.poiType == Nav.POI_FRIEND then
+        JumpToFriend(player.userID)
+    elseif player.poiType == Nav.POI_GUILDMATE then
+        JumpToGuildMember(player.userID)
+    elseif player.poiType == Nav.POI_GROUPMATE then
+        JumpToGroupMember(player.userID or player.charName)
+    end
+end
+
+local function jumpToZone(zoneId)
     Nav.Players:SetupPlayers()
 
-    if not Nav.Players.players[player.userID] or Nav.Players.players[player.userID].zoneId ~= player.zoneId then
-        -- Player has disappeared or moved!
-        CHAT_SYSTEM:AddMessage(zo_strformat(GetString(NAVIGATOR_PLAYER_NOT_IN_ZONE), player.userID, player.zoneName))
-
-        player = Nav.Players:GetPlayerInZone(zoneId)
-        if not player then
-            -- Eeek! Refresh the search results and finish
-            MT:buildScrollList()
-            return
-        end
+    local player = Nav.Players:GetPlayerInZone(zoneId)
+    if not player then
+        -- Eeek! Refresh the search results and finish
+        MT:buildScrollList()
+        CHAT_SYSTEM:AddMessage(zo_strformat(GetString(NAVIGATOR_NO_PLAYER_IN_ZONE), GetZoneNameById(zoneId)))
+        return
     end
 
     CHAT_SYSTEM:AddMessage(zo_strformat(GetString(NAVIGATOR_TRAVELING_TO_ZONE_VIA_PLAYER), player.zoneName, player.userID))
     SCENE_MANAGER:Hide("worldMap")
-
+    Nav.log("Jump %s %d", player.userID, player.poiType)
     if player.poiType == Nav.POI_FRIEND then
         JumpToFriend(player.userID)
     elseif player.poiType == Nav.POI_GUILDMATE then
@@ -158,6 +167,8 @@ function MT:jumpToNode(node)
     if node.poiType == Nav.POI_FRIEND or node.poiType == Nav.POI_GUILDMATE then
         jumpToPlayer(node)
         return
+    elseif node.poiType == Nav.POI_ZONE then
+        jumpToZone(node.zoneId)
     end
 
 	name = name or select(2, Nav.Wayshrine.Data.GetNodeInfo(nodeIndex)) -- just in case
@@ -356,6 +367,11 @@ function MT:buildScrollList(keepScrollPosition)
                     playerInfo.name = zo_strformat(GetString(NAVIGATOR_TRAVEL_TO_ZONE), zone.name)
                     -- playerInfo.suffix = "via " .. playerInfo.suffix
                     playerInfo.colour = ZO_SECOND_CONTRAST_TEXT
+                    playerInfo.poiType = Nav.POI_ZONE
+                    playerInfo.userID = nil
+                    playerInfo.onClick = function()
+                        jumpToZone(zone.zoneId)
+                    end
                 else
                     playerInfo = {
                         name = GetString(NAVIGATOR_NO_TRAVEL_PLAYER),
@@ -604,32 +620,36 @@ end
 
 local function showWayshrineMenu(owner, data)
 	ClearMenu()
-
-    local entry = {}
-    if data.nodeIndex then
-        entry.nodeIndex = data.nodeIndex
-    elseif data.zoneId then
-        entry.zoneId = data.zoneId
-    else
-        Nav.log("showWayshrineMenu: unrecognised data")
-        return
-    end
+    local bookmarks = Nav.Bookmarks
 
     local isPlayer = Nav.IsPlayer(data.poiType)
 
     if data.nodeIndex then
         if data.poiType == Nav.POI_HOUSE then
-            local houseId = GetFastTravelNodeHouseId(data.nodeIndex)
             AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_HOUSE_INSIDE), data.name), function()
+                local houseId = data.houseId or GetFastTravelNodeHouseId(data.nodeIndex)
                 RequestJumpToHouse(houseId, false)
                 zo_callLater(function() SCENE_MANAGER:Hide("worldMap") end, 10)
                 ClearMenu()
             end)
             AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_HOUSE_OUTSIDE), data.name), function()
+                local houseId = data.houseId or GetFastTravelNodeHouseId(data.nodeIndex)
                 RequestJumpToHouse(houseId, true)
                 zo_callLater(function() SCENE_MANAGER:Hide("worldMap") end, 10)
                 ClearMenu()
             end)
+            --TODO: Revisit: setting the primary residence didn't seem to be immediately visible
+            --if not data.isPrimary then
+            --    AddMenuItem(zo_strformat(GetString(SI_HOUSING_FURNITURE_SETTINGS_GENERAL_PRIMARY_RESIDENCE_BUTTON_TEXT), data.name), function()
+            --        local houseId = data.houseId or GetFastTravelNodeHouseId(data.nodeIndex)
+            --        SetHousingPrimaryHouse(houseId)
+            --        zo_callLater(function()
+            --            Nav.Locations:setupNodes()
+            --            MT:ImmediateRefresh()
+            --        end, 10)
+            --        ClearMenu()
+            --    end)
+            --end
         else
             local strId = (Nav.isRecall and data.poiType ~= Nav.POI_HOUSE) and SI_WORLD_MAP_ACTION_RECALL_TO_WAYSHRINE or SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE
             AddMenuItem(zo_strformat(GetString(strId), data.name), function()
@@ -646,8 +666,17 @@ local function showWayshrineMenu(owner, data)
             ClearMenu()
         end)
     elseif data.zoneId and Nav.isRecall and data.canJumpToPlayer and data.zoneId ~= Nav.ZONE_CYRODIIL then
-        AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE), data.name), function()
-            zo_callLater(jumpToPlayer(data), 10)
+        local destination = data.userID or data.zoneName
+        AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE), destination), function()
+            zo_callLater(function() jumpToZone(data.zoneId) end, 10)
+            ClearMenu()
+        end)
+    elseif data.poiType == Nav.POI_PLAYERHOUSE then
+        AddMenuItem(GetString(SI_SOCIAL_MENU_VISIT_HOUSE), function()
+            zo_callLater(function()
+                SCENE_MANAGER:Hide("worldMap")
+                JumpToHouse(data.userID)
+            end, 10)
             ClearMenu()
         end)
     end
@@ -662,16 +691,32 @@ local function showWayshrineMenu(owner, data)
                 MT:ImmediateRefresh()
             end)
         end
-    else
-        local bookmarks = Nav.Bookmarks
-        if bookmarks:contains(entry) then
-            AddMenuItem(GetString(NAVIGATOR_MENU_REMOVEBOOKMARK), function()
-                bookmarks:remove(entry)
+        AddMenuItem(GetString(SI_SOCIAL_MENU_VISIT_HOUSE), function()
+            JumpToHouse(data.userID)
+            ClearMenu()
+            MT.menuOpen = false
+        end)
+
+        local bookmarkEntry = { userID = data.userID, action = "house" }
+        if not bookmarks:contains(bookmarkEntry) then
+            AddMenuItem(GetString(NAVIGATOR_MENU_ADDHOUSEBOOKMARK), function()
+                bookmarks:add(bookmarkEntry)
                 ClearMenu()
                 MT.menuOpen = false
                 MT:ImmediateRefresh()
             end)
+        end
+    else
+        local entry
+        if data.nodeIndex then
+            entry = { nodeIndex = data.nodeIndex }
+        elseif data.zoneId then
+            entry = { zoneId = data.zoneId, mapId = data.mapId }
         else
+            Nav.log("showWayshrineMenu: unrecognised data")
+        end
+
+        if entry and not bookmarks:contains(entry) then
             AddMenuItem(GetString(NAVIGATOR_MENU_ADDBOOKMARK), function()
                 bookmarks:add(entry)
                 ClearMenu()
@@ -679,6 +724,15 @@ local function showWayshrineMenu(owner, data)
                 MT:ImmediateRefresh()
             end)
         end
+    end
+
+    if data.isBookmark then
+        AddMenuItem(GetString(NAVIGATOR_MENU_REMOVEBOOKMARK), function()
+            bookmarks:remove(data)
+            ClearMenu()
+            MT.menuOpen = false
+            MT:ImmediateRefresh()
+        end)
     end
 
     MT.menuOpen = true
@@ -742,8 +796,13 @@ end
 
 function MT:selectResult(control, data, mouseButton)
     if mouseButton == 1 then
-        if data.nodeIndex then
+        if data.onClick then
+            data.onClick()
+        elseif data.nodeIndex then
             self:jumpToNode(data)
+        elseif data.poiType == Nav.POI_PLAYERHOUSE then
+            JumpToHouse(data.userID)
+            SCENE_MANAGER:Hide("worldMap")
         elseif data.userID then
             jumpToPlayer(data)
         elseif data.poiType == Nav.POI_ZONE then
@@ -762,7 +821,7 @@ function MT:selectResult(control, data, mouseButton)
             end
         end
     elseif mouseButton == 2 then
-        if data.nodeIndex or data.poiType == Nav.POI_ZONE or Nav.IsPlayer(data.poiType) then
+        if data.nodeIndex or data.poiType == Nav.POI_ZONE or Nav.IsPlayer(data.poiType) or data.poiType == Nav.POI_PLAYERHOUSE then
             showWayshrineMenu(control, data)
         else
             Nav.log("selectResult: unhandled mb2; poiType=%d zoneId=%d", data.poiType or -1, data.zoneId or -1)

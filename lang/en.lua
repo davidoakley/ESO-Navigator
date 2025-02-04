@@ -52,7 +52,8 @@ mkstr("NAVIGATOR_TRAVELING_TO_ZONE_VIA_PLAYER", "Traveling to <<1>> via <<2>>")
 mkstr("NAVIGATOR_SLASH_DESCRIPTION", "Navigator: Teleports to the given zone, wayshrine, house or player")
 
 -- Menu items
-mkstr("NAVIGATOR_MENU_ADDBOOKMARK", "Add Bookmark")
+mkstr("NAVIGATOR_MENU_ADDBOOKMARK", "Bookmark")
+mkstr("NAVIGATOR_MENU_ADDHOUSEBOOKMARK", "Bookmark Primary Residence")
 mkstr("NAVIGATOR_MENU_REMOVEBOOKMARK", "Remove Bookmark")
 mkstr("NAVIGATOR_MENU_SHOWONMAP", "Show on map")
 mkstr("NAVIGATOR_MENU_SETDESTINATION", "Set Destination")

@@ -14,7 +14,8 @@ Navigator = {
     tpCommand = "/nav",
     loggingEnabled = false,
     recentsCount = 10,
-    ignoreDefiniteArticlesInSort = false
+    ignoreDefiniteArticlesInSort = false,
+    useHouseNicknames = false
   },
   Location = {},
   Wayshrine = {},

@@ -174,6 +174,16 @@ function Locs:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon)
         nodeInfo.poiType = Nav.POI_HOUSE
         nodeInfo.owned = (icon:find("poi_group_house_owned") ~= nil)
         nodeInfo.freeRecall = true
+        nodeInfo.houseId = GetFastTravelNodeHouseId(i)
+        if nodeInfo.houseId == GetHousingPrimaryHouse() then
+            nodeInfo.isPrimary = true
+            nodeInfo.icon = "/esoui/art/collections/gp_favorite_housing.dds"
+        end
+        if Nav.saved.useHouseNicknames then
+            nodeInfo.collectibleId = GetCollectibleIdForHouse(nodeInfo.houseId)
+            nodeInfo.nickname = GetCollectibleNickname(nodeInfo.collectibleId)
+            nodeInfo.suffix = zo_strformat(GetString(SI_TOOLTIP_COLLECTIBLE_NICKNAME), nodeInfo.nickname)
+        end
     elseif typePOI == 1 then
         nodeInfo.poiType = Nav.POI_WAYSHRINE
     elseif glowIcon == "/esoui/art/icons/poi/poi_soloinstance_glow.dds" or
@@ -242,7 +252,7 @@ function Locs:GetNode(nodeIndex)
     return self.nodeMap[nodeIndex]
 end
 
-function Locs:getKnownNodes(zoneId)
+function Locs:getKnownNodes(zoneId, includeAliases)
     if self.nodes == nil then
         self:setupNodes()
     end
@@ -263,16 +273,28 @@ function Locs:getKnownNodes(zoneId)
             elseif bookmarked then
                 node.weight = 1.2
             end
+            if node.isPrimary then
+                node.weight = node.weight + 0.1
+            end
             if node.traders and node.traders > 0 then
                 node.weight = node.weight * (1.0 + 0.02 * node.traders)
             end
             table.insert(nodes, node)
+
+            if includeAliases and node.poiType == Nav.POI_HOUSE and Nav.saved.useHouseNicknames then
+                local alias = Utils.shallowCopy(node)
+                alias.name = node.nickname
+                alias.suffix = node.name
+                alias.originalName = nil
+                alias.weight = 0.6
+                table.insert(nodes, alias)
+            end
         end
     end
     return nodes
 end
 
-function Locs:getHouseList()
+function Locs:getHouseList(includeAliases)
     if self.nodes == nil then
         self:setupNodes()
     end
@@ -290,8 +312,20 @@ function Locs:getHouseList()
             elseif node.bookmarked then
                 node.weight = 1.2
             end
+            if node.isPrimary then
+                node.weight = node.weight + 0.1
+            end
             node.known = true
             table.insert(nodes, node)
+
+            if includeAliases and node.poiType == Nav.POI_HOUSE and Nav.saved.useHouseNicknames then
+                local alias = Utils.shallowCopy(node)
+                alias.name = node.nickname
+                alias.suffix = node.name
+                alias.originalName = nil
+                alias.weight = 0.6
+                table.insert(nodes, alias)
+            end
         end
     end
     return nodes
@@ -304,7 +338,7 @@ function Locs:GetZones()
     return self.zones
 end
 
-local function addZoneToList(nodes, name, zoneId, mapId, bookmarked, suffix)
+local function addZoneToList(nodes, name, zoneId, mapId, bookmarked, suffix, canJumpToPlayer)
     table.insert(nodes, {
         name = name,
         barename = Utils.bareName(name),
@@ -316,7 +350,8 @@ local function addZoneToList(nodes, name, zoneId, mapId, bookmarked, suffix)
         weight = Nav.isRecall and 1.0 or 0.9,
         known = true,
         bookmarked = bookmarked,
-        suffix = suffix
+        suffix = suffix,
+        canJumpToPlayer = canJumpToPlayer
     })
 
 end
@@ -331,7 +366,7 @@ function Locs:getZoneList(includeAliases)
     for zoneId, info in pairs(self.zones) do
         addZoneToList(nodes, info.name, zoneId, info.mapId, Nav.Bookmarks:contains(info))
         if includeAliases and zoneId == Nav.ZONE_ATOLLOFIMMOLATION then
-            addZoneToList(nodes, GetString(NAVIGATOR_LOCATION_OBLIVIONPORTAL), zoneId, info.mapId, Nav.Bookmarks:contains(info), info.name)
+            addZoneToList(nodes, GetString(NAVIGATOR_LOCATION_OBLIVIONPORTAL), zoneId, info.mapId, Nav.Bookmarks:contains(info), info.name, info.canJumpToPlayer)
         end
     end
 
@@ -352,7 +387,8 @@ function Locs:getZone(zoneId)
         icon = "Navigator/media/zone.dds",
         poiType = Nav.POI_ZONE,
         weight = Nav.isRecall and 1.0 or 0.9,
-        known = true
+        known = true,
+        canJumpToPlayer = info.canJumpToPlayer
     }
 end
 

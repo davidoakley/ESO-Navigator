@@ -87,12 +87,28 @@ function Bookmarks:getBookmarks()
             if traders and traders > 0 then
                 node.traders = traders
             end
+            node.isBookmark = true
             table.insert(results, node)
         elseif entry.zoneId then
             local zone = Nav.Locations:getZone(entry.zoneId)
             if zone then
-                table.insert(results, zone)
+                local node = Nav.Utils.shallowCopy(zone)
+                node.mapId = entry.mapId
+                node.isBookmark = true
+                table.insert(results, node)
             end
+        elseif entry.userID then -- Travel to primary residence
+            local node = {
+                name = entry.userID,
+                userID = entry.userID,
+                poiType = Nav.POI_PLAYERHOUSE,
+                icon = "esoui/art/lfg/gamepad/lfg_menuicon_housetours.dds",
+                suffix = entry.nickname and zo_strformat(GetString(SI_TOOLTIP_COLLECTIBLE_NICKNAME), entry.nickname)
+                                         or GetString(SI_HOUSING_PRIMARY_RESIDENCE_HEADER),
+                known = true,
+                isBookmark = true
+            }
+            table.insert(results, node)
         end
     end
 
