@@ -10,21 +10,21 @@ local Players = Nav.Players or {
 local Utils = Nav.Utils
 
 local function addPlayerZone(self, zones, zoneId, zoneName, userID, icon, poiType, charName)
-    if zones[zoneId] and CanJumpToPlayerInZone(zoneId) then
-        local zoneInfo = {
-            zoneId = zoneId,
-            zoneName = Utils.FormatSimpleName(zoneName),
-            userID = userID,
-            icon = icon,
-            poiType = poiType
-        }
+    local zoneInfo = {
+        zoneId = zoneId,
+        zoneName = Utils.FormatSimpleName(zoneName),
+        userID = userID,
+        icon = icon,
+        poiType = poiType,
+        canJumpToPlayer = zones[zoneId] and zones[zoneId].canJumpToPlayer
+    }
 
-        self.players[userID] = zoneInfo
-        if charName then
-            charName = zo_strformat("<<!AC:1>>", charName)
-            zoneInfo.charName = charName
-        end
+    self.players[userID] = zoneInfo
+    if charName then
+        charName = zo_strformat("<<!AC:1>>", charName)
+        zoneInfo.charName = charName
     end
+    return zoneInfo
 end
 
 function Players:SetupPlayers()
@@ -83,7 +83,8 @@ function Players:GetPlayerList()
             suffix = info.zoneName,
             poiType = info.poiType,
             userID = userID,
-            known = true
+            known = true,
+            canJumpToPlayer = info.canJumpToPlayer
         })
     end
 

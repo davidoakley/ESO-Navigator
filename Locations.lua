@@ -101,7 +101,8 @@ function Locs:setupNodes()
                                 name = zoneName,
                                 zoneId = zoneId,
                                 index = zoneIndex,
-                                nodes = {}
+                                nodes = {},
+                                canJumpToPlayer = CanJumpToPlayerInZone(zoneId)
                             }
                         else
                             Nav.log("setupNodes: not zone: zoneId %d name %s", zoneId, zoneName)
