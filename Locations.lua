@@ -102,7 +102,7 @@ function Locs:setupNodes()
                                 zoneId = zoneId,
                                 index = zoneIndex,
                                 nodes = {},
-                                canJumpToPlayer = CanJumpToPlayerInZone(zoneId)
+                                canJumpToPlayer = CanJumpToPlayerInZone(zoneId) or zoneId == Nav.ZONE_ATOLLOFIMMOLATION
                             }
                         else
                             Nav.log("setupNodes: not zone: zoneId %d name %s", zoneId, zoneName)
@@ -128,16 +128,17 @@ function Locs:setupNodes()
 
     self:AddExtraZone(2, 27) -- Sort of true, but called 'Clean Test'
     self:AddExtraZone(1, 439) -- Fake!
-    self:AddExtraZone(1272, 2000) -- Atoll Of Immolation
+    self:AddExtraZone(1272, 2000, true) -- Atoll Of Immolation
 end
 
-function Locs:AddExtraZone(zoneId, mapId)
+function Locs:AddExtraZone(zoneId, mapId, canJumpToPlayer)
     local name, _, _, zoneIndex, _ = GetMapInfoById(mapId)
     self.zones[zoneId] = {
         name = name,
         zoneId = zoneId,
         index = zoneIndex,
         mapId = mapId,
+        canJumpToPlayer = canJumpToPlayer,
         nodes = {}
     }
 end
@@ -364,7 +365,7 @@ function Locs:getZoneList(includeAliases)
     end
 
     for zoneId, info in pairs(self.zones) do
-        addZoneToList(nodes, info.name, zoneId, info.mapId, Nav.Bookmarks:contains(info))
+        addZoneToList(nodes, info.name, zoneId, info.mapId, Nav.Bookmarks:contains(info), nil, info.canJumpToPlayer)
         if includeAliases and zoneId == Nav.ZONE_ATOLLOFIMMOLATION then
             addZoneToList(nodes, GetString(NAVIGATOR_LOCATION_OBLIVIONPORTAL), zoneId, info.mapId, Nav.Bookmarks:contains(info), info.name, info.canJumpToPlayer)
         end
