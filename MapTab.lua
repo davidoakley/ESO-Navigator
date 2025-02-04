@@ -356,6 +356,7 @@ function MT:buildScrollList(keepScrollPosition)
                     playerInfo.name = zo_strformat(GetString(NAVIGATOR_TRAVEL_TO_ZONE), zone.name)
                     -- playerInfo.suffix = "via " .. playerInfo.suffix
                     playerInfo.colour = ZO_SECOND_CONTRAST_TEXT
+                    playerInfo.poiType = Nav.POI_ZONE
                 else
                     playerInfo = {
                         name = GetString(NAVIGATOR_NO_TRAVEL_PLAYER),
@@ -650,7 +651,7 @@ local function showWayshrineMenu(owner, data)
             ClearMenu()
         end)
     elseif data.zoneId and Nav.isRecall and data.canJumpToPlayer and data.zoneId ~= Nav.ZONE_CYRODIIL then
-        AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE), data.name), function()
+        AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE), data.zoneName), function()
             zo_callLater(function() jumpToPlayer(data) end, 10)
             ClearMenu()
         end)
