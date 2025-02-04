@@ -177,17 +177,18 @@ local function weightComparison(x, y)
     if x.weight ~= y.weight then
         return x.weight > y.weight
     end
-	return (x.barename or x.name) < (y.barename or y.name)
+	return Utils.SortName(x) < Utils.SortName(y)
 end
 
 local function nameComparison(x, y)
-	return (x.barename or x.name) < (y.barename or y.name)
+	return Utils.SortName(x) < Utils.SortName(y)
 end
 
 local function addDeveloperTooltip(nodeData)
     local items = {
         "bareName='" .. (nodeData.barename or '-').."'",
         "searchName='" .. Utils.SearchName(nodeData.originalName or nodeData.name or '-').."'",
+        "sortName='" .. Utils.SortName(nodeData).."'",
         "weight="..(nodeData.weight or 0)
     }
     if nodeData.nodeIndex then
@@ -691,7 +692,7 @@ local function showWayshrineMenu(owner, data)
     end)
 end
 
-local function showGroupMenu(owner, data)
+local function showGroupMenu(owner, _)
     ClearMenu()
 
     AddMenuItem(GetString(SI_GROUP_LEAVE), function()
