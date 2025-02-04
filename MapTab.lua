@@ -118,23 +118,32 @@ function MT:layoutHintRow(rowControl, data, _)
 end
 
 local function jumpToPlayer(player)
+    CHAT_SYSTEM:AddMessage(zo_strformat(GetString(NAVIGATOR_TRAVELING_TO_ZONE_VIA_PLAYER), player.zoneName, player.userID))
+    SCENE_MANAGER:Hide("worldMap")
+    Nav.log("Jump %s %d", player.userID, player.poiType)
+    if player.poiType == Nav.POI_FRIEND then
+        JumpToFriend(player.userID)
+    elseif player.poiType == Nav.POI_GUILDMATE then
+        JumpToGuildMember(player.userID)
+    elseif player.poiType == Nav.POI_GROUPMATE then
+        JumpToGroupMember(player.userID or player.charName)
+    end
+end
+
+local function jumpToZone(zoneId)
     Nav.Players:SetupPlayers()
 
-    if not Nav.Players.players[player.userID] or Nav.Players.players[player.userID].zoneId ~= player.zoneId then
-        -- Player has disappeared or moved!
-        CHAT_SYSTEM:AddMessage(zo_strformat(GetString(NAVIGATOR_PLAYER_NOT_IN_ZONE), player.userID, player.zoneName))
-
-        player = Nav.Players:GetPlayerInZone(zoneId)
-        if not player then
-            -- Eeek! Refresh the search results and finish
-            MT:buildScrollList()
-            return
-        end
+    local player = Nav.Players:GetPlayerInZone(zoneId)
+    if not player then
+        -- Eeek! Refresh the search results and finish
+        MT:buildScrollList()
+        CHAT_SYSTEM:AddMessage(zo_strformat(GetString(NAVIGATOR_NO_PLAYER_IN_ZONE), GetZoneNameById(zoneId)))
+        return
     end
 
     CHAT_SYSTEM:AddMessage(zo_strformat(GetString(NAVIGATOR_TRAVELING_TO_ZONE_VIA_PLAYER), player.zoneName, player.userID))
     SCENE_MANAGER:Hide("worldMap")
-
+    Nav.log("Jump %s %d", player.userID, player.poiType)
     if player.poiType == Nav.POI_FRIEND then
         JumpToFriend(player.userID)
     elseif player.poiType == Nav.POI_GUILDMATE then
@@ -158,6 +167,8 @@ function MT:jumpToNode(node)
     if node.poiType == Nav.POI_FRIEND or node.poiType == Nav.POI_GUILDMATE then
         jumpToPlayer(node)
         return
+    elseif node.poiType == Nav.POI_ZONE then
+        jumpToZone(node.zoneId)
     end
 
 	name = name or select(2, Nav.Wayshrine.Data.GetNodeInfo(nodeIndex)) -- just in case
@@ -357,6 +368,10 @@ function MT:buildScrollList(keepScrollPosition)
                     -- playerInfo.suffix = "via " .. playerInfo.suffix
                     playerInfo.colour = ZO_SECOND_CONTRAST_TEXT
                     playerInfo.poiType = Nav.POI_ZONE
+                    playerInfo.userID = nil
+                    playerInfo.onClick = function()
+                        jumpToZone(zone.zoneId)
+                    end
                 else
                     playerInfo = {
                         name = GetString(NAVIGATOR_NO_TRAVEL_PLAYER),
@@ -651,8 +666,9 @@ local function showWayshrineMenu(owner, data)
             ClearMenu()
         end)
     elseif data.zoneId and Nav.isRecall and data.canJumpToPlayer and data.zoneId ~= Nav.ZONE_CYRODIIL then
-        AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE), data.zoneName), function()
-            zo_callLater(function() jumpToPlayer(data) end, 10)
+        local destination = data.userID or data.zoneName
+        AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE), destination), function()
+            zo_callLater(function() jumpToZone(data.zoneId) end, 10)
             ClearMenu()
         end)
     elseif data.poiType == Nav.POI_PLAYERHOUSE then
@@ -780,7 +796,9 @@ end
 
 function MT:selectResult(control, data, mouseButton)
     if mouseButton == 1 then
-        if data.nodeIndex then
+        if data.onClick then
+            data.onClick()
+        elseif data.nodeIndex then
             self:jumpToNode(data)
         elseif data.poiType == Nav.POI_PLAYERHOUSE then
             JumpToHouse(data.userID)
