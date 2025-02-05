@@ -3,7 +3,7 @@
   <component name="Black">
     <option name="sdkName" value="Python 3.9" />
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_16" default="true" project-jdk-name="Lua" project-jdk-type="Lua SDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_16" default="true">
     <output url="file://$PROJECT_DIR$/out" />
   </component>
 </project>
