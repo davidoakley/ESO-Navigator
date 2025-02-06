@@ -149,6 +149,14 @@ function Utils.trim(s)
 	return s
 end
 
+function Utils.tableConcat(t1, t2)
+	for i=1,#t2 do
+		t1[#t1+1] = t2[i]
+	end
+	return t1
+end
+
+
 function Utils.FormatSimpleName(str)
 	if str == nil or str == "" then return str end
 	local lang = string.lower(CurrentLanguage())
