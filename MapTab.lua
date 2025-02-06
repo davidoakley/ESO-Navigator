@@ -692,7 +692,7 @@ local function showWayshrineMenu(owner, data)
             AddMenuItem(GetString(NAVIGATOR_MENU_ADDHOUSEBOOKMARK), function()
                 bookmarks:add(bookmarkEntry)
                 MT.menuOpen = false
-                MT:ImmediateRefresh()
+                zo_callLater(function() MT:ImmediateRefresh() end, 10)
             end)
         end
     else
@@ -709,7 +709,7 @@ local function showWayshrineMenu(owner, data)
             AddMenuItem(GetString(NAVIGATOR_MENU_ADDBOOKMARK), function()
                 bookmarks:add(entry)
                 MT.menuOpen = false
-                MT:ImmediateRefresh()
+                zo_callLater(function() MT:ImmediateRefresh() end, 10)
             end)
         end
     end
@@ -718,7 +718,7 @@ local function showWayshrineMenu(owner, data)
         AddMenuItem(GetString(NAVIGATOR_MENU_REMOVEBOOKMARK), function()
             bookmarks:remove(data)
             MT.menuOpen = false
-            MT:ImmediateRefresh()
+            zo_callLater(function() MT:ImmediateRefresh() end, 10)
         end)
     end
 
