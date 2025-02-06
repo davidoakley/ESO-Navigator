@@ -1,39 +1,36 @@
 local Nav = Navigator
 local Bookmarks = Nav.Bookmarks or {
-    list = {},
 }
 
 function Bookmarks:init()
-    self.list = Nav.saved.bookmarks or {}
+    Nav.saved.bookmarks = Nav.saved.bookmarks or {}
 end
 
---[[ function Bookmarks:importOldBookmarks()
-    local nodes = Nav.saved.bookmarkNodes
-    local list = {}
-
-    for i = 1, #nodes do
-        table.insert(list, { nodeIndex = nodes[i] })
-    end
-
-    Nav.saved.bookmarks = list
-end -- ]]
-
 function Bookmarks:getIndex(entry)
+    local list = Nav.saved.bookmarks
+
     if entry.nodeIndex then
         local nodeIndex = entry.nodeIndex
         if nodeIndex == 211 or nodeIndex == 212 then
             -- Always refer to The Harborage as index 210
             nodeIndex = 210
         end
-        for i = 1, #self.list do
-            if nodeIndex == self.list[i].nodeIndex then
+        for i = 1, #list do
+            if nodeIndex == list[i].nodeIndex then
                 return i
             end
         end
     elseif entry.zoneId then
         local zoneId = entry.zoneId
-        for i = 1, #self.list do
-            if zoneId == self.list[i].zoneId then
+        for i = 1, #list do
+            if zoneId == list[i].zoneId then
+                return i
+            end
+        end
+    elseif entry.userID then
+        local userID = entry.userID
+        for i = 1, #list do
+            if userID == list[i].userID and entry.action == list[i].action then
                 return i
             end
         end
@@ -47,17 +44,13 @@ function Bookmarks:add(entry)
         entry.nodeIndex = 210
     end
 
-    table.insert(self.list, entry)
-    -- Nav.log("Bookmarks:add("..nodeIndex..")")
-    self:save()
+    table.insert(Nav.saved.bookmarks, entry)
 end
 
 function Bookmarks:remove(entry)
     local i = self:getIndex(entry)
     if i then
-        table.remove(self.list, i)
-        Nav.log("Bookmarks:remove("..i..")")
-        self:save()    
+        table.remove(Nav.saved.bookmarks, i)
     end
 end
 
@@ -66,16 +59,13 @@ function Bookmarks:contains(entry)
     return self:getIndex(entry) ~= nil
 end
 
-function Bookmarks:save()
-    Nav.saved.bookmarks = self.list
-end
-
 function Bookmarks:getBookmarks()
+    local list = Nav.saved.bookmarks
     local results = {}
     local nodeMap = Nav.Locations:getNodeMap()
 
-    for i = 1, #self.list do
-        local entry = self.list[i]
+    for i = 1, #list do
+        local entry = list[i]
         if entry.nodeIndex and nodeMap then
             local nodeIndex = entry.nodeIndex
             if Nav.Locations:IsHarborage(nodeIndex) then
