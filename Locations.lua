@@ -129,6 +129,7 @@ function Locs:setupNodes()
     self:AddExtraZone(2, 27) -- Sort of true, but called 'Clean Test'
     self:AddExtraZone(1, 439) -- Fake!
     self:AddExtraZone(1272, 2000, true) -- Atoll Of Immolation
+    self:AddExtraZone(Nav.ZONE_BLACKREACH, 1782, false)
 end
 
 function Locs:AddExtraZone(zoneId, mapId, canJumpToPlayer)
@@ -256,6 +257,12 @@ end
 function Locs:getKnownNodes(zoneId, includeAliases)
     if self.nodes == nil then
         self:setupNodes()
+    end
+
+    if zoneId == Nav.ZONE_BLACKREACH then
+        local nodes1 = self:getKnownNodes(Nav.ZONE_BLACKREACH_ARKTHZANDCAVERN)
+        local nodes2 = self:getKnownNodes(Nav.ZONE_BLACKREACH_GREYMOORCAVERNS)
+        return Utils.tableConcat(nodes1, nodes2)
     end
 
     local nodes = {}
@@ -420,6 +427,10 @@ function Locs:getCurrentMapZone()
         zoneId = Nav.ZONE_ATOLLOFIMMOLATION
     elseif mapId == 2119 then
         zoneId = Nav.ZONE_FARGRAVE
+    elseif mapId == 1782 then
+        zoneId = Nav.ZONE_BLACKREACH
+        mapType = MAPTYPE_ZONE
+        --return { zoneId = Nav.ZONE_BLACKREACH, name = GetMapNameById(mapId), mapId = mapId }
     end
     if zoneId == Nav.ZONE_TAMRIEL then
         return {
