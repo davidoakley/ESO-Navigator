@@ -630,13 +630,11 @@ local function showWayshrineMenu(owner, data)
                 local houseId = data.houseId or GetFastTravelNodeHouseId(data.nodeIndex)
                 RequestJumpToHouse(houseId, false)
                 zo_callLater(function() SCENE_MANAGER:Hide("worldMap") end, 10)
-                ClearMenu()
             end)
             AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_HOUSE_OUTSIDE), data.name), function()
                 local houseId = data.houseId or GetFastTravelNodeHouseId(data.nodeIndex)
                 RequestJumpToHouse(houseId, true)
                 zo_callLater(function() SCENE_MANAGER:Hide("worldMap") end, 10)
-                ClearMenu()
             end)
             --TODO: Revisit: setting the primary residence didn't seem to be immediately visible
             --if not data.isPrimary then
@@ -654,22 +652,18 @@ local function showWayshrineMenu(owner, data)
             local strId = (Nav.isRecall and data.poiType ~= Nav.POI_HOUSE) and SI_WORLD_MAP_ACTION_RECALL_TO_WAYSHRINE or SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE
             AddMenuItem(zo_strformat(GetString(strId), data.name), function()
                 MT:jumpToNode(data)
-                ClearMenu()
             end)
         end
         AddMenuItem(GetString(NAVIGATOR_MENU_SHOWONMAP), function()
             MT:PanToPOI(data, false)
-            ClearMenu()
         end)
         AddMenuItem(GetString(NAVIGATOR_MENU_SETDESTINATION), function()
             MT:PanToPOI(data, true)
-            ClearMenu()
         end)
     elseif data.zoneId and Nav.isRecall and data.canJumpToPlayer and data.zoneId ~= Nav.ZONE_CYRODIIL then
         local destination = data.userID or data.zoneName
         AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE), destination), function()
             zo_callLater(function() jumpToZone(data.zoneId) end, 10)
-            ClearMenu()
         end)
     elseif data.poiType == Nav.POI_PLAYERHOUSE then
         AddMenuItem(GetString(SI_SOCIAL_MENU_VISIT_HOUSE), function()
@@ -677,7 +671,6 @@ local function showWayshrineMenu(owner, data)
                 SCENE_MANAGER:Hide("worldMap")
                 JumpToHouse(data.userID)
             end, 10)
-            ClearMenu()
         end)
     end
 
@@ -685,15 +678,12 @@ local function showWayshrineMenu(owner, data)
         if Nav.Players:IsGroupLeader() and data.poiType == Nav.POI_GROUPMATE then
             AddMenuItem(GetString(SI_GROUP_LIST_MENU_PROMOTE_TO_LEADER), function()
                 GroupPromote(data.unitTag)
-                --bookmarks:remove(entry)
-                ClearMenu()
                 MT.menuOpen = false
                 MT:ImmediateRefresh()
             end)
         end
         AddMenuItem(GetString(SI_SOCIAL_MENU_VISIT_HOUSE), function()
             JumpToHouse(data.userID)
-            ClearMenu()
             MT.menuOpen = false
         end)
 
@@ -701,7 +691,6 @@ local function showWayshrineMenu(owner, data)
         if not bookmarks:contains(bookmarkEntry) then
             AddMenuItem(GetString(NAVIGATOR_MENU_ADDHOUSEBOOKMARK), function()
                 bookmarks:add(bookmarkEntry)
-                ClearMenu()
                 MT.menuOpen = false
                 MT:ImmediateRefresh()
             end)
@@ -719,7 +708,6 @@ local function showWayshrineMenu(owner, data)
         if entry and not bookmarks:contains(entry) then
             AddMenuItem(GetString(NAVIGATOR_MENU_ADDBOOKMARK), function()
                 bookmarks:add(entry)
-                ClearMenu()
                 MT.menuOpen = false
                 MT:ImmediateRefresh()
             end)
@@ -729,7 +717,6 @@ local function showWayshrineMenu(owner, data)
     if data.isBookmark then
         AddMenuItem(GetString(NAVIGATOR_MENU_REMOVEBOOKMARK), function()
             bookmarks:remove(data)
-            ClearMenu()
             MT.menuOpen = false
             MT:ImmediateRefresh()
         end)
@@ -751,7 +738,6 @@ local function showGroupMenu(owner, _)
 
     AddMenuItem(GetString(SI_GROUP_LEAVE), function()
         ZO_Dialogs_ShowDialog("GROUP_LEAVE_DIALOG")
-        ClearMenu()
         MT.menuOpen = false
         MT:ImmediateRefresh()
     end)
