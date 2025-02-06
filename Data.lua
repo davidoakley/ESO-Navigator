@@ -1,6 +1,7 @@
 local Nav = Navigator
 local Data = Nav.Data or {}
 
+Nav.ZONE_TAMRIEL = 2
 Nav.ZONE_CYRODIIL = 181
 Nav.ZONE_ATOLLOFIMMOLATION = 1272
 Nav.ZONE_FARGRAVE = 1282
@@ -16,6 +17,10 @@ Nav.POI_GROUP_DUNGEON = 7
 Nav.POI_HOUSE = 8
 Nav.POI_GROUPMATE = 9
 Nav.POI_PLAYERHOUSE = 10
+
+Nav.FILTER_NONE = 0
+Nav.FILTER_PLAYERS = 1
+Nav.FILTER_HOUSES = 4
 
 function Nav.IsPlayer(poiType)
     return poiType == Nav.POI_FRIEND or poiType == Nav.POI_GUILDMATE or poiType == Nav.POI_GROUPMATE

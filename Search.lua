@@ -5,10 +5,6 @@ local Locations = Nav.Locations
 local colors = Nav.ansicolors
 local fzy = Nav.fzy
 
-Nav.FILTER_NONE = 0
-Nav.FILTER_PLAYERS = 1
-Nav.FILTER_HOUSES = 4
-
 Search.candidates = {}
 
 local function match(searchName, searchTerm)

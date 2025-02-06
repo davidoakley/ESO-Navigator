@@ -354,7 +354,7 @@ function MT:buildScrollList(keepScrollPosition)
         buildList(scrollData, "recents", NAVIGATOR_CATEGORY_RECENT, recents, NAVIGATOR_HINT_NORECENTS)
 
         local zone = Nav.Locations:getCurrentMapZone()
-        if zone and zone.zoneId == 2 then
+        if zone and zone.zoneId == Nav.ZONE_TAMRIEL then
             local list = Nav.Locations:getZoneList()
             table.sort(list, nameComparison)
             buildList(scrollData, "zones", NAVIGATOR_CATEGORY_ZONES, list)
@@ -512,7 +512,7 @@ function MT:init()
 end
 
 local function getMapIdByZoneId(zoneId)
-    if zoneId == 2 then -- Tamriel
+    if zoneId == Nav.ZONE_TAMRIEL then
         return 27
     elseif zoneId == 981 then -- Brass Fortress
         return 1348

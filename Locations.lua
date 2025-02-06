@@ -421,7 +421,7 @@ function Locs:getCurrentMapZone()
     elseif mapId == 2119 then
         zoneId = Nav.ZONE_FARGRAVE
     end
-    if zoneId == 2 then
+    if zoneId == Nav.ZONE_TAMRIEL then
         return {
             zoneId = 2
         }
