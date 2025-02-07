@@ -179,7 +179,9 @@ function Locs:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon)
         nodeInfo.houseId = GetFastTravelNodeHouseId(i)
         if nodeInfo.houseId == GetHousingPrimaryHouse() then
             nodeInfo.isPrimary = true
-            nodeInfo.icon = "/esoui/art/collections/gp_favorite_housing.dds"
+            nodeInfo.icon = "Navigator/media/house_star.dds"
+        else
+            nodeInfo.icon = nodeInfo.owned and "Navigator/media/house.dds" or "Navigator/media/house_unowned.dds"
         end
         if Nav.saved.useHouseNicknames then
             nodeInfo.collectibleId = GetCollectibleIdForHouse(nodeInfo.houseId)
@@ -188,6 +190,7 @@ function Locs:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon)
         end
     elseif typePOI == 1 then
         nodeInfo.poiType = Nav.POI_WAYSHRINE
+        if icon:find("poi_wayshrine_complete") then nodeInfo.icon = "Navigator/media/wayshrine.dds" end
     elseif glowIcon == "/esoui/art/icons/poi/poi_soloinstance_glow.dds" or
            glowIcon == "/esoui/art/icons/poi/poi_groupinstance_glow.dds" then
         nodeInfo.poiType = Nav.POI_ARENA

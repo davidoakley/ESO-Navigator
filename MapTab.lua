@@ -40,7 +40,7 @@ function MT:layoutRow(rowControl, data, _)
                        ((data.known and not data.disabled) and { 1.0, 1.0, 1.0, 1.0 } or { 0.51, 0.51, 0.44, 1.0 })
 
     if data.suffix ~= nil then
-        local colour = data.canJumpToPlayer and "76BCC3" or "82826F" -- data.zoneId == Nav.ZONE_CYRODIIL and "FFAB0F"
+        local colour = (data.canJumpToPlayer and Nav.IsPlayer(data.poiType)) and "76BCC3" or "82826F" -- data.zoneId == Nav.ZONE_CYRODIIL and "FFAB0F"
         name = name .. " |c" .. colour .. data.suffix .. "|r"
     end
 

@@ -44,7 +44,7 @@ function Players:SetupPlayers()
             if playerStatus ~= PLAYER_STATUS_OFFLINE and userID ~= myID then
                 local hasChar, charName, zoneName, _, _, _, _, zoneId = GetGuildMemberCharacterInfo(guildID, i)
                 if hasChar then
-                    addPlayerZone(self, zones, zoneId, zoneName, userID, "/esoui/art/menubar/gamepad/gp_playermenu_icon_character.dds", Nav.POI_GUILDMATE, charName)
+                    addPlayerZone(self, zones, zoneId, zoneName, userID, "Navigator/media/player.dds", Nav.POI_GUILDMATE, charName)
                 end
             end
         end
@@ -57,7 +57,7 @@ function Players:SetupPlayers()
         if playerStatus ~= PLAYER_STATUS_OFFLINE and secsSinceLogoff == 0 then
             local hasChar, charName, zoneName, _, _, _, _, zoneId = GetFriendCharacterInfo(i)
             if hasChar then
-                local player = addPlayerZone(self, zones, zoneId, zoneName, userID, "/esoui/art/menubar/gamepad/gp_playermenu_icon_character.dds", Nav.POI_FRIEND, charName)
+                local player = addPlayerZone(self, zones, zoneId, zoneName, userID, "Navigator/media/player_friend.dds", Nav.POI_FRIEND, charName)
                 if player then
                     player.weight = 1.1
                 end
