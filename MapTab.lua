@@ -753,9 +753,17 @@ local function showGroupMenu(owner, _)
     end)
 end
 
+local function getPOIMapInfo(zoneIndex, mapId, poiIndex)
+    if mapId == 2082 then
+        return 0.3485, 0.3805 -- GetPOIMapInfo returns 0,0 for The Shambles
+    else
+        return GetPOIMapInfo(zoneIndex, poiIndex)
+    end
+end
+
 function MT:PanToPOI(node, setWaypoint)
-    local function panToPOI(zoneIndex, poiIndex)
-        local normalizedX, normalizedZ = GetPOIMapInfo(zoneIndex, poiIndex)
+    local function panToPOI(zoneIndex, mapId, poiIndex)
+        local normalizedX, normalizedZ = getPOIMapInfo(zoneIndex, mapId, poiIndex)
         Nav.log("MT:PanToPOI: poiIndex=%d, %f,%f", poiIndex, normalizedX, normalizedZ)
         if setWaypoint then
             PingMap(MAP_PIN_TYPE_PLAYER_WAYPOINT, MAP_TYPE_LOCATION_CENTERED, normalizedX, normalizedZ)
@@ -773,10 +781,10 @@ function MT:PanToPOI(node, setWaypoint)
         WORLD_MAP_MANAGER:SetMapById(targetMapId)
 
         zo_callLater(function()
-            panToPOI(targetZoneIndex, node.poiIndex)
+            panToPOI(targetZoneIndex, targetMapId, node.poiIndex)
         end, 100)
     else
-        panToPOI(targetZoneIndex, node.poiIndex)
+        panToPOI(targetZoneIndex, targetMapId, node.poiIndex)
     end
 end
 
