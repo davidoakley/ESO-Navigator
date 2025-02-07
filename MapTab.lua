@@ -618,6 +618,21 @@ function MT:resetSearch()
 	ZO_ScrollList_ResetToTop(self.listControl)
 end
 
+local function requestJumpToHouse(data, jumpOutside)
+    if not CanJumpToHouseFromCurrentLocation() then
+        local cannotJumpString = data.owned and GetString(SI_COLLECTIONS_CANNOT_JUMP_TO_HOUSE_FROM_LOCATION) or GetString(SI_COLLECTIONS_CANNOT_PREVIEW_HOUSE_FROM_LOCATION)
+        zo_callLater(function()
+            SCENE_MANAGER:Hide("worldMap")
+            ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, cannotJumpString)
+        end, 10)
+        return
+    end
+
+    local houseId = data.houseId or GetFastTravelNodeHouseId(data.nodeIndex)
+    RequestJumpToHouse(houseId, false)
+    zo_callLater(function() SCENE_MANAGER:Hide("worldMap") end, 10)
+end
+
 local function showWayshrineMenu(owner, data)
 	ClearMenu()
     local bookmarks = Nav.Bookmarks
@@ -627,14 +642,10 @@ local function showWayshrineMenu(owner, data)
     if data.nodeIndex then
         if data.poiType == Nav.POI_HOUSE then
             AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_HOUSE_INSIDE), data.name), function()
-                local houseId = data.houseId or GetFastTravelNodeHouseId(data.nodeIndex)
-                RequestJumpToHouse(houseId, false)
-                zo_callLater(function() SCENE_MANAGER:Hide("worldMap") end, 10)
+                requestJumpToHouse(data, false)
             end)
             AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_HOUSE_OUTSIDE), data.name), function()
-                local houseId = data.houseId or GetFastTravelNodeHouseId(data.nodeIndex)
-                RequestJumpToHouse(houseId, true)
-                zo_callLater(function() SCENE_MANAGER:Hide("worldMap") end, 10)
+                requestJumpToHouse(data, true)
             end)
             --TODO: Revisit: setting the primary residence didn't seem to be immediately visible
             --if not data.isPrimary then
@@ -792,6 +803,8 @@ function MT:selectResult(control, data, mouseButton)
     if mouseButton == 1 then
         if data.onClick then
             data.onClick()
+        elseif data.poiType == Nav.POI_HOUSE then
+            requestJumpToHouse(data, false)
         elseif data.nodeIndex then
             self:jumpToNode(data)
         elseif data.poiType == Nav.POI_PLAYERHOUSE then
