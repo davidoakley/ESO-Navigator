@@ -55,7 +55,7 @@ end
 function Search:Run(searchTerm, filter)
     self.candidates = {}
 
-    searchTerm = searchTerm and string.lower(searchTerm) or ""
+    searchTerm = searchTerm and string.lower(searchTerm) or "" -- FIXME: Should string.lower be removed?
     searchTerm = searchTerm:gsub("[^%w ]", "")
     local hasSearch = searchTerm ~= ""
 
