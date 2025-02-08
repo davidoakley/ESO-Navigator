@@ -118,7 +118,7 @@ function MT:layoutHintRow(rowControl, data, _)
 end
 
 local function jumpToPlayer(player)
-    CHAT_SYSTEM:AddMessage(zo_strformat(GetString(NAVIGATOR_TRAVELING_TO_ZONE_VIA_PLAYER), player.zoneName, player.userID))
+    ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.POSITIVE_CLICK,zo_strformat(GetString(NAVIGATOR_TRAVELING_TO_ZONE_VIA_PLAYER), player.zoneName, player.userID))
     SCENE_MANAGER:Hide("worldMap")
     Nav.log("Jump %s %d", player.userID, player.poiType)
     if player.poiType == Nav.POI_FRIEND then
@@ -137,11 +137,11 @@ local function jumpToZone(zoneId)
     if not player then
         -- Eeek! Refresh the search results and finish
         MT:buildScrollList()
-        CHAT_SYSTEM:AddMessage(zo_strformat(GetString(NAVIGATOR_NO_PLAYER_IN_ZONE), GetZoneNameById(zoneId)))
+        ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, (zo_strformat(GetString(NAVIGATOR_NO_PLAYER_IN_ZONE), GetZoneNameById(zoneId))))
         return
     end
 
-    CHAT_SYSTEM:AddMessage(zo_strformat(GetString(NAVIGATOR_TRAVELING_TO_ZONE_VIA_PLAYER), player.zoneName, player.userID))
+    ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.POSITIVE_CLICK, (zo_strformat(GetString(NAVIGATOR_TRAVELING_TO_ZONE_VIA_PLAYER), player.zoneName, player.userID)))
     SCENE_MANAGER:Hide("worldMap")
     Nav.log("Jump %s %d", player.userID, player.poiType)
     if player.poiType == Nav.POI_FRIEND then
