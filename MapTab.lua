@@ -801,10 +801,10 @@ function MT:PanToPOI(node, setWaypoint)
     end
 end
 
-function MT:selectResult(control, data, mouseButton)
+function MT:selectResult(control, data, mouseButton, isDoubleClick)
     if mouseButton == 1 then
         if data.onClick then
-            data.onClick()
+            data.onClick(isDoubleClick)
         elseif data.poiType == Nav.POI_HOUSE then
             requestJumpToHouse(data, false)
         elseif data.nodeIndex then
@@ -815,17 +815,25 @@ function MT:selectResult(control, data, mouseButton)
         elseif data.userID then
             jumpToPlayer(data)
         elseif data.poiType == Nav.POI_ZONE then
-            MT.filter = Nav.FILTER_NONE
-            self.editControl:SetText("")
-
-            local mapZoneId = Nav.Locations:getCurrentMapZoneId()
-            local currentMapId = GetCurrentMapId()
-            local mapId = data.mapId or getMapIdByZoneId(data.zoneId)
-            Nav.log("selectResult: data.zoneId %d data.mapId %d mapZoneId %d mapId %d", data.zoneId, data.mapId or 0, mapZoneId, mapId)
-            if data.zoneId ~= mapZoneId or (data.mapId and data.mapId ~= currentMapId) then
-                Nav.log("selectResult: mapId %d", mapId or 0)
-                if mapId then
-                    WORLD_MAP_MANAGER:SetMapById(mapId)
+            local clickEvent
+            if isDoubleClick then
+                if clickEvent then zo_removeCallLater(clickEvent) end
+                jumpToZone(data.zoneId)
+            else
+                local mapZoneId = Nav.Locations:getCurrentMapZoneId()
+                local currentMapId = GetCurrentMapId()
+                local targetMapId = data.mapId or getMapIdByZoneId(data.zoneId)
+                Nav.log("selectResult: data.zoneId %d data.mapId %d mapZoneId %d mapId %d", data.zoneId, data.mapId or 0, mapZoneId, targetMapId)
+                if data.zoneId ~= mapZoneId or (data.mapId and data.mapId ~= currentMapId) then
+                    --Nav.log("selectResult: mapId %d", targetMapId or 0)
+                    if targetMapId then
+                        -- Delay single click to give time for the double-click to occur
+                        clickEvent = zo_callLater(function()
+                            MT.filter = Nav.FILTER_NONE
+                            --self.editControl:SetText("")
+                            WORLD_MAP_MANAGER:SetMapById(targetMapId)
+                        end, 200)
+                    end
                 end
             end
         end
@@ -840,28 +848,24 @@ function MT:selectResult(control, data, mouseButton)
     end
 end
 
-function MT:RowMouseUp(control, mouseButton, upInside)
-	if upInside then
-		local data = ZO_ScrollList_GetData(control)
-        self:selectResult(control, data, mouseButton)
-	end
+function MT:RowMouseUp(control, mouseButton, isDoubleClick)
+    local data = ZO_ScrollList_GetData(control)
+    self:selectResult(control, data, mouseButton, isDoubleClick)
 end
 
-function MT:CategoryRowMouseUp(control, mouseButton, upInside)
-	if upInside then
-        --Nav.log("MT:CategoryRowMouseUp %d %s", mouseButton, )
-        local data = ZO_ScrollList_GetData(control)
-        if mouseButton == 2 then
-            if data.id == "group" then
-                showGroupMenu(control, data)
-            end
-        else
-            Nav.log("Toggling category %s", data.id)
-            self.collapsedCategories[data.id] = not self.collapsedCategories[data.id]
-            MT:buildScrollList(true)
-            MT:updateFilterControl()
+function MT:CategoryRowMouseUp(control, mouseButton)
+    --Nav.log("MT:CategoryRowMouseUp %d %s", mouseButton, )
+    local data = ZO_ScrollList_GetData(control)
+    if mouseButton == 2 then
+        if data.id == "group" then
+            showGroupMenu(control, data)
         end
-	end
+    else
+        Nav.log("Toggling category %s", data.id)
+        self.collapsedCategories[data.id] = not self.collapsedCategories[data.id]
+        MT:buildScrollList(true)
+        MT:updateFilterControl()
+    end
 end
 
 function MT:IsViewingInitialZone()
