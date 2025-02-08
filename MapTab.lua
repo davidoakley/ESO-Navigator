@@ -629,7 +629,7 @@ local function requestJumpToHouse(data, jumpOutside)
     end
 
     local houseId = data.houseId or GetFastTravelNodeHouseId(data.nodeIndex)
-    RequestJumpToHouse(houseId, false)
+    RequestJumpToHouse(houseId, jumpOutside)
     zo_callLater(function() SCENE_MANAGER:Hide("worldMap") end, 10)
 end
 
