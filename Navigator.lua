@@ -107,8 +107,6 @@ local function OnMapStateChange(_, newState)
     else
       Nav.MapTab.collapsedCategories = { bookmarks = true, recents = true }
     end
-
-    Nav.log("WorldMap showing done")
   elseif newState == SCENE_HIDDEN then
     Nav.log("WorldMap hidden")
     Nav.mapVisible = false
