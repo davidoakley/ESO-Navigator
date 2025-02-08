@@ -21,7 +21,7 @@
 				</Label>
             </Controls>
 			<OnMouseUp>
-				Navigator.MapTab:CategoryRowMouseUp(self, button, upInside)
+				if upInside then Navigator.MapTab:CategoryRowMouseUp(self, button) end
 			</OnMouseUp>
         </Control>
 
@@ -45,7 +45,7 @@
 				</Label>
             </Controls>
 			<OnMouseUp>
-				Navigator.MapTab:CategoryRowMouseUp(self, button, upInside)
+				if upInside then Navigator.MapTab:CategoryRowMouseUp(self, button) end
 			</OnMouseUp>
         </Control>
 
@@ -106,8 +106,11 @@
 				</Label>
             </Controls>
 			<OnMouseUp>
-				Navigator.MapTab:RowMouseUp(self, button, upInside)
+				if upInside then Navigator.MapTab:RowMouseUp(self, button, false) end
 			</OnMouseUp>
+			<OnMouseDoubleClick>
+				Navigator.MapTab:RowMouseUp(self, button, true)
+			</OnMouseDoubleClick>
         </Control>
 
         <Control name="Navigator_HintRow" virtual="true" mouseEnabled="false">
