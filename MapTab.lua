@@ -673,6 +673,10 @@ local function showWayshrineMenu(owner, data)
         AddMenuItem(GetString(NAVIGATOR_MENU_SETDESTINATION), function()
             MT:PanToPOI(data, true)
         end)
+    elseif Nav.IsPlayer(data.poiType) then
+        AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE), data.userID), function()
+            zo_callLater(function() jumpToPlayer(data) end, 10)
+        end)
     elseif data.zoneId and Nav.isRecall and data.canJumpToPlayer and data.zoneId ~= Nav.ZONE_CYRODIIL then
         local destination = data.userID or data.zoneName
         AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE), destination), function()
