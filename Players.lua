@@ -16,7 +16,7 @@ local function addPlayerZone(self, zones, zoneId, zoneName, userID, icon, poiTyp
         userID = userID,
         icon = icon,
         poiType = poiType,
-        canJumpToPlayer = zones[zoneId] and zones[zoneId].canJumpToPlayer
+        canJumpToPlayer = poiType == Nav.POI_GROUPMATE or (zones[zoneId] and zones[zoneId].canJumpToPlayer)
     }
 
     self.players[userID] = zoneInfo
