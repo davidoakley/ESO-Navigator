@@ -93,7 +93,7 @@ function Players:ClearPlayers()
 end
 
 local function createPlayerNode(player, setSuffix)
-    return {
+    return Nav.PlayerNode:New({
         name = player.userID,
         userID = player.userID,
         unitName = player.unitName,
@@ -109,7 +109,7 @@ local function createPlayerNode(player, setSuffix)
         known = true,
         weight = player.weight,
         canJumpToPlayer = player.canJumpToPlayer
-    }
+    })
 end
 
 function Players:GetPlayerList()

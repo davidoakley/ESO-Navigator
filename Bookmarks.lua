@@ -62,16 +62,17 @@ end
 function Bookmarks:getBookmarks()
     local list = Nav.saved.bookmarks
     local results = {}
-    local nodeMap = Nav.Locations:getNodeMap()
+    --local nodeMap = Nav.Locations:getNodeMap()
 
     for i = 1, #list do
         local entry = list[i]
-        if entry.nodeIndex and nodeMap then
-            local nodeIndex = entry.nodeIndex
-            if Nav.Locations:IsHarborage(nodeIndex) then
-                nodeIndex = Nav.Locations:GetHarborage()
-            end
-            local node = Nav.Utils.shallowCopy(nodeMap[nodeIndex])
+        local nodeIndex = entry.nodeIndex
+        if nodeIndex and Nav.Locations:IsHarborage(nodeIndex) then
+            nodeIndex = Nav.Locations:GetHarborage()
+        end
+        local node = nodeIndex and Nav.Locations:GetNode(nodeIndex)
+        if node then
+            --local node = Nav.Utils.shallowCopy(nodeMap[nodeIndex])
             node.known = Nav.Locations:isKnownNode(nodeIndex)
             local traders = Nav.Data.traderCounts[nodeIndex]
             if traders and traders > 0 then
@@ -82,13 +83,13 @@ function Bookmarks:getBookmarks()
         elseif entry.zoneId then
             local zone = Nav.Locations:getZone(entry.zoneId)
             if zone then
-                local node = Nav.Utils.shallowCopy(zone)
+                node = Nav.Utils.shallowCopy(zone)
                 node.mapId = entry.mapId
                 node.isBookmark = true
                 table.insert(results, node)
             end
         elseif entry.userID then -- Travel to primary residence
-            local node = {
+            node = Nav.PlayerHouseNode:New({
                 name = entry.userID,
                 userID = entry.userID,
                 poiType = Nav.POI_PLAYERHOUSE,
@@ -97,7 +98,7 @@ function Bookmarks:getBookmarks()
                                          or GetString(SI_HOUSING_PRIMARY_RESIDENCE_HEADER),
                 known = true,
                 isBookmark = true
-            }
+            })
             table.insert(results, node)
         end
     end

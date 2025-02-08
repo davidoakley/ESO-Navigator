@@ -117,19 +117,7 @@ function MT:layoutHintRow(rowControl, data, _)
 	rowControl.label:SetText(data.hint or "-")
 end
 
-local function jumpToPlayer(player)
-    ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.POSITIVE_CLICK,zo_strformat(GetString(NAVIGATOR_TRAVELING_TO_ZONE_VIA_PLAYER), player.zoneName, player.userID))
-    SCENE_MANAGER:Hide("worldMap")
-    Nav.log("Jump %s %d", player.userID, player.poiType)
-    if player.poiType == Nav.POI_FRIEND then
-        JumpToFriend(player.userID)
-    elseif player.poiType == Nav.POI_GUILDMATE then
-        JumpToGuildMember(player.userID)
-    elseif player.poiType == Nav.POI_GROUPMATE then
-        JumpToGroupMember(player.userID or player.charName)
-    end
-end
-
+--[[
 local function jumpToZone(zoneId)
     Nav.Players:SetupPlayers()
 
@@ -165,10 +153,11 @@ function MT:jumpToNode(node)
 	ZO_Dialogs_ReleaseDialog("RECALL_CONFIRM")
 
     if node.poiType == Nav.POI_FRIEND or node.poiType == Nav.POI_GUILDMATE then
-        jumpToPlayer(node)
+        node:JumpToPlayer()
         return
     elseif node.poiType == Nav.POI_ZONE then
-        jumpToZone(node.zoneId)
+        node:JumpToZone()
+        return
     end
 
 	name = name or select(2, Nav.Wayshrine.Data.GetNodeInfo(nodeIndex)) -- just in case
@@ -183,6 +172,7 @@ function MT:jumpToNode(node)
 	end
 	ZO_Dialogs_ShowPlatformDialog(id, {nodeIndex = nodeIndex}, {mainTextParams = {name}})
 end
+--]]
 
 local function weightComparison(x, y)
     if x.weight ~= y.weight then
@@ -362,29 +352,30 @@ function MT:buildScrollList(keepScrollPosition)
             local list = Nav.Locations:getKnownNodes(zone.zoneId)
 
             if Nav.isRecall and zone.zoneId ~= Nav.ZONE_CYRODIIL then
+                local node = Nav.JumpToZoneNode:New(zone)
                 local playerInfo = Nav.Players:GetPlayerInZone(zone.zoneId)
                 if playerInfo then
-                    playerInfo.name = zo_strformat(GetString(NAVIGATOR_TRAVEL_TO_ZONE), zone.name)
-                    -- playerInfo.suffix = "via " .. playerInfo.suffix
-                    playerInfo.colour = ZO_SECOND_CONTRAST_TEXT
-                    playerInfo.poiType = Nav.POI_ZONE
-                    playerInfo.userID = nil
-                    playerInfo.onClick = function()
-                        jumpToZone(zone.zoneId)
-                    end
+                    node.name = zo_strformat(GetString(NAVIGATOR_TRAVEL_TO_ZONE), zone.name)
+                    -- node.suffix = "via " .. node.suffix
+                    node.icon = "Navigator/media/recall.dds"
+                    node.colour = ZO_SECOND_CONTRAST_TEXT
                 else
-                    playerInfo = {
-                        name = GetString(NAVIGATOR_NO_TRAVEL_PLAYER),
-                        barename = "",
-                        zoneId = zone.zoneId,
-                        zoneName = GetZoneNameById(zone.zoneId),
-                        icon = "/esoui/art/crafting/crafting_smithing_notrait.dds",
-                        poiType = Nav.POI_NONE,
-                        known = false
-                    }
-                    end
-                playerInfo.weight = 10.0 -- list this first!
-                table.insert(list, playerInfo)
+                    node.name = GetString(NAVIGATOR_NO_TRAVEL_PLAYER)
+                    node.barename = ""
+                    node.icon = "/esoui/art/crafting/crafting_smithing_notrait.dds"
+                    node.known = false
+                    --node = {
+                    --    name = GetString(NAVIGATOR_NO_TRAVEL_PLAYER),
+                    --    barename = "",
+                    --    zoneId = zone.zoneId,
+                    --    zoneName = GetZoneNameById(zone.zoneId),
+                    --    icon = "/esoui/art/crafting/crafting_smithing_notrait.dds",
+                    --    poiType = Nav.POI_NONE,
+                    --    known = false
+                    --}
+                end
+                node.weight = 10.0 -- list this first!
+                table.insert(list, node)
             end
 
             table.sort(list, weightComparison)
@@ -511,22 +502,10 @@ function MT:init()
 	
 end
 
-local function getMapIdByZoneId(zoneId)
-    if zoneId == Nav.ZONE_TAMRIEL then
-        return 27
-    elseif zoneId == 981 then -- Brass Fortress
-        return 1348
-    elseif zoneId == 1463 then -- The Scholarium
-        return 2515
-    else
-        return GetMapIdByZoneId(zoneId)
-    end
-end
-
 function MT:onTextChanged(editbox)
 	local searchString = string.lower(editbox:GetText())
     if searchString == "z:" then
-        local mapId = getMapIdByZoneId(2) -- Tamriel
+        local mapId = Nav.Locations.GetMapIdByZoneId(2) -- Tamriel
         Nav.log("MT:onTextChanged mapId %d", mapId or -1)
         -- if mapId then
         WORLD_MAP_MANAGER:SetMapById(mapId)
@@ -618,120 +597,29 @@ function MT:resetSearch()
 	ZO_ScrollList_ResetToTop(self.listControl)
 end
 
-local function requestJumpToHouse(data, jumpOutside)
-    if not CanJumpToHouseFromCurrentLocation() then
-        local cannotJumpString = data.owned and GetString(SI_COLLECTIONS_CANNOT_JUMP_TO_HOUSE_FROM_LOCATION) or GetString(SI_COLLECTIONS_CANNOT_PREVIEW_HOUSE_FROM_LOCATION)
-        zo_callLater(function()
-            SCENE_MANAGER:Hide("worldMap")
-            ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, cannotJumpString)
-        end, 10)
-        return
-    end
-
-    ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.POSITIVE_CLICK,
-            zo_strformat(GetString(jumpOutside and NAVIGATOR_TRAVELING_TO_HOUSE_OUTSIDE or NAVIGATOR_TRAVELING_TO_HOUSE_INSIDE), data.name))
-    local houseId = data.houseId or GetFastTravelNodeHouseId(data.nodeIndex)
-    RequestJumpToHouse(houseId, jumpOutside)
-    zo_callLater(function() SCENE_MANAGER:Hide("worldMap") end, 10)
-end
+--local function requestJumpToHouse(data, jumpOutside)
+--    if not CanJumpToHouseFromCurrentLocation() then
+--        local cannotJumpString = data.owned and GetString(SI_COLLECTIONS_CANNOT_JUMP_TO_HOUSE_FROM_LOCATION) or GetString(SI_COLLECTIONS_CANNOT_PREVIEW_HOUSE_FROM_LOCATION)
+--        zo_callLater(function()
+--            SCENE_MANAGER:Hide("worldMap")
+--            ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, cannotJumpString)
+--        end, 10)
+--        return
+--    end
+--
+--    ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.POSITIVE_CLICK,
+--            zo_strformat(GetString(jumpOutside and NAVIGATOR_TRAVELING_TO_HOUSE_OUTSIDE or NAVIGATOR_TRAVELING_TO_HOUSE_INSIDE), data.name))
+--    local houseId = data.houseId or GetFastTravelNodeHouseId(data.nodeIndex)
+--    RequestJumpToHouse(houseId, jumpOutside)
+--    zo_callLater(function() SCENE_MANAGER:Hide("worldMap") end, 10)
+--end
 
 local function showWayshrineMenu(owner, data)
 	ClearMenu()
     local bookmarks = Nav.Bookmarks
 
-    local isPlayer = Nav.IsPlayer(data.poiType)
-
-    if data.nodeIndex then
-        if data.poiType == Nav.POI_HOUSE then
-            AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_HOUSE_INSIDE), data.name), function()
-                requestJumpToHouse(data, false)
-            end)
-            AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_HOUSE_OUTSIDE), data.name), function()
-                requestJumpToHouse(data, true)
-            end)
-            --TODO: Revisit: setting the primary residence didn't seem to be immediately visible
-            --if not data.isPrimary then
-            --    AddMenuItem(zo_strformat(GetString(SI_HOUSING_FURNITURE_SETTINGS_GENERAL_PRIMARY_RESIDENCE_BUTTON_TEXT), data.name), function()
-            --        local houseId = data.houseId or GetFastTravelNodeHouseId(data.nodeIndex)
-            --        SetHousingPrimaryHouse(houseId)
-            --        zo_callLater(function()
-            --            Nav.Locations:setupNodes()
-            --            MT:ImmediateRefresh()
-            --        end, 10)
-            --        ClearMenu()
-            --    end)
-            --end
-        else
-            local strId = (Nav.isRecall and data.poiType ~= Nav.POI_HOUSE) and SI_WORLD_MAP_ACTION_RECALL_TO_WAYSHRINE or SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE
-            AddMenuItem(zo_strformat(GetString(strId), data.name), function()
-                MT:jumpToNode(data)
-            end)
-        end
-        AddMenuItem(GetString(NAVIGATOR_MENU_SHOWONMAP), function()
-            MT:PanToPOI(data, false)
-        end)
-        AddMenuItem(GetString(NAVIGATOR_MENU_SETDESTINATION), function()
-            MT:PanToPOI(data, true)
-        end)
-    elseif Nav.IsPlayer(data.poiType) then
-        AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE), data.userID), function()
-            zo_callLater(function() jumpToPlayer(data) end, 10)
-        end)
-    elseif data.zoneId and Nav.isRecall and data.canJumpToPlayer and data.zoneId ~= Nav.ZONE_CYRODIIL then
-        local destination = data.userID or data.zoneName
-        AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE), destination), function()
-            zo_callLater(function() jumpToZone(data.zoneId) end, 10)
-        end)
-    elseif data.poiType == Nav.POI_PLAYERHOUSE then
-        AddMenuItem(GetString(SI_SOCIAL_MENU_VISIT_HOUSE), function()
-            zo_callLater(function()
-                SCENE_MANAGER:Hide("worldMap")
-                ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.POSITIVE_CLICK,zo_strformat(GetString(NAVIGATOR_TRAVELING_TO_PLAYER_HOUSE), data.userID))
-                JumpToHouse(data.userID)
-            end, 10)
-        end)
-    end
-
-    if isPlayer then
-        if Nav.Players:IsGroupLeader() and data.poiType == Nav.POI_GROUPMATE then
-            AddMenuItem(GetString(SI_GROUP_LIST_MENU_PROMOTE_TO_LEADER), function()
-                GroupPromote(data.unitTag)
-                MT.menuOpen = false
-                MT:ImmediateRefresh()
-            end)
-        end
-        AddMenuItem(GetString(SI_SOCIAL_MENU_VISIT_HOUSE), function()
-            SCENE_MANAGER:Hide("worldMap")
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.POSITIVE_CLICK,zo_strformat(GetString(NAVIGATOR_TRAVELING_TO_PLAYER_HOUSE), data.userID))
-            JumpToHouse(data.userID)
-            MT.menuOpen = false
-        end)
-
-        local bookmarkEntry = { userID = data.userID, action = "house" }
-        if not bookmarks:contains(bookmarkEntry) then
-            AddMenuItem(GetString(NAVIGATOR_MENU_ADDHOUSEBOOKMARK), function()
-                bookmarks:add(bookmarkEntry)
-                MT.menuOpen = false
-                zo_callLater(function() MT:ImmediateRefresh() end, 10)
-            end)
-        end
-    else
-        local entry
-        if data.nodeIndex then
-            entry = { nodeIndex = data.nodeIndex }
-        elseif data.zoneId then
-            entry = { zoneId = data.zoneId, mapId = data.mapId }
-        else
-            Nav.log("showWayshrineMenu: unrecognised data")
-        end
-
-        if entry and not bookmarks:contains(entry) then
-            AddMenuItem(GetString(NAVIGATOR_MENU_ADDBOOKMARK), function()
-                bookmarks:add(entry)
-                MT.menuOpen = false
-                zo_callLater(function() MT:ImmediateRefresh() end, 10)
-            end)
-        end
+    if data.AddMenuItems then
+        data:AddMenuItems()
     end
 
     if data.isBookmark then
@@ -793,7 +681,7 @@ function MT:PanToPOI(node, setWaypoint)
         mapPanAndZoom:PanToNormalizedPosition(normalizedX, normalizedZ, false)
     end
 
-    local targetMapId = node.mapId or getMapIdByZoneId(node.zoneId)
+    local targetMapId = node.mapId or Nav.Locations.GetMapIdByZoneId(node.zoneId)
     local currentMapId = GetCurrentMapId()
     local targetZoneIndex = GetZoneIndex(node.zoneId)
 
@@ -810,39 +698,40 @@ end
 
 function MT:selectResult(control, data, mouseButton, isDoubleClick)
     if mouseButton == 1 then
-        if data.onClick then
-            data.onClick(isDoubleClick)
-        elseif data.poiType == Nav.POI_HOUSE then
-            requestJumpToHouse(data, false)
-        elseif data.nodeIndex then
-            self:jumpToNode(data)
-        elseif data.poiType == Nav.POI_PLAYERHOUSE then
-            JumpToHouse(data.userID)
-            SCENE_MANAGER:Hide("worldMap")
-        elseif data.userID then
-            jumpToPlayer(data)
-        elseif data.poiType == Nav.POI_ZONE then
-            local clickEvent
-            if isDoubleClick then
-                if clickEvent then zo_removeCallLater(clickEvent) end
-                jumpToZone(data.zoneId)
-            else
-                local mapZoneId = Nav.Locations:getCurrentMapZoneId()
-                local currentMapId = GetCurrentMapId()
-                local targetMapId = data.mapId or getMapIdByZoneId(data.zoneId)
-                Nav.log("selectResult: data.zoneId %d data.mapId %d mapZoneId %d mapId %d", data.zoneId, data.mapId or 0, mapZoneId, targetMapId)
-                if data.zoneId ~= mapZoneId or (data.mapId and data.mapId ~= currentMapId) then
-                    --Nav.log("selectResult: mapId %d", targetMapId or 0)
-                    if targetMapId then
-                        -- Delay single click to give time for the double-click to occur
-                        clickEvent = zo_callLater(function()
-                            MT.filter = Nav.FILTER_NONE
-                            --self.editControl:SetText("")
-                            WORLD_MAP_MANAGER:SetMapById(targetMapId)
-                        end, 200)
-                    end
-                end
-            end
+        if data.OnClick then
+            Nav.log("OnClick %s", data.name or "-")
+            data:OnClick(isDoubleClick)
+        --elseif data.poiType == Nav.POI_HOUSE then
+        --    requestJumpToHouse(data, false)
+        --elseif data.nodeIndex then
+        --    self:jumpToNode(data)
+        --elseif data.poiType == Nav.POI_PLAYERHOUSE then
+        --    JumpToHouse(data.userID)
+        --    SCENE_MANAGER:Hide("worldMap")
+        --elseif data.userID then
+        --    data:JumpToPlayer()
+        --elseif data.poiType == Nav.POI_ZONE then
+        --    local clickEvent
+        --    if isDoubleClick then
+        --        if clickEvent then zo_removeCallLater(clickEvent) end
+        --        data:JumpToZone() --jumpToZone(data.zoneId)
+        --    else
+        --        local mapZoneId = Nav.Locations:getCurrentMapZoneId()
+        --        local currentMapId = GetCurrentMapId()
+        --        local targetMapId = data.mapId or getMapIdByZoneId(data.zoneId)
+        --        Nav.log("selectResult: data.zoneId %d data.mapId %d mapZoneId %d mapId %d", data.zoneId, data.mapId or 0, mapZoneId, targetMapId)
+        --        if data.zoneId ~= mapZoneId or (data.mapId and data.mapId ~= currentMapId) then
+        --            --Nav.log("selectResult: mapId %d", targetMapId or 0)
+        --            if targetMapId then
+        --                -- Delay single click to give time for the double-click to occur
+        --                clickEvent = zo_callLater(function()
+        --                    MT.filter = Nav.FILTER_NONE
+        --                    --self.editControl:SetText("")
+        --                    WORLD_MAP_MANAGER:SetMapById(targetMapId)
+        --                end, 200)
+        --            end
+        --        end
+        --    end
         end
     elseif mouseButton == 2 then
         if data.nodeIndex or data.poiType == Nav.POI_ZONE or Nav.IsPlayer(data.poiType) or data.poiType == Nav.POI_PLAYERHOUSE then

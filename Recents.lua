@@ -54,15 +54,15 @@ end
 
 function Recents:getRecents(count)
     local results = {}
-    local nodeMap = Nav.Locations:getNodeMap()
+    --local nodeMap = Nav.Locations:getNodeMap()
 
-    if nodeMap ~= nil then
+    --if nodeMap ~= nil then
         for i = 1, #self.nodes do
-            local nodeIndex = nodeMap[self.nodes[i]].nodeIndex or 0
+            local nodeIndex = self.nodes[i] or 0 -- nodeMap[self.nodes[i]].nodeIndex or 0
             if Nav.Locations:IsHarborage(nodeIndex) then
                 nodeIndex = Nav.Locations:GetHarborage()
             end
-            local node = Nav.Utils.shallowCopy(nodeMap[nodeIndex])
+            local node = Nav.Locations:GetNode(nodeIndex) --Nav.Utils.shallowCopy(nodeMap[nodeIndex])
             node.known = Nav.Locations:isKnownNode(nodeIndex)
             node.bookmarked = Nav.Bookmarks:contains(node)
             table.insert(results, node)
@@ -71,7 +71,7 @@ function Recents:getRecents(count)
                 return results
             end
         end
-    end
+    --end
 
     return results
 end

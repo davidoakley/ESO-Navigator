@@ -99,9 +99,11 @@ function Locs:setupNodes()
                         if self:IsZone(zoneId) then
                             self.zones[zoneId] = {
                                 name = zoneName,
+                                zoneName = zoneName,
                                 zoneId = zoneId,
                                 index = zoneIndex,
                                 nodes = {},
+                                poiType = Nav.POI_ZONE,
                                 canJumpToPlayer = CanJumpToPlayerInZone(zoneId) or zoneId == Nav.ZONE_ATOLLOFIMMOLATION
                             }
                         else
@@ -136,9 +138,11 @@ function Locs:AddExtraZone(zoneId, mapId, canJumpToPlayer)
     local name, _, _, zoneIndex, _ = GetMapInfoById(mapId)
     self.zones[zoneId] = {
         name = name,
+        zoneName = name,
         zoneId = zoneId,
         index = zoneIndex,
         mapId = mapId,
+        poiType = Nav.POI_ZONE,
         canJumpToPlayer = canJumpToPlayer,
         nodes = {}
     }
@@ -250,11 +254,41 @@ function Locs:getNodeMap()
     return self.nodeMap
 end
 
+--[[
 function Locs:GetNode(nodeIndex)
     if self.nodeMap == nil then
         self:setupNodes()
     end
     return self.nodeMap[nodeIndex]
+end
+--]]
+
+function Locs:GetNode(nodeIndex)
+    if not self:isKnownNode(nodeIndex) then
+        return nil
+    end
+
+    local data = Utils.shallowCopy(self.nodeMap[nodeIndex])
+    local node = data.poiType == Nav.POI_HOUSE and Nav.HouseNode:New(data) or Nav.FastTravelNode:New(data)
+    local bookmarked = Nav.Bookmarks:contains(data)
+    node.known = true
+    node.weight = 1.0
+    node.bookmarked = bookmarked
+    if not node.freeRecall and Nav.isRecall then
+        node.weight = bookmarked and 0.9 or 0.8
+    elseif node.poiType == Nav.POI_HOUSE and not node.owned then
+        node.weight = 0.7
+    elseif bookmarked then
+        node.weight = 1.2
+    end
+    if node.isPrimary then
+        node.weight = node.weight + 0.1
+    end
+    if node.traders and node.traders > 0 then
+        node.weight = node.weight * (1.0 + 0.02 * node.traders)
+    end
+
+    return node
 end
 
 function Locs:getKnownNodes(zoneId, includeAliases)
@@ -272,7 +306,10 @@ function Locs:getKnownNodes(zoneId, includeAliases)
     for i = 1, #self.nodes do
         local index = self.nodes[i].nodeIndex
         if self:isKnownNode(index) and (not zoneId or self.nodes[i].zoneId == zoneId) then
-            local node = Utils.shallowCopy(self.nodes[i])
+            local node = self:GetNode(index)
+            --[[
+            local data = Utils.shallowCopy(self.nodes[i])
+            local node = data.poiType == Nav.POI_HOUSE and Nav.HouseNode:New(data) or Nav.FastTravelNode:New(data)
             local bookmarked = Nav.Bookmarks:contains(self.nodes[i])
             node.known = true
             node.weight = 1.0
@@ -290,15 +327,18 @@ function Locs:getKnownNodes(zoneId, includeAliases)
             if node.traders and node.traders > 0 then
                 node.weight = node.weight * (1.0 + 0.02 * node.traders)
             end
-            table.insert(nodes, node)
+            --]]
+            if node then
+                table.insert(nodes, node)
 
-            if includeAliases and node.poiType == Nav.POI_HOUSE and Nav.saved.useHouseNicknames then
-                local alias = Utils.shallowCopy(node)
-                alias.name = node.nickname
-                alias.suffix = node.name
-                alias.originalName = nil
-                alias.weight = 0.6
-                table.insert(nodes, alias)
+                if includeAliases and node.poiType == Nav.POI_HOUSE and Nav.saved.useHouseNicknames then
+                    local alias = Nav.HouseNode:New(Utils.shallowCopy(node))
+                    alias.name = node.nickname
+                    alias.suffix = node.name
+                    alias.originalName = nil
+                    alias.weight = 0.6
+                    table.insert(nodes, alias)
+                end
             end
         end
     end
@@ -314,7 +354,7 @@ function Locs:getHouseList(includeAliases)
     for i = 1, #self.nodes do
         local index = self.nodes[i].nodeIndex
         if self:isKnownNode(index) and self.nodes[i].poiType == Nav.POI_HOUSE then
-            local node = Utils.shallowCopy(self.nodes[i])
+            local node = Nav.HouseNode:New(Utils.shallowCopy(self.nodes[i]))
             if Nav.Bookmarks:contains(node) then
                 node.bookmarked = true
             end
@@ -350,7 +390,7 @@ function Locs:GetZones()
 end
 
 local function addZoneToList(nodes, name, zoneId, mapId, bookmarked, suffix, canJumpToPlayer)
-    table.insert(nodes, {
+    table.insert(nodes, Nav.ZoneNode:New({
         name = name,
         barename = Utils.bareName(name),
         zoneId = zoneId,
@@ -363,7 +403,7 @@ local function addZoneToList(nodes, name, zoneId, mapId, bookmarked, suffix, can
         bookmarked = bookmarked,
         suffix = suffix,
         canJumpToPlayer = canJumpToPlayer
-    })
+    }))
 
 end
 
@@ -390,7 +430,7 @@ function Locs:getZone(zoneId)
     end
 
     local info = self.zones[zoneId]
-    return {
+    return Nav.ZoneNode:New({
         name = info.name,
         barename = Utils.bareName(info.name),
         zoneId = zoneId,
@@ -400,7 +440,7 @@ function Locs:getZone(zoneId)
         weight = Nav.isRecall and 1.0 or 0.9,
         known = true,
         canJumpToPlayer = info.canJumpToPlayer
-    }
+    })
 end
 
 function Locs:getCurrentMapZoneId()
@@ -446,7 +486,7 @@ function Locs:getCurrentMapZone()
     if not self.zones[zoneId] then
         Nav.log("Locs:getCurrentMapZone no info on zoneId "..zoneId)
     end
-    return self.zones[zoneId]
+    return self.zones[zoneId] and Nav.ZoneNode:New(Utils.shallowCopy(self.zones[zoneId]))
 end
 
 function Locs:IsHarborage(nodeIndex)
@@ -461,6 +501,18 @@ function Locs:GetHarborage()
     end
     Nav.log("Locs:GetHarborage failed to find harborage")
     return 210
+end
+
+function Locs.GetMapIdByZoneId(zoneId)
+    if zoneId == Nav.ZONE_TAMRIEL then
+        return 27
+    elseif zoneId == 981 then -- Brass Fortress
+        return 1348
+    elseif zoneId == 1463 then -- The Scholarium
+        return 2515
+    else
+        return GetMapIdByZoneId(zoneId)
+    end
 end
 
 Nav.Locations = Locs

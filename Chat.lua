@@ -107,8 +107,8 @@ function Chat:TP(text)
         return
     end
 
-    if result.nodeIndex then
-        Nav.MapTab:jumpToNode(result)
+    if result.JumpToNode then
+        result:JumpToNode()
         return
     elseif result.zoneId then
         local node = Nav.Players:GetPlayerInZone(result.zoneId)

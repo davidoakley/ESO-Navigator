@@ -14,6 +14,7 @@ lang/$(language).lua
 Navigator.lua
 fzy.lua
 Data.lua
+Nodes.lua
 Utils.lua
 Settings.lua
 Locations.lua
