@@ -673,6 +673,10 @@ local function showWayshrineMenu(owner, data)
         AddMenuItem(GetString(NAVIGATOR_MENU_SETDESTINATION), function()
             MT:PanToPOI(data, true)
         end)
+    elseif Nav.IsPlayer(data.poiType) then
+        AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE), data.userID), function()
+            zo_callLater(function() jumpToPlayer(data) end, 10)
+        end)
     elseif data.zoneId and Nav.isRecall and data.canJumpToPlayer and data.zoneId ~= Nav.ZONE_CYRODIIL then
         local destination = data.userID or data.zoneName
         AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE), destination), function()
@@ -682,6 +686,7 @@ local function showWayshrineMenu(owner, data)
         AddMenuItem(GetString(SI_SOCIAL_MENU_VISIT_HOUSE), function()
             zo_callLater(function()
                 SCENE_MANAGER:Hide("worldMap")
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.POSITIVE_CLICK,zo_strformat(GetString(NAVIGATOR_TRAVELING_TO_PLAYER_HOUSE), data.userID))
                 JumpToHouse(data.userID)
             end, 10)
         end)
@@ -696,6 +701,8 @@ local function showWayshrineMenu(owner, data)
             end)
         end
         AddMenuItem(GetString(SI_SOCIAL_MENU_VISIT_HOUSE), function()
+            SCENE_MANAGER:Hide("worldMap")
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.POSITIVE_CLICK,zo_strformat(GetString(NAVIGATOR_TRAVELING_TO_PLAYER_HOUSE), data.userID))
             JumpToHouse(data.userID)
             MT.menuOpen = false
         end)
