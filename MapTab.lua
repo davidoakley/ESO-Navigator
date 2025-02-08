@@ -628,6 +628,8 @@ local function requestJumpToHouse(data, jumpOutside)
         return
     end
 
+    ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.POSITIVE_CLICK,
+            zo_strformat(GetString(jumpOutside and NAVIGATOR_TRAVELING_TO_HOUSE_OUTSIDE or NAVIGATOR_TRAVELING_TO_HOUSE_INSIDE), data.name))
     local houseId = data.houseId or GetFastTravelNodeHouseId(data.nodeIndex)
     RequestJumpToHouse(houseId, jumpOutside)
     zo_callLater(function() SCENE_MANAGER:Hide("worldMap") end, 10)
