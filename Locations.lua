@@ -263,8 +263,8 @@ function Locs:GetNode(nodeIndex)
 end
 --]]
 
-function Locs:GetNode(nodeIndex)
-    if not self:isKnownNode(nodeIndex) then
+function Locs:GetNode(nodeIndex, includeUnknown)
+    if not includeUnknown and not self:isKnownNode(nodeIndex) then
         return nil
     end
 

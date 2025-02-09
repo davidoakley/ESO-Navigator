@@ -62,7 +62,7 @@ function Recents:getRecents(count)
             if Nav.Locations:IsHarborage(nodeIndex) then
                 nodeIndex = Nav.Locations:GetHarborage()
             end
-            local node = Nav.Locations:GetNode(nodeIndex) --Nav.Utils.shallowCopy(nodeMap[nodeIndex])
+            local node = Nav.Locations:GetNode(nodeIndex, true)
             node.known = Nav.Locations:isKnownNode(nodeIndex)
             node.bookmarked = Nav.Bookmarks:contains(node)
             table.insert(results, node)

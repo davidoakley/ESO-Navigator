@@ -28,11 +28,92 @@ function Node:AddBookmarkMenuItem(entry)
     end
 end
 
+function Node:GetIcon()
+    return self.icon
+end
+
+function Node:GetColorDef()
+    if self.isSelected and self.known and not self.disabled then
+        return ZO_SELECTED_TEXT
+    elseif self.colour ~= nil and not self.disabled then
+        return ZO_ColorDef:New(self.colour:UnpackRGBA())
+    elseif self.known and not self.disabled then
+        return ZO_NORMAL_TEXT
+    else
+        return ZO_DISABLED_TEXT -- rowControl.label:SetColor(0.51, 0.51, 0.44, 1.0)
+    end
+end
+
+function Node:GetIconColorDef()
+    if self.iconColour then
+        return ZO_ColorDef:New(self.iconColour:UnpackRGBA())
+    elseif self.known and not self.disabled then
+        return ZO_WHITE
+    else
+        return ZO_DISABLED_TEXT
+    end
+end
+
+function Node:GetSuffixColorDef()
+    return ZO_ColorDef:New((self.known and not self.disabled) and "82826F" or "444444")
+end
+
+function Node:ZoomToPOI(setWaypoint)
+    local function getPOIMapInfo(zoneIndex, mapId, poiIndex)
+        if mapId == 2082 then
+            return 0.3485, 0.3805 -- GetPOIMapInfo returns 0,0 for The Shambles
+        else
+            return GetPOIMapInfo(zoneIndex, poiIndex)
+        end
+    end
+
+    local function panToPOI(zoneIndex, mapId, poiIndex)
+        local normalizedX, normalizedZ = getPOIMapInfo(zoneIndex, mapId, poiIndex)
+        Nav.log("Node:ZoomToPOI: poiIndex=%d, %f,%f", poiIndex, normalizedX, normalizedZ)
+        if setWaypoint then
+            PingMap(MAP_PIN_TYPE_PLAYER_WAYPOINT, MAP_TYPE_LOCATION_CENTERED, normalizedX, normalizedZ)
+        end
+
+        local mapPanAndZoom = ZO_WorldMap_GetPanAndZoom()
+        mapPanAndZoom:PanToNormalizedPosition(normalizedX, normalizedZ, false)
+    end
+
+    local targetMapId = self.mapId or Nav.Locations.GetMapIdByZoneId(self.zoneId)
+    local currentMapId = GetCurrentMapId()
+    local targetZoneIndex = GetZoneIndex(self.zoneId)
+
+    if targetMapId ~= currentMapId then
+        WORLD_MAP_MANAGER:SetMapById(targetMapId)
+
+        zo_callLater(function()
+            panToPOI(targetZoneIndex, targetMapId, self.poiIndex)
+        end, 100)
+    else
+        panToPOI(targetZoneIndex, targetMapId, self.poiIndex)
+    end
+end
+
 
 --- @class PlayerNode
 local PlayerNode = Node:New()
 
 function PlayerNode:IsPlayer() return true end
+
+function PlayerNode:GetIconColorDef()
+    if self.poiType == Nav.POI_FRIEND then
+        return ZO_ColorDef:New(0.9, 0.8, 0)
+    elseif self.poiType == Nav.POI_GROUPMATE then
+        return ZO_WHITE
+    elseif Nav.IsPlayer(self.poiType) then
+        return ZO_NORMAL_TEXT
+    else
+        return ZO_DISABLED_TEXT
+    end
+end
+
+function PlayerNode:GetSuffixColorDef()
+    return ZO_ColorDef:New(self.canJumpToPlayer and "76BCC" or "82826F")
+end
 
 function PlayerNode:JumpToPrimaryResidence()
     SCENE_MANAGER:Hide("worldMap")
@@ -136,6 +217,13 @@ function ZoneNode:OnClick(isDoubleClick)
 end
 
 function ZoneNode:AddMenuItems()
+    local targetMapId = self.mapId or Nav.Locations.GetMapIdByZoneId(self.zoneId)
+    if targetMapId ~= GetCurrentMapId() then
+        AddMenuItem(GetString(NAVIGATOR_MENU_SHOWONMAP), function()
+            WORLD_MAP_MANAGER:SetMapById(targetMapId)
+        end)
+    end
+
     if Nav.isRecall and self.canJumpToPlayer and self.zoneId ~= Nav.ZONE_CYRODIIL then
         AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE), self.zoneName), function()
             zo_callLater(function() self:JumpToZone() end, 10)
@@ -149,6 +237,20 @@ end
 local JumpToZoneNode = ZoneNode:New()
 JumpToZoneNode.AddMenuItems = ZoneNode.AddMenuItems
 
+function JumpToZoneNode:GetIcon()
+    return self.known and "Navigator/media/recall.dds" or "esoui/art/crafting/crafting_smithing_notrait.dds"
+end
+
+function JumpToZoneNode:GetColorDef()
+    if self.isSelected and self.known then
+        return ZO_SELECTED_TEXT
+    else
+        return self.known and ZO_SECOND_CONTRAST_TEXT or ZO_DISABLED_TEXT
+    end
+end
+
+JumpToZoneNode.GetIconColorDef = JumpToZoneNode.GetColorDef
+
 function JumpToZoneNode:OnClick()
     self:JumpToZone()
 end
@@ -156,6 +258,20 @@ end
 
 --- @class HouseNode
 local HouseNode = Node:New()
+
+function HouseNode:GetColorDef()
+    if self.isSelected and self.known and self.owned then
+        return ZO_SELECTED_TEXT
+    elseif self.known and self.owned then
+        return ZO_NORMAL_TEXT
+    else
+        return ZO_DISABLED_TEXT -- rowControl.label:SetColor(0.51, 0.51, 0.44, 1.0)
+    end
+end
+
+function Node:GetSuffixColorDef()
+    return ZO_ColorDef:New(self.known and self.owned and "82826F" or "616151")
+end
 
 local function requestJumpToHouse(data, jumpOutside)
     if not CanJumpToHouseFromCurrentLocation() then
@@ -204,10 +320,10 @@ function HouseNode:AddMenuItems()
     --    end)
     --end
     AddMenuItem(GetString(NAVIGATOR_MENU_SHOWONMAP), function()
-        MT:PanToPOI(self, false)
+        self:ZoomToPOI(false)
     end)
     AddMenuItem(GetString(NAVIGATOR_MENU_SETDESTINATION), function()
-        MT:PanToPOI(self, true)
+        self:ZoomToPOI(true)
     end)
     self:AddBookmarkMenuItem({ nodeIndex = self.nodeIndex })
 end
@@ -246,10 +362,10 @@ function FastTravelNode:AddMenuItems()
         self:Jump()
     end)
     AddMenuItem(GetString(NAVIGATOR_MENU_SHOWONMAP), function()
-        MT:PanToPOI(self, false)
+        self:ZoomToPOI(false)
     end)
     AddMenuItem(GetString(NAVIGATOR_MENU_SETDESTINATION), function()
-        MT:PanToPOI(self, true)
+        self:ZoomToPOI(true)
     end)
     --self:AddBookmarkMenuItem({ nodeIndex = self.nodeIndex })
 end
