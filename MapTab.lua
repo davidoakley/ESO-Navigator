@@ -37,12 +37,12 @@ function MT:layoutRow(rowControl, data, _)
     local icon = data:GetIcon()
 
     if data.suffix ~= nil then
-        local colour = data:GetSuffixColorDef() or ZO_ColorDef:New("82826F")
+        local colour = ZO_ColorDef:New(data:GetSuffixColour())
         name = name .. " " .. colour:Colorize(data.suffix)
     end
 
 	if icon ~= nil then
-        rowControl.icon:SetColor(data:GetIconColorDef():UnpackRGBA())
+        rowControl.icon:SetColor(ZO_ColorDef.HexToFloats(data:GetIconColour()))
 		rowControl.icon:SetTexture(icon)
 		rowControl.icon:SetHidden(false)
     else
@@ -61,7 +61,7 @@ function MT:layoutRow(rowControl, data, _)
 
 	rowControl.label:SetText(name)
 
-    rowControl.label:SetColor(data:GetColorDef():UnpackRGBA())
+    rowControl.label:SetColor(ZO_ColorDef.HexToFloats(data:GetColour()))
 
     rowControl:SetHandler("OnMouseEnter", function(rc)
         if tooltipText then
@@ -70,7 +70,7 @@ function MT:layoutRow(rowControl, data, _)
     end)
     rowControl:SetHandler("OnMouseExit", function(_)
         ZO_Tooltips_HideTextTooltip()
-        rowControl.label:SetColor(data:GetColorDef():UnpackRGBA())
+        rowControl.label:SetColor(ZO_ColorDef.HexToFloats(data:GetColour()))
     end)
 end
 

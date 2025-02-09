@@ -32,30 +32,31 @@ function Node:GetIcon()
     return self.icon
 end
 
-function Node:GetColorDef()
+function Node:GetColour()
     if self.isSelected and self.known and not self.disabled then
-        return ZO_SELECTED_TEXT
-    elseif self.colour ~= nil and not self.disabled then
-        return ZO_ColorDef:New(self.colour:UnpackRGBA())
+        return Nav.COLOUR_WHITE
     elseif self.known and not self.disabled then
-        return ZO_NORMAL_TEXT
+        return Nav.COLOUR_NORMAL
     else
-        return ZO_DISABLED_TEXT -- rowControl.label:SetColor(0.51, 0.51, 0.44, 1.0)
+        return Nav.COLOUR_DISABLED
     end
 end
 
-function Node:GetIconColorDef()
-    if self.iconColour then
-        return ZO_ColorDef:New(self.iconColour:UnpackRGBA())
-    elseif self.known and not self.disabled then
-        return ZO_WHITE
+function Node:GetIconColour()
+    if self.known and not self.disabled then
+        return Nav.COLOUR_WHITE
     else
-        return ZO_DISABLED_TEXT
+        return Nav.COLOUR_DISABLED
     end
 end
 
-function Node:GetSuffixColorDef()
-    return ZO_ColorDef:New((self.known and not self.disabled) and "82826F" or "444444")
+function Node:GetSuffixColour()
+    if self.known and not self.disabled then
+        return Nav.COLOUR_SUFFIX_NORMAL
+    else
+        return Nav.COLOUR_SUFFIX_DISABLED
+    end
+    --return (self.known and not self.disabled) and Nav.COLOUR_SUFFIX_NORMAL or Nav.COLOUR_SUFFIX_DISABLED
 end
 
 function Node:ZoomToPOI(setWaypoint)
@@ -99,20 +100,18 @@ local PlayerNode = Node:New()
 
 function PlayerNode:IsPlayer() return true end
 
-function PlayerNode:GetIconColorDef()
+function PlayerNode:GetIconColour()
     if self.poiType == Nav.POI_FRIEND then
-        return ZO_ColorDef:New(0.9, 0.8, 0)
+        return Nav.COLOUR_FRIEND
     elseif self.poiType == Nav.POI_GROUPMATE then
-        return ZO_WHITE
-    elseif Nav.IsPlayer(self.poiType) then
-        return ZO_NORMAL_TEXT
+        return Nav.COLOUR_WHITE
     else
-        return ZO_DISABLED_TEXT
+        return Nav.COLOUR_NORMAL
     end
 end
 
-function PlayerNode:GetSuffixColorDef()
-    return ZO_ColorDef:New(self.canJumpToPlayer and "76BCC" or "82826F")
+function PlayerNode:GetSuffixColour()
+    return self.canJumpToPlayer and Nav.COLOUR_JUMPABLE or Nav.COLOUR_SUFFIX_NORMAL
 end
 
 function PlayerNode:JumpToPrimaryResidence()
@@ -241,15 +240,15 @@ function JumpToZoneNode:GetIcon()
     return self.known and "Navigator/media/recall.dds" or "esoui/art/crafting/crafting_smithing_notrait.dds"
 end
 
-function JumpToZoneNode:GetColorDef()
+function JumpToZoneNode:GetColour()
     if self.isSelected and self.known then
-        return ZO_SELECTED_TEXT
+        return Nav.COLOUR_WHITE
     else
-        return self.known and ZO_SECOND_CONTRAST_TEXT or ZO_DISABLED_TEXT
+        return self.known and Nav.COLOUR_JUMPABLE or Nav.COLOUR_DISABLED
     end
 end
 
-JumpToZoneNode.GetIconColorDef = JumpToZoneNode.GetColorDef
+JumpToZoneNode.GetIconColour = JumpToZoneNode.GetColour
 
 function JumpToZoneNode:OnClick()
     self:JumpToZone()
@@ -259,18 +258,16 @@ end
 --- @class HouseNode
 local HouseNode = Node:New()
 
-function HouseNode:GetColorDef()
+function HouseNode:GetColour()
     if self.isSelected and self.known and self.owned then
-        return ZO_SELECTED_TEXT
-    elseif self.known and self.owned then
-        return ZO_NORMAL_TEXT
+        return Nav.COLOUR_WHITE
     else
-        return ZO_DISABLED_TEXT -- rowControl.label:SetColor(0.51, 0.51, 0.44, 1.0)
+        return (self.known and self.owned) and Nav.COLOUR_NORMAL or Nav.COLOUR_DISABLED
     end
 end
 
-function Node:GetSuffixColorDef()
-    return ZO_ColorDef:New(self.known and self.owned and "82826F" or "616151")
+function HouseNode:GetSuffixColour()
+    return (self.known and self.owned) and Nav.COLOUR_SUFFIX_NORMAL or Nav.COLOUR_SUFFIX_DISABLED
 end
 
 local function requestJumpToHouse(data, jumpOutside)
