@@ -35,10 +35,12 @@ function MT:layoutRow(rowControl, data, _)
 	local name = data.name
     local tooltipText = data.tooltip
     local icon = data:GetIcon()
+    local categoryId = data.dataEntry.categoryId
 
-    if data.suffix ~= nil then
+    local suffix = data:GetSuffix(categoryId ~= "bookmarks")
+    if suffix ~= nil then
         local colour = ZO_ColorDef:New(data:GetSuffixColour())
-        name = name .. " " .. colour:Colorize(data.suffix)
+        name = name .. " " .. colour:Colorize(suffix)
     end
 
 	if icon ~= nil then
@@ -147,18 +149,6 @@ local function buildResult(listEntry, currentNodeIndex, isSelected)
     nodeData.dataIndex = currentNodeIndex
 
     -- Nav.log("%s: traders %d", nodeData.barename, nodeData.traders or 0)
-    if listEntry.traders and listEntry.traders > 0 then
-        if listEntry.traders >= 5 then
-            nodeData.suffix = "|t20:23:Navigator/media/city_narrow.dds:inheritcolor|t"
-        elseif listEntry.traders >= 2 then
-            nodeData.suffix = "|t20:23:Navigator/media/town_narrow.dds:inheritcolor|t"
-        end
-        nodeData.suffix = (nodeData.suffix or "") .. "|t23:23:/esoui/art/icons/servicemappins/servicepin_guildkiosk.dds:inheritcolor|t"
-    end
-
-    if nodeData.bookmarked then --Nav.Bookmarks:contains(nodeData) then
-        nodeData.suffix = (nodeData.suffix or "") .. "|t25:25:Navigator/media/bookmark.dds:inheritcolor|t"
-    end
 
     if not nodeData.known and nodeData.nodeIndex then
         nodeData.tooltip = GetString(NAVIGATOR_NOT_KNOWN)
@@ -209,7 +199,7 @@ local function buildList(scrollData, id, title, list, defaultString)
             local isSelected = hasFocus and list[i].known and (currentNodeIndex == Nav.targetNode)
             local nodeData = buildResult(list[i], currentNodeIndex, isSelected)
 
-            local entry = ZO_ScrollList_CreateDataEntry(1, nodeData)
+            local entry = ZO_ScrollList_CreateDataEntry(1, nodeData, id)
             table.insert(scrollData, entry)
 
             currentNodeIndex = currentNodeIndex + 1

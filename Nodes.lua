@@ -32,6 +32,16 @@ function Node:GetIcon()
     return self.icon
 end
 
+function Node:GetSuffix(showBookmark)
+    local suffix = self.suffix or ""
+
+    if showBookmark and Nav.Bookmarks:contains(self) then
+        suffix = (suffix or "") .. "|t25:25:Navigator/media/bookmark.dds:inheritcolor|t"
+    end
+
+    return suffix
+end
+
 function Node:GetColour()
     if self.isSelected and self.known and not self.disabled then
         return Nav.COLOUR_WHITE
@@ -328,6 +338,23 @@ end
 
 --- @class FastTravelNode
 local FastTravelNode = Node:New()
+
+function FastTravelNode:GetSuffix(showBookmark)
+    local suffix = self.suffix or ""
+
+    if self.traders and self.traders > 0 then
+        if self.traders >= 5 then
+            suffix = "|t20:23:Navigator/media/city_narrow.dds:inheritcolor|t"
+        elseif self.traders >= 2 then
+            suffix = "|t20:23:Navigator/media/town_narrow.dds:inheritcolor|t"
+        end
+        suffix = suffix .. "|t23:23:/esoui/art/icons/servicemappins/servicepin_guildkiosk.dds:inheritcolor|t"
+    end
+
+    suffix = suffix .. Node.GetSuffix(self, showBookmark)
+
+    return suffix
+end
 
 function FastTravelNode:Jump()
     if not self.known or self.disabled then
