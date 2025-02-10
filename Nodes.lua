@@ -29,8 +29,6 @@ function Node.WeightComparison(x, y)
     return Nav.Utils.SortName(x) < Nav.Utils.SortName(y)
 end
 
-function Node:IsPlayer() return false end
-
 function Node:GetWeight()
     return 1.0
 end
@@ -130,22 +128,22 @@ end
 --- @class PlayerNode
 local PlayerNode = Node:New()
 
-function PlayerNode:IsPlayer() return true end
-
 function PlayerNode:GetWeight()
-    if self.poiType == Nav.POI_GROUPMATE then
+    if self.isGroupmate then
         return self.isLeader and 1.3 or 1.2
-    elseif self.poiType == Nav.POI_FRIEND then
+    elseif self.isFriend then
         return 1.1
     else
         return 1.0
     end
 end
 
+function Node:GetSuffix() return self.zoneName or "" end
+
 function PlayerNode:GetIconColour()
-    if self.poiType == Nav.POI_FRIEND then
+    if self.isFriend then
         return Nav.COLOUR_FRIEND
-    elseif self.poiType == Nav.POI_GROUPMATE then
+    elseif self.isGroupmate then
         return Nav.COLOUR_WHITE
     else
         return Nav.COLOUR_NORMAL
@@ -166,11 +164,11 @@ function PlayerNode:JumpToPlayer()
     ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.POSITIVE_CLICK,zo_strformat(GetString(NAVIGATOR_TRAVELING_TO_ZONE_VIA_PLAYER), self.zoneName, self.userID))
     SCENE_MANAGER:Hide("worldMap")
     Nav.log("Jump %s %d", self.userID, self.poiType)
-    if self.poiType == Nav.POI_FRIEND then
+    if self.isFriend then
         JumpToFriend(self.userID)
-    elseif self.poiType == Nav.POI_GUILDMATE then
+    elseif self.isGuildmate then
         JumpToGuildMember(self.userID)
-    elseif self.poiType == Nav.POI_GROUPMATE then
+    elseif self.isGroupmate then
         JumpToGroupMember(self.userID or self.charName)
     end
 end
@@ -183,7 +181,7 @@ function PlayerNode:AddMenuItems()
     AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE), self.userID), function()
         zo_callLater(function() self:JumpToPlayer() end, 10)
     end)
-    if Nav.Players:IsGroupLeader() and self.poiType == Nav.POI_GROUPMATE then
+    if Nav.Players:IsGroupLeader() and self.isGroupmate then
         AddMenuItem(GetString(SI_GROUP_LIST_MENU_PROMOTE_TO_LEADER), function()
             GroupPromote(self.unitTag)
             MT.menuOpen = false
@@ -228,11 +226,11 @@ function ZoneNode:JumpToZone()
     ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.POSITIVE_CLICK, (zo_strformat(GetString(NAVIGATOR_TRAVELING_TO_ZONE_VIA_PLAYER), player.zoneName, player.userID)))
     SCENE_MANAGER:Hide("worldMap")
     Nav.log("Jump %s %d", player.userID, player.poiType)
-    if player.poiType == Nav.POI_FRIEND then
+    if player.isFriend then
         JumpToFriend(player.userID)
-    elseif player.poiType == Nav.POI_GUILDMATE then
+    elseif player.isGuildmate then
         JumpToGuildMember(player.userID)
-    elseif player.poiType == Nav.POI_GROUPMATE then
+    elseif player.isGroupmate then
         JumpToGroupMember(player.userID or player.charName)
     end
 end
@@ -285,6 +283,8 @@ JumpToZoneNode.AddMenuItems = ZoneNode.AddMenuItems
 function JumpToZoneNode:GetIcon()
     return self.known and "Navigator/media/recall.dds" or "esoui/art/crafting/crafting_smithing_notrait.dds"
 end
+
+function JumpToZoneNode:GetSuffix() return "" end
 
 function JumpToZoneNode:GetColour()
     if self.isSelected and self.known then

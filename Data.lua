@@ -12,13 +12,11 @@ Nav.ZONE_BLACKREACH_GREYMOORCAVERNS = 1161
 Nav.POI_NONE = -1
 Nav.POI_TRIAL = 1
 Nav.POI_ARENA = 2
-Nav.POI_FRIEND = 3
-Nav.POI_GUILDMATE = 4
+Nav.POI_PLAYER = 3
 Nav.POI_ZONE = 5
 Nav.POI_WAYSHRINE = 6
 Nav.POI_GROUP_DUNGEON = 7
 Nav.POI_HOUSE = 8
-Nav.POI_GROUPMATE = 9
 Nav.POI_PLAYERHOUSE = 10
 
 Nav.FILTER_NONE = 0
@@ -32,10 +30,6 @@ Nav.COLOUR_FRIEND = "E5CC00"
 Nav.COLOUR_JUMPABLE = "76BCC3"
 Nav.COLOUR_SUFFIX_NORMAL = "82826F"
 Nav.COLOUR_SUFFIX_DISABLED = "444444"
-
-function Nav.IsPlayer(poiType)
-    return poiType == Nav.POI_FRIEND or poiType == Nav.POI_GUILDMATE or poiType == Nav.POI_GROUPMATE
-end
 
 -- Trader Locations, copied from Faster Travel by SimonIllyan, XanDDemoX, upyachka, Valandil
 local trader_counts = { -- nodeIndex -> traders_count
