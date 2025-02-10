@@ -38,10 +38,16 @@ function MT:layoutRow(rowControl, data, _)
     local icon = data:GetIcon()
     local categoryId = data.dataEntry.categoryId
 
-    local suffix = data:GetSuffix(categoryId ~= "bookmarks")
+    local suffix = data:GetSuffix()
     if suffix ~= nil then
         local colour = ZO_ColorDef:New(data:GetSuffixColour())
         name = name .. " " .. colour:Colorize(suffix)
+    end
+
+    local tagList = data:GetTagList(categoryId ~= "bookmarks")
+    if tagList and #tagList > 0 then
+        local colour = ZO_ColorDef:New(data:GetTagColour())
+        name = name .. " " .. colour:Colorize(table.concat(tagList, ""))
     end
 
 	if icon ~= nil then

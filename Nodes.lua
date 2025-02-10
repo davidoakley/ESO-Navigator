@@ -32,14 +32,18 @@ function Node:GetIcon()
     return self.icon
 end
 
-function Node:GetSuffix(showBookmark)
+function Node:GetSuffix()
     local suffix = self.suffix or ""
 
-    if showBookmark and Nav.Bookmarks:contains(self) then
-        suffix = (suffix or "") .. "|t25:25:Navigator/media/bookmark.dds:inheritcolor|t"
-    end
-
     return suffix
+end
+
+function Node:GetTagList(showBookmark)
+    local tagList = {}
+    if showBookmark and Nav.Bookmarks:contains(self) then
+        table.insert(tagList, "|t25:25:Navigator/media/bookmark.dds:inheritcolor|t")
+    end
+    return tagList
 end
 
 function Node:GetColour()
@@ -68,6 +72,7 @@ function Node:GetSuffixColour()
     end
     --return (self.known and not self.disabled) and Nav.COLOUR_SUFFIX_NORMAL or Nav.COLOUR_SUFFIX_DISABLED
 end
+Node.GetTagColour = Node.GetSuffixColour
 
 function Node:ZoomToPOI(setWaypoint)
     local function getPOIMapInfo(zoneIndex, mapId, poiIndex)
@@ -339,21 +344,19 @@ end
 --- @class FastTravelNode
 local FastTravelNode = Node:New()
 
-function FastTravelNode:GetSuffix(showBookmark)
-    local suffix = self.suffix or ""
+function FastTravelNode:GetTagList(showBookmark)
+    local tagList = {}
 
     if self.traders and self.traders > 0 then
         if self.traders >= 5 then
-            suffix = "|t20:23:Navigator/media/city_narrow.dds:inheritcolor|t"
+            table.insert(tagList, "|t20:23:Navigator/media/city_narrow.dds:inheritcolor|t")
         elseif self.traders >= 2 then
-            suffix = "|t20:23:Navigator/media/town_narrow.dds:inheritcolor|t"
+            table.insert(tagList, "|t20:23:Navigator/media/town_narrow.dds:inheritcolor|t")
         end
-        suffix = suffix .. "|t23:23:/esoui/art/icons/servicemappins/servicepin_guildkiosk.dds:inheritcolor|t"
+        table.insert(tagList, "|t23:23:/esoui/art/icons/servicemappins/servicepin_guildkiosk.dds:inheritcolor|t")
     end
 
-    suffix = suffix .. Node.GetSuffix(self, showBookmark)
-
-    return suffix
+    return Nav.Utils.tableConcat(tagList, Node.GetTagList(self, showBookmark))
 end
 
 function FastTravelNode:Jump()
