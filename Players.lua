@@ -57,10 +57,7 @@ function Players:SetupPlayers()
         if playerStatus ~= PLAYER_STATUS_OFFLINE and secsSinceLogoff == 0 then
             local hasChar, charName, zoneName, _, _, _, _, zoneId = GetFriendCharacterInfo(i)
             if hasChar then
-                local player = addPlayerZone(self, zones, zoneId, zoneName, userID, "Navigator/media/player_friend.dds", Nav.POI_FRIEND, charName)
-                if player then
-                    player.weight = 1.1
-                end
+                addPlayerZone(self, zones, zoneId, zoneName, userID, "Navigator/media/player_friend.dds", Nav.POI_FRIEND, charName)
             end
         end
     end
@@ -81,7 +78,6 @@ function Players:SetupPlayers()
                 if player then
                     player.unitTag = unitTag
                     player.isLeader = isLeader
-                    player.weight = isLeader and 1.3 or 1.2
                 end
             end
         end
@@ -107,7 +103,6 @@ local function createPlayerNode(player, setSuffix)
         suffix = setSuffix and player.zoneName,
         poiType = player.poiType,
         known = true,
-        weight = player.weight,
         canJumpToPlayer = player.canJumpToPlayer
     })
 end

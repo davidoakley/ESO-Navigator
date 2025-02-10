@@ -16,7 +16,24 @@ function Node:New(o)
     return o
 end
 
+---WeightComparison
+---@param x Node
+---@param y Node
+function Node.WeightComparison(x, y)
+    local xWeight = x:GetWeight()
+    local yWeight = y:GetWeight()
+
+    if xWeight ~= yWeight then
+        return xWeight > yWeight
+    end
+    return Nav.Utils.SortName(x) < Nav.Utils.SortName(y)
+end
+
 function Node:IsPlayer() return false end
+
+function Node:GetWeight()
+    return 1.0
+end
 
 function Node:AddBookmarkMenuItem(entry)
     if entry and not Nav.Bookmarks:contains(entry) then
@@ -115,6 +132,16 @@ local PlayerNode = Node:New()
 
 function PlayerNode:IsPlayer() return true end
 
+function PlayerNode:GetWeight()
+    if self.poiType == Nav.POI_GROUPMATE then
+        return self.isLeader and 1.3 or 1.2
+    elseif self.poiType == Nav.POI_FRIEND then
+        return 1.1
+    else
+        return 1.0
+    end
+end
+
 function PlayerNode:GetIconColour()
     if self.poiType == Nav.POI_FRIEND then
         return Nav.COLOUR_FRIEND
@@ -181,6 +208,10 @@ end
 
 --- @class ZoneNode
 local ZoneNode = Node:New()
+
+function ZoneNode:GetWeight()
+    return Nav.isRecall and 1.0 or 0.9
+end
 
 function ZoneNode:JumpToZone()
     Nav.Players:SetupPlayers()
@@ -273,6 +304,23 @@ end
 --- @class HouseNode
 local HouseNode = Node:New()
 
+function HouseNode:GetWeight()
+    local weight = 1.0
+
+    if self.isAlias then
+        weight = 0.6
+    elseif not self.owned then
+        weight = 0.7
+    elseif Nav.Bookmarks:contains(self) then
+        weight = 1.2
+    end
+    if self.isPrimary then
+        weight = weight + 0.1
+    end
+
+    return weight
+end
+
 function HouseNode:GetColour()
     if self.isSelected and self.known and self.owned then
         return Nav.COLOUR_WHITE
@@ -343,6 +391,19 @@ end
 
 --- @class FastTravelNode
 local FastTravelNode = Node:New()
+
+function FastTravelNode:GetWeight()
+    local weight = self.freeRecall or not Nav.isRecall and 1.0 or 0.8
+
+    if Nav.Bookmarks:contains(self) then
+        weight = weight + 0.15
+    end
+    if self.traders and self.traders > 0 then
+        weight = weight + 0.02 * self.traders
+    end
+
+    return weight
+end
 
 function FastTravelNode:GetTagList(showBookmark)
     local tagList = {}

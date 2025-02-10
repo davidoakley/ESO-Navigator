@@ -113,13 +113,6 @@ function MT:layoutHintRow(rowControl, data, _)
 	rowControl.label:SetText(data.hint or "-")
 end
 
-local function weightComparison(x, y)
-    if x.weight ~= y.weight then
-        return x.weight > y.weight
-    end
-	return Utils.SortName(x) < Utils.SortName(y)
-end
-
 local function nameComparison(x, y)
 	return Utils.SortName(x) < Utils.SortName(y)
 end
@@ -129,7 +122,7 @@ local function addDeveloperTooltip(nodeData)
         "bareName='" .. (nodeData.barename or '-').."'",
         "searchName='" .. Utils.SearchName(nodeData.originalName or nodeData.name or '-').."'",
         "sortName='" .. Utils.SortName(nodeData).."'",
-        "weight="..(nodeData.weight or 0)
+        "weight="..(nodeData:GetWeight() or 0)
     }
     if nodeData.nodeIndex then
         table.insert(items, "nodeIndex="..(nodeData.nodeIndex or "-"))
@@ -267,6 +260,7 @@ function MT:buildScrollList(keepScrollPosition)
             buildList(scrollData, "zones", NAVIGATOR_CATEGORY_ZONES, list)
         elseif zone then
             local list = Nav.Locations:getKnownNodes(zone.zoneId)
+            table.sort(list, Nav.Node.WeightComparison)
 
             if Nav.isRecall and zone.zoneId ~= Nav.ZONE_CYRODIIL then
                 local node = Nav.JumpToZoneNode:New(zone)
@@ -278,11 +272,9 @@ function MT:buildScrollList(keepScrollPosition)
                     node.name = GetString(NAVIGATOR_NO_TRAVEL_PLAYER)
                     node.known = false
                 end
-                node.weight = 10.0 -- list this first!
-                table.insert(list, node)
+                table.insert(list, 1, node)
             end
 
-            table.sort(list, weightComparison)
             buildList(scrollData, "results", zone.name, list)
         end
     end
