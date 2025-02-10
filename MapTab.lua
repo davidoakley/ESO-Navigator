@@ -6,6 +6,7 @@ local Utils = Nav.Utils
 MT.filter = Nav.FILTER_NONE
 MT.needsRefresh = false
 MT.collapsedCategories = {}
+MT.targetNode = 0
 
 function MT:queueRefresh()
     if not self.needsRefresh then
@@ -196,7 +197,7 @@ local function buildList(scrollData, id, title, list, defaultString)
             local entry = ZO_ScrollList_CreateDataEntry(3, { hint = list[i].hint })
             table.insert(scrollData, entry)
         else
-            local isSelected = hasFocus and list[i].known and (currentNodeIndex == Nav.targetNode)
+            local isSelected = hasFocus and list[i].known and (currentNodeIndex == MT.targetNode)
             local nodeData = buildResult(list[i], currentNodeIndex, isSelected)
 
             local entry = ZO_ScrollList_CreateDataEntry(1, nodeData, id)
@@ -286,7 +287,7 @@ function MT:buildScrollList(keepScrollPosition)
         ZO_ScrollList_ScrollAbsolute(self.listControl, scrollPosition)
     elseif MT.resultCount > 0 then
         -- FIXME: this doesn't account for the headings
-        ZO_ScrollList_ScrollDataIntoView(self.listControl, Nav.targetNode + 1, nil, true)
+        ZO_ScrollList_ScrollDataIntoView(self.listControl, self.targetNode + 1, nil, true)
     end
 end
 
@@ -298,9 +299,9 @@ function MT:executeSearch(searchString, keepTargetNode)
     results = Search:Run(searchString or "", MT.filter)
 
 	Nav.results = results
-    if not keepTargetNode or Nav.targetNode >= (MT.resultCount or 0) then
-        -- Nav.log("executeSearch: reset targetNode keep=%d, oldTarget=%d, count=%d", keepTargetNode and 1 or 0, Nav.targetNode, (MT.resultCount or 0))
-    	Nav.targetNode = 0
+    if not keepTargetNode or self.targetNode >= (MT.resultCount or 0) then
+        -- Nav.log("executeSearch: reset targetNode keep=%d, oldTarget=%d, count=%d", keepTargetNode and 1 or 0, self.targetNode, (MT.resultCount or 0))
+    	self.targetNode = 0
         keepTargetNode = false
     end
 
@@ -315,7 +316,7 @@ function MT:getTargetDataIndex()
 
     for i = 1, #scrollData do
         if scrollData[i].typeId == 1 then -- wayshrine row
-            if currentNodeIndex == Nav.targetNode then
+            if currentNodeIndex == self.targetNode then
                 return i
             end
             currentNodeIndex = currentNodeIndex + 1
@@ -344,7 +345,7 @@ function MT:getNextCategoryFirstIndex()
     end
 
     local currentIndex = self:getTargetDataIndex()
-    local currentNodeIndex = Nav.targetNode + 1
+    local currentNodeIndex = self.targetNode + 1
 
     local i = currentIndex + 1
     local foundCategory = false
@@ -415,40 +416,40 @@ end
 
 function MT:nextResult()
     local known = false
-    local startNode = Nav.targetNode
+    local startNode = self.targetNode
     repeat
-    	Nav.targetNode = (Nav.targetNode + 1) % MT.resultCount
+    	self.targetNode = (self.targetNode + 1) % MT.resultCount
         local node = self:getTargetNode()
         if node and node.known then
             known = true
         end
-    until known or Nav.targetNode == startNode
+    until known or self.targetNode == startNode
 	self:buildScrollList()
 end
 
 function MT:previousResult()
     local known = false
-    local startNode = Nav.targetNode
+    local startNode = self.targetNode
     repeat
-        Nav.targetNode = Nav.targetNode - 1
-        if Nav.targetNode < 0 then
-            Nav.targetNode = MT.resultCount - 1
+        self.targetNode = self.targetNode - 1
+        if self.targetNode < 0 then
+            self.targetNode = MT.resultCount - 1
         end
         local node = self:getTargetNode()
         if node and node.known then
             known = true
         end
-    until known or Nav.targetNode == startNode
+    until known or self.targetNode == startNode
 	self:buildScrollList()
 end
 
 function MT:nextCategory()
-    Nav.targetNode = self:getNextCategoryFirstIndex()
+    self.targetNode = self:getNextCategoryFirstIndex()
 	self:buildScrollList()
 end
 
 function MT:previousCategory()
-    -- Nav.targetNode = self:getPreviousCategoryFirstIndex()
+    -- self.targetNode = self:getPreviousCategoryFirstIndex()
 	-- self:buildScrollList()
 end
 
@@ -568,7 +569,7 @@ function MT:OnMapChanged()
         else
             self.collapsedCategories = {}
         end
-        Nav.targetNode = 0
+        self.targetNode = 0
         self.filter = Nav.FILTER_NONE
         self:updateFilterControl()
         self.editControl:SetText("")

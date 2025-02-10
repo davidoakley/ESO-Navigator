@@ -24,7 +24,6 @@ Navigator = {
   isCLI = false,
   isDeveloper = (GetDisplayName() == '@SirNightstorm' and true) or false,
   results = {},
-  targetNode = 0,
   mapVisible = false,
 }
 local Nav = Navigator
