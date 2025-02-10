@@ -394,7 +394,7 @@ function FastTravelNode:AddMenuItems()
     AddMenuItem(GetString(NAVIGATOR_MENU_SETDESTINATION), function()
         self:ZoomToPOI(true)
     end)
-    --self:AddBookmarkMenuItem({ nodeIndex = self.nodeIndex })
+    self:AddBookmarkMenuItem({ nodeIndex = self.nodeIndex })
 end
 
 
