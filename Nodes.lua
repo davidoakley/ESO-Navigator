@@ -161,7 +161,7 @@ function PlayerNode:JumpToPrimaryResidence()
 end
 
 function PlayerNode:JumpToPlayer()
-    ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.POSITIVE_CLICK,zo_strformat(GetString(NAVIGATOR_TRAVELING_TO_ZONE_VIA_PLAYER), self.zoneName, self.userID))
+    ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.POSITIVE_CLICK,zo_strformat(GetString(NAVIGATOR_TRAVELING_TO_PLAYER_IN_ZONE), self.userID, self.zoneName))
     SCENE_MANAGER:Hide("worldMap")
     Nav.log("Jump %s %d", self.userID, self.poiType)
     if self.isFriend then
