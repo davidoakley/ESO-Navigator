@@ -138,7 +138,7 @@ function PlayerNode:GetWeight()
     end
 end
 
-function Node:GetSuffix() return self.zoneName or "" end
+function PlayerNode:GetSuffix() return self.zoneName or "" end
 
 function PlayerNode:GetIconColour()
     if self.isFriend then
