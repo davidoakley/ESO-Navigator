@@ -222,8 +222,10 @@ function Locs:CreateNode(i, name, typePOI, nodeZoneId, icon, glowIcon, known)
 end
 
 function Locs:clearKnownNodes()
-    for i = 1, #self.nodes do
-        self.nodes[i].known = nil
+    if self.nodes then
+        for i = 1, #self.nodes do
+            self.nodes[i].known = nil
+        end
     end
 end
 
