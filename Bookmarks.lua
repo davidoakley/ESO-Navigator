@@ -20,17 +20,17 @@ function Bookmarks:getIndex(entry)
                 return i
             end
         end
-    elseif entry.zoneId then
-        local zoneId = entry.zoneId
-        for i = 1, #list do
-            if zoneId == list[i].zoneId then
-                return i
-            end
-        end
     elseif entry.userID then
         local userID = entry.userID
         for i = 1, #list do
             if userID == list[i].userID and entry.action == list[i].action then
+                return i
+            end
+        end
+    elseif entry.zoneId then
+        local zoneId = entry.zoneId
+        for i = 1, #list do
+            if zoneId == list[i].zoneId then
                 return i
             end
         end
