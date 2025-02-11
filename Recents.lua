@@ -64,7 +64,6 @@ function Recents:getRecents(count)
             end
             local node = Nav.Locations:GetNode(nodeIndex, true)
             node.known = Nav.Locations:isKnownNode(nodeIndex)
-            node.bookmarked = Nav.Bookmarks:contains(node)
             table.insert(results, node)
 
             if #results >= count then

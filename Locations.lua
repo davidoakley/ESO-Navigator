@@ -52,14 +52,14 @@ function Locs:setupNodes()
         local nodeZoneId = GetParentZoneId(GetZoneId(zoneIndex))
 
         if not isLocked and name ~= "" and (typePOI == 1 or glowIcon ~= nil) then
-            local nodeInfo = self:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon)
+            local node = self:CreateNode(i, name, typePOI, nodeZoneId, icon, glowIcon, known)
 
-            table.insert(self.nodes, nodeInfo)
-            self.nodeMap[i] = nodeInfo
+            table.insert(self.nodes, node)
+            self.nodeMap[i] = node
             self.knownNodes[i] = known
             local uid = uniqueName(name, x, z)
             if not namelocMap[uid] then
-                namelocMap[uid] = nodeInfo
+                namelocMap[uid] = node
                 locMap[string.format("%.4f,%.4f", x, z)] = nodeInfo
             end
         end
@@ -150,7 +150,7 @@ function Locs:AddExtraZone(zoneId, mapId, canJumpToPlayer)
     })
 end
 
-function Locs:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon)
+function Locs:CreateNode(i, name, typePOI, nodeZoneId, icon, glowIcon, known)
     if i >= 210 and i <= 212 then
         -- Save this character's alliance's Harborage
         self.harborageIndex = i
@@ -166,7 +166,8 @@ function Locs:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon)
         zoneId = nodeZoneId,
         glowIcon = glowIcon,
         icon = icon,
-        originalIcon = icon
+        originalIcon = icon,
+        known = known
     }
 
     if typePOI == 6 then
@@ -221,7 +222,8 @@ function Locs:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon)
         nodeInfo.traders = traders
     end
 
-    return nodeInfo
+    local node = nodeInfo.poiType == Nav.POI_HOUSE and Nav.HouseNode:New(nodeInfo) or Nav.FastTravelNode:New(nodeInfo)
+    return node
 end
 
 function Locs:clearKnownNodes()
@@ -238,6 +240,7 @@ function Locs:isKnownNode(nodeIndex)
     else
         local known, _, _, _, _, _, _, _, _ = GetFastTravelNodeInfo(nodeIndex)
         self.knownNodes[nodeIndex] = known
+        self.nodeMap[nodeIndex].known = known
         return known
     end
 end
@@ -270,13 +273,7 @@ function Locs:GetNode(nodeIndex, includeUnknown)
         return nil
     end
 
-    local data = Utils.shallowCopy(self.nodeMap[nodeIndex])
-    local node = data.poiType == Nav.POI_HOUSE and Nav.HouseNode:New(data) or Nav.FastTravelNode:New(data)
-    local bookmarked = Nav.Bookmarks:contains(data)
-    node.known = true
-    node.bookmarked = bookmarked
-
-    return node
+    return self.nodeMap[nodeIndex]
 end
 
 function Locs:getKnownNodes(zoneId, includeAliases)
@@ -321,11 +318,7 @@ function Locs:getHouseList(includeAliases)
     for i = 1, #self.nodes do
         local index = self.nodes[i].nodeIndex
         if self:isKnownNode(index) and self.nodes[i].poiType == Nav.POI_HOUSE then
-            local node = Nav.HouseNode:New(Utils.shallowCopy(self.nodes[i]))
-            if Nav.Bookmarks:contains(node) then
-                node.bookmarked = true
-            end
-            node.known = true
+            local node = self.nodes[i]
             table.insert(nodes, node)
 
             if includeAliases and node.poiType == Nav.POI_HOUSE and node.owned and Nav.saved.useHouseNicknames then
@@ -424,7 +417,7 @@ function Locs:getCurrentMapZone()
     if not self.zones[zoneId] then
         Nav.log("Locs:getCurrentMapZone no info on zoneId "..zoneId)
     end
-    return self.zones[zoneId] --and Nav.ZoneNode:New(Utils.shallowCopy(self.zones[zoneId]))
+    return self.zones[zoneId]
 end
 
 function Locs:IsHarborage(nodeIndex)
