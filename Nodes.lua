@@ -337,6 +337,11 @@ function HouseNode:GetWeight()
     return weight
 end
 
+function HouseNode:GetIcon()
+    return self.isPrimary and "Navigator/media/house_star.dds" or
+            (self.owned and "Navigator/media/house.dds" or "Navigator/media/house_unowned.dds")
+end
+
 function HouseNode:GetColour()
     if self.isSelected and self.known and self.owned then
         return Nav.COLOUR_WHITE

@@ -184,9 +184,6 @@ function Locs:CreateNode(i, name, typePOI, nodeZoneId, icon, glowIcon, known)
         nodeInfo.houseId = GetFastTravelNodeHouseId(i)
         if nodeInfo.houseId == GetHousingPrimaryHouse() then
             nodeInfo.isPrimary = true
-            nodeInfo.icon = "Navigator/media/house_star.dds"
-        else
-            nodeInfo.icon = nodeInfo.owned and "Navigator/media/house.dds" or "Navigator/media/house_unowned.dds"
         end
         if Nav.saved.useHouseNicknames then
             nodeInfo.collectibleId = GetCollectibleIdForHouse(nodeInfo.houseId)
@@ -258,21 +255,21 @@ function Locs:getNodeMap()
     return self.nodeMap
 end
 
---[[
-function Locs:GetNode(nodeIndex)
-    if self.nodeMap == nil then
-        self:setupNodes()
-    end
-    return self.nodeMap[nodeIndex]
-end
---]]
-
 function Locs:GetNode(nodeIndex, includeUnknown)
     if not includeUnknown and not self:isKnownNode(nodeIndex) then
         return nil
     end
 
     return self.nodeMap[nodeIndex]
+end
+
+local function createHouseAlias(node)
+    local alias = Nav.HouseNode:New(Utils.shallowCopy(node))
+    alias.name = node.nickname
+    alias.suffix = node.name
+    alias.originalName = nil
+    alias.isAlias = true
+    return alias
 end
 
 function Locs:getKnownNodes(zoneId, includeAliases)
@@ -295,12 +292,7 @@ function Locs:getKnownNodes(zoneId, includeAliases)
                 table.insert(nodes, node)
 
                 if includeAliases and node.poiType == Nav.POI_HOUSE and node.owned and Nav.saved.useHouseNicknames then
-                    local alias = Nav.HouseNode:New(Utils.shallowCopy(node))
-                    alias.name = node.nickname
-                    alias.suffix = node.name
-                    alias.originalName = nil
-                    alias.isAlias = true
-                    table.insert(nodes, alias)
+                    table.insert(nodes, createHouseAlias(node))
                 end
             end
         end
@@ -321,12 +313,7 @@ function Locs:getHouseList(includeAliases)
             table.insert(nodes, node)
 
             if includeAliases and node.poiType == Nav.POI_HOUSE and node.owned and Nav.saved.useHouseNicknames then
-                local alias = Utils.shallowCopy(node)
-                alias.name = node.nickname
-                alias.suffix = node.name
-                alias.originalName = nil
-                alias.isAlias = true
-                table.insert(nodes, alias)
+                table.insert(nodes, createHouseAlias(node))
             end
         end
     end
