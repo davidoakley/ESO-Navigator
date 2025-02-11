@@ -324,6 +324,8 @@ function MT:UpdateEditDefaultText()
 end
 
 function MT:buildScrollList(keepScrollPosition)
+    ClearMenu() -- Close any right-click menu
+
     local scrollPosition = 0
     if keepScrollPosition then
         scrollPosition = ZO_ScrollList_GetScrollValue(self.listControl)
@@ -895,7 +897,6 @@ function MT:OnMapChanged()
         self.filter = Nav.FILTER_NONE
         self:updateFilterControl()
         self.editControl:SetText("")
-        -- end
         self:executeSearch("")
     end
 end
