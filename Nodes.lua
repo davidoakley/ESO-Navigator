@@ -142,6 +142,16 @@ function PlayerNode:GetWeight()
     end
 end
 
+function PlayerNode:GetIcon()
+    if self.isGroupmate then
+        return isLeader and "/esoui/art/icons/mapkey/mapkey_groupleader.dds" or "/esoui/art/icons/mapkey/mapkey_groupmember.dds"
+    elseif self.isFriend then
+        return "Navigator/media/player_friend.dds"
+    else
+        return "Navigator/media/player.dds"
+    end
+end
+
 function PlayerNode:GetSuffix() return self.zoneName or "" end
 
 function PlayerNode:GetIconColour()

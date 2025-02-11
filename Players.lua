@@ -9,7 +9,7 @@ local Players = Nav.Players or {
 }
 local Utils = Nav.Utils
 
-local function addPlayer(self, zones, zoneId, zoneName, userID, icon, charName)
+local function addPlayer(self, zones, zoneId, zoneName, userID, charName)
     if self.players[userID] then
         return self.players[userID]
     end
@@ -19,7 +19,6 @@ local function addPlayer(self, zones, zoneId, zoneName, userID, icon, charName)
         zoneId = zoneId,
         zoneName = Utils.FormatSimpleName(zoneName),
         userID = userID,
-        icon = icon,
         poiType = Nav.POI_PLAYER,
         known = true,
         canJumpToPlayer = zones[zoneId] and zones[zoneId].canJumpToPlayer
@@ -50,7 +49,7 @@ function Players:SetupPlayers()
             if playerStatus ~= PLAYER_STATUS_OFFLINE and userID ~= myID then
                 local hasChar, charName, zoneName, _, _, _, _, zoneId = GetGuildMemberCharacterInfo(guildID, i)
                 if hasChar then
-                    local player = addPlayer(self, zones, zoneId, zoneName, userID, "Navigator/media/player.dds", charName)
+                    local player = addPlayer(self, zones, zoneId, zoneName, userID, charName)
                     player.isGuildmate = true
                 end
             end
@@ -64,7 +63,7 @@ function Players:SetupPlayers()
         if playerStatus ~= PLAYER_STATUS_OFFLINE and secsSinceLogoff == 0 then
             local hasChar, charName, zoneName, _, _, _, _, zoneId = GetFriendCharacterInfo(i)
             if hasChar then
-                local player = addPlayer(self, zones, zoneId, zoneName, userID, "Navigator/media/player_friend.dds", charName)
+                local player = addPlayer(self, zones, zoneId, zoneName, userID, charName)
                 player.isFriend = true
             end
         end
@@ -80,9 +79,9 @@ function Players:SetupPlayers()
             if IsUnitOnline(unitTag) and string.lower(charName) ~= playerName then
                 local zoneId = GetZoneId(GetUnitZoneIndex(unitTag))
                 local zoneName = GetZoneNameById(zoneId)
-                local icon = isLeader and "/esoui/art/icons/mapkey/mapkey_groupleader.dds" or "/esoui/art/icons/mapkey/mapkey_groupmember.dds"
-                local player = addPlayer(self, zones, zoneId, zoneName, userID or '"'..charName..'"', icon, charName)
+                local player = addPlayer(self, zones, zoneId, zoneName, userID or '"'..charName..'"', charName)
                 if player then
+                    player.isGroupmate = true
                     player.canJumpToPlayer = true
                     player.unitTag = unitTag
                     player.isLeader = IsUnitGroupLeader(unitTag)
