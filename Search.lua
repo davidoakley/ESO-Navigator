@@ -20,14 +20,14 @@ local function matchComparison(x,y)
     if x.match ~= y.match then
         return x.match > y.match
     end
-	return (x.barename or x.name) < (y.barename or y.name)
+	return (x.node.barename or x.node.name) < (y.node.barename or y.node.name)
 end
 
 function Search:AddCandidates(list)
     for i = 1, #list do
         local node = list[i]
         local searchName = Utils.SearchName(node.originalName or node.name)
-        self.candidates[searchName] = node
+        table.insert(self.candidates, { searchName = searchName, node = node })
     end
 end
 
@@ -35,17 +35,19 @@ function Search:Execute(searchTerm)
     searchTerm = Utils.removeAccents(searchTerm)
     local result = {}
 
-    for searchName, node in pairs(self.candidates) do
-        local matchLevel = searchTerm ~= "" and match(searchName, searchTerm) or 1.0
+    for i = 1, #self.candidates do
+        local candidate = self.candidates[i]
+        local matchLevel = searchTerm ~= "" and match(candidate.searchName, searchTerm) or 1.0
         if matchLevel > 0 then
-            local resultNode = Utils.shallowCopy(node)
-            if node.weight then
-                matchLevel = matchLevel * node.weight
+            if candidate.node.weight then
+                matchLevel = matchLevel * candidate.node.weight
             end
-            resultNode.match = matchLevel
-            -- resultNode.matchChars = matchChars
+            candidate.match = matchLevel
+            --candidate.matchChars = matchChars
+            candidate.searchName = candidate.searchName
+            candidate.searchTerm = searchTerm
 
-            table.insert(result, resultNode)
+            table.insert(result, candidate)
         end
     end
 
@@ -78,8 +80,14 @@ function Search:Run(searchTerm, filter)
 
     table.sort(result, matchComparison)
 
-    self.result = result
-    return result
+    self.result = result -- Just for debugging
+
+    local resultNodes = {}
+    for i = 1, #result do
+        table.insert(resultNodes, result[i].node)
+    end
+
+    return resultNodes
 end
   
 function Search.highlightResult(result, matchChars)
