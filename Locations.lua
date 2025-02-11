@@ -4,7 +4,6 @@ local Locs = Nav.Locations or {
     nodeMap = nil,
     zones = nil,
     mapIndices = nil,
-    knownNodes = {},
     harborageIndex = nil
 }
 local Utils = Nav.Utils
@@ -56,7 +55,6 @@ function Locs:setupNodes()
 
             table.insert(self.nodes, node)
             self.nodeMap[i] = node
-            self.knownNodes[i] = known
             local uid = uniqueName(name, x, z)
             if not namelocMap[uid] then
                 namelocMap[uid] = node
@@ -227,7 +225,9 @@ function Locs:CreateNode(i, name, typePOI, nodeZoneId, icon, glowIcon, known)
 end
 
 function Locs:clearKnownNodes()
-    self.knownNodes = {}
+    for i = 1, #self.nodes do
+        self.nodes[i].known = nil
+    end
 end
 
 function Locs:isKnownNode(nodeIndex)
@@ -235,11 +235,10 @@ function Locs:isKnownNode(nodeIndex)
         self:setupNodes()
     end
 
-    if self.knownNodes[nodeIndex] ~= nil then
-        return self.knownNodes[nodeIndex]
+    if self.nodeMap[nodeIndex].known ~= nil then
+        return self.nodeMap[nodeIndex].known
     else
         local known, _, _, _, _, _, _, _, _ = GetFastTravelNodeInfo(nodeIndex)
-        self.knownNodes[nodeIndex] = known
         self.nodeMap[nodeIndex].known = known
         return known
     end
