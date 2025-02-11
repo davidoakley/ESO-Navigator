@@ -97,15 +97,16 @@ function Locs:setupNodes()
 
                     if not self.zones[zoneId] then
                         if self:IsZone(zoneId) then
-                            self.zones[zoneId] = {
+                            self.zones[zoneId] = Nav.ZoneNode:New({
                                 name = zoneName,
                                 zoneName = zoneName,
                                 zoneId = zoneId,
                                 index = zoneIndex,
                                 nodes = {},
                                 poiType = Nav.POI_ZONE,
-                                canJumpToPlayer = CanJumpToPlayerInZone(zoneId) or zoneId == Nav.ZONE_ATOLLOFIMMOLATION
-                            }
+                                canJumpToPlayer = CanJumpToPlayerInZone(zoneId) or zoneId == Nav.ZONE_ATOLLOFIMMOLATION,
+                                known = true
+                            })
                         else
                             Nav.log("setupNodes: not zone: zoneId %d name %s", zoneId, zoneName)
                         end
@@ -136,7 +137,7 @@ end
 
 function Locs:AddExtraZone(zoneId, mapId, canJumpToPlayer)
     local name, _, _, zoneIndex, _ = GetMapInfoById(mapId)
-    self.zones[zoneId] = {
+    self.zones[zoneId] = Nav.ZoneNode:New({
         name = name,
         zoneName = name,
         zoneId = zoneId,
@@ -144,8 +145,9 @@ function Locs:AddExtraZone(zoneId, mapId, canJumpToPlayer)
         mapId = mapId,
         poiType = Nav.POI_ZONE,
         canJumpToPlayer = canJumpToPlayer,
+        known = true,
         nodes = {}
-    }
+    })
 end
 
 function Locs:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon)
@@ -346,23 +348,6 @@ function Locs:GetZones()
     return self.zones
 end
 
-local function addZoneToList(nodes, name, zoneId, mapId, bookmarked, suffix, canJumpToPlayer)
-    table.insert(nodes, Nav.ZoneNode:New({
-        name = name,
-        barename = Utils.bareName(name),
-        zoneId = zoneId,
-        zoneName = name,
-        mapId = mapId,
-        icon = "Navigator/media/zone.dds",
-        poiType = Nav.POI_ZONE,
-        known = true,
-        bookmarked = bookmarked,
-        suffix = suffix,
-        canJumpToPlayer = canJumpToPlayer
-    }))
-
-end
-
 function Locs:getZoneList(includeAliases)
     local nodes = {}
 
@@ -370,10 +355,18 @@ function Locs:getZoneList(includeAliases)
         self:setupNodes()
     end
 
-    for zoneId, info in pairs(self.zones) do
-        addZoneToList(nodes, info.name, zoneId, info.mapId, Nav.Bookmarks:contains(info), nil, info.canJumpToPlayer)
+    for zoneId, zone in pairs(self.zones) do
+        table.insert(nodes, zone)
         if includeAliases and zoneId == Nav.ZONE_ATOLLOFIMMOLATION then
-            addZoneToList(nodes, GetString(NAVIGATOR_LOCATION_OBLIVIONPORTAL), zoneId, info.mapId, Nav.Bookmarks:contains(info), info.name, info.canJumpToPlayer)
+            table.insert(nodes, Nav.ZoneNode:New({
+                name = GetString(NAVIGATOR_LOCATION_OBLIVIONPORTAL),
+                zoneId = zone.zoneId,
+                canJumpToPlayer = zone.canJumpToPlayer,
+                index = zone.index,
+                mapId = zone.mapId,
+                poiType = Nav.POI_ZONE,
+                known = true
+            }))
         end
     end
 
@@ -385,17 +378,7 @@ function Locs:getZone(zoneId)
         self:setupNodes()
     end
 
-    local info = self.zones[zoneId]
-    return Nav.ZoneNode:New({
-        name = info.name,
-        barename = Utils.bareName(info.name),
-        zoneId = zoneId,
-        zoneName = info.name,
-        icon = "Navigator/media/zone.dds",
-        poiType = Nav.POI_ZONE,
-        known = true,
-        canJumpToPlayer = info.canJumpToPlayer
-    })
+    return self.zones[zoneId]
 end
 
 function Locs:getCurrentMapZoneId()
@@ -441,7 +424,7 @@ function Locs:getCurrentMapZone()
     if not self.zones[zoneId] then
         Nav.log("Locs:getCurrentMapZone no info on zoneId "..zoneId)
     end
-    return self.zones[zoneId] and Nav.ZoneNode:New(Utils.shallowCopy(self.zones[zoneId]))
+    return self.zones[zoneId] --and Nav.ZoneNode:New(Utils.shallowCopy(self.zones[zoneId]))
 end
 
 function Locs:IsHarborage(nodeIndex)

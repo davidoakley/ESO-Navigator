@@ -33,7 +33,7 @@ function MT:ImmediateRefresh()
 end
 
 function MT:layoutRow(rowControl, data, _)
-	local name = data.name
+	local name = data:GetName()
     local tooltipText = data.tooltip
     local icon = data:GetIcon()
     local categoryId = data.dataEntry.categoryId
@@ -265,13 +265,13 @@ function MT:buildScrollList(keepScrollPosition)
             table.sort(list, Nav.Node.WeightComparison)
 
             if Nav.isRecall and zone.zoneId ~= Nav.ZONE_CYRODIIL then
-                local node = Nav.JumpToZoneNode:New(zone)
+                local node = Nav.JumpToZoneNode:New(Utils.shallowCopy(zone))
                 local playerInfo = Nav.Players:GetPlayerInZone(zone.zoneId)
                 if playerInfo then
-                    node.name = zo_strformat(GetString(NAVIGATOR_TRAVEL_TO_ZONE), zone.name)
+                --    node.name = zo_strformat(GetString(NAVIGATOR_TRAVEL_TO_ZONE), zone.name)
                     node.known = true
                 else
-                    node.name = GetString(NAVIGATOR_NO_TRAVEL_PLAYER)
+                --    node.name = GetString(NAVIGATOR_NO_TRAVEL_PLAYER)
                     node.known = false
                 end
                 table.insert(list, 1, node)
@@ -523,7 +523,7 @@ end
 function MT:selectResult(control, data, mouseButton, isDoubleClick)
     if mouseButton == 1 then
         if data.OnClick then
-            Nav.log("OnClick %s", data.name or "-")
+            Nav.log("OnClick %s", data:GetName() or "-")
             data:OnClick(isDoubleClick)
         end
     elseif mouseButton == 2 then

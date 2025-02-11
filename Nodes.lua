@@ -43,6 +43,10 @@ function Node:AddBookmarkMenuItem(entry)
     end
 end
 
+function Node:GetName()
+    return self.name or ""
+end
+
 function Node:GetIcon()
     return self.icon
 end
@@ -211,6 +215,10 @@ function ZoneNode:GetWeight()
     return Nav.isRecall and 1.0 or 0.9
 end
 
+function ZoneNode:GetIcon()
+    return "Navigator/media/zone.dds"
+end
+
 function ZoneNode:JumpToZone()
     Nav.Players:SetupPlayers()
     local zoneId = self.zoneId
@@ -279,6 +287,14 @@ end
 --- @class JumpToZoneNode
 local JumpToZoneNode = ZoneNode:New()
 JumpToZoneNode.AddMenuItems = ZoneNode.AddMenuItems
+
+function JumpToZoneNode:GetName()
+    if self.known then
+        return zo_strformat(GetString(NAVIGATOR_TRAVEL_TO_ZONE), self.name)
+    else
+        return GetString(NAVIGATOR_NO_TRAVEL_PLAYER)
+    end
+end
 
 function JumpToZoneNode:GetIcon()
     return self.known and "Navigator/media/recall.dds" or "esoui/art/crafting/crafting_smithing_notrait.dds"
