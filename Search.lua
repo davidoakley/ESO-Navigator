@@ -27,7 +27,7 @@ function Search:AddCandidates(list)
     for i = 1, #list do
         local node = list[i]
         local searchName = Utils.SearchName(node.originalName or node.name)
-        self.candidates[searchName] = { node = node }
+        table.insert(self.candidates, { searchName = searchName, node = node })
     end
 end
 
@@ -35,13 +35,14 @@ function Search:Execute(searchTerm)
     searchTerm = Utils.removeAccents(searchTerm)
     local result = {}
 
-    for searchName, candidate in pairs(self.candidates) do
-        local matchLevel = searchTerm ~= "" and match(searchName, searchTerm) or 1.0
+    for i = 1, #self.candidates do
+        local candidate = self.candidates[i]
+        local matchLevel = searchTerm ~= "" and match(candidate.searchName, searchTerm) or 1.0
         if matchLevel > 0 then
             matchLevel = matchLevel * candidate.node:GetWeight()
             candidate.match = matchLevel
-            candidate.matchChars = matchChars
-            candidate.searchName = searchName
+            --candidate.matchChars = matchChars
+            candidate.searchName = candidate.searchName
             candidate.searchTerm = searchTerm
 
             table.insert(result, candidate)
