@@ -19,7 +19,6 @@ local function addPlayer(self, zones, zoneId, zoneName, userID, charName)
         zoneId = zoneId,
         zoneName = Utils.FormatSimpleName(zoneName),
         userID = userID,
-        poiType = Nav.POI_PLAYER,
         known = true,
         canJumpToPlayer = zones[zoneId] and zones[zoneId].canJumpToPlayer
     })

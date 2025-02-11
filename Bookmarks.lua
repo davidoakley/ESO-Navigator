@@ -92,7 +92,6 @@ function Bookmarks:getBookmarks()
             node = Nav.PlayerHouseNode:New({
                 name = entry.userID,
                 userID = entry.userID,
-                poiType = Nav.POI_PLAYERHOUSE,
                 icon = "Navigator/media/house_player.dds",
                 suffix = entry.nickname and zo_strformat(GetString(SI_TOOLTIP_COLLECTIBLE_NICKNAME), entry.nickname)
                                          or GetString(SI_HOUSING_PRIMARY_RESIDENCE_HEADER),

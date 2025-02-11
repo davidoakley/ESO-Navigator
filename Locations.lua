@@ -101,7 +101,6 @@ function Locs:setupNodes()
                                 zoneId = zoneId,
                                 index = zoneIndex,
                                 nodes = {},
-                                poiType = Nav.POI_ZONE,
                                 canJumpToPlayer = CanJumpToPlayerInZone(zoneId) or zoneId == Nav.ZONE_ATOLLOFIMMOLATION,
                                 known = true
                             })
@@ -141,7 +140,6 @@ function Locs:AddExtraZone(zoneId, mapId, canJumpToPlayer)
         zoneId = zoneId,
         index = zoneIndex,
         mapId = mapId,
-        poiType = Nav.POI_ZONE,
         canJumpToPlayer = canJumpToPlayer,
         known = true,
         nodes = {}
@@ -178,7 +176,6 @@ function Locs:CreateNode(i, name, typePOI, nodeZoneId, icon, glowIcon, known)
         nodeInfo.icon = "esoui/art/tutorial/poi_raiddungeon_complete.dds"
         nodeInfo.suffix = GetString(NAVIGATOR_TRIAL)
     elseif typePOI == 7 then
-        nodeInfo.poiType = Nav.POI_HOUSE
         nodeInfo.owned = (icon:find("poi_group_house_owned") ~= nil)
         nodeInfo.freeRecall = true
         nodeInfo.houseId = GetFastTravelNodeHouseId(i)
@@ -217,7 +214,7 @@ function Locs:CreateNode(i, name, typePOI, nodeZoneId, icon, glowIcon, known)
         nodeInfo.traders = traders
     end
 
-    local node = nodeInfo.poiType == Nav.POI_HOUSE and Nav.HouseNode:New(nodeInfo) or Nav.FastTravelNode:New(nodeInfo)
+    local node = nodeInfo.houseId and Nav.HouseNode:New(nodeInfo) or Nav.FastTravelNode:New(nodeInfo)
     return node
 end
 
@@ -293,7 +290,7 @@ function Locs:getKnownNodes(zoneId, includeAliases)
             if node then
                 table.insert(nodes, node)
 
-                if includeAliases and node.poiType == Nav.POI_HOUSE and node.owned and Nav.saved.useHouseNicknames then
+                if includeAliases and node.houseId and node.owned and Nav.saved.useHouseNicknames then
                     table.insert(nodes, createHouseAlias(node))
                 end
             end
@@ -310,11 +307,11 @@ function Locs:getHouseList(includeAliases)
     local nodes = {}
     for i = 1, #self.nodes do
         local index = self.nodes[i].nodeIndex
-        if self:isKnownNode(index) and self.nodes[i].poiType == Nav.POI_HOUSE then
+        if self:isKnownNode(index) and self.nodes[i].houseId then
             local node = self.nodes[i]
             table.insert(nodes, node)
 
-            if includeAliases and node.poiType == Nav.POI_HOUSE and node.owned and Nav.saved.useHouseNicknames then
+            if includeAliases and node.owned and Nav.saved.useHouseNicknames then
                 table.insert(nodes, createHouseAlias(node))
             end
         end
@@ -345,7 +342,6 @@ function Locs:getZoneList(includeAliases)
                 canJumpToPlayer = zone.canJumpToPlayer,
                 index = zone.index,
                 mapId = zone.mapId,
-                poiType = Nav.POI_ZONE,
                 known = true
             }))
         end
