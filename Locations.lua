@@ -66,11 +66,8 @@ function Locs:setupNodes()
     for i = 1, totalNodes do
         local known, name, x, z, icon, glowIcon, typePOI, _, isLocked = GetFastTravelNodeInfo(i)
 
-        local zoneIndex, _ = GetFastTravelNodePOIIndicies(i)
-        local nodeZoneId = GetParentZoneId(GetZoneId(zoneIndex))
-
         if not isLocked and name ~= "" and (typePOI == 1 or glowIcon ~= nil) then
-            local node = self:CreateNode(i, name, typePOI, nodeZoneId, icon, glowIcon, known)
+            local node = self:CreateNode(i, name, typePOI, icon, glowIcon, known)
 
             table.insert(self.nodes, node)
             self.nodeMap[i] = node
@@ -150,7 +147,7 @@ function Locs:AddExtraZone(zoneId, mapId, canJumpToPlayer)
     })
 end
 
-function Locs:CreateNode(i, name, typePOI, nodeZoneId, icon, glowIcon, known)
+function Locs:CreateNode(i, name, typePOI, icon, glowIcon, known)
     if i >= 210 and i <= 212 then
         -- Save this character's alliance's Harborage
         self.harborageIndex = i
@@ -163,7 +160,6 @@ function Locs:CreateNode(i, name, typePOI, nodeZoneId, icon, glowIcon, known)
         name = Utils.DisplayName(name),
         originalName = name,
         type = typePOI,
-        zoneId = nodeZoneId,
         glowIcon = glowIcon,
         icon = icon,
         originalIcon = icon,
