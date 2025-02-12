@@ -252,8 +252,10 @@ function MT:buildScrollList(keepScrollPosition)
         buildList(scrollData, "bookmarks", NAVIGATOR_CATEGORY_BOOKMARKS, bookmarks, NAVIGATOR_HINT_NOBOOKMARKS)
 
         local recentCount = Nav.saved.recentsCount
-        local recents = Nav.Recents:getRecents(recentCount)
-        buildList(scrollData, "recents", NAVIGATOR_CATEGORY_RECENT, recents, NAVIGATOR_HINT_NORECENTS)
+        if recentCount > 0 then
+            local recents = Nav.Recents:getRecents(recentCount)
+            buildList(scrollData, "recents", NAVIGATOR_CATEGORY_RECENT, recents, NAVIGATOR_HINT_NORECENTS)
+        end
 
         local zone = Nav.Locations:getCurrentMapZone()
         if zone and zone.zoneId == Nav.ZONE_TAMRIEL then

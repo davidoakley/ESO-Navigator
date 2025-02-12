@@ -51,6 +51,7 @@ function Navigator:loadSettings()
     table.insert(optionsTable, {
       type = "slider",
       name = "Entries in Recent list",
+      tooltip = "Setting this to 0 will disable the Recent list",
       min = 0,
       max = 20,
       getFunc = function() return sv.recentsCount end,
@@ -62,7 +63,7 @@ function Navigator:loadSettings()
     if LibSlashCommander then
       table.insert(optionsTable, {
         type = "dropdown",
-        name = "Chat command:",
+        name = "Chat command",
         tooltip = "Select what name to give the chat slash command",
         choices = {"None", "/nav", "/tp"},
         getFunc = function() return sv.tpCommand end,
