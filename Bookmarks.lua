@@ -78,14 +78,12 @@ function Bookmarks:getBookmarks()
             if traders and traders > 0 then
                 node.traders = traders
             end
-            node.isBookmark = true
             table.insert(results, node)
         elseif entry.zoneId then
             local zone = Nav.Locations:getZone(entry.zoneId)
             if zone then
                 node = Nav.Utils.shallowCopy(zone)
                 node.mapId = entry.mapId
-                node.isBookmark = true
                 table.insert(results, node)
             end
         elseif entry.userID then -- Travel to primary residence
@@ -96,7 +94,6 @@ function Bookmarks:getBookmarks()
                 suffix = entry.nickname and zo_strformat(GetString(SI_TOOLTIP_COLLECTIBLE_NICKNAME), entry.nickname)
                                          or GetString(SI_HOUSING_PRIMARY_RESIDENCE_HEADER),
                 known = true,
-                isBookmark = true
             })
             table.insert(results, node)
         end

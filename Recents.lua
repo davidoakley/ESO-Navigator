@@ -63,7 +63,6 @@ function Recents:getRecents(count)
                 nodeIndex = Nav.Locations:GetHarborage()
             end
             local node = Nav.Locations:GetNode(nodeIndex, true)
-            node.known = Nav.Locations:isKnownNode(nodeIndex)
             table.insert(results, node)
 
             if #results >= count then

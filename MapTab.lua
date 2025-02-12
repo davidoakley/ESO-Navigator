@@ -481,7 +481,7 @@ local function showWayshrineMenu(owner, data)
         data:AddMenuItems()
     end
 
-    if data.isBookmark then
+    if data.dataEntry.categoryId == "bookmarks" then
         AddMenuItem(GetString(NAVIGATOR_MENU_REMOVEBOOKMARK), function()
             bookmarks:remove(data)
             MT.menuOpen = false
