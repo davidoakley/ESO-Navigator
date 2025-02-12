@@ -29,6 +29,19 @@ function Node.WeightComparison(x, y)
     return Nav.Utils.SortName(x) < Nav.Utils.SortName(y)
 end
 
+function Node:IsKnown()
+    if self.known == nil then
+        if self.nodeIndex then
+            local known, _, _, _, _, _, _, _, _ = GetFastTravelNodeInfo(self.nodeIndex)
+            self.known = known
+        else
+            local x, z, iconType, icon, isShownInCurrentMap, linkedCollectibleIsLocked, isDiscovered, isNearby = GetPOIMapInfo(self.zoneIndex, self.poiIndex)
+            self.known = isDiscovered
+        end
+    end
+    return self.known
+end
+
 function Node:GetWeight()
     return 1.0
 end

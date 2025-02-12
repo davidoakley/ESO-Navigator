@@ -66,28 +66,22 @@ function Bookmarks:getBookmarks()
 
     for i = 1, #list do
         local entry = list[i]
-        local nodeIndex = entry.nodeIndex
-        if nodeIndex and Nav.Locations:IsHarborage(nodeIndex) then
-            nodeIndex = Nav.Locations:GetHarborage()
-        end
-        local node = nodeIndex and Nav.Locations:GetNode(nodeIndex)
-        if node then
-            --local node = Nav.Utils.shallowCopy(nodeMap[nodeIndex])
-            node.known = Nav.Locations:isKnownNode(nodeIndex)
-            local traders = Nav.Data.traderCounts[nodeIndex]
-            if traders and traders > 0 then
-                node.traders = traders
+        if entry.nodeIndex then
+            local nodeIndex = entry.nodeIndex
+            if nodeIndex and Nav.Locations:IsHarborage(nodeIndex) then
+                nodeIndex = Nav.Locations:GetHarborage()
             end
+            local node = Nav.Locations:GetNode(nodeIndex)
             table.insert(results, node)
         elseif entry.zoneId then
             local zone = Nav.Locations:getZone(entry.zoneId)
             if zone then
-                node = Nav.Utils.shallowCopy(zone)
+                local node = Nav.Utils.shallowCopy(zone)
                 node.mapId = entry.mapId
                 table.insert(results, node)
             end
         elseif entry.userID then -- Travel to primary residence
-            node = Nav.PlayerHouseNode:New({
+            local node = Nav.PlayerHouseNode:New({
                 name = entry.userID,
                 userID = entry.userID,
                 icon = "Navigator/media/house_player.dds",
