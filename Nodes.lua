@@ -37,8 +37,8 @@ function Node:AddBookmarkMenuItem(entry)
     if entry and not Nav.Bookmarks:contains(entry) then
         AddMenuItem(GetString(NAVIGATOR_MENU_ADDBOOKMARK), function()
             Nav.Bookmarks:add(entry)
-            MT.menuOpen = false
-            zo_callLater(function() MT:ImmediateRefresh() end, 10)
+            Nav.MapTab.menuOpen = false
+            zo_callLater(function() Nav.MapTab:ImmediateRefresh() end, 10)
         end)
     end
 end
@@ -198,21 +198,21 @@ function PlayerNode:AddMenuItems()
     if Nav.Players:IsGroupLeader() and self.isGroupmate then
         AddMenuItem(GetString(SI_GROUP_LIST_MENU_PROMOTE_TO_LEADER), function()
             GroupPromote(self.unitTag)
-            MT.menuOpen = false
-            MT:ImmediateRefresh()
+            Nav.MapTab.menuOpen = false
+            Nav.MapTab:ImmediateRefresh()
         end)
     end
     AddMenuItem(GetString(SI_SOCIAL_MENU_VISIT_HOUSE), function()
         self:JumpToPrimaryResidence()
-        MT.menuOpen = false
+        Nav.MapTab.menuOpen = false
     end)
 
     local bookmarkEntry = { userID = self.userID, action = "house" }
     if not Nav.Bookmarks:contains(bookmarkEntry) then
         AddMenuItem(GetString(NAVIGATOR_MENU_ADDHOUSEBOOKMARK), function()
             Nav.Bookmarks:add(bookmarkEntry)
-            MT.menuOpen = false
-            zo_callLater(function() MT:ImmediateRefresh() end, 10)
+            Nav.MapTab.menuOpen = false
+            zo_callLater(function() Nav.MapTab:ImmediateRefresh() end, 10)
         end)
     end
 end
@@ -405,7 +405,7 @@ function HouseNode:AddMenuItems()
     --        SetHousingPrimaryHouse(houseId)
     --        zo_callLater(function()
     --            Nav.Locations:setupNodes()
-    --            MT:ImmediateRefresh()
+    --            Nav.MapTab:ImmediateRefresh()
     --        end, 10)
     --        ClearMenu()
     --    end)
