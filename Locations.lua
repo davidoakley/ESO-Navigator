@@ -20,11 +20,6 @@ function Locs:IsZone(zoneId)
        or zoneId==1463 -- The Scholarium
        or zoneId==1272 -- Atoll of Immolation
        )
-       and not (
-        zoneId == 642 -- The Earth Forge
-    --       zoneId==2 -- Tamriel
-    --    or zoneId==Nav.ZONE_CYRODIIL
-       )
        then
         return true
     end
@@ -47,6 +42,9 @@ local function getOrCreateZone(self, zoneId, zoneName, zoneIndex)
                 canJumpToPlayer = CanJumpToPlayerInZone(zoneId) or zoneId == Nav.ZONE_ATOLLOFIMMOLATION,
                 known = true
             })
+            if zoneId == 642 then
+                self.zones[zoneId].hidden = true
+            end
         else
             Nav.log("setupNodes: not zone: zoneId %d name %s", zoneId, zoneName)
         end
@@ -55,6 +53,7 @@ local function getOrCreateZone(self, zoneId, zoneName, zoneIndex)
 end
 
 function Locs:setupNodes()
+    local beginTime  = GetGameTimeMilliseconds()
     self.nodes = {}
     self.nodeMap = {}
     self.zones = {}
@@ -78,6 +77,10 @@ function Locs:setupNodes()
             end
         end
     end
+    --self.namelocMap = namelocMap
+
+    Nav.log("Locations:setupNodes: FTNodes took %d ms", GetGameTimeMilliseconds() - beginTime)
+    beginTime = GetGameTimeMilliseconds()
 
     -- Iterate through zones to find correct zones for nodes
     for zoneId = 1, 2000 do
@@ -121,16 +124,21 @@ function Locs:setupNodes()
 		end
 	end
 
+    self:AddExtraZone(Nav.ZONE_TAMRIEL, 27) -- Sort of true, but called 'Clean Test'
+    self:AddExtraZone(1, 439) -- Fake!
+    self:AddExtraZone(Nav.ZONE_ATOLLOFIMMOLATION, 2000, true)
+    self:AddExtraZone(Nav.ZONE_BLACKREACH, 1782, false)
+
+    Nav.log("Locations:setupNodes: POIs took %d ms", GetGameTimeMilliseconds() - beginTime)
+
     for i = 1, #self.nodes do
         if not self.nodes[i].poiIndex and self.nodes[i].zoneId ~= Nav.ZONE_CYRODIIL then
-            Nav.log(" x %s - nodeIndex %d", self.nodes[i].name, self.nodes[i].nodeIndex)
+            Nav.log(" x %s - nodeIndex %d no poiIndex", self.nodes[i].name, self.nodes[i].nodeIndex)
+        end
+        if not self.nodes[i].zoneId then
+            Nav.log(" x %s - nodeIndex %d no zoneId", self.nodes[i].name, self.nodes[i].nodeIndex)
         end
     end
-
-    self:AddExtraZone(2, 27) -- Sort of true, but called 'Clean Test'
-    self:AddExtraZone(1, 439) -- Fake!
-    self:AddExtraZone(1272, 2000, true) -- Atoll Of Immolation
-    self:AddExtraZone(Nav.ZONE_BLACKREACH, 1782, false)
 end
 
 function Locs:AddExtraZone(zoneId, mapId, canJumpToPlayer)
@@ -321,16 +329,18 @@ function Locs:getZoneList(includeAliases)
     end
 
     for zoneId, zone in pairs(self.zones) do
-        table.insert(nodes, zone)
-        if includeAliases and zoneId == Nav.ZONE_ATOLLOFIMMOLATION then
-            table.insert(nodes, Nav.ZoneNode:New({
-                name = GetString(NAVIGATOR_LOCATION_OBLIVIONPORTAL),
-                zoneId = zone.zoneId,
-                canJumpToPlayer = zone.canJumpToPlayer,
-                index = zone.index,
-                mapId = zone.mapId,
-                known = true
-            }))
+        if includeAliases or not zone.hidden then
+            table.insert(nodes, zone)
+            if includeAliases and zoneId == Nav.ZONE_ATOLLOFIMMOLATION then
+                table.insert(nodes, Nav.ZoneNode:New({
+                    name = GetString(NAVIGATOR_LOCATION_OBLIVIONPORTAL),
+                    zoneId = zone.zoneId,
+                    canJumpToPlayer = zone.canJumpToPlayer,
+                    index = zone.index,
+                    mapId = zone.mapId,
+                    known = true
+                }))
+            end
         end
     end
 
