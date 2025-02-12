@@ -29,6 +29,19 @@ function Node.WeightComparison(x, y)
     return Nav.Utils.SortName(x) < Nav.Utils.SortName(y)
 end
 
+function Node:IsKnown()
+    if self.known == nil then
+        if self.nodeIndex then
+            local known, _, _, _, _, _, _, _, _ = GetFastTravelNodeInfo(self.nodeIndex)
+            self.known = known
+        else
+            local x, z, iconType, icon, isShownInCurrentMap, linkedCollectibleIsLocked, isDiscovered, isNearby = GetPOIMapInfo(self.zoneIndex, self.poiIndex)
+            self.known = isDiscovered
+        end
+    end
+    return self.known
+end
+
 function Node:GetWeight()
     return 1.0
 end
@@ -37,8 +50,8 @@ function Node:AddBookmarkMenuItem(entry)
     if entry and not Nav.Bookmarks:contains(entry) then
         AddMenuItem(GetString(NAVIGATOR_MENU_ADDBOOKMARK), function()
             Nav.Bookmarks:add(entry)
-            MT.menuOpen = false
-            zo_callLater(function() MT:ImmediateRefresh() end, 10)
+            Nav.MapTab.menuOpen = false
+            zo_callLater(function() Nav.MapTab:ImmediateRefresh() end, 10)
         end)
     end
 end
@@ -198,21 +211,21 @@ function PlayerNode:AddMenuItems()
     if Nav.Players:IsGroupLeader() and self.isGroupmate then
         AddMenuItem(GetString(SI_GROUP_LIST_MENU_PROMOTE_TO_LEADER), function()
             GroupPromote(self.unitTag)
-            MT.menuOpen = false
-            MT:ImmediateRefresh()
+            Nav.MapTab.menuOpen = false
+            Nav.MapTab:ImmediateRefresh()
         end)
     end
     AddMenuItem(GetString(SI_SOCIAL_MENU_VISIT_HOUSE), function()
         self:JumpToPrimaryResidence()
-        MT.menuOpen = false
+        Nav.MapTab.menuOpen = false
     end)
 
     local bookmarkEntry = { userID = self.userID, action = "house" }
     if not Nav.Bookmarks:contains(bookmarkEntry) then
         AddMenuItem(GetString(NAVIGATOR_MENU_ADDHOUSEBOOKMARK), function()
             Nav.Bookmarks:add(bookmarkEntry)
-            MT.menuOpen = false
-            zo_callLater(function() MT:ImmediateRefresh() end, 10)
+            Nav.MapTab.menuOpen = false
+            zo_callLater(function() Nav.MapTab:ImmediateRefresh() end, 10)
         end)
     end
 end
@@ -405,7 +418,7 @@ function HouseNode:AddMenuItems()
     --        SetHousingPrimaryHouse(houseId)
     --        zo_callLater(function()
     --            Nav.Locations:setupNodes()
-    --            MT:ImmediateRefresh()
+    --            Nav.MapTab:ImmediateRefresh()
     --        end, 10)
     --        ClearMenu()
     --    end)
@@ -510,6 +523,27 @@ function PlayerHouseNode:AddMenuItems()
 end
 
 
+--- @class POINode
+local POINode = Node:New()
+
+function POINode:OnClick()
+    self:ZoomToPOI(false)
+end
+
+function POINode:AddMenuItems()
+    AddMenuItem(GetString(NAVIGATOR_MENU_SHOWONMAP), function()
+        self:ZoomToPOI(false)
+    end)
+    AddMenuItem(GetString(NAVIGATOR_MENU_SETDESTINATION), function()
+        self:ZoomToPOI(true)
+    end)
+    self:AddBookmarkMenuItem({ poiIndex = self.poiIndex, zoneId = self.zoneId })
+end
+
+function POINode:GetWeight()
+    return self:IsKnown() and 0.5 or 0.3
+end
+
 Nav.Node = Node
 Nav.PlayerNode = PlayerNode
 Nav.ZoneNode = ZoneNode
@@ -517,3 +551,4 @@ Nav.JumpToZoneNode = JumpToZoneNode
 Nav.HouseNode = HouseNode
 Nav.FastTravelNode = FastTravelNode
 Nav.PlayerHouseNode = PlayerHouseNode
+Nav.POINode = POINode
