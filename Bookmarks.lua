@@ -20,17 +20,17 @@ function Bookmarks:getIndex(entry)
                 return i
             end
         end
-    elseif entry.zoneId then
-        local zoneId = entry.zoneId
-        for i = 1, #list do
-            if zoneId == list[i].zoneId then
-                return i
-            end
-        end
     elseif entry.userID then
         local userID = entry.userID
         for i = 1, #list do
             if userID == list[i].userID and entry.action == list[i].action then
+                return i
+            end
+        end
+    elseif entry.zoneId then
+        local zoneId = entry.zoneId
+        for i = 1, #list do
+            if zoneId == list[i].zoneId then
                 return i
             end
         end
@@ -62,42 +62,33 @@ end
 function Bookmarks:getBookmarks()
     local list = Nav.saved.bookmarks
     local results = {}
-    local nodeMap = Nav.Locations:getNodeMap()
+    --local nodeMap = Nav.Locations:getNodeMap()
 
     for i = 1, #list do
         local entry = list[i]
-        if entry.nodeIndex and nodeMap then
+        if entry.nodeIndex then
             local nodeIndex = entry.nodeIndex
-            if Nav.Locations:IsHarborage(nodeIndex) then
+            if nodeIndex and Nav.Locations:IsHarborage(nodeIndex) then
                 nodeIndex = Nav.Locations:GetHarborage()
             end
-            local node = Nav.Utils.shallowCopy(nodeMap[nodeIndex])
-            node.known = Nav.Locations:isKnownNode(nodeIndex)
-            local traders = Nav.Data.traderCounts[nodeIndex]
-            if traders and traders > 0 then
-                node.traders = traders
-            end
-            node.isBookmark = true
+            local node = Nav.Locations:GetNode(nodeIndex)
             table.insert(results, node)
         elseif entry.zoneId then
             local zone = Nav.Locations:getZone(entry.zoneId)
             if zone then
                 local node = Nav.Utils.shallowCopy(zone)
                 node.mapId = entry.mapId
-                node.isBookmark = true
                 table.insert(results, node)
             end
         elseif entry.userID then -- Travel to primary residence
-            local node = {
+            local node = Nav.PlayerHouseNode:New({
                 name = entry.userID,
                 userID = entry.userID,
-                poiType = Nav.POI_PLAYERHOUSE,
                 icon = "Navigator/media/house_player.dds",
                 suffix = entry.nickname and zo_strformat(GetString(SI_TOOLTIP_COLLECTIBLE_NICKNAME), entry.nickname)
                                          or GetString(SI_HOUSING_PRIMARY_RESIDENCE_HEADER),
                 known = true,
-                isBookmark = true
-            }
+            })
             table.insert(results, node)
         end
     end

@@ -4,7 +4,6 @@ local Locs = Nav.Locations or {
     nodeMap = nil,
     zones = nil,
     mapIndices = nil,
-    knownNodes = {},
     harborageIndex = nil
 }
 local Utils = Nav.Utils
@@ -21,11 +20,6 @@ function Locs:IsZone(zoneId)
        or zoneId==1463 -- The Scholarium
        or zoneId==1272 -- Atoll of Immolation
        )
-       and not (
-        zoneId == 642 -- The Earth Forge
-    --       zoneId==2 -- Tamriel
-    --    or zoneId==Nav.ZONE_CYRODIIL
-       )
        then
         return true
     end
@@ -36,7 +30,30 @@ local function uniqueName(name, x, z)
     return string.format("%s:%.4f,%.4f", Utils.bareName(name), x, z)
 end
 
+local function getOrCreateZone(self, zoneId, zoneName, zoneIndex)
+    if not self.zones[zoneId] then
+        if self:IsZone(zoneId) then
+            self.zones[zoneId] = Nav.ZoneNode:New({
+                name = zoneName,
+                zoneName = zoneName,
+                zoneId = zoneId,
+                index = zoneIndex,
+                nodes = {},
+                canJumpToPlayer = CanJumpToPlayerInZone(zoneId) or zoneId == Nav.ZONE_ATOLLOFIMMOLATION,
+                known = true
+            })
+            if zoneId == 642 then
+                self.zones[zoneId].hidden = true
+            end
+        else
+            Nav.log("setupNodes: not zone: zoneId %d name %s", zoneId, zoneName)
+        end
+    end
+    return self.zones[zoneId]
+end
+
 function Locs:setupNodes()
+    local beginTime  = GetGameTimeMilliseconds()
     self.nodes = {}
     self.nodeMap = {}
     self.zones = {}
@@ -48,22 +65,22 @@ function Locs:setupNodes()
     for i = 1, totalNodes do
         local known, name, x, z, icon, glowIcon, typePOI, _, isLocked = GetFastTravelNodeInfo(i)
 
-        local zoneIndex, _ = GetFastTravelNodePOIIndicies(i)
-        local nodeZoneId = GetParentZoneId(GetZoneId(zoneIndex))
-
         if not isLocked and name ~= "" and (typePOI == 1 or glowIcon ~= nil) then
-            local nodeInfo = self:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon)
+            local node = self:CreateNode(i, name, typePOI, icon, glowIcon, known)
 
-            table.insert(self.nodes, nodeInfo)
-            self.nodeMap[i] = nodeInfo
-            self.knownNodes[i] = known
+            table.insert(self.nodes, node)
+            self.nodeMap[i] = node
             local uid = uniqueName(name, x, z)
             if not namelocMap[uid] then
-                namelocMap[uid] = nodeInfo
-                locMap[string.format("%.4f,%.4f", x, z)] = nodeInfo
+                namelocMap[uid] = node
+                locMap[string.format("%.4f,%.4f", x, z)] = node
             end
         end
     end
+    --self.namelocMap = namelocMap
+
+    Nav.log("Locations:setupNodes: FTNodes took %d ms", GetGameTimeMilliseconds() - beginTime)
+    beginTime = GetGameTimeMilliseconds()
 
     -- Iterate through zones to find correct zones for nodes
     for zoneId = 1, 2000 do
@@ -78,40 +95,27 @@ function Locs:setupNodes()
 			for poiIndex = 1, numPOIs do
 				local poiName = GetPOIInfo(zoneIndex, poiIndex) -- might be wrong - "X" instead of "Dungeon: X"!
                 local x, z = GetPOIMapInfo(zoneIndex, poiIndex)
-                local nodeInfo = namelocMap[uniqueName(poiName, x, z)]  -- that's why we use BareName to strip prefix
+                local node = namelocMap[uniqueName(poiName, x, z)]  -- that's why we use BareName to strip prefix
                 -- fix "Darkshade Caverns I" being returned for both DC1 and DC2
                 if zoneId == 57 and poiIndex == 60 then -- zone Deshaan, POI 60 is DC2!
-                    nodeInfo = self.nodeMap[264]
-                elseif not nodeInfo then
-                    nodeInfo = locMap[string.format("%.4f,%.4f", x, z)]
+                    node = self.nodeMap[264]
+                elseif not node then
+                    node = locMap[string.format("%.4f,%.4f", x, z)]
                 end
-                if poiName ~= "" and nodeInfo ~= nil  then -- teleportable POI
-                    nodeInfo.poiIndex = poiIndex
+                if poiName ~= "" and node ~= nil  then -- teleportable POI
+                    node.poiIndex = poiIndex
 
                     if zoneId==1146 then -- the Dragonguard Sanctuary wayshrine in Tideholm
                         zoneId = 1133 -- should appear in Southern Elsweyr
                     elseif zoneId==1283 then
                         zoneId = Nav.ZONE_FARGRAVE -- The Shambles -> Fargrave
-                        nodeInfo.mapId = 2082
+                        node.mapId = 2082
 					end
 
-                    if not self.zones[zoneId] then
-                        if self:IsZone(zoneId) then
-                            self.zones[zoneId] = {
-                                name = zoneName,
-                                zoneId = zoneId,
-                                index = zoneIndex,
-                                nodes = {},
-                                canJumpToPlayer = CanJumpToPlayerInZone(zoneId) or zoneId == Nav.ZONE_ATOLLOFIMMOLATION
-                            }
-                        else
-                            Nav.log("setupNodes: not zone: zoneId %d name %s", zoneId, zoneName)
-                        end
-                    end
-
-                    if self.zones[zoneId] then
-                        nodeInfo.zoneId = zoneId
-                        table.insert(self.zones[zoneId].nodes, nodeInfo)
+                    local zone = getOrCreateZone(self, zoneId, zoneName, zoneIndex)
+                    if zone then
+                        node.zoneId = zoneId
+                        table.insert(zone.nodes, node)
                     -- else
                     --     Nav.log("Locs:setupNodes: node "..i.." '"..nodeInfo.name.."' in non-parent zoneId "..nodeZoneId)
                     end
@@ -120,31 +124,38 @@ function Locs:setupNodes()
 		end
 	end
 
+    self:AddExtraZone(Nav.ZONE_TAMRIEL, 27) -- Sort of true, but called 'Clean Test'
+    self:AddExtraZone(1, 439) -- Fake!
+    self:AddExtraZone(Nav.ZONE_ATOLLOFIMMOLATION, 2000, true)
+    self:AddExtraZone(Nav.ZONE_BLACKREACH, 1782, false)
+
+    Nav.log("Locations:setupNodes: POIs took %d ms", GetGameTimeMilliseconds() - beginTime)
+
     for i = 1, #self.nodes do
         if not self.nodes[i].poiIndex and self.nodes[i].zoneId ~= Nav.ZONE_CYRODIIL then
-            Nav.log(" x %s - nodeIndex %d", self.nodes[i].name, self.nodes[i].nodeIndex)
+            Nav.log(" x %s - nodeIndex %d no poiIndex", self.nodes[i].name, self.nodes[i].nodeIndex)
+        end
+        if not self.nodes[i].zoneId then
+            Nav.log(" x %s - nodeIndex %d no zoneId", self.nodes[i].name, self.nodes[i].nodeIndex)
         end
     end
-
-    self:AddExtraZone(2, 27) -- Sort of true, but called 'Clean Test'
-    self:AddExtraZone(1, 439) -- Fake!
-    self:AddExtraZone(1272, 2000, true) -- Atoll Of Immolation
-    self:AddExtraZone(Nav.ZONE_BLACKREACH, 1782, false)
 end
 
 function Locs:AddExtraZone(zoneId, mapId, canJumpToPlayer)
     local name, _, _, zoneIndex, _ = GetMapInfoById(mapId)
-    self.zones[zoneId] = {
+    self.zones[zoneId] = Nav.ZoneNode:New({
         name = name,
+        zoneName = name,
         zoneId = zoneId,
         index = zoneIndex,
         mapId = mapId,
         canJumpToPlayer = canJumpToPlayer,
+        known = true,
         nodes = {}
-    }
+    })
 end
 
-function Locs:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon)
+function Locs:CreateNode(i, name, typePOI, icon, glowIcon, known)
     if i >= 210 and i <= 212 then
         -- Save this character's alliance's Harborage
         self.harborageIndex = i
@@ -157,10 +168,10 @@ function Locs:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon)
         name = Utils.DisplayName(name),
         originalName = name,
         type = typePOI,
-        zoneId = nodeZoneId,
         glowIcon = glowIcon,
         icon = icon,
-        originalIcon = icon
+        originalIcon = icon,
+        known = known
     }
 
     if typePOI == 6 then
@@ -173,15 +184,11 @@ function Locs:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon)
         nodeInfo.icon = "esoui/art/tutorial/poi_raiddungeon_complete.dds"
         nodeInfo.suffix = GetString(NAVIGATOR_TRIAL)
     elseif typePOI == 7 then
-        nodeInfo.poiType = Nav.POI_HOUSE
         nodeInfo.owned = (icon:find("poi_group_house_owned") ~= nil)
         nodeInfo.freeRecall = true
         nodeInfo.houseId = GetFastTravelNodeHouseId(i)
         if nodeInfo.houseId == GetHousingPrimaryHouse() then
             nodeInfo.isPrimary = true
-            nodeInfo.icon = "Navigator/media/house_star.dds"
-        else
-            nodeInfo.icon = nodeInfo.owned and "Navigator/media/house.dds" or "Navigator/media/house_unowned.dds"
         end
         if Nav.saved.useHouseNicknames then
             nodeInfo.collectibleId = GetCollectibleIdForHouse(nodeInfo.houseId)
@@ -215,26 +222,20 @@ function Locs:CreateNodeInfo(i, name, typePOI, nodeZoneId, icon, glowIcon)
         nodeInfo.traders = traders
     end
 
-    return nodeInfo
+    local node = nodeInfo.houseId and Nav.HouseNode:New(nodeInfo) or Nav.FastTravelNode:New(nodeInfo)
+    return node
 end
 
 function Locs:clearKnownNodes()
-    self.knownNodes = {}
-end
-
-function Locs:isKnownNode(nodeIndex)
-    if self.nodes == nil then
-        self:setupNodes()
-    end
-
-    if self.knownNodes[nodeIndex] ~= nil then
-        return self.knownNodes[nodeIndex]
-    else
-        local known, _, _, _, _, _, _, _, _ = GetFastTravelNodeInfo(nodeIndex)
-        self.knownNodes[nodeIndex] = known
-        return known
+    if self.nodes then
+        for i = 1, #self.nodes do
+            if not self.nodes[i].known then -- unknown nodes may become known, but not vice versa
+                self.nodes[i].known = nil
+            end
+        end
     end
 end
+
 
 function Locs:getNodes()
     if self.nodes == nil then
@@ -250,11 +251,22 @@ function Locs:getNodeMap()
     return self.nodeMap
 end
 
-function Locs:GetNode(nodeIndex)
-    if self.nodeMap == nil then
-        self:setupNodes()
+function Locs:GetNode(nodeIndex, includeUnknown)
+    local node = self.nodeMap[nodeIndex]
+    if not includeUnknown and not node:IsKnown() then
+        return nil
     end
+
     return self.nodeMap[nodeIndex]
+end
+
+local function createHouseAlias(node)
+    local alias = Nav.HouseNode:New(Utils.shallowCopy(node))
+    alias.name = node.nickname
+    alias.suffix = node.name
+    alias.originalName = nil
+    alias.isAlias = true
+    return alias
 end
 
 function Locs:getKnownNodes(zoneId, includeAliases)
@@ -270,35 +282,12 @@ function Locs:getKnownNodes(zoneId, includeAliases)
 
     local nodes = {}
     for i = 1, #self.nodes do
-        local index = self.nodes[i].nodeIndex
-        if self:isKnownNode(index) and (not zoneId or self.nodes[i].zoneId == zoneId) then
-            local node = Utils.shallowCopy(self.nodes[i])
-            local bookmarked = Nav.Bookmarks:contains(self.nodes[i])
-            node.known = true
-            node.weight = 1.0
-            node.bookmarked = bookmarked
-            if not node.freeRecall and Nav.isRecall then
-                node.weight = bookmarked and 0.9 or 0.8
-            elseif node.poiType == Nav.POI_HOUSE and not node.owned then
-                node.weight = 0.7
-            elseif bookmarked then
-                node.weight = 1.2
-            end
-            if node.isPrimary then
-                node.weight = node.weight + 0.1
-            end
-            if node.traders and node.traders > 0 then
-                node.weight = node.weight * (1.0 + 0.02 * node.traders)
-            end
+        local node = self.nodes[i]
+        if node:IsKnown() and (not zoneId or node.zoneId == zoneId) then
             table.insert(nodes, node)
 
-            if includeAliases and node.poiType == Nav.POI_HOUSE and Nav.saved.useHouseNicknames then
-                local alias = Utils.shallowCopy(node)
-                alias.name = node.nickname
-                alias.suffix = node.name
-                alias.originalName = nil
-                alias.weight = 0.6
-                table.insert(nodes, alias)
+            if includeAliases and node.houseId and node.owned and Nav.saved.useHouseNicknames then
+                table.insert(nodes, createHouseAlias(node))
             end
         end
     end
@@ -313,29 +302,12 @@ function Locs:getHouseList(includeAliases)
     local nodes = {}
     for i = 1, #self.nodes do
         local index = self.nodes[i].nodeIndex
-        if self:isKnownNode(index) and self.nodes[i].poiType == Nav.POI_HOUSE then
-            local node = Utils.shallowCopy(self.nodes[i])
-            if Nav.Bookmarks:contains(node) then
-                node.bookmarked = true
-            end
-            if not node.owned then
-                node.weight = 0.7
-            elseif node.bookmarked then
-                node.weight = 1.2
-            end
-            if node.isPrimary then
-                node.weight = node.weight + 0.1
-            end
-            node.known = true
+        if self:isKnownNode(index) and self.nodes[i].houseId then
+            local node = self.nodes[i]
             table.insert(nodes, node)
 
-            if includeAliases and node.poiType == Nav.POI_HOUSE and Nav.saved.useHouseNicknames then
-                local alias = Utils.shallowCopy(node)
-                alias.name = node.nickname
-                alias.suffix = node.name
-                alias.originalName = nil
-                alias.weight = 0.6
-                table.insert(nodes, alias)
+            if includeAliases and node.owned and Nav.saved.useHouseNicknames then
+                table.insert(nodes, createHouseAlias(node))
             end
         end
     end
@@ -349,24 +321,6 @@ function Locs:GetZones()
     return self.zones
 end
 
-local function addZoneToList(nodes, name, zoneId, mapId, bookmarked, suffix, canJumpToPlayer)
-    table.insert(nodes, {
-        name = name,
-        barename = Utils.bareName(name),
-        zoneId = zoneId,
-        zoneName = name,
-        mapId = mapId,
-        icon = "Navigator/media/zone.dds",
-        poiType = Nav.POI_ZONE,
-        weight = Nav.isRecall and 1.0 or 0.9,
-        known = true,
-        bookmarked = bookmarked,
-        suffix = suffix,
-        canJumpToPlayer = canJumpToPlayer
-    })
-
-end
-
 function Locs:getZoneList(includeAliases)
     local nodes = {}
 
@@ -374,10 +328,19 @@ function Locs:getZoneList(includeAliases)
         self:setupNodes()
     end
 
-    for zoneId, info in pairs(self.zones) do
-        addZoneToList(nodes, info.name, zoneId, info.mapId, Nav.Bookmarks:contains(info), nil, info.canJumpToPlayer)
-        if includeAliases and zoneId == Nav.ZONE_ATOLLOFIMMOLATION then
-            addZoneToList(nodes, GetString(NAVIGATOR_LOCATION_OBLIVIONPORTAL), zoneId, info.mapId, Nav.Bookmarks:contains(info), info.name, info.canJumpToPlayer)
+    for zoneId, zone in pairs(self.zones) do
+        if includeAliases or not zone.hidden then
+            table.insert(nodes, zone)
+            if includeAliases and zoneId == Nav.ZONE_ATOLLOFIMMOLATION then
+                table.insert(nodes, Nav.ZoneNode:New({
+                    name = GetString(NAVIGATOR_LOCATION_OBLIVIONPORTAL),
+                    zoneId = zone.zoneId,
+                    canJumpToPlayer = zone.canJumpToPlayer,
+                    index = zone.index,
+                    mapId = zone.mapId,
+                    known = true
+                }))
+            end
         end
     end
 
@@ -389,18 +352,7 @@ function Locs:getZone(zoneId)
         self:setupNodes()
     end
 
-    local info = self.zones[zoneId]
-    return {
-        name = info.name,
-        barename = Utils.bareName(info.name),
-        zoneId = zoneId,
-        zoneName = info.name,
-        icon = "Navigator/media/zone.dds",
-        poiType = Nav.POI_ZONE,
-        weight = Nav.isRecall and 1.0 or 0.9,
-        known = true,
-        canJumpToPlayer = info.canJumpToPlayer
-    }
+    return self.zones[zoneId]
 end
 
 function Locs:getCurrentMapZoneId()
@@ -461,6 +413,18 @@ function Locs:GetHarborage()
     end
     Nav.log("Locs:GetHarborage failed to find harborage")
     return 210
+end
+
+function Locs.GetMapIdByZoneId(zoneId)
+    if zoneId == Nav.ZONE_TAMRIEL then
+        return 27
+    elseif zoneId == 981 then -- Brass Fortress
+        return 1348
+    elseif zoneId == 1463 then -- The Scholarium
+        return 2515
+    else
+        return GetMapIdByZoneId(zoneId)
+    end
 end
 
 Nav.Locations = Locs

@@ -96,37 +96,12 @@ function Chat:TP(text)
         return
     end
 
-    if self.search and self.search:sub(1, 1) == "@" then
-        if result.poiType == Nav.POI_FRIEND then
-            JumpToFriend(result.userID)
-        elseif result.poiType == Nav.POI_GUILDMATE then
-            JumpToGuildMember(result.userID)
-        else
-            CHAT_SYSTEM:AddMessage(zo_strformat(GetString(NAVIGATOR_CANNOT_TRAVEL_TO_PLAYER), result.userID))
-        end
-        return
-    end
-
-    if result.nodeIndex then
-        Nav.MapTab:jumpToNode(result)
-        return
+    if result.JumpToPlayer then
+        result:JumpToPlayer()
+   elseif result.JumpToNode then
+        result:JumpToNode()
     elseif result.zoneId then
-        local node = Nav.Players:GetPlayerInZone(result.zoneId)
-        if not node then
-            CHAT_SYSTEM:AddMessage(zo_strformat(GetString(NAVIGATOR_NO_PLAYER_IN_ZONE), result.zoneName))
-            return
-        end
-
-        -- local userID, poiType, zoneId, zoneName = node.userID, node.poiType, node.zoneId, node.zoneName
-
-        CHAT_SYSTEM:AddMessage(zo_strformat(GetString(NAVIGATOR_TRAVELING_TO_ZONE_VIA_PLAYER), node.zoneName, node.userID))
-        SCENE_MANAGER:Hide("worldMap")
-
-        if node.poiType == Nav.POI_FRIEND then
-            JumpToFriend(node.userID)
-        elseif node.poiType == Nav.POI_GUILDMATE then
-            JumpToGuildMember(node.userID)
-        end
+        result:JumpToZone()
     else
         -- CHAT_SYSTEM:AddMessage("Sorry, I wasn't able to process that result")
     end

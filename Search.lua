@@ -39,9 +39,7 @@ function Search:Execute(searchTerm)
         local candidate = self.candidates[i]
         local matchLevel = searchTerm ~= "" and match(candidate.searchName, searchTerm) or 1.0
         if matchLevel > 0 then
-            if candidate.node.weight then
-                matchLevel = matchLevel * candidate.node.weight
-            end
+            matchLevel = matchLevel * candidate.node:GetWeight()
             candidate.match = matchLevel
             --candidate.matchChars = matchChars
             candidate.searchName = candidate.searchName

@@ -9,22 +9,26 @@ local Players = Nav.Players or {
 }
 local Utils = Nav.Utils
 
-local function addPlayerZone(self, zones, zoneId, zoneName, userID, icon, poiType, charName)
-    local zoneInfo = {
+local function addPlayer(self, zones, zoneId, zoneName, userID, charName)
+    if self.players[userID] then
+        return self.players[userID]
+    end
+
+    local player = Nav.PlayerNode:New({
+        name = userID,
         zoneId = zoneId,
         zoneName = Utils.FormatSimpleName(zoneName),
         userID = userID,
-        icon = icon,
-        poiType = poiType,
-        canJumpToPlayer = poiType == Nav.POI_GROUPMATE or (zones[zoneId] and zones[zoneId].canJumpToPlayer)
-    }
+        known = true,
+        canJumpToPlayer = zones[zoneId] and zones[zoneId].canJumpToPlayer
+    })
 
-    self.players[userID] = zoneInfo
+    self.players[userID] = player
     if charName then
         charName = zo_strformat("<<!AC:1>>", charName)
-        zoneInfo.charName = charName
+        player.charName = charName
     end
-    return zoneInfo
+    return player
 end
 
 function Players:SetupPlayers()
@@ -44,7 +48,8 @@ function Players:SetupPlayers()
             if playerStatus ~= PLAYER_STATUS_OFFLINE and userID ~= myID then
                 local hasChar, charName, zoneName, _, _, _, _, zoneId = GetGuildMemberCharacterInfo(guildID, i)
                 if hasChar then
-                    addPlayerZone(self, zones, zoneId, zoneName, userID, "Navigator/media/player.dds", Nav.POI_GUILDMATE, charName)
+                    local player = addPlayer(self, zones, zoneId, zoneName, userID, charName)
+                    player.isGuildmate = true
                 end
             end
         end
@@ -57,10 +62,8 @@ function Players:SetupPlayers()
         if playerStatus ~= PLAYER_STATUS_OFFLINE and secsSinceLogoff == 0 then
             local hasChar, charName, zoneName, _, _, _, _, zoneId = GetFriendCharacterInfo(i)
             if hasChar then
-                local player = addPlayerZone(self, zones, zoneId, zoneName, userID, "Navigator/media/player_friend.dds", Nav.POI_FRIEND, charName)
-                if player then
-                    player.weight = 1.1
-                end
+                local player = addPlayer(self, zones, zoneId, zoneName, userID, charName)
+                player.isFriend = true
             end
         end
     end
@@ -75,13 +78,12 @@ function Players:SetupPlayers()
             if IsUnitOnline(unitTag) and string.lower(charName) ~= playerName then
                 local zoneId = GetZoneId(GetUnitZoneIndex(unitTag))
                 local zoneName = GetZoneNameById(zoneId)
-                local isLeader = IsUnitGroupLeader(unitTag)
-                local icon = isLeader and "/esoui/art/icons/mapkey/mapkey_groupleader.dds" or "/esoui/art/icons/mapkey/mapkey_groupmember.dds"
-                local player = addPlayerZone(self, zones, zoneId, zoneName, userID or '"'..charName..'"', icon, Nav.POI_GROUPMATE, charName)
+                local player = addPlayer(self, zones, zoneId, zoneName, userID or '"'..charName..'"', charName)
                 if player then
+                    player.isGroupmate = true
+                    player.canJumpToPlayer = true
                     player.unitTag = unitTag
-                    player.isLeader = isLeader
-                    player.weight = isLeader and 1.3 or 1.2
+                    player.isLeader = IsUnitGroupLeader(unitTag)
                 end
             end
         end
@@ -92,32 +94,12 @@ function Players:ClearPlayers()
     self.players = nil
 end
 
-local function createPlayerNode(player, setSuffix)
-    return {
-        name = player.userID,
-        userID = player.userID,
-        unitName = player.unitName,
-        isLeader = player.isLeader,
-        unitTag = player.unitTag,
-        isLeader = player.isLeader,
-        barename = player.userID:sub(2), -- remove '@' prefix
-        zoneId = player.zoneId,
-        zoneName = player.zoneName,
-        icon = player.icon,
-        suffix = setSuffix and player.zoneName,
-        poiType = player.poiType,
-        known = true,
-        weight = player.weight,
-        canJumpToPlayer = player.canJumpToPlayer
-    }
-end
-
 function Players:GetPlayerList()
     if self.players == nil then self:SetupPlayers() end
 
     local nodes = {}
     for _, player in pairs(self.players) do
-        table.insert(nodes, createPlayerNode(player, true))
+        table.insert(nodes, player)
     end
 
     return nodes
@@ -128,7 +110,7 @@ function Players:GetPlayerInZone(zoneId)
 
     for _, player in pairs(self.players) do
         if player.zoneId == zoneId then
-            return createPlayerNode(player)
+            return player
         end
     end
     return nil
@@ -148,8 +130,8 @@ function Players:GetGroupList()
     
     local list = {}
     for _, player in pairs(self.players) do
-        if player.poiType == Nav.POI_GROUPMATE and player.userID then
-            table.insert(list, createPlayerNode(player, true))
+        if player.isGroupmate and player.userID then
+            table.insert(list, player)
         end
     end
 
