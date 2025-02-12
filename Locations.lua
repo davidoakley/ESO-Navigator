@@ -74,7 +74,7 @@ function Locs:setupNodes()
             local uid = uniqueName(name, x, z)
             if not namelocMap[uid] then
                 namelocMap[uid] = node
-                locMap[string.format("%.4f,%.4f", x, z)] = nodeInfo
+                locMap[string.format("%.4f,%.4f", x, z)] = node
             end
         end
     end
