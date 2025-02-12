@@ -96,8 +96,7 @@ function Bookmarks:getBookmarks()
                 icon = "Navigator/media/house_player.dds",
                 suffix = entry.nickname and zo_strformat(GetString(SI_TOOLTIP_COLLECTIBLE_NICKNAME), entry.nickname)
                                          or GetString(SI_HOUSING_PRIMARY_RESIDENCE_HEADER),
-                known = true,
-                --isBookmark = true
+                known = true
             })
             table.insert(results, node)
         end
