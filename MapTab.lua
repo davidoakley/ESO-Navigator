@@ -146,7 +146,6 @@ end
 local function buildResult(listEntry, currentNodeIndex, isSelected)
     local nodeData = Utils.shallowCopy(listEntry)
     nodeData.isSelected = isSelected
-    nodeData.dataIndex = currentNodeIndex
 
     -- Nav.log("%s: traders %d", nodeData.barename, nodeData.traders or 0)
 
@@ -200,6 +199,8 @@ local function buildList(scrollData, id, title, list, defaultString)
             local nodeData = buildResult(list[i], currentNodeIndex, isSelected)
 
             local entry = ZO_ScrollList_CreateDataEntry(1, nodeData, id)
+            entry.indexInCategory = i
+            entry.categoryEntryCount = #list
             table.insert(scrollData, entry)
 
             currentNodeIndex = currentNodeIndex + 1
@@ -484,6 +485,23 @@ local function showWayshrineMenu(owner, data)
     end
 
     if data.dataEntry.categoryId == "bookmarks" then
+        local yPad = 12
+        if data.dataEntry.indexInCategory > 1 then
+            AddMenuItem(GetString(NAVIGATOR_MENU_MOVEBOOKMARKUP), function()
+                Nav.Bookmarks:Move(data, -1)
+                MT.menuOpen = false
+                zo_callLater(function() MT:ImmediateRefresh() end, 10)
+            end, nil, nil, nil, nil, yPad)
+            yPad = 0
+        end
+        if data.dataEntry.indexInCategory < data.dataEntry.categoryEntryCount then
+            AddMenuItem(GetString(NAVIGATOR_MENU_MOVEBOOKMARKDOWN), function()
+                Nav.Bookmarks:Move(data, 1)
+                MT.menuOpen = false
+                zo_callLater(function() MT:ImmediateRefresh() end, 10)
+            end, nil, nil, nil, nil, yPad)
+            yPad = 0
+        end
         AddMenuItem(GetString(NAVIGATOR_MENU_REMOVEBOOKMARK), function()
             bookmarks:remove(data)
             MT.menuOpen = false
