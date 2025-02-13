@@ -55,35 +55,37 @@ end
 
 --TODO: Move isSelected out of node data
 function MT:layoutRow(rowControl, data, _)
-	local name = data:GetName()
-    local icon = data:GetIcon()
+    local node = data.node
+    local isSelected = data.isSelected
+	local name = node:GetName()
+    local icon = node:GetIcon()
     local categoryId = data.dataEntry.categoryId
 
-    local suffix = data:GetSuffix()
+    local suffix = node:GetSuffix()
     if suffix ~= nil then
-        local colour = ZO_ColorDef:New(data:GetSuffixColour(data.isSelected))
+        local colour = ZO_ColorDef:New(node:GetSuffixColour(isSelected))
         name = name .. " " .. colour:Colorize(suffix)
     end
 
-    local tagList = data:GetTagList(categoryId ~= "bookmarks")
+    local tagList = node:GetTagList(categoryId ~= "bookmarks")
     if tagList and #tagList > 0 then
-        local colour = ZO_ColorDef:New(data:GetTagColour(data.isSelected))
+        local colour = ZO_ColorDef:New(node:GetTagColour(isSelected))
         name = name .. " " .. colour:Colorize(table.concat(tagList, ""))
     end
 
 	if icon ~= nil then
-        rowControl.icon:SetColor(ZO_ColorDef.HexToFloats(data:GetIconColour(data.isSelected)))
+        rowControl.icon:SetColor(ZO_ColorDef.HexToFloats(node:GetIconColour(isSelected)))
 		rowControl.icon:SetTexture(icon)
 		rowControl.icon:SetHidden(false)
     else
 		rowControl.icon:SetHidden(true)
 	end
 
-    rowControl.cost:SetHidden(not data:GetRecallCost())
+    rowControl.cost:SetHidden(not node:GetRecallCost())
 
-    rowControl.keybind:SetHidden(not data.isSelected)
-    rowControl.bg:SetHidden(not data.isSelected)
-    if data.isSelected then
+    rowControl.keybind:SetHidden(not isSelected)
+    rowControl.bg:SetHidden(not isSelected)
+    if isSelected then
         rowControl.label:SetAnchor(TOPRIGHT, rowControl.keybind, TOPLEFT, -4, -1)
     else
         rowControl.label:SetAnchor(TOPRIGHT, rowControl, TOPRIGHT, -4, 0)
@@ -91,14 +93,14 @@ function MT:layoutRow(rowControl, data, _)
 
 	rowControl.label:SetText(name)
 
-    rowControl.label:SetColor(ZO_ColorDef.HexToFloats(data:GetColour(data.isSelected)))
+    rowControl.label:SetColor(ZO_ColorDef.HexToFloats(node:GetColour(isSelected)))
 
     rowControl:SetHandler("OnMouseEnter", function(rc)
         local tooltipText
-        if not data.known and data.nodeIndex then
+        if not node.known and node.nodeIndex then
             tooltipText = GetString(NAVIGATOR_NOT_KNOWN)
         else
-            local recallCost = data:GetRecallCost()
+            local recallCost = node:GetRecallCost()
             if recallCost then
                 local currencyType = CURT_MONEY
                 local formatType = ZO_CURRENCY_FORMAT_AMOUNT_ICON
@@ -107,11 +109,11 @@ function MT:layoutRow(rowControl, data, _)
             end
         end
 
-        if data.tooltip then
-            tooltipText = (tooltipText and (tooltipText .. "\n") or "") .. data.tooltip
+        if node.tooltip then
+            tooltipText = (tooltipText and (tooltipText .. "\n") or "") .. node.tooltip
         end
 
-        local devTooltip = getDeveloperTooltip(data)
+        local devTooltip = getDeveloperTooltip(node)
         if devTooltip then
             tooltipText = (tooltipText and (tooltipText .. "\n") or "") .. devTooltip
         end
@@ -122,7 +124,7 @@ function MT:layoutRow(rowControl, data, _)
     end)
     rowControl:SetHandler("OnMouseExit", function(_)
         ZO_Tooltips_HideTextTooltip()
-        rowControl.label:SetColor(ZO_ColorDef.HexToFloats(data:GetColour()))
+        rowControl.label:SetColor(ZO_ColorDef.HexToFloats(node:GetColour()))
     end)
 end
 
@@ -166,14 +168,6 @@ local function buildCategoryHeader(scrollData, id, title, collapsed)
     table.insert(scrollData, recentEntry)
 end
 
---TODO: Avoid shallowCopy of node
-local function buildResult(listEntry, isSelected)
-    local nodeData = Utils.shallowCopy(listEntry)
-    nodeData.isSelected = isSelected
-
-    return nodeData
-end
-
 local function buildList(scrollData, id, title, list, defaultString)
     local collapsed = MT.collapsedCategories[id] and true or false
     local hasFocus = MT.editControl:HasFocus()
@@ -194,11 +188,14 @@ local function buildList(scrollData, id, title, list, defaultString)
             table.insert(scrollData, entry)
         else
             local isSelected = hasFocus and list[i].known and (currentNodeIndex == MT.targetNode)
-            local nodeData = buildResult(list[i], isSelected)
+            local data = {
+                node = list[i],
+                isSelected = isSelected,
+                indexInCategory = i,
+                categoryEntryCount = #list
+            }
 
-            local entry = ZO_ScrollList_CreateDataEntry(1, nodeData, id)
-            entry.indexInCategory = i
-            entry.categoryEntryCount = #list
+            local entry = ZO_ScrollList_CreateDataEntry(1, data, id)
             table.insert(scrollData, entry)
 
             currentNodeIndex = currentNodeIndex + 1
@@ -478,13 +475,13 @@ local function showWayshrineMenu(owner, data)
 	ClearMenu()
     local bookmarks = Nav.Bookmarks
 
-    if data.AddMenuItems then
-        data:AddMenuItems()
+    if data.node.AddMenuItems then
+        data.node:AddMenuItems()
     end
 
     if data.dataEntry.categoryId == "bookmarks" then
         local yPad = 12
-        if data.dataEntry.indexInCategory > 1 then
+        if data.indexInCategory > 1 then
             AddMenuItem(GetString(NAVIGATOR_MENU_MOVEBOOKMARKUP), function()
                 Nav.Bookmarks:Move(data, -1)
                 MT.menuOpen = false
@@ -492,7 +489,7 @@ local function showWayshrineMenu(owner, data)
             end, nil, nil, nil, nil, yPad)
             yPad = 0
         end
-        if data.dataEntry.indexInCategory < data.dataEntry.categoryEntryCount then
+        if data.indexInCategory < data.categoryEntryCount then
             AddMenuItem(GetString(NAVIGATOR_MENU_MOVEBOOKMARKDOWN), function()
                 Nav.Bookmarks:Move(data, 1)
                 MT.menuOpen = false
