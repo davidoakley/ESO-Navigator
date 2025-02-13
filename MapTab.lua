@@ -318,7 +318,7 @@ function MT:getTargetDataIndex()
 	return nil
 end
 
-function MT:getTargetNode()
+function MT:getTargetData()
     local i = self:getTargetDataIndex()
 
     if i then
@@ -344,7 +344,7 @@ function MT:getNextCategoryFirstIndex()
 
     while true do
         if scrollData[i].typeId == 1 then -- wayshrine row
-            if (foundCategory and scrollData[i].data.known) or i == currentIndex then
+            if (foundCategory and scrollData[i].data.node and scrollData[i].data.node.known) or i == currentIndex then
                 -- return the first entry after the category header
                 -- Nav.log("Index %d node %d is result - returning", i, currentNodeIndex)
                 return currentNodeIndex
@@ -400,7 +400,7 @@ function MT:onTextChanged(editbox)
 end
 
 function MT:selectCurrentResult()
-	local data = self:getTargetNode()
+	local data = self:getTargetData()
 	if data then
 		self:selectResult(nil, data, 1)
 	end
@@ -411,8 +411,8 @@ function MT:nextResult()
     local startNode = self.targetNode
     repeat
     	self.targetNode = (self.targetNode + 1) % MT.resultCount
-        local node = self:getTargetNode()
-        if node and node.known then
+        local data = self:getTargetData()
+        if data and data.node and data.node:IsKnown() then
             known = true
         end
     until known or self.targetNode == startNode
@@ -427,8 +427,8 @@ function MT:previousResult()
         if self.targetNode < 0 then
             self.targetNode = MT.resultCount - 1
         end
-        local node = self:getTargetNode()
-        if node and node.known then
+        local data = self:getTargetData()
+        if data and data.node and data.node:IsKnown() then
             known = true
         end
     until known or self.targetNode == startNode
@@ -531,9 +531,9 @@ end
 
 function MT:selectResult(control, data, mouseButton, isDoubleClick)
     if mouseButton == 1 then
-        if data.OnClick then
-            Nav.log("OnClick %s", data:GetName() or "-")
-            data:OnClick(isDoubleClick)
+        if data.node and data.node.OnClick then
+            Nav.log("OnClick %s", data.node:GetName() or "-")
+            data.node:OnClick(isDoubleClick)
         end
     elseif mouseButton == 2 then
         showWayshrineMenu(control, data)
