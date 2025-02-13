@@ -32,9 +32,30 @@ function MT:ImmediateRefresh()
     self.needsRefresh = false
 end
 
+local function getDeveloperTooltip(node)
+    if not Nav.isDeveloper then
+        return nil
+    end
+
+    local items = {
+        "bareName='" .. (node.barename or '-').."'",
+        "searchName='" .. Utils.SearchName(node.originalName or node.name or '-').."'",
+        "sortName='" .. Utils.SortName(node).."'",
+        "weight="..(node:GetWeight() or 0)
+    }
+    if node.nodeIndex then
+        table.insert(items, "nodeIndex="..(node.nodeIndex or "-"))
+    end
+    if node.zoneId then
+        table.insert(items, "zoneId="..(node.zoneId or "-"))
+    end
+
+    return table.concat(items, "\n")
+end
+
+--TODO: Move isSelected out of node data
 function MT:layoutRow(rowControl, data, _)
 	local name = data:GetName()
-    local tooltipText = data.tooltip
     local icon = data:GetIcon()
     local categoryId = data.dataEntry.categoryId
 
@@ -73,6 +94,28 @@ function MT:layoutRow(rowControl, data, _)
     rowControl.label:SetColor(ZO_ColorDef.HexToFloats(data:GetColour(data.isSelected)))
 
     rowControl:SetHandler("OnMouseEnter", function(rc)
+        local tooltipText
+        if not data.known and data.nodeIndex then
+            tooltipText = GetString(NAVIGATOR_NOT_KNOWN)
+        else
+            local recallCost = data:GetRecallCost()
+            if recallCost then
+                local currencyType = CURT_MONEY
+                local formatType = ZO_CURRENCY_FORMAT_AMOUNT_ICON
+                local currencyString = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(currencyType, recallCost, formatType))
+                tooltipText = string.format(GetString(SI_TOOLTIP_RECALL_COST) .. "%s", currencyString)
+            end
+        end
+
+        if data.tooltip then
+            tooltipText = (tooltipText and (tooltipText .. "\n") or "") .. data.tooltip
+        end
+
+        local devTooltip = getDeveloperTooltip(data)
+        if devTooltip then
+            tooltipText = (tooltipText and (tooltipText .. "\n") or "") .. devTooltip
+        end
+
         if tooltipText then
             ZO_Tooltips_ShowTextTooltip(rc, LEFT, tooltipText)
         end
@@ -117,61 +160,16 @@ local function nameComparison(x, y)
 	return Utils.SortName(x) < Utils.SortName(y)
 end
 
-local function addDeveloperTooltip(nodeData)
-    local items = {
-        "bareName='" .. (nodeData.barename or '-').."'",
-        "searchName='" .. Utils.SearchName(nodeData.originalName or nodeData.name or '-').."'",
-        "sortName='" .. Utils.SortName(nodeData).."'",
-        "weight="..(nodeData:GetWeight() or 0)
-    }
-    if nodeData.nodeIndex then
-        table.insert(items, "nodeIndex="..(nodeData.nodeIndex or "-"))
-    end
-    if nodeData.zoneId then
-        table.insert(items, "zoneId="..(nodeData.zoneId or "-"))
-    end
-    if nodeData.tooltip then
-        table.insert(items, 1, nodeData.tooltip)
-    end
-
-    nodeData.tooltip = table.concat(items, "; ")
-end
-
 local function buildCategoryHeader(scrollData, id, title, collapsed)
     title = tonumber(title) ~= nil and GetString(title) or title
     local recentEntry = ZO_ScrollList_CreateDataEntry(collapsed and 2 or 0, { id = id, name = title })
     table.insert(scrollData, recentEntry)
 end
 
-local function buildResult(listEntry, currentNodeIndex, isSelected)
+--TODO: Avoid shallowCopy of node
+local function buildResult(listEntry, isSelected)
     local nodeData = Utils.shallowCopy(listEntry)
     nodeData.isSelected = isSelected
-
-    -- Nav.log("%s: traders %d", nodeData.barename, nodeData.traders or 0)
-
-    if not nodeData.known and nodeData.nodeIndex then
-        nodeData.tooltip = GetString(NAVIGATOR_NOT_KNOWN)
-    end
-
-    nodeData.isFree = true
-    if Nav.isRecall and nodeData.known and nodeData.nodeIndex then
-        local _, timeLeft = GetRecallCooldown()
-
-        if timeLeft == 0 then
-            local currencyType = CURT_MONEY
-            local currencyAmount = GetRecallCost(nodeData.nodeIndex)
-            if currencyAmount > 0 then
-                local formatType = ZO_CURRENCY_FORMAT_AMOUNT_ICON
-                local currencyString = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(currencyType, currencyAmount, formatType))
-                nodeData.tooltip = string.format(GetString(SI_TOOLTIP_RECALL_COST) .. "%s", currencyString)
-                nodeData.isFree = false
-            end
-        end
-    end
-
-    if Nav.isDeveloper then
-        addDeveloperTooltip(nodeData)
-    end
 
     return nodeData
 end
@@ -196,7 +194,7 @@ local function buildList(scrollData, id, title, list, defaultString)
             table.insert(scrollData, entry)
         else
             local isSelected = hasFocus and list[i].known and (currentNodeIndex == MT.targetNode)
-            local nodeData = buildResult(list[i], currentNodeIndex, isSelected)
+            local nodeData = buildResult(list[i], isSelected)
 
             local entry = ZO_ScrollList_CreateDataEntry(1, nodeData, id)
             entry.indexInCategory = i

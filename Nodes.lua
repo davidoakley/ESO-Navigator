@@ -106,6 +106,10 @@ function Node:GetSuffixColour()
 end
 Node.GetTagColour = Node.GetSuffixColour
 
+function Node:GetRecallCost()
+    return nil -- By default, free!
+end
+
 function Node:ZoomToPOI(setWaypoint)
     local function getPOIMapInfo(zoneIndex, mapId, poiIndex)
         if mapId == 2082 then
@@ -460,6 +464,21 @@ function FastTravelNode:GetTagList(showBookmark)
     end
 
     return Nav.Utils.tableConcat(tagList, Node.GetTagList(self, showBookmark))
+end
+
+function FastTravelNode:GetRecallCost()
+    if not Nav.isRecall then
+        return nil
+    end
+
+    local _, timeLeft = GetRecallCooldown()
+    if timeLeft == 0 then
+        local currencyAmount = GetRecallCost(self.nodeIndex)
+        if currencyAmount > 0 then
+            return currencyAmount
+        end
+    end
+    return nil -- It's free!
 end
 
 function FastTravelNode:Jump()
