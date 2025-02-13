@@ -44,6 +44,8 @@ mkstr("NAVIGATOR_TRAVEL_TO_ZONE", "Se rendre à <<1>>") -- 1:Zone
 --mkstr("NAVIGATOR_MENU_ADDBOOKMARK", "Add Bookmark")
 --mkstr("NAVIGATOR_MENU_ADDHOUSEBOOKMARK", "Add Primary Residence Bookmark")
 --mkstr("NAVIGATOR_MENU_REMOVEBOOKMARK", "Remove Bookmark")
+--mkstr("NAVIGATOR_MENU_MOVEBOOKMARKUP", "Move Bookmark up")
+--mkstr("NAVIGATOR_MENU_MOVEBOOKMARKDOWN", "Move Bookmark down")
 
 
 
