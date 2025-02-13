@@ -40,25 +40,25 @@ function MT:layoutRow(rowControl, data, _)
 
     local suffix = data:GetSuffix()
     if suffix ~= nil then
-        local colour = ZO_ColorDef:New(data:GetSuffixColour())
+        local colour = ZO_ColorDef:New(data:GetSuffixColour(data.isSelected))
         name = name .. " " .. colour:Colorize(suffix)
     end
 
     local tagList = data:GetTagList(categoryId ~= "bookmarks")
     if tagList and #tagList > 0 then
-        local colour = ZO_ColorDef:New(data:GetTagColour())
+        local colour = ZO_ColorDef:New(data:GetTagColour(data.isSelected))
         name = name .. " " .. colour:Colorize(table.concat(tagList, ""))
     end
 
 	if icon ~= nil then
-        rowControl.icon:SetColor(ZO_ColorDef.HexToFloats(data:GetIconColour()))
+        rowControl.icon:SetColor(ZO_ColorDef.HexToFloats(data:GetIconColour(data.isSelected)))
 		rowControl.icon:SetTexture(icon)
 		rowControl.icon:SetHidden(false)
     else
 		rowControl.icon:SetHidden(true)
 	end
 
-    rowControl.cost:SetHidden(data.isFree)
+    rowControl.cost:SetHidden(not data:GetRecallCost())
 
     rowControl.keybind:SetHidden(not data.isSelected)
     rowControl.bg:SetHidden(not data.isSelected)
@@ -70,7 +70,7 @@ function MT:layoutRow(rowControl, data, _)
 
 	rowControl.label:SetText(name)
 
-    rowControl.label:SetColor(ZO_ColorDef.HexToFloats(data:GetColour()))
+    rowControl.label:SetColor(ZO_ColorDef.HexToFloats(data:GetColour(data.isSelected)))
 
     rowControl:SetHandler("OnMouseEnter", function(rc)
         if tooltipText then

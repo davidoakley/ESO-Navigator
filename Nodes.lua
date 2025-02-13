@@ -78,8 +78,8 @@ function Node:GetTagList(showBookmark)
     return tagList
 end
 
-function Node:GetColour()
-    if self.isSelected and self.known and not self.disabled then
+function Node:GetColour(isSelected)
+    if isSelected and self.known and not self.disabled then
         return Nav.COLOUR_WHITE
     elseif self.known and not self.disabled then
         return Nav.COLOUR_NORMAL
@@ -323,8 +323,8 @@ end
 
 function JumpToZoneNode:GetSuffix() return "" end
 
-function JumpToZoneNode:GetColour()
-    if self.isSelected and self.known then
+function JumpToZoneNode:GetColour(isSelected)
+    if isSelected and self.known then
         return Nav.COLOUR_WHITE
     else
         return self.known and Nav.COLOUR_JUMPABLE or Nav.COLOUR_DISABLED
@@ -363,8 +363,8 @@ function HouseNode:GetIcon()
             (self.owned and "Navigator/media/house.dds" or "Navigator/media/house_unowned.dds")
 end
 
-function HouseNode:GetColour()
-    if self.isSelected and self.known and self.owned then
+function HouseNode:GetColour(isSelected)
+    if isSelected and self.known and self.owned then
         return Nav.COLOUR_WHITE
     else
         return (self.known and self.owned) and Nav.COLOUR_NORMAL or Nav.COLOUR_DISABLED
