@@ -115,6 +115,17 @@ function Navigator:loadSettings()
       })
     end
 
+    if GetWorldName() == "EU Megaserver" then
+        table.insert(optionsTable, {
+            type = "divider"
+        })
+        table.insert(optionsTable, 	{
+            type = "description",
+            text = "Why not join |H1:guild:767808|hMora's Whispers|h?\nOur guild is a vibrant social lair with a free trader, loads of events, weekly raffles, fully equipped guild base, active Discord and so forth! Hit the link to find out more!",
+            enableLinks = true,
+            reference = Navigator.settingsName .. "_ad"
+        })
+    end
     -- table.insert(optionsTable, 	{
     --   type = "description",
     --   -- title = "My Description",
