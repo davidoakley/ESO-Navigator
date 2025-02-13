@@ -37,18 +37,6 @@ function Navigator:loadSettings()
     })
 
     table.insert(optionsTable, {
-      type = "checkbox",
-      name = "Auto-focus Search box",
-      tooltip = "Automatically puts the cursor in the search box when the tab is selected. This means that the 'M' key can't be used to exit the map; use 'Escape' instead.",
-      getFunc = function() return sv.autoFocus end,
-      setFunc = function(value)
-        sv.autoFocus = value
-        end,
-      width = "full",
-      warning = "When active, the 'M' key can't be used to immediately exit the map; use 'Escape' instead."
-    })
-
-    table.insert(optionsTable, {
       type = "slider",
       name = "Entries in Recent list",
       tooltip = "Setting this to 0 will disable the Recent list",
@@ -57,8 +45,32 @@ function Navigator:loadSettings()
       getFunc = function() return sv.recentsCount end,
       setFunc = function(value) sv.recentsCount = value end,
       width = "full",
-      default = 10
-    })  
+      default = self.default.recentsCount
+    })
+
+    table.insert(optionsTable, {
+        type = "checkbox",
+        name = "Show and search house nicknames",
+        --tooltip = "",
+        getFunc = function() return sv.useHouseNicknames end,
+        setFunc = function(value)
+            sv.useHouseNicknames = value
+            self.Locations:setupNodes()
+        end,
+        width = "full"
+    })
+
+    table.insert(optionsTable, {
+        type = "checkbox",
+        name = "Auto-focus Search box",
+        tooltip = "Automatically puts the cursor in the search box when the tab is selected. This means that the 'M' key can't be used to exit the map; use 'Escape' instead.",
+        getFunc = function() return sv.autoFocus end,
+        setFunc = function(value)
+            sv.autoFocus = value
+        end,
+        width = "full",
+        warning = "When active, the 'M' key can't be used to immediately exit the map; use 'Escape' instead."
+    })
 
     if LibSlashCommander then
       table.insert(optionsTable, {
@@ -85,18 +97,6 @@ function Navigator:loadSettings()
         text = "|cFFFF00|t24:24:/esoui/art/miscellaneous/eso_icon_warning.dds:inheritcolor|t|r Navigator's chat command is only available if the |c99FFFFLibSlashCommander|r add-on is installed and enabled"
       })
     end
-
-    table.insert(optionsTable, {
-        type = "checkbox",
-        name = "Show and search house nicknames",
-        --tooltip = "",
-        getFunc = function() return sv.useHouseNicknames end,
-        setFunc = function(value)
-            sv.useHouseNicknames = value
-            self.Locations:setupNodes()
-        end,
-        width = "full"
-    })
 
     -- table.insert(optionsTable, 	{
     --   type = "description",
