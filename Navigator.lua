@@ -6,17 +6,6 @@ Navigator = {
   author = "SirNightstorm",
   appVersion = "0",
   svName = "Navigator_SavedVariables",
-  default = {
-    recentNodes = {},
-    bookmarks = {},
-    defaultTab = true,
-    autoFocus = false,
-    tpCommand = "/nav",
-    loggingEnabled = false,
-    recentsCount = 10,
-    ignoreDefiniteArticlesInSort = false,
-    useHouseNicknames = false
-  },
   Location = {},
   Wayshrine = {},
   Search = {},
@@ -27,6 +16,23 @@ Navigator = {
   mapVisible = false,
 }
 local Nav = Navigator
+
+Nav.CONFIRMFASTTRAVEL_ALWAYS = 0
+Nav.CONFIRMFASTTRAVEL_WHENCOST = 1
+Nav.CONFIRMFASTTRAVEL_NEVER = 2
+
+Nav.default = {
+  recentNodes = {},
+  bookmarks = {},
+  defaultTab = true,
+  autoFocus = false,
+  tpCommand = "/nav",
+  loggingEnabled = false,
+  recentsCount = 10,
+  ignoreDefiniteArticlesInSort = false,
+  useHouseNicknames = false,
+  confirmFastTravel = Nav.CONFIRMFASTTRAVEL_ALWAYS
+}
 
 local logger
 

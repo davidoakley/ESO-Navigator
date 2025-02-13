@@ -48,6 +48,23 @@ function Navigator:loadSettings()
       default = self.default.recentsCount
     })
 
+    -- Get the text for a gold currency icon
+    local currencyInfo = ZO_CURRENCIES_DATA[CURT_MONEY]
+    local iconSize = currencyInfo.keyboardPercentOfLineSize
+    local iconMarkup = currencyInfo.keyboardTexture
+    local gold = zo_iconFormat(iconMarkup, iconSize, iconSize)
+    table.insert(optionsTable, {
+        type = "dropdown",
+        name = "Confirm fast travel",
+        tooltip = "Whether/when to show the standard alert prompt when jumping to a wayshrine",
+        choices = {"Always", zo_strformat("When costs <<1>>", gold), "Never"},
+        choicesValues = { self.CONFIRMFASTTRAVEL_ALWAYS, self.CONFIRMFASTTRAVEL_WHENCOST, self.CONFIRMFASTTRAVEL_NEVER },
+        getFunc = function() return sv.confirmFastTravel end,
+        setFunc = function(value) sv.confirmFastTravel = value end,
+        width = "full",
+        default = self.default.confirmFastTravel,
+    })
+
     table.insert(optionsTable, {
         type = "checkbox",
         name = "Show and search house nicknames",

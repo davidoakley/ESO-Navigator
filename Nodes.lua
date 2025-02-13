@@ -489,8 +489,8 @@ function FastTravelNode:Jump()
     ZO_Dialogs_ReleaseDialog("FAST_TRAVEL_CONFIRM")
     ZO_Dialogs_ReleaseDialog("RECALL_CONFIRM")
 
-    local id = (Nav.isRecall == true and "RECALL_CONFIRM") or "FAST_TRAVEL_CONFIRM"
     if Nav.isRecall == true then
+        -- Locked out of recall for a time
         local _, timeLeft = GetRecallCooldown()
         if timeLeft ~= 0 then
             local text = zo_strformat(SI_FAST_TRAVEL_RECALL_COOLDOWN, self.originalName, ZO_FormatTimeMilliseconds(timeLeft, TIME_FORMAT_STYLE_DESCRIPTIVE, TIME_FORMAT_PRECISION_SECONDS))
@@ -498,6 +498,22 @@ function FastTravelNode:Jump()
             return
         end
     end
+
+    local confirm = Nav.saved.confirmFastTravel
+    local cost = GetRecallCost(self.nodeIndex)
+    local currency = GetRecallCurrency(self.nodeIndex)
+    local canAffordRecall = cost <= GetCurrencyAmount(currency, CURRENCY_LOCATION_CHARACTER)
+    if (confirm == Nav.CONFIRMFASTTRAVEL_NEVER and canAffordRecall) or
+       (confirm == Nav.CONFIRMFASTTRAVEL_WHENCOST and not cost) then
+        zo_callLater(function()
+            FastTravelToNode(self.nodeIndex)
+            SCENE_MANAGER:Hide("worldMap")
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.POSITIVE_CLICK, (zo_strformat(GetString(NAVIGATOR_TRAVELING_TO_LOCATION), self.name)))
+        end, 10)
+        return
+    end
+
+    local id = (Nav.isRecall == true and "RECALL_CONFIRM") or "FAST_TRAVEL_CONFIRM"
     ZO_Dialogs_ShowPlatformDialog(id, {nodeIndex = self.nodeIndex}, {mainTextParams = {self.originalName}})
 end
 
