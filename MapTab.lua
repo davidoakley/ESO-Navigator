@@ -265,13 +265,7 @@ function MT:buildScrollList(keepScrollPosition)
             if Nav.isRecall and zone.zoneId ~= Nav.ZONE_CYRODIIL then
                 local node = Nav.JumpToZoneNode:New(Utils.shallowCopy(zone))
                 local playerInfo = Nav.Players:GetPlayerInZone(zone.zoneId)
-                if playerInfo then
-                --    node.name = zo_strformat(GetString(NAVIGATOR_TRAVEL_TO_ZONE), zone.name)
-                    node.known = true
-                else
-                --    node.name = GetString(NAVIGATOR_NO_TRAVEL_PLAYER)
-                    node.known = false
-                end
+                node.known = playerInfo ~= nil
                 table.insert(list, 1, node)
             end
 
