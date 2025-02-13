@@ -508,7 +508,10 @@ function FastTravelNode:Jump()
         zo_callLater(function()
             FastTravelToNode(self.nodeIndex)
             SCENE_MANAGER:Hide("worldMap")
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.POSITIVE_CLICK, (zo_strformat(GetString(NAVIGATOR_TRAVELING_TO_LOCATION), self.name)))
+            local id = Nav.isRecall and NAVIGATOR_RECALLING_TO_LOCATION_COST or NAVIGATOR_TRAVELING_TO_LOCATION
+            local currencyString = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(CURT_MONEY, cost, ZO_CURRENCY_FORMAT_AMOUNT_ICON))
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.POSITIVE_CLICK,
+                    zo_strformat(GetString(id), self.name, currencyString))
         end, 10)
         return
     end
