@@ -32,37 +32,60 @@ function MT:ImmediateRefresh()
     self.needsRefresh = false
 end
 
+local function getDeveloperTooltip(node)
+    if not Nav.isDeveloper then
+        return nil
+    end
+
+    local items = {
+        "bareName='" .. (node.barename or '-').."'",
+        "searchName='" .. Utils.SearchName(node.originalName or node.name or '-').."'",
+        "sortName='" .. Utils.SortName(node).."'",
+        "weight="..(node:GetWeight() or 0)
+    }
+    if node.nodeIndex then
+        table.insert(items, "nodeIndex="..(node.nodeIndex or "-"))
+    end
+    if node.zoneId then
+        table.insert(items, "zoneId="..(node.zoneId or "-"))
+    end
+
+    return table.concat(items, "\n")
+end
+
+--TODO: Move isSelected out of node data
 function MT:layoutRow(rowControl, data, _)
-	local name = data:GetName()
-    local tooltipText = data.tooltip
-    local icon = data:GetIcon()
+    local node = data.node
+    local isSelected = data.isSelected
+	local name = node:GetName()
+    local icon = node:GetIcon()
     local categoryId = data.dataEntry.categoryId
 
-    local suffix = data:GetSuffix()
+    local suffix = node:GetSuffix()
     if suffix ~= nil then
-        local colour = ZO_ColorDef:New(data:GetSuffixColour())
+        local colour = ZO_ColorDef:New(node:GetSuffixColour(isSelected))
         name = name .. " " .. colour:Colorize(suffix)
     end
 
-    local tagList = data:GetTagList(categoryId ~= "bookmarks")
+    local tagList = node:GetTagList(categoryId ~= "bookmarks")
     if tagList and #tagList > 0 then
-        local colour = ZO_ColorDef:New(data:GetTagColour())
+        local colour = ZO_ColorDef:New(node:GetTagColour(isSelected))
         name = name .. " " .. colour:Colorize(table.concat(tagList, ""))
     end
 
 	if icon ~= nil then
-        rowControl.icon:SetColor(ZO_ColorDef.HexToFloats(data:GetIconColour()))
+        rowControl.icon:SetColor(ZO_ColorDef.HexToFloats(node:GetIconColour(isSelected)))
 		rowControl.icon:SetTexture(icon)
 		rowControl.icon:SetHidden(false)
     else
 		rowControl.icon:SetHidden(true)
 	end
 
-    rowControl.cost:SetHidden(data.isFree)
+    rowControl.cost:SetHidden(not node:GetRecallCost())
 
-    rowControl.keybind:SetHidden(not data.isSelected)
-    rowControl.bg:SetHidden(not data.isSelected)
-    if data.isSelected then
+    rowControl.keybind:SetHidden(not isSelected)
+    rowControl.bg:SetHidden(not isSelected)
+    if isSelected then
         rowControl.label:SetAnchor(TOPRIGHT, rowControl.keybind, TOPLEFT, -4, -1)
     else
         rowControl.label:SetAnchor(TOPRIGHT, rowControl, TOPRIGHT, -4, 0)
@@ -70,16 +93,38 @@ function MT:layoutRow(rowControl, data, _)
 
 	rowControl.label:SetText(name)
 
-    rowControl.label:SetColor(ZO_ColorDef.HexToFloats(data:GetColour()))
+    rowControl.label:SetColor(ZO_ColorDef.HexToFloats(node:GetColour(isSelected)))
 
     rowControl:SetHandler("OnMouseEnter", function(rc)
+        local tooltipText
+        if not node.known and node.nodeIndex then
+            tooltipText = GetString(NAVIGATOR_NOT_KNOWN)
+        else
+            local recallCost = node:GetRecallCost()
+            if recallCost then
+                local currencyType = CURT_MONEY
+                local formatType = ZO_CURRENCY_FORMAT_AMOUNT_ICON
+                local currencyString = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(currencyType, recallCost, formatType))
+                tooltipText = string.format(GetString(SI_TOOLTIP_RECALL_COST) .. "%s", currencyString)
+            end
+        end
+
+        if node.tooltip then
+            tooltipText = (tooltipText and (tooltipText .. "\n") or "") .. node.tooltip
+        end
+
+        local devTooltip = getDeveloperTooltip(node)
+        if devTooltip then
+            tooltipText = (tooltipText and (tooltipText .. "\n") or "") .. devTooltip
+        end
+
         if tooltipText then
             ZO_Tooltips_ShowTextTooltip(rc, LEFT, tooltipText)
         end
     end)
     rowControl:SetHandler("OnMouseExit", function(_)
         ZO_Tooltips_HideTextTooltip()
-        rowControl.label:SetColor(ZO_ColorDef.HexToFloats(data:GetColour()))
+        rowControl.label:SetColor(ZO_ColorDef.HexToFloats(node:GetColour()))
     end)
 end
 
@@ -117,63 +162,10 @@ local function nameComparison(x, y)
 	return Utils.SortName(x) < Utils.SortName(y)
 end
 
-local function addDeveloperTooltip(nodeData)
-    local items = {
-        "bareName='" .. (nodeData.barename or '-').."'",
-        "searchName='" .. Utils.SearchName(nodeData.originalName or nodeData.name or '-').."'",
-        "sortName='" .. Utils.SortName(nodeData).."'",
-        "weight="..(nodeData:GetWeight() or 0)
-    }
-    if nodeData.nodeIndex then
-        table.insert(items, "nodeIndex="..(nodeData.nodeIndex or "-"))
-    end
-    if nodeData.zoneId then
-        table.insert(items, "zoneId="..(nodeData.zoneId or "-"))
-    end
-    if nodeData.tooltip then
-        table.insert(items, 1, nodeData.tooltip)
-    end
-
-    nodeData.tooltip = table.concat(items, "; ")
-end
-
 local function buildCategoryHeader(scrollData, id, title, collapsed)
     title = tonumber(title) ~= nil and GetString(title) or title
     local recentEntry = ZO_ScrollList_CreateDataEntry(collapsed and 2 or 0, { id = id, name = title })
     table.insert(scrollData, recentEntry)
-end
-
-local function buildResult(listEntry, currentNodeIndex, isSelected)
-    local nodeData = Utils.shallowCopy(listEntry)
-    nodeData.isSelected = isSelected
-
-    -- Nav.log("%s: traders %d", nodeData.barename, nodeData.traders or 0)
-
-    if not nodeData.known and nodeData.nodeIndex then
-        nodeData.tooltip = GetString(NAVIGATOR_NOT_KNOWN)
-    end
-
-    nodeData.isFree = true
-    if Nav.isRecall and nodeData.known and nodeData.nodeIndex then
-        local _, timeLeft = GetRecallCooldown()
-
-        if timeLeft == 0 then
-            local currencyType = CURT_MONEY
-            local currencyAmount = GetRecallCost(nodeData.nodeIndex)
-            if currencyAmount > 0 then
-                local formatType = ZO_CURRENCY_FORMAT_AMOUNT_ICON
-                local currencyString = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(currencyType, currencyAmount, formatType))
-                nodeData.tooltip = string.format(GetString(SI_TOOLTIP_RECALL_COST) .. "%s", currencyString)
-                nodeData.isFree = false
-            end
-        end
-    end
-
-    if Nav.isDeveloper then
-        addDeveloperTooltip(nodeData)
-    end
-
-    return nodeData
 end
 
 local function buildList(scrollData, id, title, list, defaultString)
@@ -196,11 +188,14 @@ local function buildList(scrollData, id, title, list, defaultString)
             table.insert(scrollData, entry)
         else
             local isSelected = hasFocus and list[i].known and (currentNodeIndex == MT.targetNode)
-            local nodeData = buildResult(list[i], currentNodeIndex, isSelected)
+            local data = {
+                node = list[i],
+                isSelected = isSelected,
+                indexInCategory = i,
+                categoryEntryCount = #list
+            }
 
-            local entry = ZO_ScrollList_CreateDataEntry(1, nodeData, id)
-            entry.indexInCategory = i
-            entry.categoryEntryCount = #list
+            local entry = ZO_ScrollList_CreateDataEntry(1, data, id)
             table.insert(scrollData, entry)
 
             currentNodeIndex = currentNodeIndex + 1
@@ -270,13 +265,7 @@ function MT:buildScrollList(keepScrollPosition)
             if Nav.isRecall and zone.zoneId ~= Nav.ZONE_CYRODIIL then
                 local node = Nav.JumpToZoneNode:New(Utils.shallowCopy(zone))
                 local playerInfo = Nav.Players:GetPlayerInZone(zone.zoneId)
-                if playerInfo then
-                --    node.name = zo_strformat(GetString(NAVIGATOR_TRAVEL_TO_ZONE), zone.name)
-                    node.known = true
-                else
-                --    node.name = GetString(NAVIGATOR_NO_TRAVEL_PLAYER)
-                    node.known = false
-                end
+                node.known = playerInfo ~= nil
                 table.insert(list, 1, node)
             end
 
@@ -329,7 +318,7 @@ function MT:getTargetDataIndex()
 	return nil
 end
 
-function MT:getTargetNode()
+function MT:getTargetData()
     local i = self:getTargetDataIndex()
 
     if i then
@@ -355,7 +344,7 @@ function MT:getNextCategoryFirstIndex()
 
     while true do
         if scrollData[i].typeId == 1 then -- wayshrine row
-            if (foundCategory and scrollData[i].data.known) or i == currentIndex then
+            if (foundCategory and scrollData[i].data.node and scrollData[i].data.node.known) or i == currentIndex then
                 -- return the first entry after the category header
                 -- Nav.log("Index %d node %d is result - returning", i, currentNodeIndex)
                 return currentNodeIndex
@@ -411,7 +400,7 @@ function MT:onTextChanged(editbox)
 end
 
 function MT:selectCurrentResult()
-	local data = self:getTargetNode()
+	local data = self:getTargetData()
 	if data then
 		self:selectResult(nil, data, 1)
 	end
@@ -422,8 +411,8 @@ function MT:nextResult()
     local startNode = self.targetNode
     repeat
     	self.targetNode = (self.targetNode + 1) % MT.resultCount
-        local node = self:getTargetNode()
-        if node and node.known then
+        local data = self:getTargetData()
+        if data and data.node and data.node:IsKnown() then
             known = true
         end
     until known or self.targetNode == startNode
@@ -438,8 +427,8 @@ function MT:previousResult()
         if self.targetNode < 0 then
             self.targetNode = MT.resultCount - 1
         end
-        local node = self:getTargetNode()
-        if node and node.known then
+        local data = self:getTargetData()
+        if data and data.node and data.node:IsKnown() then
             known = true
         end
     until known or self.targetNode == startNode
@@ -480,13 +469,13 @@ local function showWayshrineMenu(owner, data)
 	ClearMenu()
     local bookmarks = Nav.Bookmarks
 
-    if data.AddMenuItems then
-        data:AddMenuItems()
+    if data.node.AddMenuItems then
+        data.node:AddMenuItems()
     end
 
     if data.dataEntry.categoryId == "bookmarks" then
         local yPad = 12
-        if data.dataEntry.indexInCategory > 1 then
+        if data.indexInCategory > 1 then
             AddMenuItem(GetString(NAVIGATOR_MENU_MOVEBOOKMARKUP), function()
                 Nav.Bookmarks:Move(data, -1)
                 MT.menuOpen = false
@@ -494,7 +483,7 @@ local function showWayshrineMenu(owner, data)
             end, nil, nil, nil, nil, yPad)
             yPad = 0
         end
-        if data.dataEntry.indexInCategory < data.dataEntry.categoryEntryCount then
+        if data.indexInCategory < data.categoryEntryCount then
             AddMenuItem(GetString(NAVIGATOR_MENU_MOVEBOOKMARKDOWN), function()
                 Nav.Bookmarks:Move(data, 1)
                 MT.menuOpen = false
@@ -542,9 +531,9 @@ end
 
 function MT:selectResult(control, data, mouseButton, isDoubleClick)
     if mouseButton == 1 then
-        if data.OnClick then
-            Nav.log("OnClick %s", data:GetName() or "-")
-            data:OnClick(isDoubleClick)
+        if data.node and data.node.OnClick then
+            Nav.log("OnClick %s", data.node:GetName() or "-")
+            data.node:OnClick(isDoubleClick)
         end
     elseif mouseButton == 2 then
         showWayshrineMenu(control, data)

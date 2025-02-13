@@ -78,8 +78,8 @@ function Node:GetTagList(showBookmark)
     return tagList
 end
 
-function Node:GetColour()
-    if self.isSelected and self.known and not self.disabled then
+function Node:GetColour(isSelected)
+    if isSelected and self.known and not self.disabled then
         return Nav.COLOUR_WHITE
     elseif self.known and not self.disabled then
         return Nav.COLOUR_NORMAL
@@ -105,6 +105,10 @@ function Node:GetSuffixColour()
     --return (self.known and not self.disabled) and Nav.COLOUR_SUFFIX_NORMAL or Nav.COLOUR_SUFFIX_DISABLED
 end
 Node.GetTagColour = Node.GetSuffixColour
+
+function Node:GetRecallCost()
+    return nil -- By default, free!
+end
 
 function Node:ZoomToPOI(setWaypoint)
     local function getPOIMapInfo(zoneIndex, mapId, poiIndex)
@@ -323,8 +327,8 @@ end
 
 function JumpToZoneNode:GetSuffix() return "" end
 
-function JumpToZoneNode:GetColour()
-    if self.isSelected and self.known then
+function JumpToZoneNode:GetColour(isSelected)
+    if isSelected and self.known then
         return Nav.COLOUR_WHITE
     else
         return self.known and Nav.COLOUR_JUMPABLE or Nav.COLOUR_DISABLED
@@ -363,8 +367,8 @@ function HouseNode:GetIcon()
             (self.owned and "Navigator/media/house.dds" or "Navigator/media/house_unowned.dds")
 end
 
-function HouseNode:GetColour()
-    if self.isSelected and self.known and self.owned then
+function HouseNode:GetColour(isSelected)
+    if isSelected and self.known and self.owned then
         return Nav.COLOUR_WHITE
     else
         return (self.known and self.owned) and Nav.COLOUR_NORMAL or Nav.COLOUR_DISABLED
@@ -462,6 +466,21 @@ function FastTravelNode:GetTagList(showBookmark)
     return Nav.Utils.tableConcat(tagList, Node.GetTagList(self, showBookmark))
 end
 
+function FastTravelNode:GetRecallCost()
+    if not Nav.isRecall then
+        return nil
+    end
+
+    local _, timeLeft = GetRecallCooldown()
+    if timeLeft == 0 then
+        local currencyAmount = GetRecallCost(self.nodeIndex)
+        if currencyAmount > 0 then
+            return currencyAmount
+        end
+    end
+    return nil -- It's free!
+end
+
 function FastTravelNode:Jump()
     if not self.known or self.disabled then
         return
@@ -487,10 +506,12 @@ function FastTravelNode:OnClick()
 end
 
 function FastTravelNode:AddMenuItems()
-    local strId = Nav.isRecall and SI_WORLD_MAP_ACTION_RECALL_TO_WAYSHRINE or SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE
-    AddMenuItem(zo_strformat(GetString(strId), self.name), function()
-        self:Jump()
-    end)
+    if self:IsKnown() then
+        local strId = Nav.isRecall and SI_WORLD_MAP_ACTION_RECALL_TO_WAYSHRINE or SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE
+        AddMenuItem(zo_strformat(GetString(strId), self.name), function()
+            self:Jump()
+        end)
+    end
     AddMenuItem(GetString(NAVIGATOR_MENU_SHOWONMAP), function()
         self:ZoomToPOI(false)
     end)
