@@ -65,6 +65,16 @@ function Bookmarks:contains(entry)
     return self:getIndex(entry) ~= nil
 end
 
+function Bookmarks:Move(node, offset)
+    local index = self:getIndex(node) --node = Nav.saved.bookmarks[index]
+    if index then
+        table.remove(Nav.saved.bookmarks, index)
+        table.insert(Nav.saved.bookmarks, index + offset, node)
+    else
+        Nav.logWarning("Bookmarks:Move: can't find index for '%s'", node.name)
+    end
+end
+
 function Bookmarks:getBookmarks()
     local list = Nav.saved.bookmarks
     local results = {}

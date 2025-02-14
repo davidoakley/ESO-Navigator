@@ -96,14 +96,14 @@ function Chat:TP(text)
         return
     end
 
-    if result.JumpToPlayer then
+    if result.Jump then
+        result:Jump()
+    elseif result.JumpToPlayer then
         result:JumpToPlayer()
-   elseif result.JumpToNode then
-        result:JumpToNode()
-    elseif result.zoneId then
+    elseif result.JumpToZone then
         result:JumpToZone()
     else
-        -- CHAT_SYSTEM:AddMessage("Sorry, I wasn't able to process that result")
+         CHAT_SYSTEM:AddMessage("Sorry, I wasn't able to process that result")
     end
 end
 

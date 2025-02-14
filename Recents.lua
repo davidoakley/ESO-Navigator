@@ -54,22 +54,19 @@ end
 
 function Recents:getRecents(count)
     local results = {}
-    --local nodeMap = Nav.Locations:getNodeMap()
 
-    --if nodeMap ~= nil then
-        for i = 1, #self.nodes do
-            local nodeIndex = self.nodes[i] or 0 -- nodeMap[self.nodes[i]].nodeIndex or 0
-            if Nav.Locations:IsHarborage(nodeIndex) then
-                nodeIndex = Nav.Locations:GetHarborage()
-            end
-            local node = Nav.Locations:GetNode(nodeIndex, true)
-            table.insert(results, node)
-
-            if #results >= count then
-                return results
-            end
+    for i = 1, #self.nodes do
+        if #results >= count then
+            return results
         end
-    --end
+
+        local nodeIndex = self.nodes[i] or 0 -- nodeMap[self.nodes[i]].nodeIndex or 0
+        if Nav.Locations:IsHarborage(nodeIndex) then
+            nodeIndex = Nav.Locations:GetHarborage()
+        end
+        local node = Nav.Locations:GetNode(nodeIndex, true)
+        table.insert(results, node)
+    end
 
     return results
 end

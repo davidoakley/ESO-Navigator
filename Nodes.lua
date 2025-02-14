@@ -6,6 +6,8 @@
 
 local Nav = Navigator
 
+local pingEvent
+
 --- @class Node
 local Node = {}
 
@@ -15,6 +17,8 @@ function Node:New(o)
     self.__index = self
     return o
 end
+
+function Node:IsHouse() return false end
 
 ---WeightComparison
 ---@param x Node
@@ -65,9 +69,7 @@ function Node:GetIcon()
 end
 
 function Node:GetSuffix()
-    local suffix = self.suffix or ""
-
-    return suffix
+    return self.suffix or ""
 end
 
 function Node:GetTagList(showBookmark)
@@ -78,8 +80,12 @@ function Node:GetTagList(showBookmark)
     return tagList
 end
 
-function Node:GetColour()
-    if self.isSelected and self.known and not self.disabled then
+function Node:GetTooltip()
+    return self.tooltip
+end
+
+function Node:GetColour(isSelected)
+    if isSelected and self.known and not self.disabled then
         return Nav.COLOUR_WHITE
     elseif self.known and not self.disabled then
         return Nav.COLOUR_NORMAL
@@ -106,12 +112,18 @@ function Node:GetSuffixColour()
 end
 Node.GetTagColour = Node.GetSuffixColour
 
+function Node:GetRecallCost()
+    return nil -- By default, free!
+end
+
 function Node:ZoomToPOI(setWaypoint)
-    local function getPOIMapInfo(zoneIndex, mapId, poiIndex)
+    local function getPOIMapInfo(self, zoneIndex, mapId)
         if mapId == 2082 then
-            return 0.3485, 0.3805 -- GetPOIMapInfo returns 0,0 for The Shambles
+            return 0.3485, 0.3805 -- The Shambles
+        elseif self.nodeIndex == 407 then
+            return 0.9273, 0.7105 -- Dragonguard Sanctum
         else
-            return GetPOIMapInfo(zoneIndex, poiIndex)
+            return GetPOIMapInfo(zoneIndex, self.poiIndex)
         end
     end
 
@@ -120,6 +132,8 @@ function Node:ZoomToPOI(setWaypoint)
         Nav.log("Node:ZoomToPOI: poiIndex=%d, %f,%f", poiIndex, normalizedX, normalizedZ)
         if setWaypoint then
             PingMap(MAP_PIN_TYPE_PLAYER_WAYPOINT, MAP_TYPE_LOCATION_CENTERED, normalizedX, normalizedZ)
+        else
+            Node.AddPing(normalizedX, normalizedZ)
         end
 
         local mapPanAndZoom = ZO_WorldMap_GetPanAndZoom()
@@ -129,18 +143,38 @@ function Node:ZoomToPOI(setWaypoint)
     local targetMapId = self.mapId or Nav.Locations.GetMapIdByZoneId(self.zoneId)
     local currentMapId = GetCurrentMapId()
     local targetZoneIndex = GetZoneIndex(self.zoneId)
+    if self.nodeIndex == 407 then -- Dragonguard Sanctum
+        targetMapId = 1654
+    end
 
     if targetMapId ~= currentMapId then
         WORLD_MAP_MANAGER:SetMapById(targetMapId)
 
         zo_callLater(function()
-            panToPOI(targetZoneIndex, targetMapId, self.poiIndex)
+            panToPOI(self, targetZoneIndex, targetMapId)
         end, 100)
     else
-        panToPOI(targetZoneIndex, targetMapId, self.poiIndex)
+        panToPOI(self, targetZoneIndex, targetMapId)
     end
 end
 
+function Node.AddPing(x, y)
+    Node.RemovePings()
+    local pinMgr = ZO_WorldMap_GetPinManager()
+    pinMgr:CreatePin(MAP_PIN_TYPE_AUTO_MAP_NAVIGATION_PING, "pings", x, y)
+    pingEvent = zo_callLater(function()
+        Node.RemovePings()
+        pingEvent = nil
+    end, 2800)
+end
+
+function Node.RemovePings()
+    if pingEvent then
+        zo_removeCallLater(pingEvent)
+        pingEvent = nil
+        ZO_WorldMap_GetPinManager():RemovePins("pings", MAP_PIN_TYPE_AUTO_MAP_NAVIGATION_PING)
+    end
+end
 
 --- @class PlayerNode
 local PlayerNode = Node:New()
@@ -241,6 +275,13 @@ function ZoneNode:GetIcon()
     return "Navigator/media/zone.dds"
 end
 
+function ZoneNode:GetTooltip()
+    if self.zoneId == Nav.ZONE_CYRODIIL then return nil end
+    local player = Nav.Players:GetPlayerInZone(self.zoneId)
+    local stringId = player and NAVIGATOR_TIP_DOUBLECLICK_TO_TRAVEL or NAVIGATOR_NO_TRAVEL_PLAYER
+    return zo_strformat(GetString(stringId), self.name)
+end
+
 function ZoneNode:JumpToZone()
     Nav.Players:SetupPlayers()
     local zoneId = self.zoneId
@@ -322,9 +363,11 @@ function JumpToZoneNode:GetIcon()
 end
 
 function JumpToZoneNode:GetSuffix() return "" end
+function JumpToZoneNode:GetTagList() return {} end
+function JumpToZoneNode:GetTooltip() return nil end
 
-function JumpToZoneNode:GetColour()
-    if self.isSelected and self.known then
+function JumpToZoneNode:GetColour(isSelected)
+    if isSelected and self.known then
         return Nav.COLOUR_WHITE
     else
         return self.known and Nav.COLOUR_JUMPABLE or Nav.COLOUR_DISABLED
@@ -341,6 +384,22 @@ end
 --- @class HouseNode
 local HouseNode = Node:New()
 
+function HouseNode:IsHouse() return true end
+
+function HouseNode:GetHouseId()
+    if self.houseId == nil then
+        self.houseId = GetFastTravelNodeHouseId(self.nodeIndex)
+    end
+    return self.houseId
+end
+
+function HouseNode:IsPrimary()
+    if self.isPrimary == nil then
+        self.isPrimary = self:GetHouseId() == GetHousingPrimaryHouse()
+    end
+    return self.isPrimary
+end
+
 function HouseNode:GetWeight()
     local weight = 1.0
 
@@ -351,7 +410,7 @@ function HouseNode:GetWeight()
     elseif Nav.Bookmarks:contains(self) then
         weight = 1.2
     end
-    if self.isPrimary then
+    if self:IsPrimary() then
         weight = weight + 0.1
     end
 
@@ -359,12 +418,12 @@ function HouseNode:GetWeight()
 end
 
 function HouseNode:GetIcon()
-    return self.isPrimary and "Navigator/media/house_star.dds" or
+    return self:IsPrimary() and "Navigator/media/house_star.dds" or
             (self.owned and "Navigator/media/house.dds" or "Navigator/media/house_unowned.dds")
 end
 
-function HouseNode:GetColour()
-    if self.isSelected and self.known and self.owned then
+function HouseNode:GetColour(isSelected)
+    if isSelected and self.known and self.owned then
         return Nav.COLOUR_WHITE
     else
         return (self.known and self.owned) and Nav.COLOUR_NORMAL or Nav.COLOUR_DISABLED
@@ -375,9 +434,9 @@ function HouseNode:GetSuffixColour()
     return (self.known and self.owned) and Nav.COLOUR_SUFFIX_NORMAL or Nav.COLOUR_SUFFIX_DISABLED
 end
 
-local function requestJumpToHouse(data, jumpOutside)
+function HouseNode:Jump(jumpOutside)
     if not CanJumpToHouseFromCurrentLocation() then
-        local cannotJumpString = data.owned and GetString(SI_COLLECTIONS_CANNOT_JUMP_TO_HOUSE_FROM_LOCATION) or GetString(SI_COLLECTIONS_CANNOT_PREVIEW_HOUSE_FROM_LOCATION)
+        local cannotJumpString = self.owned and GetString(SI_COLLECTIONS_CANNOT_JUMP_TO_HOUSE_FROM_LOCATION) or GetString(SI_COLLECTIONS_CANNOT_PREVIEW_HOUSE_FROM_LOCATION)
         zo_callLater(function()
             SCENE_MANAGER:Hide("worldMap")
             ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, cannotJumpString)
@@ -385,28 +444,27 @@ local function requestJumpToHouse(data, jumpOutside)
         return
     end
 
-    ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.POSITIVE_CLICK,
-            zo_strformat(GetString(jumpOutside and NAVIGATOR_TRAVELING_TO_HOUSE_OUTSIDE or NAVIGATOR_TRAVELING_TO_HOUSE_INSIDE), data.name))
-    local houseId = data.houseId or GetFastTravelNodeHouseId(data.nodeIndex)
-    RequestJumpToHouse(houseId, jumpOutside)
+    local stringId = jumpOutside and NAVIGATOR_TRAVELING_TO_HOUSE_OUTSIDE or NAVIGATOR_TRAVELING_TO_HOUSE_INSIDE
+    ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.POSITIVE_CLICK, zo_strformat(GetString(stringId), self.name))
+    RequestJumpToHouse(self:GetHouseId(), jumpOutside)
     zo_callLater(function() SCENE_MANAGER:Hide("worldMap") end, 10)
 end
 
 function HouseNode:OnClick()
-    requestJumpToHouse(self, false)
+    self:Jump(false)
 end
 
 function HouseNode:AddMenuItems()
     if self.owned then
         AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_HOUSE_INSIDE), self.name), function()
-            requestJumpToHouse(self, false)
+            self:Jump(false)
         end)
         AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_HOUSE_OUTSIDE), self.name), function()
-            requestJumpToHouse(self, true)
+            self:Jump(true)
         end)
     else
         AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_PREVIEW_HOUSE), self.name), function()
-            requestJumpToHouse(self, false)
+            self:Jump(false)
         end)
     end
     --TODO: Revisit: setting the primary residence didn't seem to be immediately visible
@@ -447,6 +505,17 @@ function FastTravelNode:GetWeight()
     return weight
 end
 
+function FastTravelNode:GetSuffix()
+    if self.poiType == Nav.POI_GROUP_DUNGEON then
+        return self.nodeIndex ~= 550 and GetString(NAVIGATOR_DUNGEON) or ""
+    elseif self.poiType == Nav.POI_TRIAL then
+        return GetString(NAVIGATOR_TRIAL)
+    elseif self.poiType == Nav.POI_ARENA then
+        return GetString(NAVIGATOR_ARENA)
+    end
+    return ""
+end
+
 function FastTravelNode:GetTagList(showBookmark)
     local tagList = {}
 
@@ -462,6 +531,21 @@ function FastTravelNode:GetTagList(showBookmark)
     return Nav.Utils.tableConcat(tagList, Node.GetTagList(self, showBookmark))
 end
 
+function FastTravelNode:GetRecallCost()
+    if not Nav.isRecall then
+        return nil
+    end
+
+    local _, timeLeft = GetRecallCooldown()
+    if timeLeft == 0 then
+        local currencyAmount = GetRecallCost(self.nodeIndex)
+        if currencyAmount > 0 then
+            return currencyAmount
+        end
+    end
+    return nil -- It's free!
+end
+
 function FastTravelNode:Jump()
     if not self.known or self.disabled then
         return
@@ -470,8 +554,8 @@ function FastTravelNode:Jump()
     ZO_Dialogs_ReleaseDialog("FAST_TRAVEL_CONFIRM")
     ZO_Dialogs_ReleaseDialog("RECALL_CONFIRM")
 
-    local id = (Nav.isRecall == true and "RECALL_CONFIRM") or "FAST_TRAVEL_CONFIRM"
     if Nav.isRecall == true then
+        -- Locked out of recall for a time
         local _, timeLeft = GetRecallCooldown()
         if timeLeft ~= 0 then
             local text = zo_strformat(SI_FAST_TRAVEL_RECALL_COOLDOWN, self.originalName, ZO_FormatTimeMilliseconds(timeLeft, TIME_FORMAT_STYLE_DESCRIPTIVE, TIME_FORMAT_PRECISION_SECONDS))
@@ -479,6 +563,25 @@ function FastTravelNode:Jump()
             return
         end
     end
+
+    local confirm = Nav.saved.confirmFastTravel
+    local cost = GetRecallCost(self.nodeIndex)
+    local currency = GetRecallCurrency(self.nodeIndex)
+    local canAffordRecall = cost <= GetCurrencyAmount(currency, CURRENCY_LOCATION_CHARACTER)
+    if (confirm == Nav.CONFIRMFASTTRAVEL_NEVER and canAffordRecall) or
+       (confirm == Nav.CONFIRMFASTTRAVEL_WHENCOST and not cost) then
+        zo_callLater(function()
+            FastTravelToNode(self.nodeIndex)
+            SCENE_MANAGER:Hide("worldMap")
+            local id = Nav.isRecall and NAVIGATOR_RECALLING_TO_LOCATION_COST or NAVIGATOR_TRAVELING_TO_LOCATION
+            local currencyString = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(CURT_MONEY, cost, ZO_CURRENCY_FORMAT_AMOUNT_ICON))
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.POSITIVE_CLICK,
+                    zo_strformat(GetString(id), self.name, currencyString))
+        end, 10)
+        return
+    end
+
+    local id = (Nav.isRecall == true and "RECALL_CONFIRM") or "FAST_TRAVEL_CONFIRM"
     ZO_Dialogs_ShowPlatformDialog(id, {nodeIndex = self.nodeIndex}, {mainTextParams = {self.originalName}})
 end
 
@@ -487,10 +590,12 @@ function FastTravelNode:OnClick()
 end
 
 function FastTravelNode:AddMenuItems()
-    local strId = Nav.isRecall and SI_WORLD_MAP_ACTION_RECALL_TO_WAYSHRINE or SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE
-    AddMenuItem(zo_strformat(GetString(strId), self.name), function()
-        self:Jump()
-    end)
+    if self:IsKnown() then
+        local strId = Nav.isRecall and SI_WORLD_MAP_ACTION_RECALL_TO_WAYSHRINE or SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE
+        AddMenuItem(zo_strformat(GetString(strId), self.name), function()
+            self:Jump()
+        end)
+    end
     AddMenuItem(GetString(NAVIGATOR_MENU_SHOWONMAP), function()
         self:ZoomToPOI(false)
     end)

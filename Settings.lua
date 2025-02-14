@@ -9,6 +9,8 @@ function Navigator:loadSettings()
       displayName = self.displayName,
       author = self.author, -- DynamicFPS.Colorize(DynamicFPS.author, "AAF0BB"),
       version = self.appVersion,
+      website = "https://www.esoui.com/downloads/info4026-Navigator-MapSearchFastTravel.html",
+      feedback = "https://www.esoui.com/portal.php?id=401&a=bugreport",
       registerForRefresh = true,
       registerForDefaults = true,
     }
@@ -37,32 +39,62 @@ function Navigator:loadSettings()
     })
 
     table.insert(optionsTable, {
-      type = "checkbox",
-      name = "Auto-focus Search box",
-      tooltip = "Automatically puts the cursor in the search box when the tab is selected. This means that the 'M' key can't be used to exit the map; use 'Escape' instead.",
-      getFunc = function() return sv.autoFocus end,
-      setFunc = function(value)
-        sv.autoFocus = value
-        end,
-      width = "full",
-      warning = "When active, the 'M' key can't be used to immediately exit the map; use 'Escape' instead."
-    })
-
-    table.insert(optionsTable, {
       type = "slider",
       name = "Entries in Recent list",
+      tooltip = "Setting this to 0 will disable the Recent list",
       min = 0,
       max = 20,
       getFunc = function() return sv.recentsCount end,
       setFunc = function(value) sv.recentsCount = value end,
       width = "full",
-      default = 10
-    })  
+      default = self.default.recentsCount
+    })
+
+    -- Get the text for a gold currency icon
+    local currencyInfo = ZO_CURRENCIES_DATA[CURT_MONEY]
+    local iconSize = currencyInfo.keyboardPercentOfLineSize
+    local iconMarkup = currencyInfo.keyboardTexture
+    local gold = zo_iconFormat(iconMarkup, iconSize, iconSize)
+    table.insert(optionsTable, {
+        type = "dropdown",
+        name = "Confirm fast travel",
+        tooltip = "Whether/when to show the standard alert prompt when jumping to a wayshrine. Only affects Navigator, not the World Map",
+        choices = {"Always", zo_strformat("When costs <<1>>", gold), "Never"},
+        choicesValues = { self.CONFIRMFASTTRAVEL_ALWAYS, self.CONFIRMFASTTRAVEL_WHENCOST, self.CONFIRMFASTTRAVEL_NEVER },
+        getFunc = function() return sv.confirmFastTravel end,
+        setFunc = function(value) sv.confirmFastTravel = value end,
+        width = "full",
+        default = self.default.confirmFastTravel,
+    })
+
+    table.insert(optionsTable, {
+        type = "checkbox",
+        name = "Show and search house nicknames",
+        --tooltip = "",
+        getFunc = function() return sv.useHouseNicknames end,
+        setFunc = function(value)
+            sv.useHouseNicknames = value
+            self.Locations:setupNodes()
+        end,
+        width = "full"
+    })
+
+    table.insert(optionsTable, {
+        type = "checkbox",
+        name = "Auto-focus Search box",
+        tooltip = "Automatically puts the cursor in the search box when the tab is selected. This means that the 'M' key can't be used to exit the map; use 'Escape' instead.",
+        getFunc = function() return sv.autoFocus end,
+        setFunc = function(value)
+            sv.autoFocus = value
+        end,
+        width = "full",
+        warning = "When active, the 'M' key can't be used to immediately exit the map; use 'Escape' instead."
+    })
 
     if LibSlashCommander then
       table.insert(optionsTable, {
         type = "dropdown",
-        name = "Chat command:",
+        name = "Chat command",
         tooltip = "Select what name to give the chat slash command",
         choices = {"None", "/nav", "/tp"},
         getFunc = function() return sv.tpCommand end,
@@ -85,18 +117,18 @@ function Navigator:loadSettings()
       })
     end
 
-    table.insert(optionsTable, {
-        type = "checkbox",
-        name = "Show and search house nicknames",
-        --tooltip = "",
-        getFunc = function() return sv.useHouseNicknames end,
-        setFunc = function(value)
-            sv.useHouseNicknames = value
-            self.Locations:setupNodes()
-        end,
-        width = "full"
-    })
-
+    if GetWorldName() == "EU Megaserver" then
+        table.insert(optionsTable, {
+            type = "divider"
+        })
+        table.insert(optionsTable, 	{
+            type = "description",
+            title = "Join our guild!",
+            text = "|cC5C29E|H1:guild:767808|hMora's Whispers|h is a vibrant social lair with a free trader, loads of events, weekly raffles, fully equipped guild base, active Discord and so forth! Hit the link above to find out more!|r",
+            enableLinks = true,
+            reference = Navigator.settingsName .. "_ad"
+        })
+    end
     -- table.insert(optionsTable, 	{
     --   type = "description",
     --   -- title = "My Description",

@@ -30,6 +30,71 @@ local function uniqueName(name, x, z)
     return string.format("%s:%.4f,%.4f", Utils.bareName(name), x, z)
 end
 
+local function createNode(self, i, name, typePOI, icon, glowIcon, known)
+    if i >= 210 and i <= 212 then
+        -- Save this character's alliance's Harborage
+        self.harborageIndex = i
+    end
+
+    name = Utils.FormatSimpleName(name)
+
+    local nodeInfo = {
+        nodeIndex = i,
+        name = Utils.DisplayName(name),
+        originalName = name,
+        type = typePOI,
+        glowIcon = glowIcon,
+        icon = icon,
+        originalIcon = icon,
+        known = known
+    }
+
+    local isHouse = false
+    if typePOI == 6 then
+        nodeInfo.poiType = Nav.POI_GROUP_DUNGEON
+    elseif typePOI == 3 then
+        nodeInfo.poiType = Nav.POI_TRIAL
+        nodeInfo.icon = "esoui/art/tutorial/poi_raiddungeon_complete.dds"
+    elseif typePOI == 7 then
+        nodeInfo.owned = (icon:find("poi_group_house_owned") ~= nil)
+        nodeInfo.freeRecall = true
+        isHouse = true
+        if Nav.saved.useHouseNicknames then
+            nodeInfo.houseId = GetFastTravelNodeHouseId(i)
+            local collectibleId = GetCollectibleIdForHouse(nodeInfo.houseId)
+            nodeInfo.nickname = GetCollectibleNickname(collectibleId)
+            nodeInfo.suffix = zo_strformat(GetString(SI_TOOLTIP_COLLECTIBLE_NICKNAME), nodeInfo.nickname)
+        end
+    elseif typePOI == 1 then
+        nodeInfo.poiType = Nav.POI_WAYSHRINE
+        if icon:find("poi_wayshrine_complete") then nodeInfo.icon = "Navigator/media/wayshrine.dds" end
+    elseif glowIcon == "/esoui/art/icons/poi/poi_soloinstance_glow.dds" or
+            glowIcon == "/esoui/art/icons/poi/poi_groupinstance_glow.dds" then
+        nodeInfo.poiType = Nav.POI_ARENA
+    else
+        Nav.logWarning("Unknown POI " .. i .. " '" .. name .. "' type " .. typePOI .. " " .. (glowIcon or "-"))
+    end
+
+    nodeInfo.barename = Utils.bareName(nodeInfo.name)
+
+    if icon == "/esoui/art/icons/icon_missing.dds" then
+        nodeInfo.icon = "/esoui/art/crafting/crafting_smithing_notrait.dds"
+    end
+
+    if nodeInfo.zoneId == Nav.ZONE_CYRODIIL and nodeInfo.poiType == Nav.POI_WAYSHRINE then
+        nodeInfo.icon = "/esoui/art/crafting/crafting_smithing_notrait.dds"
+        nodeInfo.disabled = true
+    end
+
+    local traders = Nav.Data.traderCounts[i]
+    if traders and traders > 0 then
+        nodeInfo.traders = traders
+    end
+
+    local node = isHouse and Nav.HouseNode:New(nodeInfo) or Nav.FastTravelNode:New(nodeInfo)
+    return node
+end
+
 local function getOrCreateZone(self, zoneId, zoneName, zoneIndex)
     if not self.zones[zoneId] then
         if self:IsZone(zoneId) then
@@ -52,6 +117,20 @@ local function getOrCreateZone(self, zoneId, zoneName, zoneIndex)
     return self.zones[zoneId]
 end
 
+local function addExtraZone(self, zoneId, mapId, canJumpToPlayer)
+    local name, _, _, zoneIndex, _ = GetMapInfoById(mapId)
+    self.zones[zoneId] = Nav.ZoneNode:New({
+        name = name,
+        zoneName = name,
+        zoneId = zoneId,
+        index = zoneIndex,
+        mapId = mapId,
+        canJumpToPlayer = canJumpToPlayer,
+        known = true,
+        nodes = {}
+    })
+end
+
 function Locs:setupNodes()
     local beginTime  = GetGameTimeMilliseconds()
     self.nodes = {}
@@ -66,7 +145,7 @@ function Locs:setupNodes()
         local known, name, x, z, icon, glowIcon, typePOI, _, isLocked = GetFastTravelNodeInfo(i)
 
         if not isLocked and name ~= "" and (typePOI == 1 or glowIcon ~= nil) then
-            local node = self:CreateNode(i, name, typePOI, icon, glowIcon, known)
+            local node = createNode(self, i, name, typePOI, icon, glowIcon, known)
 
             table.insert(self.nodes, node)
             self.nodeMap[i] = node
@@ -83,12 +162,14 @@ function Locs:setupNodes()
     beginTime = GetGameTimeMilliseconds()
 
     -- Iterate through zones to find correct zones for nodes
-    for zoneId = 1, 2000 do
+    local zoneIdLimit = 1446 -- The Scholarium
+    for zoneId = 1, zoneIdLimit do
 		local zoneName = GetZoneNameById(zoneId)
 		if zoneName ~= nil and zoneName ~= ""
            and zoneId ~= 643 -- Imperial Sewers
            --and zoneId ~= 1283 -- The Shambles
            then
+            zoneIdLimit = zoneId + 50
             zoneName = Utils.FormatSimpleName(zoneName)
 			local zoneIndex = GetZoneIndex(zoneId)
 			local numPOIs = GetNumPOIs(zoneIndex)
@@ -142,12 +223,12 @@ function Locs:setupNodes()
 		end
 	end
 
-    self:AddExtraZone(Nav.ZONE_TAMRIEL, 27) -- Sort of true, but called 'Clean Test'
-    self:AddExtraZone(1, 439) -- Fake!
-    self:AddExtraZone(Nav.ZONE_ATOLLOFIMMOLATION, 2000, true)
-    self:AddExtraZone(Nav.ZONE_BLACKREACH, 1782, false)
+    addExtraZone(self, Nav.ZONE_TAMRIEL, 27) -- Sort of true, but called 'Clean Test'
+    addExtraZone(self, 1, 439) -- Fake!
+    addExtraZone(self, Nav.ZONE_ATOLLOFIMMOLATION, 2000, true)
+    addExtraZone(self, Nav.ZONE_BLACKREACH, 1782, false)
 
-    Nav.log("Locations:setupNodes: POIs took %d ms", GetGameTimeMilliseconds() - beginTime)
+    Nav.log("Locations:setupNodes: POIs took %d ms (zoneIdLimit %d)", GetGameTimeMilliseconds() - beginTime, zoneIdLimit)
 
     for i = 1, #self.nodes do
         if not self.nodes[i].poiIndex and self.nodes[i].zoneId ~= Nav.ZONE_CYRODIIL then
@@ -159,93 +240,9 @@ function Locs:setupNodes()
     end
 end
 
-function Locs:AddExtraZone(zoneId, mapId, canJumpToPlayer)
-    local name, _, _, zoneIndex, _ = GetMapInfoById(mapId)
-    self.zones[zoneId] = Nav.ZoneNode:New({
-        name = name,
-        zoneName = name,
-        zoneId = zoneId,
-        index = zoneIndex,
-        mapId = mapId,
-        canJumpToPlayer = canJumpToPlayer,
-        known = true,
-        nodes = {}
-    })
-end
-
-function Locs:CreateNode(i, name, typePOI, icon, glowIcon, known)
-    if i >= 210 and i <= 212 then
-        -- Save this character's alliance's Harborage
-        self.harborageIndex = i
-    end
-
-    name = Utils.FormatSimpleName(name)
-
-    local nodeInfo = {
-        nodeIndex = i,
-        name = Utils.DisplayName(name),
-        originalName = name,
-        type = typePOI,
-        glowIcon = glowIcon,
-        icon = icon,
-        originalIcon = icon,
-        known = known
-    }
-
-    if typePOI == 6 then
-        nodeInfo.poiType = Nav.POI_GROUP_DUNGEON
-        if i ~= 550 then -- not Infinite Archive
-            nodeInfo.suffix = GetString(NAVIGATOR_DUNGEON)
-        end
-    elseif typePOI == 3 then
-        nodeInfo.poiType = Nav.POI_TRIAL
-        nodeInfo.icon = "esoui/art/tutorial/poi_raiddungeon_complete.dds"
-        nodeInfo.suffix = GetString(NAVIGATOR_TRIAL)
-    elseif typePOI == 7 then
-        nodeInfo.owned = (icon:find("poi_group_house_owned") ~= nil)
-        nodeInfo.freeRecall = true
-        nodeInfo.houseId = GetFastTravelNodeHouseId(i)
-        if nodeInfo.houseId == GetHousingPrimaryHouse() then
-            nodeInfo.isPrimary = true
-        end
-        if Nav.saved.useHouseNicknames then
-            nodeInfo.collectibleId = GetCollectibleIdForHouse(nodeInfo.houseId)
-            nodeInfo.nickname = GetCollectibleNickname(nodeInfo.collectibleId)
-            nodeInfo.suffix = zo_strformat(GetString(SI_TOOLTIP_COLLECTIBLE_NICKNAME), nodeInfo.nickname)
-        end
-    elseif typePOI == 1 then
-        nodeInfo.poiType = Nav.POI_WAYSHRINE
-        if icon:find("poi_wayshrine_complete") then nodeInfo.icon = "Navigator/media/wayshrine.dds" end
-    elseif glowIcon == "/esoui/art/icons/poi/poi_soloinstance_glow.dds" or
-           glowIcon == "/esoui/art/icons/poi/poi_groupinstance_glow.dds" then
-        nodeInfo.poiType = Nav.POI_ARENA
-        nodeInfo.suffix = GetString(NAVIGATOR_ARENA)
-    else
-        Nav.logWarning("Unknown POI " .. i .. " '" .. name .. "' type " .. typePOI .. " " .. (glowIcon or "-"))
-    end
-
-    nodeInfo.barename = Utils.bareName(nodeInfo.name)
-
-    if icon == "/esoui/art/icons/icon_missing.dds" then
-        nodeInfo.icon = "/esoui/art/crafting/crafting_smithing_notrait.dds"
-    end
-
-    if nodeInfo.zoneId == Nav.ZONE_CYRODIIL and nodeInfo.poiType == Nav.POI_WAYSHRINE then
-        nodeInfo.icon = "/esoui/art/crafting/crafting_smithing_notrait.dds"
-        nodeInfo.disabled = true
-    end
-
-    local traders = Nav.Data.traderCounts[i]
-    if traders and traders > 0 then
-        nodeInfo.traders = traders
-    end
-
-    local node = nodeInfo.houseId and Nav.HouseNode:New(nodeInfo) or Nav.FastTravelNode:New(nodeInfo)
-    return node
-end
-
 function Locs:clearKnownNodes()
     if self.nodes then
+        Nav.log("clearKnownNodes")
         for i = 1, #self.nodes do
             if not self.nodes[i].known then -- unknown nodes may become known, but not vice versa
                 self.nodes[i].known = nil
@@ -314,7 +311,7 @@ function Locs:getKnownNodes(zoneId, includeAliases)
         if (not zoneId or node.zoneId == zoneId) then --node:IsKnown() and (not zoneId or node.zoneId == zoneId) then
             table.insert(nodes, node)
 
-            if includeAliases and node.houseId and node.owned and Nav.saved.useHouseNicknames then
+            if includeAliases and node:IsHouse() and Nav.saved.useHouseNicknames then
                 table.insert(nodes, createHouseAlias(node))
             end
         end
@@ -330,7 +327,7 @@ function Locs:getHouseList(includeAliases)
     local nodes = {}
     for i = 1, #self.nodes do
         local index = self.nodes[i].nodeIndex
-        if self:isKnownNode(index) and self.nodes[i].houseId then
+        if self.nodes[i]:IsKnown() and self.nodes[i]:IsHouse() then
             local node = self.nodes[i]
             table.insert(nodes, node)
 
