@@ -477,7 +477,7 @@ local function showWayshrineMenu(owner, data)
         local yPad = 12
         if data.indexInCategory > 1 then
             AddMenuItem(GetString(NAVIGATOR_MENU_MOVEBOOKMARKUP), function()
-                Nav.Bookmarks:Move(data, -1)
+                Nav.Bookmarks:Move(data.node, -1)
                 MT.menuOpen = false
                 zo_callLater(function() MT:ImmediateRefresh() end, 10)
             end, nil, nil, nil, nil, yPad)
@@ -485,14 +485,14 @@ local function showWayshrineMenu(owner, data)
         end
         if data.indexInCategory < data.categoryEntryCount then
             AddMenuItem(GetString(NAVIGATOR_MENU_MOVEBOOKMARKDOWN), function()
-                Nav.Bookmarks:Move(data, 1)
+                Nav.Bookmarks:Move(data.node, 1)
                 MT.menuOpen = false
                 zo_callLater(function() MT:ImmediateRefresh() end, 10)
             end, nil, nil, nil, nil, yPad)
             yPad = 0
         end
         AddMenuItem(GetString(NAVIGATOR_MENU_REMOVEBOOKMARK), function()
-            bookmarks:remove(data)
+            bookmarks:remove(data.node)
             MT.menuOpen = false
             zo_callLater(function() MT:ImmediateRefresh() end, 10)
         end)
