@@ -111,11 +111,13 @@ function Node:GetRecallCost()
 end
 
 function Node:ZoomToPOI(setWaypoint)
-    local function getPOIMapInfo(zoneIndex, mapId, poiIndex)
+    local function getPOIMapInfo(self, zoneIndex, mapId)
         if mapId == 2082 then
-            return 0.3485, 0.3805 -- GetPOIMapInfo returns 0,0 for The Shambles
+            return 0.3485, 0.3805 -- The Shambles
+        elseif self.nodeIndex == 407 then
+            return 0.9273, 0.7105 -- Dragonguard Sanctum
         else
-            return GetPOIMapInfo(zoneIndex, poiIndex)
+            return GetPOIMapInfo(zoneIndex, self.poiIndex)
         end
     end
 
@@ -133,17 +135,20 @@ function Node:ZoomToPOI(setWaypoint)
     local targetMapId = self.mapId or Nav.Locations.GetMapIdByZoneId(self.zoneId)
     local currentMapId = GetCurrentMapId()
     local targetZoneIndex = GetZoneIndex(self.zoneId)
+    if self.nodeIndex == 407 then -- Dragonguard Sanctum
+        targetMapId = 1654
+    end
 
     if targetMapId ~= currentMapId then
-        WORLD_MAP_MANAGER:SetMapById(targetMapId)
+    WORLD_MAP_MANAGER:SetMapById(targetMapId)
 
-        zo_callLater(function()
-            panToPOI(targetZoneIndex, targetMapId, self.poiIndex)
-        end, 100)
+    zo_callLater(function()
+    panToPOI(self, targetZoneIndex, targetMapId)
+    end, 100)
     else
-        panToPOI(targetZoneIndex, targetMapId, self.poiIndex)
+    panToPOI(self, targetZoneIndex, targetMapId)
     end
-end
+    end
 
 
 --- @class PlayerNode
