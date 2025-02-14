@@ -400,9 +400,9 @@ function HouseNode:GetSuffixColour()
     return (self.known and self.owned) and Nav.COLOUR_SUFFIX_NORMAL or Nav.COLOUR_SUFFIX_DISABLED
 end
 
-local function requestJumpToHouse(data, jumpOutside)
+function HouseNode:Jump(jumpOutside)
     if not CanJumpToHouseFromCurrentLocation() then
-        local cannotJumpString = data.owned and GetString(SI_COLLECTIONS_CANNOT_JUMP_TO_HOUSE_FROM_LOCATION) or GetString(SI_COLLECTIONS_CANNOT_PREVIEW_HOUSE_FROM_LOCATION)
+        local cannotJumpString = self.owned and GetString(SI_COLLECTIONS_CANNOT_JUMP_TO_HOUSE_FROM_LOCATION) or GetString(SI_COLLECTIONS_CANNOT_PREVIEW_HOUSE_FROM_LOCATION)
         zo_callLater(function()
             SCENE_MANAGER:Hide("worldMap")
             ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, cannotJumpString)
@@ -410,27 +410,27 @@ local function requestJumpToHouse(data, jumpOutside)
         return
     end
 
-    ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.POSITIVE_CLICK,
-            zo_strformat(GetString(jumpOutside and NAVIGATOR_TRAVELING_TO_HOUSE_OUTSIDE or NAVIGATOR_TRAVELING_TO_HOUSE_INSIDE), data.name))
-    RequestJumpToHouse(data:GetHouseId(), jumpOutside)
+    local stringId = jumpOutside and NAVIGATOR_TRAVELING_TO_HOUSE_OUTSIDE or NAVIGATOR_TRAVELING_TO_HOUSE_INSIDE
+    ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.POSITIVE_CLICK, zo_strformat(GetString(stringId), self.name))
+    RequestJumpToHouse(self:GetHouseId(), jumpOutside)
     zo_callLater(function() SCENE_MANAGER:Hide("worldMap") end, 10)
 end
 
 function HouseNode:OnClick()
-    requestJumpToHouse(self, false)
+    self:Jump(false)
 end
 
 function HouseNode:AddMenuItems()
     if self.owned then
         AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_HOUSE_INSIDE), self.name), function()
-            requestJumpToHouse(self, false)
+            self:Jump(false)
         end)
         AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_HOUSE_OUTSIDE), self.name), function()
-            requestJumpToHouse(self, true)
+            self:Jump(true)
         end)
     else
         AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_PREVIEW_HOUSE), self.name), function()
-            requestJumpToHouse(self, false)
+            self:Jump(false)
         end)
     end
     --TODO: Revisit: setting the primary residence didn't seem to be immediately visible
