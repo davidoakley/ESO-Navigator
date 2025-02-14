@@ -162,12 +162,14 @@ function Locs:setupNodes()
     beginTime = GetGameTimeMilliseconds()
 
     -- Iterate through zones to find correct zones for nodes
-    for zoneId = 1, 2000 do
+    local zoneIdLimit = 1446 -- The Scholarium
+    for zoneId = 1, zoneIdLimit do
 		local zoneName = GetZoneNameById(zoneId)
 		if zoneName ~= nil and zoneName ~= ""
            and zoneId ~= 643 -- Imperial Sewers
            --and zoneId ~= 1283 -- The Shambles
            then
+            zoneIdLimit = zoneId + 50
             zoneName = Utils.FormatSimpleName(zoneName)
 			local zoneIndex = GetZoneIndex(zoneId)
 			local numPOIs = GetNumPOIs(zoneIndex)
@@ -208,7 +210,7 @@ function Locs:setupNodes()
     addExtraZone(self, Nav.ZONE_ATOLLOFIMMOLATION, 2000, true)
     addExtraZone(self, Nav.ZONE_BLACKREACH, 1782, false)
 
-    Nav.log("Locations:setupNodes: POIs took %d ms", GetGameTimeMilliseconds() - beginTime)
+    Nav.log("Locations:setupNodes: POIs took %d ms (zoneIdLimit %d)", GetGameTimeMilliseconds() - beginTime, zoneIdLimit)
 
     for i = 1, #self.nodes do
         if not self.nodes[i].poiIndex and self.nodes[i].zoneId ~= Nav.ZONE_CYRODIIL then
