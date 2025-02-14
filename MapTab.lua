@@ -33,7 +33,7 @@ function MT:ImmediateRefresh()
 end
 
 local function getDeveloperTooltip(node)
-    if not Nav.isDeveloper then
+    if not Nav.isDeveloper or not Nav.saved.loggingEnabled then
         return nil
     end
 
