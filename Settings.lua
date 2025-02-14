@@ -9,6 +9,8 @@ function Navigator:loadSettings()
       displayName = self.displayName,
       author = self.author, -- DynamicFPS.Colorize(DynamicFPS.author, "AAF0BB"),
       version = self.appVersion,
+      website = "https://www.esoui.com/downloads/info4026-Navigator-MapSearchFastTravel.html",
+      feedback = "https://www.esoui.com/portal.php?id=401&a=bugreport",
       registerForRefresh = true,
       registerForDefaults = true,
     }
@@ -121,7 +123,8 @@ function Navigator:loadSettings()
         })
         table.insert(optionsTable, 	{
             type = "description",
-            text = "Why not join |H1:guild:767808|hMora's Whispers|h?\nOur guild is a vibrant social lair with a free trader, loads of events, weekly raffles, fully equipped guild base, active Discord and so forth! Hit the link to find out more!",
+            title = "Join our guild!",
+            text = "|cC5C29E|H1:guild:767808|hMora's Whispers|h is a vibrant social lair with a free trader, loads of events, weekly raffles, fully equipped guild base, active Discord and so forth! Hit the link above to find out more!|r",
             enableLinks = true,
             reference = Navigator.settingsName .. "_ad"
         })

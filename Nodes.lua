@@ -16,6 +16,8 @@ function Node:New(o)
     return o
 end
 
+function Node:IsHouse() return false end
+
 ---WeightComparison
 ---@param x Node
 ---@param y Node
@@ -65,9 +67,7 @@ function Node:GetIcon()
 end
 
 function Node:GetSuffix()
-    local suffix = self.suffix or ""
-
-    return suffix
+    return self.suffix or ""
 end
 
 function Node:GetTagList(showBookmark)
@@ -111,11 +111,13 @@ function Node:GetRecallCost()
 end
 
 function Node:ZoomToPOI(setWaypoint)
-    local function getPOIMapInfo(zoneIndex, mapId, poiIndex)
+    local function getPOIMapInfo(self, zoneIndex, mapId)
         if mapId == 2082 then
-            return 0.3485, 0.3805 -- GetPOIMapInfo returns 0,0 for The Shambles
+            return 0.3485, 0.3805 -- The Shambles
+        elseif self.nodeIndex == 407 then
+            return 0.9273, 0.7105 -- Dragonguard Sanctum
         else
-            return GetPOIMapInfo(zoneIndex, poiIndex)
+            return GetPOIMapInfo(zoneIndex, self.poiIndex)
         end
     end
 
@@ -133,17 +135,20 @@ function Node:ZoomToPOI(setWaypoint)
     local targetMapId = self.mapId or Nav.Locations.GetMapIdByZoneId(self.zoneId)
     local currentMapId = GetCurrentMapId()
     local targetZoneIndex = GetZoneIndex(self.zoneId)
+    if self.nodeIndex == 407 then -- Dragonguard Sanctum
+        targetMapId = 1654
+    end
 
     if targetMapId ~= currentMapId then
-        WORLD_MAP_MANAGER:SetMapById(targetMapId)
+    WORLD_MAP_MANAGER:SetMapById(targetMapId)
 
-        zo_callLater(function()
-            panToPOI(targetZoneIndex, targetMapId, self.poiIndex)
-        end, 100)
+    zo_callLater(function()
+    panToPOI(self, targetZoneIndex, targetMapId)
+    end, 100)
     else
-        panToPOI(targetZoneIndex, targetMapId, self.poiIndex)
+    panToPOI(self, targetZoneIndex, targetMapId)
     end
-end
+    end
 
 
 --- @class PlayerNode
@@ -345,6 +350,22 @@ end
 --- @class HouseNode
 local HouseNode = Node:New()
 
+function HouseNode:IsHouse() return true end
+
+function HouseNode:GetHouseId()
+    if self.houseId == nil then
+        self.houseId = GetFastTravelNodeHouseId(self.nodeIndex)
+    end
+    return self.houseId
+end
+
+function HouseNode:IsPrimary()
+    if self.isPrimary == nil then
+        self.isPrimary = self:GetHouseId() == GetHousingPrimaryHouse()
+    end
+    return self.isPrimary
+end
+
 function HouseNode:GetWeight()
     local weight = 1.0
 
@@ -355,7 +376,7 @@ function HouseNode:GetWeight()
     elseif Nav.Bookmarks:contains(self) then
         weight = 1.2
     end
-    if self.isPrimary then
+    if self:IsPrimary() then
         weight = weight + 0.1
     end
 
@@ -363,7 +384,7 @@ function HouseNode:GetWeight()
 end
 
 function HouseNode:GetIcon()
-    return self.isPrimary and "Navigator/media/house_star.dds" or
+    return self:IsPrimary() and "Navigator/media/house_star.dds" or
             (self.owned and "Navigator/media/house.dds" or "Navigator/media/house_unowned.dds")
 end
 
@@ -379,9 +400,9 @@ function HouseNode:GetSuffixColour()
     return (self.known and self.owned) and Nav.COLOUR_SUFFIX_NORMAL or Nav.COLOUR_SUFFIX_DISABLED
 end
 
-local function requestJumpToHouse(data, jumpOutside)
+function HouseNode:Jump(jumpOutside)
     if not CanJumpToHouseFromCurrentLocation() then
-        local cannotJumpString = data.owned and GetString(SI_COLLECTIONS_CANNOT_JUMP_TO_HOUSE_FROM_LOCATION) or GetString(SI_COLLECTIONS_CANNOT_PREVIEW_HOUSE_FROM_LOCATION)
+        local cannotJumpString = self.owned and GetString(SI_COLLECTIONS_CANNOT_JUMP_TO_HOUSE_FROM_LOCATION) or GetString(SI_COLLECTIONS_CANNOT_PREVIEW_HOUSE_FROM_LOCATION)
         zo_callLater(function()
             SCENE_MANAGER:Hide("worldMap")
             ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, cannotJumpString)
@@ -389,28 +410,27 @@ local function requestJumpToHouse(data, jumpOutside)
         return
     end
 
-    ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.POSITIVE_CLICK,
-            zo_strformat(GetString(jumpOutside and NAVIGATOR_TRAVELING_TO_HOUSE_OUTSIDE or NAVIGATOR_TRAVELING_TO_HOUSE_INSIDE), data.name))
-    local houseId = data.houseId or GetFastTravelNodeHouseId(data.nodeIndex)
-    RequestJumpToHouse(houseId, jumpOutside)
+    local stringId = jumpOutside and NAVIGATOR_TRAVELING_TO_HOUSE_OUTSIDE or NAVIGATOR_TRAVELING_TO_HOUSE_INSIDE
+    ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.POSITIVE_CLICK, zo_strformat(GetString(stringId), self.name))
+    RequestJumpToHouse(self:GetHouseId(), jumpOutside)
     zo_callLater(function() SCENE_MANAGER:Hide("worldMap") end, 10)
 end
 
 function HouseNode:OnClick()
-    requestJumpToHouse(self, false)
+    self:Jump(false)
 end
 
 function HouseNode:AddMenuItems()
     if self.owned then
         AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_HOUSE_INSIDE), self.name), function()
-            requestJumpToHouse(self, false)
+            self:Jump(false)
         end)
         AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_HOUSE_OUTSIDE), self.name), function()
-            requestJumpToHouse(self, true)
+            self:Jump(true)
         end)
     else
         AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_PREVIEW_HOUSE), self.name), function()
-            requestJumpToHouse(self, false)
+            self:Jump(false)
         end)
     end
     --TODO: Revisit: setting the primary residence didn't seem to be immediately visible
@@ -449,6 +469,17 @@ function FastTravelNode:GetWeight()
     end
 
     return weight
+end
+
+function FastTravelNode:GetSuffix()
+    if self.poiType == Nav.POI_GROUP_DUNGEON then
+        return self.nodeIndex ~= 550 and GetString(NAVIGATOR_DUNGEON) or ""
+    elseif self.poiType == Nav.POI_TRIAL then
+        return GetString(NAVIGATOR_TRIAL)
+    elseif self.poiType == Nav.POI_ARENA then
+        return GetString(NAVIGATOR_ARENA)
+    end
+    return ""
 end
 
 function FastTravelNode:GetTagList(showBookmark)
