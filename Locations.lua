@@ -176,13 +176,9 @@ function Locs:CreateNode(i, name, typePOI, icon, glowIcon, known)
 
     if typePOI == 6 then
         nodeInfo.poiType = Nav.POI_GROUP_DUNGEON
-        if i ~= 550 then -- not Infinite Archive
-            nodeInfo.suffix = GetString(NAVIGATOR_DUNGEON)
-        end
     elseif typePOI == 3 then
         nodeInfo.poiType = Nav.POI_TRIAL
         nodeInfo.icon = "esoui/art/tutorial/poi_raiddungeon_complete.dds"
-        nodeInfo.suffix = GetString(NAVIGATOR_TRIAL)
     elseif typePOI == 7 then
         nodeInfo.owned = (icon:find("poi_group_house_owned") ~= nil)
         nodeInfo.freeRecall = true
@@ -201,7 +197,6 @@ function Locs:CreateNode(i, name, typePOI, icon, glowIcon, known)
     elseif glowIcon == "/esoui/art/icons/poi/poi_soloinstance_glow.dds" or
            glowIcon == "/esoui/art/icons/poi/poi_groupinstance_glow.dds" then
         nodeInfo.poiType = Nav.POI_ARENA
-        nodeInfo.suffix = GetString(NAVIGATOR_ARENA)
     else
         Nav.logWarning("Unknown POI " .. i .. " '" .. name .. "' type " .. typePOI .. " " .. (glowIcon or "-"))
     end

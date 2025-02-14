@@ -65,9 +65,7 @@ function Node:GetIcon()
 end
 
 function Node:GetSuffix()
-    local suffix = self.suffix or ""
-
-    return suffix
+    return self.suffix or ""
 end
 
 function Node:GetTagList(showBookmark)
@@ -449,6 +447,17 @@ function FastTravelNode:GetWeight()
     end
 
     return weight
+end
+
+function FastTravelNode:GetSuffix()
+    if self.poiType == Nav.POI_GROUP_DUNGEON then
+        return self.nodeIndex ~= 550 and GetString(NAVIGATOR_DUNGEON) or ""
+    elseif self.poiType == Nav.POI_TRIAL then
+        return GetString(NAVIGATOR_TRIAL)
+    elseif self.poiType == Nav.POI_ARENA then
+        return GetString(NAVIGATOR_ARENA)
+    end
+    return ""
 end
 
 function FastTravelNode:GetTagList(showBookmark)
