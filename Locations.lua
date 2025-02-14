@@ -49,6 +49,7 @@ local function createNode(self, i, name, typePOI, icon, glowIcon, known)
         known = known
     }
 
+    local isHouse = false
     if typePOI == 6 then
         nodeInfo.poiType = Nav.POI_GROUP_DUNGEON
     elseif typePOI == 3 then
@@ -57,13 +58,11 @@ local function createNode(self, i, name, typePOI, icon, glowIcon, known)
     elseif typePOI == 7 then
         nodeInfo.owned = (icon:find("poi_group_house_owned") ~= nil)
         nodeInfo.freeRecall = true
-        nodeInfo.houseId = GetFastTravelNodeHouseId(i)
-        if nodeInfo.houseId == GetHousingPrimaryHouse() then
-            nodeInfo.isPrimary = true
-        end
+        isHouse = true
         if Nav.saved.useHouseNicknames then
-            nodeInfo.collectibleId = GetCollectibleIdForHouse(nodeInfo.houseId)
-            nodeInfo.nickname = GetCollectibleNickname(nodeInfo.collectibleId)
+            nodeInfo.houseId = GetFastTravelNodeHouseId(i)
+            local collectibleId = GetCollectibleIdForHouse(nodeInfo.houseId)
+            nodeInfo.nickname = GetCollectibleNickname(collectibleId)
             nodeInfo.suffix = zo_strformat(GetString(SI_TOOLTIP_COLLECTIBLE_NICKNAME), nodeInfo.nickname)
         end
     elseif typePOI == 1 then
@@ -92,7 +91,7 @@ local function createNode(self, i, name, typePOI, icon, glowIcon, known)
         nodeInfo.traders = traders
     end
 
-    local node = nodeInfo.houseId and Nav.HouseNode:New(nodeInfo) or Nav.FastTravelNode:New(nodeInfo)
+    local node = isHouse and Nav.HouseNode:New(nodeInfo) or Nav.FastTravelNode:New(nodeInfo)
     return node
 end
 
@@ -282,7 +281,7 @@ function Locs:getKnownNodes(zoneId, includeAliases)
         if node:IsKnown() and (not zoneId or node.zoneId == zoneId) then
             table.insert(nodes, node)
 
-            if includeAliases and node.houseId and node.owned and Nav.saved.useHouseNicknames then
+            if includeAliases and node:IsHouse() and Nav.saved.useHouseNicknames then
                 table.insert(nodes, createHouseAlias(node))
             end
         end
@@ -298,7 +297,7 @@ function Locs:getHouseList(includeAliases)
     local nodes = {}
     for i = 1, #self.nodes do
         local index = self.nodes[i].nodeIndex
-        if self:isKnownNode(index) and self.nodes[i].houseId then
+        if self:isKnownNode(index) and self.nodes[i]:IsHouse() then
             local node = self.nodes[i]
             table.insert(nodes, node)
 

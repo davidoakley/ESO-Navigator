@@ -16,6 +16,8 @@ function Node:New(o)
     return o
 end
 
+function Node:IsHouse() return false end
+
 ---WeightComparison
 ---@param x Node
 ---@param y Node
@@ -341,7 +343,23 @@ end
 
 
 --- @class HouseNode
-local HouseNode = Node:New()
+local HouseNode = Node:New({ isHouse = true })
+
+function HouseNode:IsHouse() return true end
+
+function HouseNode:GetHouseId()
+    if self.houseId == nil then
+        self.houseId = GetFastTravelNodeHouseId(self.nodeIndex)
+    end
+    return self.houseId
+end
+
+function HouseNode:IsPrimary()
+    if self.isPrimary == nil then
+        self.isPrimary = self:GetHouseId() == GetHousingPrimaryHouse()
+    end
+    return self.isPrimary
+end
 
 function HouseNode:GetWeight()
     local weight = 1.0
@@ -353,7 +371,7 @@ function HouseNode:GetWeight()
     elseif Nav.Bookmarks:contains(self) then
         weight = 1.2
     end
-    if self.isPrimary then
+    if self:IsPrimary() then
         weight = weight + 0.1
     end
 
@@ -361,7 +379,7 @@ function HouseNode:GetWeight()
 end
 
 function HouseNode:GetIcon()
-    return self.isPrimary and "Navigator/media/house_star.dds" or
+    return self:IsPrimary() and "Navigator/media/house_star.dds" or
             (self.owned and "Navigator/media/house.dds" or "Navigator/media/house_unowned.dds")
 end
 
@@ -389,8 +407,7 @@ local function requestJumpToHouse(data, jumpOutside)
 
     ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.POSITIVE_CLICK,
             zo_strformat(GetString(jumpOutside and NAVIGATOR_TRAVELING_TO_HOUSE_OUTSIDE or NAVIGATOR_TRAVELING_TO_HOUSE_INSIDE), data.name))
-    local houseId = data.houseId or GetFastTravelNodeHouseId(data.nodeIndex)
-    RequestJumpToHouse(houseId, jumpOutside)
+    RequestJumpToHouse(data:GetHouseId(), jumpOutside)
     zo_callLater(function() SCENE_MANAGER:Hide("worldMap") end, 10)
 end
 
