@@ -109,8 +109,11 @@ function MT:layoutRow(rowControl, data, _)
             end
         end
 
-        if node.tooltip then
-            tooltipText = (tooltipText and (tooltipText .. "\n") or "") .. node.tooltip
+        if node.GetTooltip then
+            local t = node:GetTooltip()
+            if t then
+                tooltipText = (tooltipText and (tooltipText .. "\n") or "") .. t
+            end
         end
 
         local devTooltip = getDeveloperTooltip(node)

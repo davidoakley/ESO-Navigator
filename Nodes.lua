@@ -80,6 +80,10 @@ function Node:GetTagList(showBookmark)
     return tagList
 end
 
+function Node:GetTooltip()
+    return self.tooltip
+end
+
 function Node:GetColour(isSelected)
     if isSelected and self.known and not self.disabled then
         return Nav.COLOUR_WHITE
@@ -271,6 +275,13 @@ function ZoneNode:GetIcon()
     return "Navigator/media/zone.dds"
 end
 
+function ZoneNode:GetTooltip()
+    if self.zoneId == Nav.ZONE_CYRODIIL then return nil end
+    local player = Nav.Players:GetPlayerInZone(self.zoneId)
+    local stringId = player and NAVIGATOR_TIP_DOUBLECLICK_TO_TRAVEL or NAVIGATOR_NO_TRAVEL_PLAYER
+    return zo_strformat(GetString(stringId), self.name)
+end
+
 function ZoneNode:JumpToZone()
     Nav.Players:SetupPlayers()
     local zoneId = self.zoneId
@@ -352,6 +363,8 @@ function JumpToZoneNode:GetIcon()
 end
 
 function JumpToZoneNode:GetSuffix() return "" end
+function JumpToZoneNode:GetTagList() return {} end
+function JumpToZoneNode:GetTooltip() return nil end
 
 function JumpToZoneNode:GetColour(isSelected)
     if isSelected and self.known then
