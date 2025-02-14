@@ -583,6 +583,8 @@ function MT:OnMapChanged()
         self:updateFilterControl()
         self.editControl:SetText("")
         self:executeSearch("")
+
+        Nav.Node.RemovePings()
     end
 end
 

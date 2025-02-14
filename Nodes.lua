@@ -6,6 +6,8 @@
 
 local Nav = Navigator
 
+local pingEvent
+
 --- @class Node
 local Node = {}
 
@@ -126,6 +128,8 @@ function Node:ZoomToPOI(setWaypoint)
         Nav.log("Node:ZoomToPOI: poiIndex=%d, %f,%f", poiIndex, normalizedX, normalizedZ)
         if setWaypoint then
             PingMap(MAP_PIN_TYPE_PLAYER_WAYPOINT, MAP_TYPE_LOCATION_CENTERED, normalizedX, normalizedZ)
+        else
+            Node.AddPing(normalizedX, normalizedZ)
         end
 
         local mapPanAndZoom = ZO_WorldMap_GetPanAndZoom()
@@ -140,16 +144,33 @@ function Node:ZoomToPOI(setWaypoint)
     end
 
     if targetMapId ~= currentMapId then
-    WORLD_MAP_MANAGER:SetMapById(targetMapId)
+        WORLD_MAP_MANAGER:SetMapById(targetMapId)
 
-    zo_callLater(function()
-    panToPOI(self, targetZoneIndex, targetMapId)
-    end, 100)
+        zo_callLater(function()
+            panToPOI(self, targetZoneIndex, targetMapId)
+        end, 100)
     else
-    panToPOI(self, targetZoneIndex, targetMapId)
+        panToPOI(self, targetZoneIndex, targetMapId)
     end
-    end
+end
 
+function Node.AddPing(x, y)
+    Node.RemovePings()
+    local pinMgr = ZO_WorldMap_GetPinManager()
+    pinMgr:CreatePin(MAP_PIN_TYPE_AUTO_MAP_NAVIGATION_PING, "pings", x, y)
+    pingEvent = zo_callLater(function()
+        Node.RemovePings()
+        pingEvent = nil
+    end, 2800)
+end
+
+function Node.RemovePings()
+    if pingEvent then
+        zo_removeCallLater(pingEvent)
+        pingEvent = nil
+        ZO_WorldMap_GetPinManager():RemovePins("pings", MAP_PIN_TYPE_AUTO_MAP_NAVIGATION_PING)
+    end
+end
 
 --- @class PlayerNode
 local PlayerNode = Node:New()
