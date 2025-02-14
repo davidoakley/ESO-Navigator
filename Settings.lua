@@ -58,7 +58,7 @@ function Navigator:loadSettings()
     table.insert(optionsTable, {
         type = "dropdown",
         name = "Confirm fast travel",
-        tooltip = "Whether/when to show the standard alert prompt when jumping to a wayshrine",
+        tooltip = "Whether/when to show the standard alert prompt when jumping to a wayshrine. Only affects Navigator, not the World Map",
         choices = {"Always", zo_strformat("When costs <<1>>", gold), "Never"},
         choicesValues = { self.CONFIRMFASTTRAVEL_ALWAYS, self.CONFIRMFASTTRAVEL_WHENCOST, self.CONFIRMFASTTRAVEL_NEVER },
         getFunc = function() return sv.confirmFastTravel end,

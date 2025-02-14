@@ -6,6 +6,8 @@
 
 local Nav = Navigator
 
+local pingEvent
+
 --- @class Node
 local Node = {}
 
@@ -78,6 +80,10 @@ function Node:GetTagList(showBookmark)
     return tagList
 end
 
+function Node:GetTooltip()
+    return self.tooltip
+end
+
 function Node:GetColour(isSelected)
     if isSelected and self.known and not self.disabled then
         return Nav.COLOUR_WHITE
@@ -126,6 +132,8 @@ function Node:ZoomToPOI(setWaypoint)
         Nav.log("Node:ZoomToPOI: poiIndex=%d, %f,%f", poiIndex, normalizedX, normalizedZ)
         if setWaypoint then
             PingMap(MAP_PIN_TYPE_PLAYER_WAYPOINT, MAP_TYPE_LOCATION_CENTERED, normalizedX, normalizedZ)
+        else
+            Node.AddPing(normalizedX, normalizedZ)
         end
 
         local mapPanAndZoom = ZO_WorldMap_GetPanAndZoom()
@@ -140,16 +148,33 @@ function Node:ZoomToPOI(setWaypoint)
     end
 
     if targetMapId ~= currentMapId then
-    WORLD_MAP_MANAGER:SetMapById(targetMapId)
+        WORLD_MAP_MANAGER:SetMapById(targetMapId)
 
-    zo_callLater(function()
-    panToPOI(self, targetZoneIndex, targetMapId)
-    end, 100)
+        zo_callLater(function()
+            panToPOI(self, targetZoneIndex, targetMapId)
+        end, 100)
     else
-    panToPOI(self, targetZoneIndex, targetMapId)
+        panToPOI(self, targetZoneIndex, targetMapId)
     end
-    end
+end
 
+function Node.AddPing(x, y)
+    Node.RemovePings()
+    local pinMgr = ZO_WorldMap_GetPinManager()
+    pinMgr:CreatePin(MAP_PIN_TYPE_AUTO_MAP_NAVIGATION_PING, "pings", x, y)
+    pingEvent = zo_callLater(function()
+        Node.RemovePings()
+        pingEvent = nil
+    end, 2800)
+end
+
+function Node.RemovePings()
+    if pingEvent then
+        zo_removeCallLater(pingEvent)
+        pingEvent = nil
+        ZO_WorldMap_GetPinManager():RemovePins("pings", MAP_PIN_TYPE_AUTO_MAP_NAVIGATION_PING)
+    end
+end
 
 --- @class PlayerNode
 local PlayerNode = Node:New()
@@ -250,6 +275,13 @@ function ZoneNode:GetIcon()
     return "Navigator/media/zone.dds"
 end
 
+function ZoneNode:GetTooltip()
+    if self.zoneId == Nav.ZONE_CYRODIIL then return nil end
+    local player = Nav.Players:GetPlayerInZone(self.zoneId)
+    local stringId = player and NAVIGATOR_TIP_DOUBLECLICK_TO_TRAVEL or NAVIGATOR_NO_TRAVEL_PLAYER
+    return zo_strformat(GetString(stringId), self.name)
+end
+
 function ZoneNode:JumpToZone()
     Nav.Players:SetupPlayers()
     local zoneId = self.zoneId
@@ -331,6 +363,8 @@ function JumpToZoneNode:GetIcon()
 end
 
 function JumpToZoneNode:GetSuffix() return "" end
+function JumpToZoneNode:GetTagList() return {} end
+function JumpToZoneNode:GetTooltip() return nil end
 
 function JumpToZoneNode:GetColour(isSelected)
     if isSelected and self.known then
