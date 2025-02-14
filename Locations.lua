@@ -299,7 +299,7 @@ function Locs:getHouseList(includeAliases)
     local nodes = {}
     for i = 1, #self.nodes do
         local index = self.nodes[i].nodeIndex
-        if self:isKnownNode(index) and self.nodes[i]:IsHouse() then
+        if self.nodes[i]:IsKnown() and self.nodes[i]:IsHouse() then
             local node = self.nodes[i]
             table.insert(nodes, node)
 

@@ -343,7 +343,7 @@ end
 
 
 --- @class HouseNode
-local HouseNode = Node:New({ isHouse = true })
+local HouseNode = Node:New()
 
 function HouseNode:IsHouse() return true end
 
