@@ -75,7 +75,7 @@ end
 function Node:GetTagList(showBookmark)
     local tagList = {}
     if showBookmark and Nav.Bookmarks:contains(self) then
-        table.insert(tagList, "|t25:25:Navigator/media/bookmark.dds:inheritcolor|t")
+        table.insert(tagList, "|t18:24:Navigator/media/tags/bookmark.dds:inheritcolor|t")
     end
     return tagList
 end
@@ -521,11 +521,11 @@ function FastTravelNode:GetTagList(showBookmark)
 
     if self.traders and self.traders > 0 then
         if self.traders >= 5 then
-            table.insert(tagList, "|t20:23:Navigator/media/city_narrow.dds:inheritcolor|t")
+            table.insert(tagList, "|t18:24:Navigator/media/tags/city.dds:inheritcolor|t")
         elseif self.traders >= 2 then
-            table.insert(tagList, "|t20:23:Navigator/media/town_narrow.dds:inheritcolor|t")
+            table.insert(tagList, "|t18:24:Navigator/media/tags/town.dds:inheritcolor|t")
         end
-        table.insert(tagList, "|t23:23:/esoui/art/icons/servicemappins/servicepin_guildkiosk.dds:inheritcolor|t")
+        table.insert(tagList, "|t18:24:Navigator/media/tags/trader.dds:inheritcolor|t")
     end
 
     return Nav.Utils.tableConcat(tagList, Node.GetTagList(self, showBookmark))
