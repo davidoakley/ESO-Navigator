@@ -191,7 +191,7 @@ end
 
 function PlayerNode:GetIcon()
     if self.isGroupmate then
-        return isLeader and "/esoui/art/icons/mapkey/mapkey_groupleader.dds" or "/esoui/art/icons/mapkey/mapkey_groupmember.dds"
+        return self.isLeader and "/esoui/art/icons/mapkey/mapkey_groupleader.dds" or "/esoui/art/icons/mapkey/mapkey_groupmember.dds"
     elseif self.isFriend then
         return "Navigator/media/player_friend.dds"
     else
