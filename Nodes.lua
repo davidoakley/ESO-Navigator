@@ -191,7 +191,7 @@ end
 
 function PlayerNode:GetIcon()
     if self.isGroupmate then
-        return isLeader and "/esoui/art/icons/mapkey/mapkey_groupleader.dds" or "/esoui/art/icons/mapkey/mapkey_groupmember.dds"
+        return self.isLeader and "/esoui/art/icons/mapkey/mapkey_groupleader.dds" or "/esoui/art/icons/mapkey/mapkey_groupmember.dds"
     elseif self.isFriend then
         return "Navigator/media/player_friend.dds"
     else
@@ -565,11 +565,11 @@ function FastTravelNode:Jump()
     end
 
     local confirm = Nav.saved.confirmFastTravel
-    local cost = GetRecallCost(self.nodeIndex)
+    local cost = Nav.isRecall and GetRecallCost(self.nodeIndex) or 0
     local currency = GetRecallCurrency(self.nodeIndex)
     local canAffordRecall = cost <= GetCurrencyAmount(currency, CURRENCY_LOCATION_CHARACTER)
     if (confirm == Nav.CONFIRMFASTTRAVEL_NEVER and canAffordRecall) or
-       (confirm == Nav.CONFIRMFASTTRAVEL_WHENCOST and not cost) then
+       (confirm == Nav.CONFIRMFASTTRAVEL_WHENCOST and cost == 0) then
         zo_callLater(function()
             FastTravelToNode(self.nodeIndex)
             SCENE_MANAGER:Hide("worldMap")

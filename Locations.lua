@@ -432,7 +432,7 @@ end
 
 function Locs:GetHarborage()
     for i = 210, 212 do
-        if self:isKnownNode(i) then
+        if self:GetNode(i) then
             return i
         end
     end
