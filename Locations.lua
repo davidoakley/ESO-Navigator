@@ -252,20 +252,6 @@ function Locs:clearKnownNodes()
 end
 
 
-function Locs:getNodes()
-    if self.nodes == nil then
-        self:setupNodes()
-    end
-    return self.nodes
-end
-
-function Locs:getNodeMap()
-    if self.nodeMap == nil then
-        self:setupNodes()
-    end
-    return self.nodeMap
-end
-
 function Locs:GetNode(nodeIndex, includeUnknown)
     local node = self.nodeMap[nodeIndex]
     if not includeUnknown and not node:IsKnown() then

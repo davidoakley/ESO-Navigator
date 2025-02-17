@@ -78,7 +78,6 @@ end
 function Bookmarks:getBookmarks()
     local list = Nav.saved.bookmarks
     local results = {}
-    --local nodeMap = Nav.Locations:getNodeMap()
 
     for i = 1, #list do
         local entry = list[i]
