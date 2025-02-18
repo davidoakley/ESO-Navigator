@@ -154,6 +154,8 @@ function MT:updateFilterControl()
         self:showFilterControl('Players')
     elseif self.filter == Nav.FILTER_HOUSES then
         self:showFilterControl('Houses')
+    elseif self.filter == Nav.FILTER_ALL then
+        self:showFilterControl('All')
     end
 end
 
@@ -188,12 +190,13 @@ local function buildList(scrollData, id, title, list, defaultString)
     end
 
     local currentNodeIndex = MT.resultCount
+    local includeUnknown = Nav.saved.includeUndiscovered or MT.filter == Nav.FILTER_ALL
 
     for i = 1, #list do
         if list[i].hint then
             local entry = ZO_ScrollList_CreateDataEntry(3, { hint = list[i].hint })
             table.insert(scrollData, entry)
-        else
+        elseif list[i].known or includeUnknown then
             local isSelected = hasFocus and list[i].known and (currentNodeIndex == MT.targetNode)
             local data = {
                 node = list[i],
@@ -391,6 +394,11 @@ function MT:onTextChanged(editbox)
         searchString = ""
     elseif searchString == "h:" then
         self.filter = Nav.FILTER_HOUSES
+        editbox:SetText("")
+        editbox.editTextChanged = false
+        searchString = ""
+    elseif searchString == "a:" then
+        self.filter = Nav.FILTER_ALL
         editbox:SetText("")
         editbox.editTextChanged = false
         searchString = ""
