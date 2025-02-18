@@ -167,6 +167,11 @@ function MT:layoutHintRow(rowControl, data, _)
 	rowControl.label:SetText(data.hint or "-")
 end
 
+local function ShowUndiscovered()
+    MT.filter = Nav.FILTER_ALL
+    MT:ImmediateRefresh()
+end
+
 local function nameComparison(x, y)
 	return Utils.SortName(x) < Utils.SortName(y)
 end
@@ -191,6 +196,7 @@ local function buildList(scrollData, id, title, list, defaultString)
 
     local currentNodeIndex = MT.resultCount
     local includeUnknown = Nav.saved.includeUndiscovered or MT.filter == Nav.FILTER_ALL
+    local listed = 0
 
     for i = 1, #list do
         if list[i].hint then
@@ -209,7 +215,14 @@ local function buildList(scrollData, id, title, list, defaultString)
             table.insert(scrollData, entry)
 
             currentNodeIndex = currentNodeIndex + 1
+            listed = listed + 1
         end
+    end
+
+    Nav.log("#list %d, listed %d", #list, listed)
+    if #list > 0 and listed == 0 then
+        local entry = ZO_ScrollList_CreateDataEntry(3, { hint = GetString(NAVIGATOR_HINT_SHOWUNDISCOVERED), onClick = ShowUndiscovered })
+        table.insert(scrollData, entry)
     end
 
     MT.resultCount = currentNodeIndex
@@ -574,6 +587,13 @@ function MT:CategoryRowMouseUp(control, mouseButton)
         self.collapsedCategories[data.id] = not self.collapsedCategories[data.id]
         MT:buildScrollList(true)
         MT:updateFilterControl()
+    end
+end
+
+function MT:HintRowMouseUp(control, mouseButton)
+    local data = ZO_ScrollList_GetData(control)
+    if data.onClick then
+        data.onClick()
     end
 end
 
