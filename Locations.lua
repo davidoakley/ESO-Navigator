@@ -26,11 +26,12 @@ function Locs:IsZone(zoneId)
     return false
 end
 
-local function uniqueName(name, x, z)
-    return string.format("%s:%.4f,%.4f", Utils.bareName(name), x, z)
+local function uniqueName(index, name, x, z)
+    return (index == 0) and string.format("%s:%.4f,%.4f", Utils.bareName(name), x, z)
+                         or string.format("%.4f,%.4f", x, z)
 end
 
-local function createNode(self, i, name, typePOI, icon, glowIcon, known)
+local function createNode(self, i, name, typePOI, icon, glowIcon, known, zone, poiIndex)
     if i >= 210 and i <= 212 then
         -- Save this character's alliance's Harborage
         self.harborageIndex = i
@@ -43,10 +44,12 @@ local function createNode(self, i, name, typePOI, icon, glowIcon, known)
         name = Utils.DisplayName(name),
         originalName = name,
         type = typePOI,
-        glowIcon = glowIcon,
         icon = icon,
         originalIcon = icon,
-        known = known
+        known = known,
+        zoneId = zone.zoneId,
+        zoneIndex = zone.zoneIndex,
+        poiIndex = poiIndex
     }
 
     local isHouse = false
@@ -95,122 +98,151 @@ local function createNode(self, i, name, typePOI, icon, glowIcon, known)
     return node
 end
 
-local function getOrCreateZone(self, zoneId, zoneName, zoneIndex)
+local function getOrCreateZone(self, zoneId, zoneName, zoneIndex, mapId, canJumpToPlayer)
     if not self.zones[zoneId] then
-        if self:IsZone(zoneId) then
+        if mapId and zoneIndex == nil then
+            local n, _, _, i, _ = GetMapInfoById(mapId)
+            zoneName = n
+            zoneIndex = i
+        end
+        if self:IsZone(zoneId) or mapId then
+            if canJumpToPlayer == nil then
+                canJumpToPlayer = CanJumpToPlayerInZone(zoneId) or zoneId == Nav.ZONE_ATOLLOFIMMOLATION
+            end
             self.zones[zoneId] = Nav.ZoneNode:New({
                 name = zoneName,
                 zoneName = zoneName,
                 zoneId = zoneId,
+                zoneIndex = zoneIndex,
                 index = zoneIndex,
-                nodes = {},
-                canJumpToPlayer = CanJumpToPlayerInZone(zoneId) or zoneId == Nav.ZONE_ATOLLOFIMMOLATION,
+                mapId = mapId,
+                pois = {},
+                canJumpToPlayer = canJumpToPlayer,
                 known = true
             })
             if zoneId == 642 then
                 self.zones[zoneId].hidden = true
             end
         else
-            Nav.log("setupNodes: not zone: zoneId %d name %s", zoneId, zoneName)
+            Nav.log("SetupNodes: not zone: zoneId %d name %s", zoneId, zoneName)
         end
     end
     return self.zones[zoneId]
 end
 
-local function addExtraZone(self, zoneId, mapId, canJumpToPlayer)
-    local name, _, _, zoneIndex, _ = GetMapInfoById(mapId)
-    self.zones[zoneId] = Nav.ZoneNode:New({
-        name = name,
-        zoneName = name,
-        zoneId = zoneId,
-        index = zoneIndex,
-        mapId = mapId,
-        canJumpToPlayer = canJumpToPlayer,
-        known = true,
-        nodes = {}
-    })
+local function loadFastTravelNode(self, nodeIndex, nodeLookup, zoneLookup)
+    local known, name, x, z, icon, glowIcon, typePOI, _, isLocked = GetFastTravelNodeInfo(nodeIndex)
+
+    if not isLocked and name ~= "" and (typePOI == 1 or glowIcon ~= nil) then
+        local zoneIndex, poiIndex = GetFastTravelNodePOIIndicies(nodeIndex)
+        local zoneId = GetZoneId(zoneIndex)
+        if not zoneLookup[zoneId] then
+            zoneId = GetParentZoneId(zoneId)
+        end
+        if zoneLookup[zoneId] then
+            local _, _, _, zone = unpack(zoneLookup[zoneId])
+            local node = createNode(self, nodeIndex, name, typePOI, icon, glowIcon, known, zone, poiIndex)
+
+            self.nodeMap[nodeIndex] = node
+
+            local uid = string.format("%d:%d", zoneIndex, poiIndex) --uniqueName(0, name, x, z)
+            if not nodeLookup[uid] then --nodeLookup[uid] then
+                nodeLookup[uid] = node
+                table.insert(self.nodes, node)
+                zone.pois[poiIndex] = node
+
+                node.nodeZoneIndex = zoneIndex
+                node.nodePOIIndex = poiIndex
+            else
+                Nav.log("loadFastTravelNode: duplicate %d/%d/%s vs %d/%d/%s", zoneIndex, poiIndex, name, zone.pois[poiIndex].zoneIndex or -1, zone.pois[poiIndex].poiIndex or -1, zone.pois[poiIndex].name or "?")
+            end
+        else
+            Nav.log("loadFastTravelNode: nodeIndex %d '%s': no zone for zoneIndex %d zoneId %d", nodeIndex, name, zoneIndex or -1, zoneId or -1)
+        end
+    end
 end
 
-function Locs:setupNodes()
-    local beginTime  = GetGameTimeMilliseconds()
+local function loadPopulatedZones(self, zoneLookup)
+    -- Iterate through zones to find correct zones for nodes
+    local zoneIdLimit = 1446 -- The Scholarium
+    local zoneId = 1
+    while zoneId <= zoneIdLimit do --for zoneId = 1, zoneIdLimit do
+        if self:IsZone(zoneId) then
+            local zoneName = GetZoneNameById(zoneId)
+            if zoneName ~= nil and zoneName ~= ""
+                    and zoneId ~= 643 -- Imperial Sewers
+            then
+                zoneIdLimit = math.max(zoneIdLimit, zoneId + 50)
+                zoneName = Utils.FormatSimpleName(zoneName)
+                local zoneIndex = GetZoneIndex(zoneId)
+                local numPOIs = GetNumPOIs(zoneIndex)
+                if numPOIs > 0 then
+                    local zone = getOrCreateZone(self, zoneId, zoneName, zoneIndex)
+                    zoneLookup[zoneId] = { zoneName, zoneIndex, numPOIs, zone }
+                end
+            end
+        end
+        zoneId = zoneId + 1
+    end
+
+    getOrCreateZone(self, Nav.ZONE_TAMRIEL, nil, nil, 27, false) -- Sort of true, but called 'Clean Test'
+    getOrCreateZone(self, 1, nil, nil, 439, false) -- Fake!
+    getOrCreateZone(self, Nav.ZONE_ATOLLOFIMMOLATION, nil, nil, 2000, true)
+    getOrCreateZone(self, Nav.ZONE_BLACKREACH, nil, nil, 1782, false)
+end
+
+local function loadZonePOIs(self, zoneId, zoneIndex, zoneName, numPOIs)
+    for poiIndex = 1, numPOIs do
+        local nodeZoneId = zoneId
+        local poiName = GetPOIInfo(zoneIndex, poiIndex) -- might be wrong - "X" instead of "Dungeon: X"!
+        local zone = getOrCreateZone(self, nodeZoneId, zoneName, zoneIndex)
+        if zone and not zone.pois[poiIndex] and poiName ~= nil and poiName ~= "" then
+            local _, _, _, icon, _, _, isDiscovered, _ = GetPOIMapInfo(zoneIndex, poiIndex)
+            local node = Nav.POINode:New({
+                poiIndex = poiIndex,
+                name = Utils.DisplayName(poiName),
+                originalName = poiName,
+                type = Nav.POI_MISC,
+                zoneId = nodeZoneId,
+                icon = icon,
+                originalIcon = icon,
+                known = isDiscovered
+            })
+
+            table.insert(self.nodes, node)
+            zone.pois[poiIndex] = node
+        end
+    end
+end
+
+function Locs:SetupNodes()
     self.nodes = {}
     self.nodeMap = {}
     self.zones = {}
+    self.zoneIndices = {}
     self.locMap = {}
 
-    local totalNodes = GetNumFastTravelNodes()
-    local namelocMap = {} -- Match on barename and location
-    local locMap = {} -- Match on location
-    for i = 1, totalNodes do
-        local known, name, x, z, icon, glowIcon, typePOI, _, isLocked = GetFastTravelNodeInfo(i)
-
-        if not isLocked and name ~= "" and (typePOI == 1 or glowIcon ~= nil) then
-            local node = createNode(self, i, name, typePOI, icon, glowIcon, known)
-
-            table.insert(self.nodes, node)
-            self.nodeMap[i] = node
-            local uid = uniqueName(name, x, z)
-            if not namelocMap[uid] then
-                namelocMap[uid] = node
-                locMap[string.format("%.4f,%.4f", x, z)] = node
-            end
-        end
-    end
-    --self.namelocMap = namelocMap
-
-    Nav.log("Locations:setupNodes: FTNodes took %d ms", GetGameTimeMilliseconds() - beginTime)
     beginTime = GetGameTimeMilliseconds()
+    local zoneLookup = {}
+    loadPopulatedZones(self, zoneLookup)
+    self.zoneLookup = zoneLookup
+    Nav.log("Locations:SetupNodes: Zones took %d ms", GetGameTimeMilliseconds() - beginTime)
 
+    local beginTime  = GetGameTimeMilliseconds()
+    local nodeLookup = {} -- Match on barename:x,z or x,z
+    local totalNodes = GetNumFastTravelNodes()
+    for i = 1, totalNodes do
+        loadFastTravelNode(self, i, nodeLookup, zoneLookup)
+    end
+    Nav.log("Locations:SetupNodes: FTNodes took %d ms", GetGameTimeMilliseconds() - beginTime)
+
+    beginTime = GetGameTimeMilliseconds()
     -- Iterate through zones to find correct zones for nodes
-    local zoneIdLimit = 1446 -- The Scholarium
-    for zoneId = 1, zoneIdLimit do
-		local zoneName = GetZoneNameById(zoneId)
-		if zoneName ~= nil and zoneName ~= ""
-           and zoneId ~= 643 -- Imperial Sewers
-           --and zoneId ~= 1283 -- The Shambles
-           then
-            zoneIdLimit = zoneId + 50
-            zoneName = Utils.FormatSimpleName(zoneName)
-			local zoneIndex = GetZoneIndex(zoneId)
-			local numPOIs = GetNumPOIs(zoneIndex)
-			for poiIndex = 1, numPOIs do
-				local poiName = GetPOIInfo(zoneIndex, poiIndex) -- might be wrong - "X" instead of "Dungeon: X"!
-                local x, z = GetPOIMapInfo(zoneIndex, poiIndex)
-                local node = namelocMap[uniqueName(poiName, x, z)]  -- that's why we use BareName to strip prefix
-                -- fix "Darkshade Caverns I" being returned for both DC1 and DC2
-                if zoneId == 57 and poiIndex == 60 then -- zone Deshaan, POI 60 is DC2!
-                    node = self.nodeMap[264]
-                elseif not node then
-                    node = locMap[string.format("%.4f,%.4f", x, z)]
-                end
-                if poiName ~= "" and node ~= nil  then -- teleportable POI
-                    node.poiIndex = poiIndex
-
-                    if zoneId==1146 then -- the Dragonguard Sanctuary wayshrine in Tideholm
-                        zoneId = 1133 -- should appear in Southern Elsweyr
-                    elseif zoneId==1283 then
-                        zoneId = Nav.ZONE_FARGRAVE -- The Shambles -> Fargrave
-                        node.mapId = 2082
-					end
-
-                    local zone = getOrCreateZone(self, zoneId, zoneName, zoneIndex)
-                    if zone then
-                        node.zoneId = zoneId
-                        table.insert(zone.nodes, node)
-                    -- else
-                    --     Nav.log("Locs:setupNodes: node "..i.." '"..nodeInfo.name.."' in non-parent zoneId "..nodeZoneId)
-                    end
-				end
-			end
-		end
-	end
-
-    addExtraZone(self, Nav.ZONE_TAMRIEL, 27) -- Sort of true, but called 'Clean Test'
-    addExtraZone(self, 1, 439) -- Fake!
-    addExtraZone(self, Nav.ZONE_ATOLLOFIMMOLATION, 2000, true)
-    addExtraZone(self, Nav.ZONE_BLACKREACH, 1782, false)
-
-    Nav.log("Locations:setupNodes: POIs took %d ms (zoneIdLimit %d)", GetGameTimeMilliseconds() - beginTime, zoneIdLimit)
+    for zoneId, zoneData in pairs(zoneLookup) do
+        local zoneName, zoneIndex, numPOIs = unpack(zoneData)
+        loadZonePOIs(self, zoneId, zoneIndex, zoneName, numPOIs)
+    end
+    Nav.log("Locations:SetupNodes: POIs took %d ms", GetGameTimeMilliseconds() - beginTime)
 
     for i = 1, #self.nodes do
         if not self.nodes[i].poiIndex and self.nodes[i].zoneId ~= Nav.ZONE_CYRODIIL then
@@ -234,20 +266,6 @@ function Locs:clearKnownNodes()
 end
 
 
-function Locs:getNodes()
-    if self.nodes == nil then
-        self:setupNodes()
-    end
-    return self.nodes
-end
-
-function Locs:getNodeMap()
-    if self.nodeMap == nil then
-        self:setupNodes()
-    end
-    return self.nodeMap
-end
-
 function Locs:GetNode(nodeIndex, includeUnknown)
     local node = self.nodeMap[nodeIndex]
     if not includeUnknown and not node:IsKnown() then
@@ -255,6 +273,16 @@ function Locs:GetNode(nodeIndex, includeUnknown)
     end
 
     return self.nodeMap[nodeIndex]
+end
+
+function Locs:GetPOI(zoneId, poiIndex, includeUnknown)
+    for i = 1, #self.nodes do
+        local node = self.nodes[i]
+        if node.zoneId == zoneId and node.poiIndex == poiIndex and (not includeUnknown and not node:IsKnown()) then
+            return node
+        end
+    end
+    return nil
 end
 
 local function createHouseAlias(node)
@@ -268,7 +296,7 @@ end
 
 function Locs:getKnownNodes(zoneId, includeAliases)
     if self.nodes == nil then
-        self:setupNodes()
+        self:SetupNodes()
     end
 
     if zoneId == Nav.ZONE_BLACKREACH then
@@ -280,7 +308,7 @@ function Locs:getKnownNodes(zoneId, includeAliases)
     local nodes = {}
     for i = 1, #self.nodes do
         local node = self.nodes[i]
-        if node:IsKnown() and (not zoneId or node.zoneId == zoneId) then
+        if (not zoneId or node.zoneId == zoneId) then --node:IsKnown() and (not zoneId or node.zoneId == zoneId) then
             table.insert(nodes, node)
 
             if includeAliases and node:IsHouse() and Nav.saved.useHouseNicknames then
@@ -293,12 +321,11 @@ end
 
 function Locs:getHouseList(includeAliases)
     if self.nodes == nil then
-        self:setupNodes()
+        self:SetupNodes()
     end
 
     local nodes = {}
     for i = 1, #self.nodes do
-        local index = self.nodes[i].nodeIndex
         if self.nodes[i]:IsKnown() and self.nodes[i]:IsHouse() then
             local node = self.nodes[i]
             table.insert(nodes, node)
@@ -313,7 +340,7 @@ end
 
 function Locs:GetZones()
     if not self.zones then
-        self:setupNodes()
+        self:SetupNodes()
     end
     return self.zones
 end
@@ -322,7 +349,7 @@ function Locs:getZoneList(includeAliases)
     local nodes = {}
 
     if not self.zones then
-        self:setupNodes()
+        self:SetupNodes()
     end
 
     for zoneId, zone in pairs(self.zones) do
@@ -346,7 +373,7 @@ end
 
 function Locs:getZone(zoneId)
     if not self.zones then
-        self:setupNodes()
+        self:SetupNodes()
     end
 
     return self.zones[zoneId]
@@ -369,7 +396,7 @@ end
 
 function Locs:getCurrentMapZone()
     if self.zones == nil then
-        self:setupNodes()
+        self:SetupNodes()
     end
 
     local mapId = GetCurrentMapId()

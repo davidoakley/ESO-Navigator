@@ -60,7 +60,7 @@ function Recents:getRecents(count)
             return results
         end
 
-        local nodeIndex = self.nodes[i] or 0 -- nodeMap[self.nodes[i]].nodeIndex or 0
+        local nodeIndex = self.nodes[i] or 0
         if Nav.Locations:IsHarborage(nodeIndex) then
             nodeIndex = Nav.Locations:GetHarborage()
         end

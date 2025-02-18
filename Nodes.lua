@@ -191,7 +191,7 @@ end
 
 function PlayerNode:GetIcon()
     if self.isGroupmate then
-        return isLeader and "/esoui/art/icons/mapkey/mapkey_groupleader.dds" or "/esoui/art/icons/mapkey/mapkey_groupmember.dds"
+        return self.isLeader and "/esoui/art/icons/mapkey/mapkey_groupleader.dds" or "/esoui/art/icons/mapkey/mapkey_groupmember.dds"
     elseif self.isFriend then
         return "Navigator/media/player_friend.dds"
     else
@@ -473,7 +473,7 @@ function HouseNode:AddMenuItems()
     --        local houseId = data.houseId or GetFastTravelNodeHouseId(data.nodeIndex)
     --        SetHousingPrimaryHouse(houseId)
     --        zo_callLater(function()
-    --            Nav.Locations:setupNodes()
+    --            Nav.Locations:SetupNodes()
     --            Nav.MapTab:ImmediateRefresh()
     --        end, 10)
     --        ClearMenu()
@@ -626,6 +626,27 @@ function PlayerHouseNode:AddMenuItems()
 end
 
 
+--- @class POINode
+local POINode = Node:New()
+
+function POINode:OnClick()
+    self:ZoomToPOI(false)
+end
+
+function POINode:AddMenuItems()
+    AddMenuItem(GetString(NAVIGATOR_MENU_SHOWONMAP), function()
+        self:ZoomToPOI(false)
+    end)
+    AddMenuItem(GetString(NAVIGATOR_MENU_SETDESTINATION), function()
+        self:ZoomToPOI(true)
+    end)
+    self:AddBookmarkMenuItem({ poiIndex = self.poiIndex, zoneId = self.zoneId })
+end
+
+function POINode:GetWeight()
+    return self:IsKnown() and 0.5 or 0.3
+end
+
 Nav.Node = Node
 Nav.PlayerNode = PlayerNode
 Nav.ZoneNode = ZoneNode
@@ -633,3 +654,4 @@ Nav.JumpToZoneNode = JumpToZoneNode
 Nav.HouseNode = HouseNode
 Nav.FastTravelNode = FastTravelNode
 Nav.PlayerHouseNode = PlayerHouseNode
+Nav.POINode = POINode

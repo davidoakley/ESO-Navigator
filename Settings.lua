@@ -74,7 +74,7 @@ function Navigator:loadSettings()
         getFunc = function() return sv.useHouseNicknames end,
         setFunc = function(value)
             sv.useHouseNicknames = value
-            self.Locations:setupNodes()
+            self.Locations:SetupNodes()
         end,
         width = "full"
     })
