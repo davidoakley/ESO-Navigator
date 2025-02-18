@@ -406,7 +406,7 @@ function HouseNode:GetWeight()
     if self.isAlias then
         weight = 0.6
     elseif not self.owned then
-        weight = 0.7
+        weight = 0.4
     elseif Nav.Bookmarks:contains(self) then
         weight = 1.2
     end

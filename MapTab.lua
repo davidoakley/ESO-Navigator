@@ -154,6 +154,8 @@ function MT:updateFilterControl()
         self:showFilterControl('Players')
     elseif self.filter == Nav.FILTER_HOUSES then
         self:showFilterControl('Houses')
+    elseif self.filter == Nav.FILTER_ALL then
+        self:showFilterControl('All')
     end
 end
 
@@ -163,6 +165,11 @@ end
 
 function MT:layoutHintRow(rowControl, data, _)
 	rowControl.label:SetText(data.hint or "-")
+end
+
+local function ShowUndiscovered()
+    MT.filter = Nav.FILTER_ALL
+    MT:ImmediateRefresh()
 end
 
 local function nameComparison(x, y)
@@ -188,12 +195,14 @@ local function buildList(scrollData, id, title, list, defaultString)
     end
 
     local currentNodeIndex = MT.resultCount
+    local includeUnknown = Nav.saved.includeUndiscovered or MT.filter == Nav.FILTER_ALL
+    local listed = 0
 
     for i = 1, #list do
         if list[i].hint then
             local entry = ZO_ScrollList_CreateDataEntry(3, { hint = list[i].hint })
             table.insert(scrollData, entry)
-        else
+        elseif list[i].known or includeUnknown then
             local isSelected = hasFocus and list[i].known and (currentNodeIndex == MT.targetNode)
             local data = {
                 node = list[i],
@@ -206,7 +215,14 @@ local function buildList(scrollData, id, title, list, defaultString)
             table.insert(scrollData, entry)
 
             currentNodeIndex = currentNodeIndex + 1
+            listed = listed + 1
         end
+    end
+
+    Nav.log("#list %d, listed %d", #list, listed)
+    if #list > 0 and listed == 0 then
+        local entry = ZO_ScrollList_CreateDataEntry(3, { hint = GetString(NAVIGATOR_HINT_SHOWUNDISCOVERED), onClick = ShowUndiscovered })
+        table.insert(scrollData, entry)
     end
 
     MT.resultCount = currentNodeIndex
@@ -394,6 +410,11 @@ function MT:onTextChanged(editbox)
         editbox:SetText("")
         editbox.editTextChanged = false
         searchString = ""
+    elseif searchString == "a:" then
+        self.filter = Nav.FILTER_ALL
+        editbox:SetText("")
+        editbox.editTextChanged = false
+        searchString = ""
     elseif searchString == '@' or searchString == "p:" then
         self.filter = Nav.FILTER_PLAYERS
         editbox.editTextChanged = false
@@ -566,6 +587,13 @@ function MT:CategoryRowMouseUp(control, mouseButton)
         self.collapsedCategories[data.id] = not self.collapsedCategories[data.id]
         MT:buildScrollList(true)
         MT:updateFilterControl()
+    end
+end
+
+function MT:HintRowMouseUp(control, mouseButton)
+    local data = ZO_ScrollList_GetData(control)
+    if data.onClick then
+        data.onClick()
     end
 end
 

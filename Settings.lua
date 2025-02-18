@@ -81,6 +81,17 @@ function Navigator:loadSettings()
 
     table.insert(optionsTable, {
         type = "checkbox",
+        name = "Include undiscovered locations",
+        tooltip = "List undiscovered locations and show them in search results",
+        getFunc = function() return sv.includeUndiscovered end,
+        setFunc = function(value)
+            sv.includeUndiscovered = value
+        end,
+        width = "full"
+    })
+
+    table.insert(optionsTable, {
+        type = "checkbox",
         name = "Auto-focus Search box",
         tooltip = "Automatically puts the cursor in the search box when the tab is selected. This means that the 'M' key can't be used to exit the map; use 'Escape' instead.",
         getFunc = function() return sv.autoFocus end,

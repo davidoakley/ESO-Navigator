@@ -26,6 +26,7 @@ Nav.default = {
   bookmarks = {},
   defaultTab = true,
   autoFocus = false,
+  includeUndiscovered = false,
   tpCommand = "/nav",
   loggingEnabled = false,
   recentsCount = 10,
