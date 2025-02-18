@@ -98,17 +98,26 @@ local function createNode(self, i, name, typePOI, icon, glowIcon, known, zone, p
     return node
 end
 
-local function getOrCreateZone(self, zoneId, zoneName, zoneIndex)
+local function getOrCreateZone(self, zoneId, zoneName, zoneIndex, mapId, canJumpToPlayer)
     if not self.zones[zoneId] then
-        if self:IsZone(zoneId) then
+        if mapId and zoneIndex == nil then
+            local n, _, _, i, _ = GetMapInfoById(mapId)
+            zoneName = n
+            zoneIndex = i
+        end
+        if self:IsZone(zoneId) or mapId then
+            if canJumpToPlayer == nil then
+                canJumpToPlayer = CanJumpToPlayerInZone(zoneId) or zoneId == Nav.ZONE_ATOLLOFIMMOLATION
+            end
             self.zones[zoneId] = Nav.ZoneNode:New({
                 name = zoneName,
                 zoneName = zoneName,
                 zoneId = zoneId,
                 zoneIndex = zoneIndex,
                 index = zoneIndex,
+                mapId = mapId,
                 pois = {},
-                canJumpToPlayer = CanJumpToPlayerInZone(zoneId) or zoneId == Nav.ZONE_ATOLLOFIMMOLATION,
+                canJumpToPlayer = canJumpToPlayer,
                 known = true
             })
             if zoneId == 642 then
@@ -119,20 +128,6 @@ local function getOrCreateZone(self, zoneId, zoneName, zoneIndex)
         end
     end
     return self.zones[zoneId]
-end
-
-local function addExtraZone(self, zoneId, mapId, canJumpToPlayer)
-    local name, _, _, zoneIndex, _ = GetMapInfoById(mapId)
-    self.zones[zoneId] = Nav.ZoneNode:New({
-        name = name,
-        zoneName = name,
-        zoneId = zoneId,
-        index = zoneIndex,
-        mapId = mapId,
-        canJumpToPlayer = canJumpToPlayer,
-        known = true,
-        pois = {}
-    })
 end
 
 local function loadFastTravelNode(self, nodeIndex, nodeLookup, zoneLookup)
@@ -191,10 +186,10 @@ local function loadPopulatedZones(self, zoneLookup)
         zoneId = zoneId + 1
     end
 
-    addExtraZone(self, Nav.ZONE_TAMRIEL, 27) -- Sort of true, but called 'Clean Test'
-    addExtraZone(self, 1, 439) -- Fake!
-    addExtraZone(self, Nav.ZONE_ATOLLOFIMMOLATION, 2000, true)
-    addExtraZone(self, Nav.ZONE_BLACKREACH, 1782, false)
+    getOrCreateZone(self, Nav.ZONE_TAMRIEL, nil, nil, 27, false) -- Sort of true, but called 'Clean Test'
+    getOrCreateZone(self, 1, nil, nil, 439, false) -- Fake!
+    getOrCreateZone(self, Nav.ZONE_ATOLLOFIMMOLATION, nil, nil, 2000, true)
+    getOrCreateZone(self, Nav.ZONE_BLACKREACH, nil, nil, 1782, false)
 end
 
 local function loadZonePOIs(self, zoneId, zoneIndex, zoneName, numPOIs)
