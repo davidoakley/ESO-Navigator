@@ -124,7 +124,7 @@ local function getOrCreateZone(self, zoneId, zoneName, zoneIndex, mapId, canJump
                 self.zones[zoneId].hidden = true
             end
         else
-            Nav.log("setupNodes: not zone: zoneId %d name %s", zoneId, zoneName)
+            Nav.log("SetupNodes: not zone: zoneId %d name %s", zoneId, zoneName)
         end
     end
     return self.zones[zoneId]
@@ -216,7 +216,7 @@ local function loadZonePOIs(self, zoneId, zoneIndex, zoneName, numPOIs)
     end
 end
 
-function Locs:setupNodes()
+function Locs:SetupNodes()
     self.nodes = {}
     self.nodeMap = {}
     self.zones = {}
@@ -227,7 +227,7 @@ function Locs:setupNodes()
     local zoneLookup = {}
     loadPopulatedZones(self, zoneLookup)
     self.zoneLookup = zoneLookup
-    Nav.log("Locations:setupNodes: Zones took %d ms", GetGameTimeMilliseconds() - beginTime)
+    Nav.log("Locations:SetupNodes: Zones took %d ms", GetGameTimeMilliseconds() - beginTime)
 
     local beginTime  = GetGameTimeMilliseconds()
     local nodeLookup = {} -- Match on barename:x,z or x,z
@@ -235,7 +235,7 @@ function Locs:setupNodes()
     for i = 1, totalNodes do
         loadFastTravelNode(self, i, nodeLookup, zoneLookup)
     end
-    Nav.log("Locations:setupNodes: FTNodes took %d ms", GetGameTimeMilliseconds() - beginTime)
+    Nav.log("Locations:SetupNodes: FTNodes took %d ms", GetGameTimeMilliseconds() - beginTime)
 
     beginTime = GetGameTimeMilliseconds()
     -- Iterate through zones to find correct zones for nodes
@@ -243,7 +243,7 @@ function Locs:setupNodes()
         local zoneName, zoneIndex, numPOIs = unpack(zoneData)
         loadZonePOIs(self, zoneId, zoneIndex, zoneName, numPOIs)
     end
-    Nav.log("Locations:setupNodes: POIs took %d ms", GetGameTimeMilliseconds() - beginTime)
+    Nav.log("Locations:SetupNodes: POIs took %d ms", GetGameTimeMilliseconds() - beginTime)
 
     for i = 1, #self.nodes do
         if not self.nodes[i].poiIndex and self.nodes[i].zoneId ~= Nav.ZONE_CYRODIIL then
@@ -297,7 +297,7 @@ end
 
 function Locs:getKnownNodes(zoneId, includeAliases)
     if self.nodes == nil then
-        self:setupNodes()
+        self:SetupNodes()
     end
 
     if zoneId == Nav.ZONE_BLACKREACH then
@@ -322,7 +322,7 @@ end
 
 function Locs:getHouseList(includeAliases)
     if self.nodes == nil then
-        self:setupNodes()
+        self:SetupNodes()
     end
 
     local nodes = {}
@@ -342,7 +342,7 @@ end
 
 function Locs:GetZones()
     if not self.zones then
-        self:setupNodes()
+        self:SetupNodes()
     end
     return self.zones
 end
@@ -351,7 +351,7 @@ function Locs:getZoneList(includeAliases)
     local nodes = {}
 
     if not self.zones then
-        self:setupNodes()
+        self:SetupNodes()
     end
 
     for zoneId, zone in pairs(self.zones) do
@@ -375,7 +375,7 @@ end
 
 function Locs:getZone(zoneId)
     if not self.zones then
-        self:setupNodes()
+        self:SetupNodes()
     end
 
     return self.zones[zoneId]
@@ -398,7 +398,7 @@ end
 
 function Locs:getCurrentMapZone()
     if self.zones == nil then
-        self:setupNodes()
+        self:SetupNodes()
     end
 
     local mapId = GetCurrentMapId()
