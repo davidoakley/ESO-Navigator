@@ -145,10 +145,9 @@ local function loadFastTravelNode(self, nodeIndex, nodeLookup, zoneLookup)
 
             self.nodeMap[nodeIndex] = node
 
-            local uid = uniqueName(0, name, x, z)
-            if not zone.pois[poiIndex] then --nodeLookup[uid] then
+            local uid = string.format("%d:%d", zoneIndex, poiIndex) --uniqueName(0, name, x, z)
+            if not nodeLookup[uid] then --nodeLookup[uid] then
                 nodeLookup[uid] = node
-                nodeLookup[uniqueName(1, name, x, z)] = node
                 table.insert(self.nodes, node)
                 zone.pois[poiIndex] = node
 
@@ -327,7 +326,6 @@ function Locs:getHouseList(includeAliases)
 
     local nodes = {}
     for i = 1, #self.nodes do
-        local index = self.nodes[i].nodeIndex
         if self.nodes[i]:IsKnown() and self.nodes[i]:IsHouse() then
             local node = self.nodes[i]
             table.insert(nodes, node)
