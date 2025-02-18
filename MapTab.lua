@@ -70,7 +70,11 @@ function MT:layoutRow(rowControl, data, _)
     local tagList = node:GetTagList(categoryId ~= "bookmarks")
     if tagList and #tagList > 0 then
         local colour = ZO_ColorDef:New(node:GetTagColour(isSelected))
-        name = name .. " " .. colour:Colorize(table.concat(tagList, ""))
+        local tagStrings = {}
+        for i = 1, #tagList do
+            table.insert(tagStrings, string.format("|t18:24:Navigator/media/tags/%s.dds:inheritcolor|t", tagList[i]))
+        end
+        name = name .. " " .. colour:Colorize(table.concat(tagStrings, ""))
     end
 
 	if icon ~= nil then
