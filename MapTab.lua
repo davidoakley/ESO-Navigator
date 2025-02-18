@@ -581,11 +581,12 @@ function MT:OnMapChanged()
         else
             self.collapsedCategories = {}
         end
-        self.targetNode = 0
-        self.filter = Nav.FILTER_NONE
-        self:updateFilterControl()
-        self.editControl:SetText("")
-        self:executeSearch("")
+
+        if (self.searchString or "") == "" and self.filter == Nav.FILTER_NONE then
+            Nav.log("MT:OnMapChanged: executeSearch")
+            self.targetNode = 0
+            self:executeSearch("")
+        end
 
         Nav.Node.RemovePings()
     end
