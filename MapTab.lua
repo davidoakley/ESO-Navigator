@@ -278,11 +278,11 @@ function MT:buildScrollList(keepScrollPosition)
 
         local zone = Nav.Locations:getCurrentMapZone()
         if zone and zone.zoneId == Nav.ZONE_TAMRIEL then
-            local list = Nav.Locations:getZoneList()
+            local list = Nav.Locations:GetZoneList()
             table.sort(list, nameComparison)
             buildList(scrollData, "zones", NAVIGATOR_CATEGORY_ZONES, list)
         elseif zone then
-            local list = Nav.Locations:getKnownNodes(zone.zoneId)
+            local list = Nav.Locations:GetNodeList(zone.zoneId)
             table.sort(list, Nav.Node.WeightComparison)
 
             if Nav.isRecall and zone.zoneId ~= Nav.ZONE_CYRODIIL then

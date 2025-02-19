@@ -24,7 +24,7 @@ function Chat:Init()
     end
 
     function Chat.AutoCompleteProvider:GetResultList()
-        local zoneList = Nav.Locations:getZoneList()
+        local zoneList = Nav.Locations:GetZoneList()
         local list = {}
         for i = 1, #zoneList do
             list[zoneList[i].name] = zoneList[i].name

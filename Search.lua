@@ -68,10 +68,10 @@ function Search:Run(searchTerm, filter)
     if filter == Nav.FILTER_PLAYERS then
         self:AddCandidates(Nav.Players:GetPlayerList())
     elseif filter == Nav.FILTER_HOUSES then
-        self:AddCandidates(Locations:getHouseList(hasSearch))
+        self:AddCandidates(Locations:GetHouseList(hasSearch))
     else
-        self:AddCandidates(Locations:getKnownNodes(nil, hasSearch))
-        self:AddCandidates(Locations:getZoneList(true))
+        self:AddCandidates(Locations:GetNodeList(nil, hasSearch))
+        self:AddCandidates(Locations:GetZoneList(true))
     end
 
     local result = self:Execute(searchTerm)

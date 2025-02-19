@@ -1,4 +1,6 @@
 local Nav = Navigator
+
+--- @class Locations
 local Locs = Nav.Locations or {
     nodes = nil,
     nodeMap = nil,
@@ -294,14 +296,18 @@ local function createHouseAlias(node)
     return alias
 end
 
-function Locs:getKnownNodes(zoneId, includeAliases)
+---GetNodeList
+---@param zoneId number
+---@param includeAliases boolean
+---@return table Node List
+function Locs:GetNodeList(zoneId, includeAliases)
     if self.nodes == nil then
         self:SetupNodes()
     end
 
     if zoneId == Nav.ZONE_BLACKREACH then
-        local nodes1 = self:getKnownNodes(Nav.ZONE_BLACKREACH_ARKTHZANDCAVERN)
-        local nodes2 = self:getKnownNodes(Nav.ZONE_BLACKREACH_GREYMOORCAVERNS)
+        local nodes1 = self:GetNodeList(Nav.ZONE_BLACKREACH_ARKTHZANDCAVERN, includeAliases)
+        local nodes2 = self:GetNodeList(Nav.ZONE_BLACKREACH_GREYMOORCAVERNS, includeAliases)
         return Utils.tableConcat(nodes1, nodes2)
     end
 
@@ -319,7 +325,7 @@ function Locs:getKnownNodes(zoneId, includeAliases)
     return nodes
 end
 
-function Locs:getHouseList(includeAliases)
+function Locs:GetHouseList(includeAliases)
     if self.nodes == nil then
         self:SetupNodes()
     end
@@ -345,7 +351,7 @@ function Locs:GetZones()
     return self.zones
 end
 
-function Locs:getZoneList(includeAliases)
+function Locs:GetZoneList(includeAliases)
     local nodes = {}
 
     if not self.zones then
