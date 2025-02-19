@@ -237,8 +237,13 @@ local function OnAddOnLoaded(_, addonName)
     Nav:initialize()
 
     if PP and PP.ADDON_NAME then
-        PP.ScrollBar(Navigator_MapTabListScrollBar)
-        ZO_Scroll_SetMaxFadeDistance(Navigator_MapTabList, PP.savedVars.ListStyle.list_fade_distance)
+        local success, error = pcall(function()
+            PP.ScrollBar(Navigator_MapTabListScrollBar)
+            ZO_Scroll_SetMaxFadeDistance(Navigator_MapTabList, PP.savedVars.ListStyle.list_fade_distance)
+        end)
+        if not success then
+            Nav.logWarning("OnAddOnLoaded: PP error '%s'", error)
+        end
     end
 
     EVENT_MANAGER:UnregisterForEvent(Nav.name, EVENT_ADD_ON_LOADED)
