@@ -182,7 +182,7 @@ local function buildCategoryHeader(scrollData, id, title, collapsed)
     table.insert(scrollData, recentEntry)
 end
 
-local function buildList(scrollData, id, title, list, defaultString)
+local function buildList(scrollData, id, title, list, defaultString, maxEntries)
     local collapsed = MT.collapsedCategories[id] and true or false
     local hasFocus = MT.editControl:HasFocus()
 
@@ -216,6 +216,10 @@ local function buildList(scrollData, id, title, list, defaultString)
 
             currentNodeIndex = currentNodeIndex + 1
             listed = listed + 1
+
+            if maxEntries and listed >= maxEntries then
+                break
+            end
         end
     end
 
@@ -271,8 +275,8 @@ function MT:buildScrollList(keepScrollPosition)
 
         local recentCount = Nav.saved.recentsCount
         if recentCount > 0 then
-            local recents = Nav.Recents:getRecents(recentCount)
-            buildList(scrollData, "recents", NAVIGATOR_CATEGORY_RECENT, recents, NAVIGATOR_HINT_NORECENTS)
+            local recents = Nav.Recents:getRecents()
+            buildList(scrollData, "recents", NAVIGATOR_CATEGORY_RECENT, recents, NAVIGATOR_HINT_NORECENTS, recentCount)
         end
 
         local zone = Nav.Locations:getCurrentMapZone()

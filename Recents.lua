@@ -52,14 +52,10 @@ function Recents:save()
     Nav.saved.recentNodes = self.nodes
 end
 
-function Recents:getRecents(count)
+function Recents:getRecents()
     local results = {}
 
     for i = 1, #self.nodes do
-        if #results >= count then
-            return results
-        end
-
         local nodeIndex = self.nodes[i] or 0
         if Nav.Locations:IsHarborage(nodeIndex) then
             nodeIndex = Nav.Locations:GetHarborage()
