@@ -204,7 +204,6 @@ local function loadZonePOIs(self, zoneId, zoneIndex, zoneName, numPOIs)
                 poiIndex = poiIndex,
                 name = Utils.DisplayName(poiName),
                 originalName = poiName,
-                type = Nav.POI_MISC,
                 zoneId = nodeZoneId,
                 icon = icon,
                 originalIcon = icon,

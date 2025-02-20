@@ -19,6 +19,7 @@ function Node:New(o)
 end
 
 function Node:IsHouse() return false end
+function Node:IsPOI() return false end
 
 ---WeightComparison
 ---@param x Node
@@ -628,6 +629,8 @@ end
 
 --- @class POINode
 local POINode = Node:New()
+
+function POINode:IsPOI() return true end
 
 function POINode:OnClick()
     self:ZoomToPOI(false)
