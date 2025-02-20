@@ -31,6 +31,7 @@ Nav.default = {
   loggingEnabled = false,
   recentsCount = 10,
   ignoreDefiniteArticlesInSort = false,
+  listPOIs = true,
   useHouseNicknames = false,
   confirmFastTravel = Nav.CONFIRMFASTTRAVEL_ALWAYS
 }

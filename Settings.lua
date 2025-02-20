@@ -69,6 +69,15 @@ function Navigator:loadSettings()
 
     table.insert(optionsTable, {
         type = "checkbox",
+        name = "Show Points Of Interest on the zone list",
+        tooltip = "If this is disabled, only \"destinations\" such as wayshrines, dungeons, houses or players will be listed",
+        getFunc = function() return sv.listPOIs end,
+        setFunc = function(value) sv.listPOIs = value end,
+        default = self.default.listPOIs,
+    })
+
+    table.insert(optionsTable, {
+        type = "checkbox",
         name = "Show and search house nicknames",
         --tooltip = "",
         getFunc = function() return sv.useHouseNicknames end,

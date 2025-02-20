@@ -219,7 +219,6 @@ local function buildList(scrollData, id, title, list, defaultString)
         end
     end
 
-    Nav.log("#list %d, listed %d", #list, listed)
     if #list > 0 and listed == 0 then
         local entry = ZO_ScrollList_CreateDataEntry(3, { hint = GetString(NAVIGATOR_HINT_SHOWUNDISCOVERED), onClick = ShowUndiscovered })
         table.insert(scrollData, entry)
@@ -282,7 +281,7 @@ function MT:buildScrollList(keepScrollPosition)
             table.sort(list, nameComparison)
             buildList(scrollData, "zones", NAVIGATOR_CATEGORY_ZONES, list)
         elseif zone then
-            local list = Nav.Locations:GetNodeList(zone.zoneId)
+            local list = Nav.Locations:GetNodeList(zone.zoneId, false, Nav.saved.listPOIs)
             table.sort(list, Nav.Node.WeightComparison)
 
             if Nav.isRecall and zone.zoneId ~= Nav.ZONE_CYRODIIL then

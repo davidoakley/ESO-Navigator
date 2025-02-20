@@ -299,10 +299,14 @@ end
 ---@param zoneId number
 ---@param includeAliases boolean
 ---@return table Node List
-function Locs:GetNodeList(zoneId, includeAliases)
+function Locs:GetNodeList(zoneId, includeAliases, includePOIs)
     if self.nodes == nil then
         self:SetupNodes()
     end
+
+    if includePOIs == nil then
+        includePOIs = true
+    end -- Default includePOIs to true
 
     if zoneId == Nav.ZONE_BLACKREACH then
         local nodes1 = self:GetNodeList(Nav.ZONE_BLACKREACH_ARKTHZANDCAVERN, includeAliases)
@@ -313,7 +317,7 @@ function Locs:GetNodeList(zoneId, includeAliases)
     local nodes = {}
     for i = 1, #self.nodes do
         local node = self.nodes[i]
-        if (not zoneId or node.zoneId == zoneId) then --node:IsKnown() and (not zoneId or node.zoneId == zoneId) then
+        if (not zoneId or node.zoneId == zoneId) and (includePOIs or not node:IsPOI()) then
             table.insert(nodes, node)
 
             if includeAliases and node:IsHouse() and Nav.saved.useHouseNicknames then
