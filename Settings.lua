@@ -78,23 +78,23 @@ function Navigator:loadSettings()
 
     table.insert(optionsTable, {
         type = "checkbox",
-        name = "Show and search house nicknames",
-        --tooltip = "",
-        getFunc = function() return sv.useHouseNicknames end,
+        name = "Show and search undiscovered locations",
+        tooltip = "List undiscovered locations and show them in search results",
+        getFunc = function() return sv.includeUndiscovered end,
         setFunc = function(value)
-            sv.useHouseNicknames = value
-            self.Locations:SetupNodes()
+            sv.includeUndiscovered = value
         end,
         width = "full"
     })
 
     table.insert(optionsTable, {
         type = "checkbox",
-        name = "Include undiscovered locations",
-        tooltip = "List undiscovered locations and show them in search results",
-        getFunc = function() return sv.includeUndiscovered end,
+        name = "Show and search house nicknames",
+        --tooltip = "",
+        getFunc = function() return sv.useHouseNicknames end,
         setFunc = function(value)
-            sv.includeUndiscovered = value
+            sv.useHouseNicknames = value
+            self.Locations:SetupNodes()
         end,
         width = "full"
     })
