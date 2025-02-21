@@ -68,8 +68,10 @@ local function UpdateValue(control, forceDefault, value)
         --after setting this value, let's refresh the others to see if any should be disabled or have their settings changed
         LAM.util.RequestRefreshIfNeeded(control)
     else
-        value = control.data.getFunc()
-        control.dropdown:SetSelectedItem(control.choices[value])
+        for d =1, #control.dropdowns do
+            value = control.data.getFunc(d)
+            control.dropdowns[d]:SetSelectedItem(control.dropdowns[d].choices[value])
+        end
     end
 end
 
@@ -109,14 +111,14 @@ local function SetupTooltips(comboBox)
     end)
 end
 
-local function UpdateChoices(control, choices, choicesValues, choicesTooltips)
-    control.dropdown:ClearItems() --remove previous choices --(need to call :SetSelectedItem()?)
-    ZO_ClearTable(control.choices)
+local function UpdateChoices(dropdown, choices, choicesValues, choicesTooltips)
+    dropdown:ClearItems() --remove previous choices --(need to call :SetSelectedItem()?)
+    ZO_ClearTable(dropdown.choices)
 
     --build new list of choices
-    choices = choices or control.data.choices
-    choicesValues = choicesValues or control.data.choicesValues
-    choicesTooltips = choicesTooltips or control.data.choicesTooltips
+    --choices = choices or control.data.choices
+    --choicesValues = choicesValues or control.data.choicesValues
+    --choicesTooltips = choicesTooltips or control.data.choicesTooltips
 
     if choicesValues then
         assert(#choices == #choicesValues, "choices and choicesValues need to have the same size")
@@ -124,12 +126,12 @@ local function UpdateChoices(control, choices, choicesValues, choicesTooltips)
 
     if choicesTooltips then
         assert(#choices == #choicesTooltips, "choices and choicesTooltips need to have the same size")
-        SetupTooltips(control.dropdown)
+        SetupTooltips(dropdown)
     end
 
     for i = 1, #choices do
-        local entry = control.dropdown:CreateItemEntry(choices[i], DropdownCallback)
-        entry.control = control
+        local entry = dropdown:CreateItemEntry(choices[i], DropdownCallback)
+        entry.control = dropdown.control
         if choicesValues then
             entry.value = choicesValues[i]
         end
@@ -138,9 +140,9 @@ local function UpdateChoices(control, choices, choicesValues, choicesTooltips)
         end
         local entryValue = entry.value
         if entryValue == nil then entryValue = entry.name end
-        control.choices[entryValue] = entry.name
+        dropdown.choices[entryValue] = entry.name
 
-        control.dropdown:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE) --if sort type/order isn't specified, then don't sort
+        dropdown:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE) --if sort type/order isn't specified, then don't sort
     end
 end
 
@@ -246,21 +248,21 @@ function LAMCreateControl.navactions(parent, dropdownData, controlName)
     local width = control:GetWidth()
     control:SetResizeToFitDescendents(true)
 
-    local columns = 2
+    local columns = #dropdownData.columnHeadings
+    local rows = #dropdownData.rowHeadings
     local rowHeight = 27
-    local minHeight = rowHeight * 3 --(control.data.minHeight and LAM.util.GetDefaultValue(control.data.minHeight)) or MIN_HEIGHT
-    local maxHeight = rowHeight * 3 --(control.data.maxHeight and LAM.util.GetDefaultValue(control.data.maxHeight)) or (minHeight * 4)
 
-    if control.isHalfWidth then --note these restrictions
-        control:SetDimensionConstraints(width / 2, minHeight, width / 2, maxHeight)
-        control:SetResizeToFitConstrains(ANCHOR_CONSTRAINS_Y)
-    else
-        control:SetDimensionConstraints(width, minHeight, width, maxHeight)
-        control:SetResizeToFitConstrains(ANCHOR_CONSTRAINS_Y)
-    end
+    local gap = 12
+    local dropdownW, dropdownH = width / 3 - gap, rowHeight --control.container:GetDimensions()
+
+    --local minHeight = rowHeight * (rows + 1) --(control.data.minHeight and LAM.util.GetDefaultValue(control.data.minHeight)) or MIN_HEIGHT
+    --local maxHeight = rowHeight * (rows + 1) --(control.data.maxHeight and LAM.util.GetDefaultValue(control.data.maxHeight)) or (minHeight * 4)
+    local height = dropdownH * (rows + 1) + gap * rows
+
+    control:SetDimensionConstraints(width, height, width, height)
+    control:SetResizeToFitConstrains(ANCHOR_CONSTRAINS_Y)
 
     --local control = LAM.util.CreateLabelAndContainerControl(parent, dropdownData, controlName)
-    control.choices = {}
 
     local countControl = parent
     local name = parent:GetName()
@@ -275,65 +277,83 @@ function LAMCreateControl.navactions(parent, dropdownData, controlName)
     --control:SetDimensionConstraints(width, height, width, height)
     --control:SetResizeToFitConstrains(ANCHOR_CONSTRAINS_Y)
     --
-    local gap = 8
-    local dropdownW, dropdownH = width / 3, rowHeight --control.container:GetDimensions()
     local dropdownOriginX = width - dropdownW * columns - gap * (columns - 1)
     local dropdownOriginY = rowHeight
     --control.container:SetDimensions(dropdownW * 2 + gap, MIN_HEIGHT)
     control.comboboxes = {}
+    control.dropdowns = {}
 
-    for column = 1, 2 do
-        local comboboxCount = (countControl.comboboxCount or 0) + 1
-        countControl.comboboxCount = comboboxCount
-        local combobox = wm:CreateControlFromVirtual(zo_strjoin(nil, name, "Combobox", comboboxCount), control, "ZO_ComboBox")
-        table.insert(control.comboboxes, combobox)
+    for column = 1, columns do
+        local label = wm:CreateControl(nil, control, CT_LABEL)
+        label:SetFont("ZoFontWinH4")
+        label:SetHeight(rowHeight)
+        label:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
+        label:SetText(LAM.util.GetStringFromValue(dropdownData.columnHeadings[column]))
+        label:SetAnchor(TOPLEFT, nil, nil, dropdownOriginX + (column - 1) * (dropdownW + gap), 0)
+        label:SetDimensions(dropdownW, dropdownH)
+        label:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
+    end
 
-        combobox:SetAnchor(TOPLEFT, nil, nil, dropdownOriginX + (column - 1) * (dropdownW + gap), dropdownOriginY)
-        combobox:SetDimensions(dropdownW, dropdownH)
-        combobox:SetHandler("OnMouseEnter", function() ZO_Options_OnMouseEnter(control) end)
-        combobox:SetHandler("OnMouseExit", function() ZO_Options_OnMouseExit(control) end)
-        control.dropdown = ZO_ComboBox_ObjectFromContainer(combobox)
-        local dropdown = control.dropdown
-        dropdown:SetSortsItems(false) -- need to sort ourselves in order to be able to sort by value
+    for row = 1, rows do
+        local y = dropdownOriginY + (rowHeight + gap) * (row - 1)
+        local label = wm:CreateControl(nil, control, CT_LABEL)
+        label:SetFont("ZoFontWinH4")
+        label:SetHeight(rowHeight)
+        label:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
+        label:SetText(LAM.util.GetStringFromValue(dropdownData.rowHeadings[row]))
+        label:SetAnchor(TOPLEFT, nil, nil, 0, y)
+        --control.label = label
 
-        dropdown:DisableMultiSelect()
+        for column = 1, columns do
+            local comboboxCount = (countControl.comboboxCount or 0) + 1
+            countControl.comboboxCount = comboboxCount
+            local combobox = wm:CreateControlFromVirtual(zo_strjoin(nil, name, "Combobox", comboboxCount), control, "ZO_ComboBox")
+            table.insert(control.comboboxes, combobox)
 
-        --After the items are added and the dropdown shows: Change the height of the dropdown
-        SecurePostHook(dropdown, "AddMenuItems", function()
-            control.AdjustDimensions(control, dropdown, dropdownData)
-        end)
+            combobox:SetAnchor(TOPLEFT, nil, nil, dropdownOriginX + (column - 1) * (dropdownW + gap), y)
+            combobox:SetDimensions(dropdownW, dropdownH)
+            combobox:SetHandler("OnMouseEnter", function() ZO_Options_OnMouseEnter(control) end)
+            combobox:SetHandler("OnMouseExit", function() ZO_Options_OnMouseExit(control) end)
 
-        ZO_PreHook(dropdown, "UpdateItems", function(self)
-            assert(not self.m_sortsItems, "built-in dropdown sorting was reactivated, sorting is handled by LAM")
-            if control.m_sortOrder ~= nil and control.m_sortType then
-                local sortKey = next(control.m_sortType)
-                local sortFunc = function(item1, item2) return ZO_TableOrderingFunction(item1, item2, sortKey, control.m_sortType, control.m_sortOrder) end
-                table.sort(self.m_sortedItems, sortFunc)
-            end
-        end)
+            local dropdown = ZO_ComboBox_ObjectFromContainer(combobox)
+            table.insert(control.dropdowns, dropdown)
+            dropdown.control = control
+            dropdown.choices = {}
+            dropdown:SetSortsItems(false) -- need to sort ourselves in order to be able to sort by value
 
-        if dropdownData.choicesValues then
-            control.m_sortType, control.m_sortOrder = ZO_SORT_ORDER_UP, SORT_BY_VALUE
-        end
+            dropdown:DisableMultiSelect()
 
-        if dropdownData.warning ~= nil or dropdownData.requiresReload then
-            control.warning = wm:CreateControlFromVirtual(nil, control, "ZO_Options_WarningIcon")
-            control.warning:SetAnchor(RIGHT, combobox, LEFT, -5, 0)
-            control.UpdateWarning = LAM.util.UpdateWarning
-            control:UpdateWarning()
-        end
+            --After the items are added and the dropdown shows: Change the height of the dropdown
+            SecurePostHook(dropdown, "AddMenuItems", function()
+                control.AdjustDimensions(control, dropdown, dropdownData)
+            end)
 
-        control.SetDropdownHeight = SetDropdownHeight
-        control.AdjustDimensions = AdjustDimensions
-        control.UpdateChoices = UpdateChoices
-        control:UpdateChoices(dropdownData.choices, dropdownData.choicesValues)
-        control.UpdateValue = UpdateValue
-        control:UpdateValue()
-        if dropdownData.disabled ~= nil then
-            control.UpdateDisabled = UpdateDisabled
-            control:UpdateDisabled()
+            ZO_PreHook(dropdown, "UpdateItems", function(self)
+                assert(not self.m_sortsItems, "built-in dropdown sorting was reactivated, sorting is handled by LAM")
+                if control.m_sortOrder ~= nil and control.m_sortType then
+                    local sortKey = next(control.m_sortType)
+                    local sortFunc = function(item1, item2) return ZO_TableOrderingFunction(item1, item2, sortKey, control.m_sortType, control.m_sortOrder) end
+                    table.sort(self.m_sortedItems, sortFunc)
+                end
+            end)
+
+            dropdown.UpdateChoices = UpdateChoices
+            dropdown:UpdateChoices(dropdownData.choices, dropdownData.choicesValues)
         end
     end
+
+    if dropdownData.choicesValues then
+        control.m_sortType, control.m_sortOrder = ZO_SORT_ORDER_UP, SORT_BY_VALUE
+    end
+
+    control.SetDropdownHeight = SetDropdownHeight
+    control.AdjustDimensions = AdjustDimensions
+    control.UpdateValue = UpdateValue
+    control:UpdateValue()
+    --if dropdownData.disabled ~= nil then
+    --    control.UpdateDisabled = UpdateDisabled
+    --    control:UpdateDisabled()
+    --end
 
     LAM.util.RegisterForRefreshIfNeeded(control)
     LAM.util.RegisterForReloadIfNeeded(control)

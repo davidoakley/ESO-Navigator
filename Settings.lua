@@ -102,10 +102,11 @@ function Navigator:loadSettings()
         rowHeadings = {"Destination action", "Zone action"},
         choices = {"Show On Map", "Set Destination", "Travel"},
         choicesValues = { 0, 1, 2 },
-        getFunc = function() return 0 end,
+        getFunc = function(index) return (index == 2 or index == 4) and 2 or 0 end,
         setFunc = function(value) sv.singleClickJump = value end,
         width = "full",
         default = self.default.singleClickJump,
+        reference = Navigator.settingsName .. "_actions"
     })
 
 
