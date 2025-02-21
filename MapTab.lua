@@ -563,13 +563,33 @@ end
 function MT:selectResult(control, data, mouseButton, isDoubleClick)
     if mouseButton == 1 then
         if data.node and data.node.OnClick then
-            Nav.log("OnClick %s", data.node:GetName() or "-")
+            --Nav.log("OnClick %s", data.node:GetName() or "-")
             data.node:OnClick(isDoubleClick)
         end
     elseif mouseButton == 2 then
         showWayshrineMenu(control, data)
     else
         Nav.log("selectResult: unhandled; poiType=%d zoneId=%d", data.poiType or -1, data.zoneId or -1)
+    end
+end
+
+function MT:HandleMouseUp(handler, control, mouseButton, upInside)
+    if upInside then
+        if control.isDoubleClick then
+            Nav.log("MT:HandleMouseUp 2")
+            handler(self, control, mouseButton, true)
+            control.isDoubleClick = false
+            zo_removeCallLater(control.doubleClickTimer)
+        else
+            Nav.log("MT:HandleMouseUp 1")
+            handler(self, control, mouseButton, false)
+            if mouseButton == 1 then
+                control.isDoubleClick = true
+                control.doubleClickTimer = zo_callLater(function()
+                    control.isDoubleClick = false
+                end, 500)
+            end
+        end
     end
 end
 

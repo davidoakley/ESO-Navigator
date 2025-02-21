@@ -177,6 +177,16 @@ function Node.RemovePings()
     end
 end
 
+function Node:DoAction(action)
+    if action == Nav.ACTION_SHOWONMAP then
+        self:ZoomToPOI(false)
+    elseif action == Nav.ACTION_SETDESTINATION then
+        self:ZoomToPOI(true)
+    elseif action == Nav.ACTION_TRAVEL then
+        self:Jump()
+    end
+end
+
 --- @class PlayerNode
 local PlayerNode = Node:New()
 
@@ -307,11 +317,11 @@ function ZoneNode:JumpToZone()
 end
 
 function ZoneNode:OnClick(isDoubleClick)
-    local clickEvent
-    if isDoubleClick then
-        if clickEvent then zo_removeCallLater(clickEvent) end
-        self:JumpToZone() --jumpToZone(self.zoneId)
-    else
+    self:DoAction(isDoubleClick and Nav.saved.zoneDoubleClick or Nav.saved.zoneSingleClick)
+end
+
+function ZoneNode:DoAction(action)
+    if action == Nav.ACTION_SHOWONMAP then
         local mapZoneId = Nav.Locations:getCurrentMapZoneId()
         local currentMapId = GetCurrentMapId()
         local targetMapId = self.mapId or Nav.Locations.GetMapIdByZoneId(self.zoneId)
@@ -327,6 +337,8 @@ function ZoneNode:OnClick(isDoubleClick)
                 end, 200)
             end
         end
+    elseif action == Nav.ACTION_TRAVEL then
+        self:JumpToZone()
     end
 end
 
@@ -549,6 +561,7 @@ end
 
 function FastTravelNode:Jump()
     if not self.known or self.disabled then
+        Nav.log("FastTravelNode:Jump: unknown or disabled")
         return
     end
 
@@ -586,10 +599,6 @@ function FastTravelNode:Jump()
     ZO_Dialogs_ShowPlatformDialog(id, {nodeIndex = self.nodeIndex}, {mainTextParams = {self.originalName}})
 end
 
-function FastTravelNode:OnClick()
-    self:Jump()
-end
-
 function FastTravelNode:AddMenuItems()
     if self:IsKnown() then
         local strId = Nav.isRecall and SI_WORLD_MAP_ACTION_RECALL_TO_WAYSHRINE or SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE
@@ -604,6 +613,10 @@ function FastTravelNode:AddMenuItems()
         self:ZoomToPOI(true)
     end)
     self:AddBookmarkMenuItem({ nodeIndex = self.nodeIndex })
+end
+
+function FastTravelNode:OnClick(isDoubleClick)
+    self:DoAction(isDoubleClick and Nav.saved.destinationDoubleClick or Nav.saved.destinationSingleClick)
 end
 
 

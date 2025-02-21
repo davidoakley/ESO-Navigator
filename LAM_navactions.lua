@@ -27,9 +27,9 @@
 
 local widgetVersion = 27
 local LAM = LibAddonMenu2
-if not LAM:RegisterWidget("navactions", widgetVersion) then return end
+if not LAM:RegisterWidget("nav_actions", widgetVersion) then return end
 
-local GetDefaultValue = LAM.util.GetDefaultValue
+--local GetDefaultValue = LAM.util.GetDefaultValue
 
 local wm = WINDOW_MANAGER
 
@@ -41,44 +41,42 @@ local PADDING_X = GetMenuPadding()
 local CONTENT_PADDING = PADDING_X * 4
 
 
-local function UpdateDisabled(control)
-    local disable
-    if type(control.data.disabled) == "function" then
-        disable = control.data.disabled()
-    else
-        disable = control.data.disabled
-    end
+--local function UpdateDisabled(control)
+--    local disable
+--    if type(control.data.disabled) == "function" then
+--        disable = control.data.disabled()
+--    else
+--        disable = control.data.disabled
+--    end
+--
+--    control.dropdown:SetEnabled(not disable)
+--    if disable then
+--        control.label:SetColor(ZO_DEFAULT_DISABLED_COLOR:UnpackRGBA())
+--    else
+--        control.label:SetColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGBA())
+--    end
+--end
 
-    control.dropdown:SetEnabled(not disable)
-    if disable then
-        control.label:SetColor(ZO_DEFAULT_DISABLED_COLOR:UnpackRGBA())
-    else
-        control.label:SetColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGBA())
-    end
-end
-
-local function UpdateValue(control, forceDefault, value)
+local function UpdateValue(dropdown, index, forceDefault, value)
     if forceDefault then --if we are forcing defaults
-        local def_value = GetDefaultValue(control.data.default)
+        local def_value = dropdown.control.data.default(index)
 
-        control.data.setFunc(def_value)
-        control.dropdown:SetSelectedItem(control.choices[def_value])
+        dropdown.control.data.setFunc(index, def_value)
+        dropdown:SetSelectedItem(dropdown.control.choices[def_value])
     elseif value ~= nil then
-        control.data.setFunc(value)
+        dropdown.control.data.setFunc(index, value)
         --after setting this value, let's refresh the others to see if any should be disabled or have their settings changed
-        LAM.util.RequestRefreshIfNeeded(control)
+        LAM.util.RequestRefreshIfNeeded(dropdown.control)
     else
-        for d =1, #control.dropdowns do
-            value = control.data.getFunc(d)
-            control.dropdowns[d]:SetSelectedItem(control.dropdowns[d].choices[value])
-        end
+        value = dropdown.control.data.getFunc(index)
+        dropdown:SetSelectedItem(dropdown.choices[value])
     end
 end
 
-local function DropdownCallback(control, choiceText, choice)
+local function DropdownCallback(_, choiceText, choice)
     local updateValue = choice.value
     if updateValue == nil then updateValue = choiceText end
-    choice.control:UpdateValue(false, updateValue)
+    choice.dropdown:UpdateValue(choice.dropdown.index, false, updateValue)
 end
 
 local function DoShowTooltip(control, tooltip)
@@ -106,14 +104,18 @@ local function SetupTooltips(comboBox)
         end
     end)
 
-    SecurePostHook(ZO_ComboBoxDropdown_Keyboard, "OnEntryMouseExit", function(comboBoxCtrl)
+    SecurePostHook(ZO_ComboBoxDropdown_Keyboard, "OnEntryMouseExit", function(_)
         HideTooltip()
     end)
 end
 
-local function UpdateChoices(dropdown, choices, choicesValues, choicesTooltips)
+local function UpdateChoices(dropdown, index, choicesFn, choicesValuesFn, choicesTooltipsFn)
     dropdown:ClearItems() --remove previous choices --(need to call :SetSelectedItem()?)
     ZO_ClearTable(dropdown.choices)
+
+    local choices = choicesFn(index)
+    local choicesValues = choicesValuesFn and choicesValuesFn(index)
+    local choicesTooltips = choicesTooltipsFn and choicesTooltipsFn(index)
 
     --build new list of choices
     --choices = choices or control.data.choices
@@ -132,6 +134,7 @@ local function UpdateChoices(dropdown, choices, choicesValues, choicesTooltips)
     for i = 1, #choices do
         local entry = dropdown:CreateItemEntry(choices[i], DropdownCallback)
         entry.control = dropdown.control
+        entry.dropdown = dropdown
         if choicesValues then
             entry.value = choicesValues[i]
         end
@@ -147,7 +150,7 @@ local function UpdateChoices(dropdown, choices, choicesValues, choicesTooltips)
 end
 
 --Change the height of the combobox dropdown
-local function SetDropdownHeight(control, dropdown, dropdownData)
+local function SetDropdownHeight(_, dropdown, dropdownData)
     local entrySpacing = dropdown:GetSpacing()
     local numSortedItems = #dropdown.m_sortedItems
     local visibleRows, min, max
@@ -242,7 +245,7 @@ local function AdjustDimensions(control, dropdown, dropdownData)
 end
 
 
-function LAMCreateControl.navactions(parent, dropdownData, controlName)
+function LAMCreateControl.nav_actions(parent, dropdownData, controlName)
 
     local control = LAM.util.CreateBaseControl(parent, dropdownData, controlName)
     local width = control:GetWidth()
@@ -294,6 +297,7 @@ function LAMCreateControl.navactions(parent, dropdownData, controlName)
         label:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
     end
 
+    local index = 1
     for row = 1, rows do
         local y = dropdownOriginY + (rowHeight + gap) * (row - 1)
         local label = wm:CreateControl(nil, control, CT_LABEL)
@@ -318,6 +322,7 @@ function LAMCreateControl.navactions(parent, dropdownData, controlName)
             local dropdown = ZO_ComboBox_ObjectFromContainer(combobox)
             table.insert(control.dropdowns, dropdown)
             dropdown.control = control
+            dropdown.index = index
             dropdown.choices = {}
             dropdown:SetSortsItems(false) -- need to sort ourselves in order to be able to sort by value
 
@@ -338,7 +343,12 @@ function LAMCreateControl.navactions(parent, dropdownData, controlName)
             end)
 
             dropdown.UpdateChoices = UpdateChoices
-            dropdown:UpdateChoices(dropdownData.choices, dropdownData.choicesValues)
+            dropdown:UpdateChoices(index, dropdownData.choices, dropdownData.choicesValues)
+
+            dropdown.UpdateValue = UpdateValue
+            dropdown:UpdateValue(index)
+
+            index = index + 1
         end
     end
 
@@ -348,8 +358,6 @@ function LAMCreateControl.navactions(parent, dropdownData, controlName)
 
     control.SetDropdownHeight = SetDropdownHeight
     control.AdjustDimensions = AdjustDimensions
-    control.UpdateValue = UpdateValue
-    control:UpdateValue()
     --if dropdownData.disabled ~= nil then
     --    control.UpdateDisabled = UpdateDisabled
     --    control:UpdateDisabled()

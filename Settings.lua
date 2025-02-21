@@ -1,3 +1,5 @@
+local Nav = Navigator --- @class Navigator
+
 function Navigator:loadSettings()
     local LAM = LibAddonMenu2
     local sv = self.saved
@@ -67,54 +69,32 @@ function Navigator:loadSettings()
         default = self.default.confirmFastTravel,
     })
 
-    --local lmb = "|t16:20:Navigator/media/mouse_lmb.dds|t"
-    --table.insert(optionsTable, {
-    --    type = "dropdown",
-    --    name = "Destination single-click / double-click action",
-    --    tooltip = "Whether single-left-clicking a wayshrine or other destination shows it on the map and double-clicking travels to it, or whether a single-left-click travels to it",
-    --    choices = {"Show On Map / Travel", " Travel / -"},
-    --    choicesValues = { false, true },
-    --    getFunc = function() return sv.singleClickJump end,
-    --    setFunc = function(value) sv.singleClickJump = value end,
-    --    width = "full",
-    --    default = self.default.singleClickJump,
-    --})
-    --
-    --table.insert(optionsTable, {
-    --    type = "dropdown",
-    --    name = "Zone single-click / double-click action",
-    --    tooltip = "Whether single-left-clicking a zone shows it on the map and double-clicking travels to it, or whether a single-left-click travels to it",
-    --    choices = {"Show On Map / Travel", " Travel / -"},
-    --    choicesValues = { false, true },
-    --    getFunc = function() return sv.singleClickZone end,
-    --    setFunc = function(value) sv.singleClickZone = value end,
-    --    width = "full",
-    --    default = self.default.singleClickZone,
-    --})
 
     table.insert(optionsTable, { type = "divider" })
 
+    local actions = { "destinationSingleClick", "destinationDoubleClick", "zoneSingleClick", "zoneDoubleClick" }
+    local actionDefaults = { Nav.ACTION_SHOWONMAP, Nav.ACTION_TRAVEL, Nav.ACTION_SHOWONMAP, Nav.ACTION_TRAVEL }
     table.insert(optionsTable, {
-        type = "navactions",
+        type = "nav_actions",
         name = "Actions",
         tooltip = "The action that happens if you single-left-click a destination such as a wayshrine or house",
         columnHeadings = {"Single-click", "Double-click"},
         rowHeadings = {"Destination action", "Zone action"},
-        choices = {"Show On Map", "Set Destination", "Travel"},
-        choicesValues = { 0, 1, 2 },
-        getFunc = function(index) return (index == 2 or index == 4) and 2 or 0 end,
-        setFunc = function(value) sv.singleClickJump = value end,
-        width = "full",
-        default = self.default.singleClickJump,
-        reference = Navigator.settingsName .. "_actions"
+        choices = function(index)
+            return index >= 3 and {"Show On Map", "Travel"} or {"Show On Map", "Set Destination", "Travel"}
+        end,
+        choicesValues = function(index)
+            return index >= 3 and { Nav.ACTION_SHOWONMAP, Nav.ACTION_TRAVEL } or { Nav.ACTION_SHOWONMAP, Nav.ACTION_SETDESTINATION, Nav.ACTION_TRAVEL }
+        end,
+        getFunc = function(index) return sv[actions[index]] end,
+        setFunc = function(index, value) sv[actions[index]] = value end,
+        default = function(index) return actionDefaults[index] end,
+        reference = Nav.settingsName .. "_actions"
     })
-
 
     table.insert(optionsTable, { type = "divider" })
 
-
-
-
+    
     table.insert(optionsTable, {
         type = "checkbox",
         name = "Show Points Of Interest on the zone list",
