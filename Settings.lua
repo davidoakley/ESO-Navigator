@@ -96,9 +96,10 @@ function Navigator:loadSettings()
 
     table.insert(optionsTable, {
         type = "navactions",
-        name = "Destination action",
+        name = "Actions",
         tooltip = "The action that happens if you single-left-click a destination such as a wayshrine or house",
         columnHeadings = {"Single-click", "Double-click"},
+        rowHeadings = {"Destination action", "Zone action"},
         choices = {"Show On Map", "Set Destination", "Travel"},
         choicesValues = { 0, 1, 2 },
         getFunc = function() return 0 end,
@@ -107,41 +108,6 @@ function Navigator:loadSettings()
         default = self.default.singleClickJump,
     })
 
-    table.insert(optionsTable, {
-        type = "dropdown",
-        name = "Destination double-click action",
-        tooltip = "The action that happens if you double-left-click a destination such as a wayshrine or house",
-        choices = {"Show On Map", "Set Destination", "Travel"},
-        choicesValues = { 0, 1, 2 },
-        getFunc = function() return 2 end,
-        setFunc = function(value) sv.singleClickJump = value end,
-        width = "full",
-        default = self.default.singleClickJump,
-    })
-
-    table.insert(optionsTable, {
-        type = "dropdown",
-        name = "Zone single-click action",
-        tooltip = "The action that happens if you single-left-click a zone entry",
-        choices = {"Show On Map", "Set Destination", "Travel"},
-        choicesValues = { 0, 1, 2 },
-        getFunc = function() return 0 end,
-        setFunc = function(value) sv.singleClickJump = value end,
-        width = "full",
-        default = self.default.singleClickJump,
-    })
-
-    table.insert(optionsTable, {
-        type = "dropdown",
-        name = "Zone double-click action",
-        tooltip = "The action that happens if you double-left-click a zone entry",
-        choices = {"Show On Map", "Set Destination", "Travel"},
-        choicesValues = { 0, 1, 2 },
-        getFunc = function() return 2 end,
-        setFunc = function(value) sv.singleClickJump = value end,
-        width = "full",
-        default = self.default.singleClickJump,
-    })
 
     table.insert(optionsTable, { type = "divider" })
 
