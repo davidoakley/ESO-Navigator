@@ -33,6 +33,8 @@ Nav.default = {
   ignoreDefiniteArticlesInSort = false,
   listPOIs = true,
   useHouseNicknames = false,
+  singleClickJump = false,
+  singleClickZone = false,
   confirmFastTravel = Nav.CONFIRMFASTTRAVEL_ALWAYS
 }
 

@@ -67,6 +67,87 @@ function Navigator:loadSettings()
         default = self.default.confirmFastTravel,
     })
 
+    --local lmb = "|t16:20:Navigator/media/mouse_lmb.dds|t"
+    --table.insert(optionsTable, {
+    --    type = "dropdown",
+    --    name = "Destination single-click / double-click action",
+    --    tooltip = "Whether single-left-clicking a wayshrine or other destination shows it on the map and double-clicking travels to it, or whether a single-left-click travels to it",
+    --    choices = {"Show On Map / Travel", " Travel / -"},
+    --    choicesValues = { false, true },
+    --    getFunc = function() return sv.singleClickJump end,
+    --    setFunc = function(value) sv.singleClickJump = value end,
+    --    width = "full",
+    --    default = self.default.singleClickJump,
+    --})
+    --
+    --table.insert(optionsTable, {
+    --    type = "dropdown",
+    --    name = "Zone single-click / double-click action",
+    --    tooltip = "Whether single-left-clicking a zone shows it on the map and double-clicking travels to it, or whether a single-left-click travels to it",
+    --    choices = {"Show On Map / Travel", " Travel / -"},
+    --    choicesValues = { false, true },
+    --    getFunc = function() return sv.singleClickZone end,
+    --    setFunc = function(value) sv.singleClickZone = value end,
+    --    width = "full",
+    --    default = self.default.singleClickZone,
+    --})
+
+    table.insert(optionsTable, { type = "divider" })
+
+    table.insert(optionsTable, {
+        type = "navactions",
+        name = "Destination action",
+        tooltip = "The action that happens if you single-left-click a destination such as a wayshrine or house",
+        columnHeadings = {"Single-click", "Double-click"},
+        choices = {"Show On Map", "Set Destination", "Travel"},
+        choicesValues = { 0, 1, 2 },
+        getFunc = function() return 0 end,
+        setFunc = function(value) sv.singleClickJump = value end,
+        width = "full",
+        default = self.default.singleClickJump,
+    })
+
+    table.insert(optionsTable, {
+        type = "dropdown",
+        name = "Destination double-click action",
+        tooltip = "The action that happens if you double-left-click a destination such as a wayshrine or house",
+        choices = {"Show On Map", "Set Destination", "Travel"},
+        choicesValues = { 0, 1, 2 },
+        getFunc = function() return 2 end,
+        setFunc = function(value) sv.singleClickJump = value end,
+        width = "full",
+        default = self.default.singleClickJump,
+    })
+
+    table.insert(optionsTable, {
+        type = "dropdown",
+        name = "Zone single-click action",
+        tooltip = "The action that happens if you single-left-click a zone entry",
+        choices = {"Show On Map", "Set Destination", "Travel"},
+        choicesValues = { 0, 1, 2 },
+        getFunc = function() return 0 end,
+        setFunc = function(value) sv.singleClickJump = value end,
+        width = "full",
+        default = self.default.singleClickJump,
+    })
+
+    table.insert(optionsTable, {
+        type = "dropdown",
+        name = "Zone double-click action",
+        tooltip = "The action that happens if you double-left-click a zone entry",
+        choices = {"Show On Map", "Set Destination", "Travel"},
+        choicesValues = { 0, 1, 2 },
+        getFunc = function() return 2 end,
+        setFunc = function(value) sv.singleClickJump = value end,
+        width = "full",
+        default = self.default.singleClickJump,
+    })
+
+    table.insert(optionsTable, { type = "divider" })
+
+
+
+
     table.insert(optionsTable, {
         type = "checkbox",
         name = "Show Points Of Interest on the zone list",
