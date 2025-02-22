@@ -72,7 +72,9 @@ local function createNode(self, i, name, typePOI, icon, glowIcon, known, zone, p
         end
     elseif typePOI == 1 then
         nodeInfo.poiType = Nav.POI_WAYSHRINE
-        if icon:find("poi_wayshrine_complete") then nodeInfo.icon = "Navigator/media/wayshrine.dds" end
+        if icon:find("poi_wayshrine_complete") or icon == "/esoui/art/icons/icon_missing.dds" then
+            nodeInfo.icon = "Navigator/media/wayshrine.dds"
+        end
     elseif glowIcon == "/esoui/art/icons/poi/poi_soloinstance_glow.dds" or
             glowIcon == "/esoui/art/icons/poi/poi_groupinstance_glow.dds" then
         nodeInfo.poiType = Nav.POI_ARENA
@@ -82,7 +84,7 @@ local function createNode(self, i, name, typePOI, icon, glowIcon, known, zone, p
 
     nodeInfo.barename = Utils.bareName(nodeInfo.name)
 
-    if icon == "/esoui/art/icons/icon_missing.dds" then
+    if nodeInfo.icon == "/esoui/art/icons/icon_missing.dds" then
         nodeInfo.icon = "/esoui/art/crafting/crafting_smithing_notrait.dds"
     end
 
