@@ -70,7 +70,11 @@ function MT:layoutRow(rowControl, data, _)
     local tagList = node:GetTagList(categoryId ~= "bookmarks")
     if tagList and #tagList > 0 then
         local colour = ZO_ColorDef:New(node:GetTagColour(isSelected))
-        name = name .. " " .. colour:Colorize(table.concat(tagList, ""))
+        local tagStrings = {}
+        for i = 1, #tagList do
+            table.insert(tagStrings, string.format("|t18:24:Navigator/media/tags/%s.dds:inheritcolor|t", tagList[i]))
+        end
+        name = name .. " " .. colour:Colorize(table.concat(tagStrings, ""))
     end
 
 	if icon ~= nil then
@@ -150,6 +154,8 @@ function MT:updateFilterControl()
         self:showFilterControl('Players')
     elseif self.filter == Nav.FILTER_HOUSES then
         self:showFilterControl('Houses')
+    elseif self.filter == Nav.FILTER_ALL then
+        self:showFilterControl('All')
     end
 end
 
@@ -159,6 +165,11 @@ end
 
 function MT:layoutHintRow(rowControl, data, _)
 	rowControl.label:SetText(data.hint or "-")
+end
+
+local function ShowUndiscovered()
+    MT.filter = Nav.FILTER_ALL
+    MT:ImmediateRefresh()
 end
 
 local function nameComparison(x, y)
@@ -171,7 +182,7 @@ local function buildCategoryHeader(scrollData, id, title, collapsed)
     table.insert(scrollData, recentEntry)
 end
 
-local function buildList(scrollData, id, title, list, defaultString)
+local function buildList(scrollData, id, title, list, defaultString, maxEntries)
     local collapsed = MT.collapsedCategories[id] and true or false
     local hasFocus = MT.editControl:HasFocus()
 
@@ -184,12 +195,14 @@ local function buildList(scrollData, id, title, list, defaultString)
     end
 
     local currentNodeIndex = MT.resultCount
+    local includeUnknown = Nav.saved.includeUndiscovered or MT.filter == Nav.FILTER_ALL
+    local listed = 0
 
     for i = 1, #list do
         if list[i].hint then
             local entry = ZO_ScrollList_CreateDataEntry(3, { hint = list[i].hint })
             table.insert(scrollData, entry)
-        else
+        elseif list[i].known or includeUnknown then
             local isSelected = hasFocus and list[i].known and (currentNodeIndex == MT.targetNode)
             local data = {
                 node = list[i],
@@ -202,7 +215,17 @@ local function buildList(scrollData, id, title, list, defaultString)
             table.insert(scrollData, entry)
 
             currentNodeIndex = currentNodeIndex + 1
+            listed = listed + 1
+
+            if maxEntries and listed >= maxEntries then
+                break
+            end
         end
+    end
+
+    if #list > 0 and listed == 0 then
+        local entry = ZO_ScrollList_CreateDataEntry(3, { hint = GetString(NAVIGATOR_HINT_SHOWUNDISCOVERED), onClick = ShowUndiscovered })
+        table.insert(scrollData, entry)
     end
 
     MT.resultCount = currentNodeIndex
@@ -252,17 +275,17 @@ function MT:buildScrollList(keepScrollPosition)
 
         local recentCount = Nav.saved.recentsCount
         if recentCount > 0 then
-            local recents = Nav.Recents:getRecents(recentCount)
-            buildList(scrollData, "recents", NAVIGATOR_CATEGORY_RECENT, recents, NAVIGATOR_HINT_NORECENTS)
+            local recents = Nav.Recents:getRecents()
+            buildList(scrollData, "recents", NAVIGATOR_CATEGORY_RECENT, recents, NAVIGATOR_HINT_NORECENTS, recentCount)
         end
 
         local zone = Nav.Locations:getCurrentMapZone()
         if zone and zone.zoneId == Nav.ZONE_TAMRIEL then
-            local list = Nav.Locations:getZoneList()
+            local list = Nav.Locations:GetZoneList()
             table.sort(list, nameComparison)
             buildList(scrollData, "zones", NAVIGATOR_CATEGORY_ZONES, list)
         elseif zone then
-            local list = Nav.Locations:getKnownNodes(zone.zoneId)
+            local list = Nav.Locations:GetNodeList(zone.zoneId, false, Nav.saved.listPOIs)
             table.sort(list, Nav.Node.WeightComparison)
 
             if Nav.isRecall and zone.zoneId ~= Nav.ZONE_CYRODIIL then
@@ -387,6 +410,11 @@ function MT:onTextChanged(editbox)
         searchString = ""
     elseif searchString == "h:" then
         self.filter = Nav.FILTER_HOUSES
+        editbox:SetText("")
+        editbox.editTextChanged = false
+        searchString = ""
+    elseif searchString == "a:" then
+        self.filter = Nav.FILTER_ALL
         editbox:SetText("")
         editbox.editTextChanged = false
         searchString = ""
@@ -535,13 +563,33 @@ end
 function MT:selectResult(control, data, mouseButton, isDoubleClick)
     if mouseButton == 1 then
         if data.node and data.node.OnClick then
-            Nav.log("OnClick %s", data.node:GetName() or "-")
+            --Nav.log("OnClick %s", data.node:GetName() or "-")
             data.node:OnClick(isDoubleClick)
         end
     elseif mouseButton == 2 then
         showWayshrineMenu(control, data)
     else
         Nav.log("selectResult: unhandled; poiType=%d zoneId=%d", data.poiType or -1, data.zoneId or -1)
+    end
+end
+
+function MT:HandleMouseUp(handler, control, mouseButton, upInside)
+    if upInside then
+        if control.isDoubleClick then
+            Nav.log("MT:HandleMouseUp 2")
+            handler(self, control, mouseButton, true)
+            control.isDoubleClick = false
+            zo_removeCallLater(control.doubleClickTimer)
+        else
+            Nav.log("MT:HandleMouseUp 1")
+            handler(self, control, mouseButton, false)
+            if mouseButton == 1 then
+                control.isDoubleClick = true
+                control.doubleClickTimer = zo_callLater(function()
+                    control.isDoubleClick = false
+                end, 500)
+            end
+        end
     end
 end
 
@@ -565,6 +613,13 @@ function MT:CategoryRowMouseUp(control, mouseButton)
     end
 end
 
+function MT:HintRowMouseUp(control, mouseButton)
+    local data = ZO_ScrollList_GetData(control)
+    if data.onClick then
+        data.onClick()
+    end
+end
+
 function MT:IsViewingInitialZone()
     local zone = Nav.Locations:getCurrentMapZone()
     return not zone or zone.zoneId == Nav.initialMapZoneId
@@ -581,11 +636,12 @@ function MT:OnMapChanged()
         else
             self.collapsedCategories = {}
         end
-        self.targetNode = 0
-        self.filter = Nav.FILTER_NONE
-        self:updateFilterControl()
-        self.editControl:SetText("")
-        self:executeSearch("")
+
+        if (self.searchString or "") == "" and self.filter == Nav.FILTER_NONE then
+            Nav.log("MT:OnMapChanged: executeSearch")
+            self.targetNode = 0
+            self:executeSearch("")
+        end
 
         Nav.Node.RemovePings()
     end

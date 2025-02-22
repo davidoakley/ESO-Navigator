@@ -24,7 +24,7 @@ function Chat:Init()
     end
 
     function Chat.AutoCompleteProvider:GetResultList()
-        local zoneList = Nav.Locations:getZoneList()
+        local zoneList = Nav.Locations:GetZoneList()
         local list = {}
         for i = 1, #zoneList do
             list[zoneList[i].name] = zoneList[i].name
@@ -73,7 +73,10 @@ function Chat:Search(text)
 end
 
 function Chat:TP(text)
-    if text == "*logon" then
+    if text == "" then
+        LibAddonMenu2:OpenToPanel(Nav.settingsPanel)
+        return
+    elseif text == "*logon" then
         Nav.saved.loggingEnabled = true
         CHAT_SYSTEM:AddMessage("Logging enabled")
         return

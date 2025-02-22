@@ -106,14 +106,11 @@
 				</Label>
             </Controls>
 			<OnMouseUp>
-				if upInside then Navigator.MapTab:RowMouseUp(self, button, false) end
+				Navigator.MapTab:HandleMouseUp(Navigator.MapTab.RowMouseUp, self, button, upInside)
 			</OnMouseUp>
-			<OnMouseDoubleClick>
-				Navigator.MapTab:RowMouseUp(self, button, true)
-			</OnMouseDoubleClick>
         </Control>
 
-        <Control name="Navigator_HintRow" virtual="true" mouseEnabled="false">
+        <Control name="Navigator_HintRow" virtual="true" mouseEnabled="true">
 			<OnInitialized>
 				self.offsetX = 30
 				self.label = self:GetNamedChild("Label")
@@ -124,6 +121,9 @@
 					<AnchorFill/>
 				</Label>
             </Controls>
+			<OnMouseUp>
+				if upInside then Navigator.MapTab:HintRowMouseUp(self, button, false) end
+			</OnMouseUp>
         </Control>
 
 

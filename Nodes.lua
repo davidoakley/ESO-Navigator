@@ -19,6 +19,7 @@ function Node:New(o)
 end
 
 function Node:IsHouse() return false end
+function Node:IsPOI() return false end
 
 ---WeightComparison
 ---@param x Node
@@ -75,7 +76,7 @@ end
 function Node:GetTagList(showBookmark)
     local tagList = {}
     if showBookmark and Nav.Bookmarks:contains(self) then
-        table.insert(tagList, "|t25:25:Navigator/media/bookmark.dds:inheritcolor|t")
+        table.insert(tagList, "bookmark")
     end
     return tagList
 end
@@ -173,6 +174,16 @@ function Node.RemovePings()
         zo_removeCallLater(pingEvent)
         pingEvent = nil
         ZO_WorldMap_GetPinManager():RemovePins("pings", MAP_PIN_TYPE_AUTO_MAP_NAVIGATION_PING)
+    end
+end
+
+function Node:DoAction(action)
+    if action == Nav.ACTION_SHOWONMAP then
+        self:ZoomToPOI(false)
+    elseif action == Nav.ACTION_SETDESTINATION then
+        self:ZoomToPOI(true)
+    elseif action == Nav.ACTION_TRAVEL then
+        self:Jump()
     end
 end
 
@@ -306,11 +317,11 @@ function ZoneNode:JumpToZone()
 end
 
 function ZoneNode:OnClick(isDoubleClick)
-    local clickEvent
-    if isDoubleClick then
-        if clickEvent then zo_removeCallLater(clickEvent) end
-        self:JumpToZone() --jumpToZone(self.zoneId)
-    else
+    self:DoAction(isDoubleClick and Nav.saved.zoneDoubleClick or Nav.saved.zoneSingleClick)
+end
+
+function ZoneNode:DoAction(action)
+    if action == Nav.ACTION_SHOWONMAP then
         local mapZoneId = Nav.Locations:getCurrentMapZoneId()
         local currentMapId = GetCurrentMapId()
         local targetMapId = self.mapId or Nav.Locations.GetMapIdByZoneId(self.zoneId)
@@ -326,6 +337,8 @@ function ZoneNode:OnClick(isDoubleClick)
                 end, 200)
             end
         end
+    elseif action == Nav.ACTION_TRAVEL then
+        self:JumpToZone()
     end
 end
 
@@ -406,7 +419,7 @@ function HouseNode:GetWeight()
     if self.isAlias then
         weight = 0.6
     elseif not self.owned then
-        weight = 0.7
+        weight = 0.4
     elseif Nav.Bookmarks:contains(self) then
         weight = 1.2
     end
@@ -473,7 +486,7 @@ function HouseNode:AddMenuItems()
     --        local houseId = data.houseId or GetFastTravelNodeHouseId(data.nodeIndex)
     --        SetHousingPrimaryHouse(houseId)
     --        zo_callLater(function()
-    --            Nav.Locations:setupNodes()
+    --            Nav.Locations:SetupNodes()
     --            Nav.MapTab:ImmediateRefresh()
     --        end, 10)
     --        ClearMenu()
@@ -521,11 +534,11 @@ function FastTravelNode:GetTagList(showBookmark)
 
     if self.traders and self.traders > 0 then
         if self.traders >= 5 then
-            table.insert(tagList, "|t20:23:Navigator/media/city_narrow.dds:inheritcolor|t")
+            table.insert(tagList, "city")
         elseif self.traders >= 2 then
-            table.insert(tagList, "|t20:23:Navigator/media/town_narrow.dds:inheritcolor|t")
+            table.insert(tagList, "town")
         end
-        table.insert(tagList, "|t23:23:/esoui/art/icons/servicemappins/servicepin_guildkiosk.dds:inheritcolor|t")
+        table.insert(tagList, "trader")
     end
 
     return Nav.Utils.tableConcat(tagList, Node.GetTagList(self, showBookmark))
@@ -548,6 +561,7 @@ end
 
 function FastTravelNode:Jump()
     if not self.known or self.disabled then
+        Nav.log("FastTravelNode:Jump: unknown or disabled")
         return
     end
 
@@ -585,10 +599,6 @@ function FastTravelNode:Jump()
     ZO_Dialogs_ShowPlatformDialog(id, {nodeIndex = self.nodeIndex}, {mainTextParams = {self.originalName}})
 end
 
-function FastTravelNode:OnClick()
-    self:Jump()
-end
-
 function FastTravelNode:AddMenuItems()
     if self:IsKnown() then
         local strId = Nav.isRecall and SI_WORLD_MAP_ACTION_RECALL_TO_WAYSHRINE or SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE
@@ -603,6 +613,10 @@ function FastTravelNode:AddMenuItems()
         self:ZoomToPOI(true)
     end)
     self:AddBookmarkMenuItem({ nodeIndex = self.nodeIndex })
+end
+
+function FastTravelNode:OnClick(isDoubleClick)
+    self:DoAction(isDoubleClick and Nav.saved.destinationDoubleClick or Nav.saved.destinationSingleClick)
 end
 
 
@@ -626,6 +640,29 @@ function PlayerHouseNode:AddMenuItems()
 end
 
 
+--- @class POINode
+local POINode = Node:New()
+
+function POINode:IsPOI() return true end
+
+function POINode:OnClick()
+    self:ZoomToPOI(false)
+end
+
+function POINode:AddMenuItems()
+    AddMenuItem(GetString(NAVIGATOR_MENU_SHOWONMAP), function()
+        self:ZoomToPOI(false)
+    end)
+    AddMenuItem(GetString(NAVIGATOR_MENU_SETDESTINATION), function()
+        self:ZoomToPOI(true)
+    end)
+    self:AddBookmarkMenuItem({ poiIndex = self.poiIndex, zoneId = self.zoneId })
+end
+
+function POINode:GetWeight()
+    return self:IsKnown() and 0.5 or 0.3
+end
+
 Nav.Node = Node
 Nav.PlayerNode = PlayerNode
 Nav.ZoneNode = ZoneNode
@@ -633,3 +670,4 @@ Nav.JumpToZoneNode = JumpToZoneNode
 Nav.HouseNode = HouseNode
 Nav.FastTravelNode = FastTravelNode
 Nav.PlayerHouseNode = PlayerHouseNode
+Nav.POINode = POINode

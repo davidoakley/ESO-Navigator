@@ -16,11 +16,13 @@ fzy.lua
 Data.lua
 Nodes.lua
 Utils.lua
-Settings.lua
 Locations.lua
 Players.lua
 Search.lua
 Chat.lua
+
+LAM_navactions.lua
+Settings.lua
 
 MapTab.xml
 MapTab.lua

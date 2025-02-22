@@ -27,6 +27,7 @@ NAVIGATOR_CATEGORY_GROUP = SI_MAIN_MENU_GROUP
 mkstr("NAVIGATOR_HINT_NORESULTS", "No results found")
 mkstr("NAVIGATOR_HINT_NORECENTS", "Destinations that you travel to will automatically appear here")
 mkstr("NAVIGATOR_HINT_NOBOOKMARKS", "Right click a destination to create (or delete) a bookmark for it")
+mkstr("NAVIGATOR_HINT_SHOWUNDISCOVERED", "Tap to show undiscovered locations")
 
 -- Enter key label (keep it short!)
 mkstr("NAVIGATOR_KEY_ENTER", "Enter")

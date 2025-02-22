@@ -20,6 +20,12 @@ function Bookmarks:getIndex(entry)
                 return i
             end
         end
+    elseif entry.poiIndex then
+        for i = 1, #list do
+            if entry.poiIndex == list[i].poiIndex then
+                return i
+            end
+        end
     elseif entry.userID then
         local userID = entry.userID
         for i = 1, #list do
@@ -72,7 +78,6 @@ end
 function Bookmarks:getBookmarks()
     local list = Nav.saved.bookmarks
     local results = {}
-    --local nodeMap = Nav.Locations:getNodeMap()
 
     for i = 1, #list do
         local entry = list[i]
@@ -82,6 +87,9 @@ function Bookmarks:getBookmarks()
                 nodeIndex = Nav.Locations:GetHarborage()
             end
             local node = Nav.Locations:GetNode(nodeIndex)
+            table.insert(results, node)
+        elseif entry.poiIndex then
+            local node = Nav.Locations:GetPOI(entry.zoneId, entry.poiIndex)
             table.insert(results, node)
         elseif entry.zoneId then
             local zone = Nav.Locations:getZone(entry.zoneId)
@@ -97,7 +105,7 @@ function Bookmarks:getBookmarks()
                 icon = "Navigator/media/house_player.dds",
                 suffix = entry.nickname and zo_strformat(GetString(SI_TOOLTIP_COLLECTIBLE_NICKNAME), entry.nickname)
                                          or GetString(SI_HOUSING_PRIMARY_RESIDENCE_HEADER),
-                known = true,
+                known = true
             })
             table.insert(results, node)
         end
