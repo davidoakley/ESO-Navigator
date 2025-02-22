@@ -73,7 +73,10 @@ function Chat:Search(text)
 end
 
 function Chat:TP(text)
-    if text == "*logon" then
+    if text == "" then
+        LibAddonMenu2:OpenToPanel(Nav.settingsPanel)
+        return
+    elseif text == "*logon" then
         Nav.saved.loggingEnabled = true
         CHAT_SYSTEM:AddMessage("Logging enabled")
         return

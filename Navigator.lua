@@ -21,6 +21,10 @@ Nav.CONFIRMFASTTRAVEL_ALWAYS = 0
 Nav.CONFIRMFASTTRAVEL_WHENCOST = 1
 Nav.CONFIRMFASTTRAVEL_NEVER = 2
 
+Nav.ACTION_SHOWONMAP = 0
+Nav.ACTION_SETDESTINATION = 1
+Nav.ACTION_TRAVEL = 2
+
 Nav.default = {
   recentNodes = {},
   bookmarks = {},
@@ -33,6 +37,11 @@ Nav.default = {
   ignoreDefiniteArticlesInSort = false,
   listPOIs = true,
   useHouseNicknames = false,
+  destinationSingleClick = Nav.ACTION_SHOWONMAP,
+  destinationDoubleClick = Nav.ACTION_TRAVEL,
+  zoneSingleClick = Nav.ACTION_SHOWONMAP,
+  zoneDoubleClick = Nav.ACTION_TRAVEL,
+  singleClickZone = false,
   confirmFastTravel = Nav.CONFIRMFASTTRAVEL_ALWAYS
 }
 

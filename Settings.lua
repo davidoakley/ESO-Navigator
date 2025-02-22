@@ -1,3 +1,5 @@
+local Nav = Navigator --- @class Navigator
+
 function Navigator:loadSettings()
     local LAM = LibAddonMenu2
     local sv = self.saved
@@ -67,6 +69,32 @@ function Navigator:loadSettings()
         default = self.default.confirmFastTravel,
     })
 
+
+    table.insert(optionsTable, { type = "divider" })
+
+    local actions = { "destinationSingleClick", "destinationDoubleClick", "zoneSingleClick", "zoneDoubleClick" }
+    local actionDefaults = { Nav.ACTION_SHOWONMAP, Nav.ACTION_TRAVEL, Nav.ACTION_SHOWONMAP, Nav.ACTION_TRAVEL }
+    table.insert(optionsTable, {
+        type = "nav_actions",
+        name = "Actions",
+        tooltip = "The action that happens if you single-left-click a destination such as a wayshrine or house",
+        columnHeadings = {"Single-click", "Double-click"},
+        rowHeadings = {"Destination action", "Zone action"},
+        choices = function(index)
+            return index >= 3 and {"Show On Map", "Travel"} or {"Show On Map", "Set Destination", "Travel"}
+        end,
+        choicesValues = function(index)
+            return index >= 3 and { Nav.ACTION_SHOWONMAP, Nav.ACTION_TRAVEL } or { Nav.ACTION_SHOWONMAP, Nav.ACTION_SETDESTINATION, Nav.ACTION_TRAVEL }
+        end,
+        getFunc = function(index) return sv[actions[index]] end,
+        setFunc = function(index, value) sv[actions[index]] = value end,
+        default = function(index) return actionDefaults[index] end,
+        reference = Nav.settingsName .. "_actions"
+    })
+
+    table.insert(optionsTable, { type = "divider" })
+
+    
     table.insert(optionsTable, {
         type = "checkbox",
         name = "Show Points Of Interest on the zone list",

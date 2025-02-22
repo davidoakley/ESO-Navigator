@@ -106,11 +106,8 @@
 				</Label>
             </Controls>
 			<OnMouseUp>
-				if upInside then Navigator.MapTab:RowMouseUp(self, button, false) end
+				Navigator.MapTab:HandleMouseUp(Navigator.MapTab.RowMouseUp, self, button, upInside)
 			</OnMouseUp>
-			<OnMouseDoubleClick>
-				Navigator.MapTab:RowMouseUp(self, button, true)
-			</OnMouseDoubleClick>
         </Control>
 
         <Control name="Navigator_HintRow" virtual="true" mouseEnabled="true">
