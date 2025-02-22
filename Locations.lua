@@ -201,7 +201,7 @@ local function loadZonePOIs(self, zoneId, zoneIndex, zoneName, numPOIs)
         local poiName = GetPOIInfo(zoneIndex, poiIndex) -- might be wrong - "X" instead of "Dungeon: X"!
         local zone = getOrCreateZone(self, nodeZoneId, zoneName, zoneIndex)
         if zone and not zone.pois[poiIndex] and poiName ~= nil and poiName ~= "" then
-            local _, _, _, icon, _, _, isDiscovered, _ = GetPOIMapInfo(zoneIndex, poiIndex)
+            local _, _, pinType, icon, _, _, isDiscovered, _ = GetPOIMapInfo(zoneIndex, poiIndex)
             local node = Nav.POINode:New({
                 poiIndex = poiIndex,
                 name = Utils.DisplayName(poiName),
@@ -209,8 +209,12 @@ local function loadZonePOIs(self, zoneId, zoneIndex, zoneName, numPOIs)
                 zoneId = nodeZoneId,
                 icon = icon,
                 originalIcon = icon,
-                known = isDiscovered
+                known = isDiscovered,
+                pinType = pinType
             })
+            if icon:find("poi_mundus") then
+                node.suffix = zoneName
+            end
 
             table.insert(self.nodes, node)
             zone.pois[poiIndex] = node
