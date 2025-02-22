@@ -431,8 +431,16 @@ function HouseNode:GetWeight()
 end
 
 function HouseNode:GetIcon()
-    return self:IsPrimary() and "Navigator/media/house_star.dds" or
-            (self.owned and "Navigator/media/house.dds" or "Navigator/media/house_unowned.dds")
+    return self:IsPrimary() and "Navigator/media/house_star.dds"
+                             or "Navigator/media/house.dds"
+end
+
+function HouseNode:GetIconColour()
+    if self.owned then
+        return Nav.COLOUR_WHITE
+    else
+        return Nav.COLOUR_DISABLED
+    end
 end
 
 function HouseNode:GetColour(isSelected)
@@ -644,6 +652,14 @@ end
 local POINode = Node:New()
 
 function POINode:IsPOI() return true end
+
+function POINode:GetIconColour()
+    if self.known and not self.disabled then
+        return Nav.COLOUR_NORMAL
+    else
+        return Nav.COLOUR_DISABLED
+    end
+end
 
 function POINode:OnClick()
     self:ZoomToPOI(false)
