@@ -514,7 +514,8 @@ end
 local FastTravelNode = Node:New()
 
 function FastTravelNode:GetWeight()
-    local weight = self.freeRecall or not Nav.isRecall and 1.0 or 0.8
+    local weight = self.freeRecall or not Nav.isRecall and 1.0 or
+                  (self.disabled and 0.3 or 0.8)
 
     if Nav.Bookmarks:contains(self) then
         weight = weight + 0.15
@@ -553,7 +554,7 @@ function FastTravelNode:GetTagList(showBookmark)
 end
 
 function FastTravelNode:GetRecallCost()
-    if not Nav.isRecall then
+    if not Nav.isRecall or self.disabled then
         return nil
     end
 
