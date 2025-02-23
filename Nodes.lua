@@ -727,6 +727,11 @@ function KeepNode:DoAction(action)
     end
 end
 
+function KeepNode:GetWeight()
+    return (self.icon:find("AvA_borderKeep") and 0.9) or
+           (self.icon:find("AvA_town") and 1.1) or
+           (self.icon:find("AvA_outpost") and 1.2) or 1.3
+end
 
 Nav.Node = Node
 Nav.PlayerNode = PlayerNode

@@ -244,11 +244,14 @@ local function loadKeep(self, bgCtx, ktnnIndex, zone)
         known = true,
         accessible = accessible,
         pinType = pinType,
+        alliance = GetKeepAlliance(keepId, bgCtx),
         bgCtx = bgCtx
     })
 
-    table.insert(self.nodes, node)
-    zone.keeps[ktnnIndex] = node
+    if not node.icon:find("borderKeep") or node.alliance == Nav.currentAlliance then
+        table.insert(self.nodes, node)
+        table.insert(zone.keeps, node)
+    end
 end
 
 local function loadKeeps(self)
@@ -344,6 +347,7 @@ function Locs:UpdateKeeps()
         local keep = zone.keeps[i]
         keep.pinType  = GetKeepPinInfo(keep.keepId, bgCtx)
         keep.accessible = GetKeepAccessible(keep.keepId, bgCtx)
+        keep.alliance = GetKeepAlliance(keep.keepId, bgCtx)
         keep.icon = ZO_MapPin.PIN_DATA[keep.pinType].texture or "/esoui/art/crafting/crafting_smithing_notrait.dds"
     end
 
