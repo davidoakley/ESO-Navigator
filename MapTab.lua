@@ -28,6 +28,9 @@ end
 
 function MT:ImmediateRefresh()
     -- Nav.log("MT:ImmediateRefresh")
+    if Nav.Locations.keepsDirty then
+        Nav.Locations:UpdateKeeps()
+    end
     self:executeSearch(self.searchString, true)
     self.needsRefresh = false
 end

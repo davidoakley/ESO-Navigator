@@ -117,20 +117,20 @@ function Node:GetRecallCost()
     return nil -- By default, free!
 end
 
-function Node:ZoomToPOI(setWaypoint)
-    local function getPOIMapInfo(self, zoneIndex, mapId)
-        if mapId == 2082 then
-            return 0.3485, 0.3805 -- The Shambles
-        elseif self.nodeIndex == 407 then
-            return 0.9273, 0.7105 -- Dragonguard Sanctum
-        else
-            return GetPOIMapInfo(zoneIndex, self.poiIndex)
-        end
+function Node:GetMapInfo(self, zoneIndex, mapId)
+    if mapId == 2082 then
+        return 0.3485, 0.3805 -- The Shambles
+    elseif self.nodeIndex == 407 then
+        return 0.9273, 0.7105 -- Dragonguard Sanctum
+    else
+        return GetPOIMapInfo(zoneIndex, self.poiIndex)
     end
+end
 
-    local function panToPOI(zoneIndex, mapId, poiIndex)
-        local normalizedX, normalizedZ = getPOIMapInfo(zoneIndex, mapId, poiIndex)
-        Nav.log("Node:ZoomToPOI: poiIndex=%d, %f,%f", poiIndex, normalizedX, normalizedZ)
+function Node:ZoomToPOI(setWaypoint, useCurrentZone)
+    local function panToPOI(self, zoneIndex, mapId)
+        local normalizedX, normalizedZ = self:GetMapInfo(self, zoneIndex, mapId)
+        Nav.log("Node:ZoomToPOI: poiIndex=%d, %f,%f", self.poiIndex or -1, normalizedX, normalizedZ)
         if setWaypoint then
             PingMap(MAP_PIN_TYPE_PLAYER_WAYPOINT, MAP_TYPE_LOCATION_CENTERED, normalizedX, normalizedZ)
         else
@@ -138,7 +138,7 @@ function Node:ZoomToPOI(setWaypoint)
         end
 
         local mapPanAndZoom = ZO_WorldMap_GetPanAndZoom()
-        mapPanAndZoom:PanToNormalizedPosition(normalizedX, normalizedZ, false)
+        mapPanAndZoom:PanToNormalizedPosition(normalizedX, normalizedZ, useCurrentZone)
     end
 
     local targetMapId = self.mapId or Nav.Locations.GetMapIdByZoneId(self.zoneId)
@@ -680,6 +680,54 @@ function POINode:GetWeight()
     return self:IsKnown() and 0.5 or 0.3
 end
 
+
+--- @class KeepNode
+local KeepNode = Node:New()
+
+function KeepNode:OnClick()
+    self:ZoomToPOI(false)
+end
+
+function KeepNode:GetMapInfo(self, zoneIndex, mapId)
+    local pinType,nx,ny  = GetKeepPinInfo(self.keepId, self.bgCtx)
+    --if mapId == 2082 then
+    --    return 0.3485, 0.3805 -- The Shambles
+    --elseif self.nodeIndex == 407 then
+    --    return 0.9273, 0.7105 -- Dragonguard Sanctum
+    --else
+    --    return GetPOIMapInfo(zoneIndex, self.poiIndex)
+    --end
+    Nav.log("KeepNode:GetMapInfo: keepId=%d -> %f,%f", self.keepId, nx, ny)
+    return nx,ny
+end
+
+function KeepNode:Jump()
+    local canTravelToKeep = WORLD_MAP_MANAGER:IsInMode(MAP_MODE_AVA_KEEP_RECALL)
+    if not canTravelToKeep then
+        local startKeepId = GetKeepFastTravelInteraction()
+        canTravelToKeep = startKeepId and self.keepId ~= startKeepId
+    end
+    if canTravelToKeep then
+        TravelToKeep(self.keepId)
+        ZO_WorldMap_HideWorldMap()
+    end
+end
+
+function KeepNode:OnClick(isDoubleClick)
+    self:DoAction(isDoubleClick and Nav.saved.destinationDoubleClick or Nav.saved.destinationSingleClick)
+end
+
+function KeepNode:DoAction(action)
+    if action == Nav.ACTION_SHOWONMAP then
+        self:ZoomToPOI(false, true)
+    elseif action == Nav.ACTION_SETDESTINATION then
+        self:ZoomToPOI(true, true)
+    elseif action == Nav.ACTION_TRAVEL then
+        self:Jump()
+    end
+end
+
+
 Nav.Node = Node
 Nav.PlayerNode = PlayerNode
 Nav.ZoneNode = ZoneNode
@@ -688,3 +736,4 @@ Nav.HouseNode = HouseNode
 Nav.FastTravelNode = FastTravelNode
 Nav.PlayerHouseNode = PlayerHouseNode
 Nav.POINode = POINode
+Nav.KeepNode = KeepNode

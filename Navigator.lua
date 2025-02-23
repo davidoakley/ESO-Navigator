@@ -132,6 +132,11 @@ local function OnMapStateChange(_, newState)
 end
 
 local function OnMapChanged()
+    if Nav.MapTab.visible then
+        Nav.Locations:UpdateKeeps()
+        Nav.MapTab:ImmediateRefresh()
+    else
+    end
   Nav.MapTab:OnMapChanged()
 end
 
@@ -160,6 +165,11 @@ local function SetPlayersDirty(_)
   -- Nav.log("SetPlayersDirty("..eventCode..")")
   Nav.Players:ClearPlayers()
   Nav.MapTab:queueRefresh()
+end
+
+local function SetKeepsDirty(_)
+    Nav.Locations:SetKeepsDirty()
+    Nav.MapTab:queueRefresh()
 end
 
 function Nav.showSearch()
@@ -197,6 +207,8 @@ function Nav:initialize()
 
   SCENE_MANAGER:GetScene('worldMap'):RegisterCallback("StateChange", OnMapStateChange)
 
+  self.currentAlliance = GetUnitAlliance("player")
+
   self.MapTab:init()
   self.Recents:init()
   self.Bookmarks:init()
@@ -223,6 +235,12 @@ function Nav:initialize()
       SetPlayersDirty()
     end
   end)
+
+  addEvents(SetKeepsDirty, EVENT_FAST_TRAVEL_NETWORK_UPDATED, EVENT_FAST_TRAVEL_KEEP_NETWORK_UPDATED,
+          EVENT_FAST_TRAVEL_KEEP_NETWORK_LINK_CHANGED, EVENT_CAMPAIGN_STATE_INITIALIZED,
+          EVENT_CAMPAIGN_SELECTION_DATA_CHANGED, EVENT_CURRENT_CAMPAIGN_CHANGED, EVENT_ASSIGNED_CAMPAIGN_CHANGED,
+          EVENT_KEEPS_INITIALIZED, EVENT_KEEP_ALLIANCE_OWNER_CHANGED, EVENT_KEEP_UNDER_ATTACK_CHANGED
+  )
 
   local buttonData = {
     pressed = "Navigator/media/tabicon_down.dds",

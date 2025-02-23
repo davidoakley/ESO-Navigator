@@ -6,7 +6,8 @@ local Locs = Nav.Locations or {
     nodeMap = nil,
     zones = nil,
     mapIndices = nil,
-    harborageIndex = nil
+    harborageIndex = nil,
+    keepsDirty = false
 }
 local Utils = Nav.Utils
 
@@ -143,7 +144,7 @@ local function loadFastTravelNode(self, nodeIndex, nodeLookup, zoneLookup)
         if not zoneLookup[zoneId] then
             zoneId = GetParentZoneId(zoneId)
         end
-        if zoneLookup[zoneId] then
+        if zoneLookup[zoneId] and zoneId ~= Nav.ZONE_CYRODIIL then
             local _, _, _, zone = unpack(zoneLookup[zoneId])
             local node = createNode(self, nodeIndex, name, typePOI, icon, glowIcon, known, zone, poiIndex)
 
@@ -202,23 +203,66 @@ local function loadZonePOIs(self, zoneId, zoneIndex, zoneName, numPOIs)
         local zone = getOrCreateZone(self, nodeZoneId, zoneName, zoneIndex)
         if zone and not zone.pois[poiIndex] and poiName ~= nil and poiName ~= "" then
             local _, _, pinType, icon, _, _, isDiscovered, _ = GetPOIMapInfo(zoneIndex, poiIndex)
-            local node = Nav.POINode:New({
-                poiIndex = poiIndex,
-                name = Utils.DisplayName(poiName),
-                originalName = poiName,
-                zoneId = nodeZoneId,
-                icon = icon,
-                originalIcon = icon,
-                known = isDiscovered,
-                pinType = pinType
-            })
-            if icon:find("poi_mundus") then
-                node.suffix = zoneName
-            end
+            if not icon:find("wayshrine") then -- Remove Cyrodiil's unusable wayshrines
+                local node = Nav.POINode:New({
+                    poiIndex = poiIndex,
+                    name = Utils.DisplayName(poiName),
+                    originalName = poiName,
+                    zoneId = nodeZoneId,
+                    icon = icon,
+                    originalIcon = icon,
+                    known = isDiscovered,
+                    pinType = pinType
+                })
+                if icon:find("poi_mundus") then
+                    node.suffix = zoneName
+                end
 
-            table.insert(self.nodes, node)
-            zone.pois[poiIndex] = node
+                table.insert(self.nodes, node)
+                zone.pois[poiIndex] = node
+            end
         end
+    end
+end
+
+local function loadKeep(self, bgCtx, ktnnIndex, zone)
+    local keepId, accessible, normalizedX,  normalizedY = GetKeepTravelNetworkNodeInfo(ktnnIndex, bgCtx)
+
+    local pinType,nx,ny  = GetKeepPinInfo(keepId, bgCtx)
+    local name = GetKeepName(keepId)
+    local icon = "EsoUI/Art/Campaign/Gamepad/gp_overview_keepIcon.dds"
+
+    icon = ZO_MapPin.PIN_DATA[pinType].texture or "/esoui/art/crafting/crafting_smithing_notrait.dds"
+
+    local node = Nav.KeepNode:New({
+        ktnnIndex = ktnnIndex,
+        keepId = keepId,
+        name = Utils.DisplayName(name),
+        originalName = name,
+        zoneId = Nav.ZONE_CYRODIIL,
+        icon = icon,
+        known = true,
+        accessible = accessible,
+        pinType = pinType,
+        bgCtx = bgCtx
+    })
+
+    table.insert(self.nodes, node)
+    zone.keeps[ktnnIndex] = node
+end
+
+local function loadKeeps(self)
+    ZO_WorldMap_RefreshKeeps()
+
+    local zone = self.zones[Nav.ZONE_CYRODIIL]
+    zone.keeps = {}
+
+    local bgCtx = BGQUERY_ASSIGNED_CAMPAIGN --ZO_WorldMap_GetBattlegroundQueryType()
+
+    local count = GetNumKeepTravelNetworkNodes(bgCtx)
+    Nav.log("loadKeeps: GetNumKeepTravelNetworkNodes=%d, GetNumKeeps=%d", count, GetNumKeeps())
+    for ktnnIndex = 1, count do
+        loadKeep(self, bgCtx, ktnnIndex, zone)
     end
 end
 
@@ -251,6 +295,10 @@ function Locs:SetupNodes()
     end
     Nav.log("Locations:SetupNodes: POIs took %d ms", GetGameTimeMilliseconds() - beginTime)
 
+    beginTime = GetGameTimeMilliseconds()
+    loadKeeps(self)
+    Nav.log("Locations:SetupNodes: Keeps took %d ms", GetGameTimeMilliseconds() - beginTime)
+
     for i = 1, #self.nodes do
         if not self.nodes[i].poiIndex and self.nodes[i].zoneId ~= Nav.ZONE_CYRODIIL then
             Nav.log(" x %s - nodeIndex %d no poiIndex", self.nodes[i].name, self.nodes[i].nodeIndex)
@@ -270,6 +318,36 @@ function Locs:clearKnownNodes()
             end
         end
     end
+end
+
+function Locs:SetKeepsDirty()
+    self.keepsDirty = true
+end
+
+function Locs:UpdateKeeps()
+    if self.zones == nil then
+        self:SetupNodes()
+    end
+
+    local zone = self.zones[Nav.ZONE_CYRODIIL]
+
+    if not zone.keeps or #zone.keeps == 0 then
+        loadKeeps(self)
+    end
+
+    ZO_WorldMap_RefreshKeeps()
+
+    --FIXME: Needs to be local campaign if in Cyrodiil
+    local bgCtx = ZO_WorldMap_GetBattlegroundQueryType() -- BGQUERY_ASSIGNED_CAMPAIGN
+
+    for i = 1, #zone.keeps do
+        local keep = zone.keeps[i]
+        keep.pinType  = GetKeepPinInfo(keep.keepId, bgCtx)
+        keep.accessible = GetKeepAccessible(keep.keepId, bgCtx)
+        keep.icon = ZO_MapPin.PIN_DATA[keep.pinType].texture or "/esoui/art/crafting/crafting_smithing_notrait.dds"
+    end
+
+    self.keepsDirty = false
 end
 
 

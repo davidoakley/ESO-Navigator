@@ -153,6 +153,9 @@
 				else
 				    Navigator.MapTab:buildScrollList()
 				end
+				if Navigator.Locations.keepsDirty then
+					Navigator.Locations:UpdateKeeps()
+				end
 			</OnEffectivelyShown>
 			<OnEffectivelyHidden>
 				Navigator.log("Navigator_MapTab.OnEffectivelyHidden")
