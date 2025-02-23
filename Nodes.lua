@@ -431,8 +431,16 @@ function HouseNode:GetWeight()
 end
 
 function HouseNode:GetIcon()
-    return self:IsPrimary() and "Navigator/media/house_star.dds" or
-            (self.owned and "Navigator/media/house.dds" or "Navigator/media/house_unowned.dds")
+    return self:IsPrimary() and "Navigator/media/house_star.dds"
+                             or "Navigator/media/house.dds"
+end
+
+function HouseNode:GetIconColour()
+    if self.owned then
+        return Nav.COLOUR_WHITE
+    else
+        return Nav.COLOUR_DISABLED
+    end
 end
 
 function HouseNode:GetColour(isSelected)
@@ -506,7 +514,8 @@ end
 local FastTravelNode = Node:New()
 
 function FastTravelNode:GetWeight()
-    local weight = self.freeRecall or not Nav.isRecall and 1.0 or 0.8
+    local weight = self.freeRecall or not Nav.isRecall and 1.0 or
+                  (self.disabled and 0.3 or 0.8)
 
     if Nav.Bookmarks:contains(self) then
         weight = weight + 0.15
@@ -545,7 +554,7 @@ function FastTravelNode:GetTagList(showBookmark)
 end
 
 function FastTravelNode:GetRecallCost()
-    if not Nav.isRecall then
+    if not Nav.isRecall or self.disabled then
         return nil
     end
 
@@ -644,6 +653,14 @@ end
 local POINode = Node:New()
 
 function POINode:IsPOI() return true end
+
+function POINode:GetIconColour()
+    if self.known and not self.disabled then
+        return Nav.COLOUR_NORMAL
+    else
+        return Nav.COLOUR_DISABLED
+    end
+end
 
 function POINode:OnClick()
     self:ZoomToPOI(false)

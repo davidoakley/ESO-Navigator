@@ -72,7 +72,9 @@ local function createNode(self, i, name, typePOI, icon, glowIcon, known, zone, p
         end
     elseif typePOI == 1 then
         nodeInfo.poiType = Nav.POI_WAYSHRINE
-        if icon:find("poi_wayshrine_complete") then nodeInfo.icon = "Navigator/media/wayshrine.dds" end
+        if icon:find("poi_wayshrine_complete") or icon == "/esoui/art/icons/icon_missing.dds" then
+            nodeInfo.icon = "Navigator/media/wayshrine.dds"
+        end
     elseif glowIcon == "/esoui/art/icons/poi/poi_soloinstance_glow.dds" or
             glowIcon == "/esoui/art/icons/poi/poi_groupinstance_glow.dds" then
         nodeInfo.poiType = Nav.POI_ARENA
@@ -82,7 +84,7 @@ local function createNode(self, i, name, typePOI, icon, glowIcon, known, zone, p
 
     nodeInfo.barename = Utils.bareName(nodeInfo.name)
 
-    if icon == "/esoui/art/icons/icon_missing.dds" then
+    if nodeInfo.icon == "/esoui/art/icons/icon_missing.dds" then
         nodeInfo.icon = "/esoui/art/crafting/crafting_smithing_notrait.dds"
     end
 
@@ -199,7 +201,7 @@ local function loadZonePOIs(self, zoneId, zoneIndex, zoneName, numPOIs)
         local poiName = GetPOIInfo(zoneIndex, poiIndex) -- might be wrong - "X" instead of "Dungeon: X"!
         local zone = getOrCreateZone(self, nodeZoneId, zoneName, zoneIndex)
         if zone and not zone.pois[poiIndex] and poiName ~= nil and poiName ~= "" then
-            local _, _, _, icon, _, _, isDiscovered, _ = GetPOIMapInfo(zoneIndex, poiIndex)
+            local _, _, pinType, icon, _, _, isDiscovered, _ = GetPOIMapInfo(zoneIndex, poiIndex)
             local node = Nav.POINode:New({
                 poiIndex = poiIndex,
                 name = Utils.DisplayName(poiName),
@@ -207,8 +209,12 @@ local function loadZonePOIs(self, zoneId, zoneIndex, zoneName, numPOIs)
                 zoneId = nodeZoneId,
                 icon = icon,
                 originalIcon = icon,
-                known = isDiscovered
+                known = isDiscovered,
+                pinType = pinType
             })
+            if icon:find("poi_mundus") then
+                node.suffix = zoneName
+            end
 
             table.insert(self.nodes, node)
             zone.pois[poiIndex] = node
