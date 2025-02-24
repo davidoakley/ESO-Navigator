@@ -654,9 +654,11 @@ local POINode = Node:New()
 
 function POINode:IsPOI() return true end
 
-function POINode:GetIconColour()
-    if self.known and not self.disabled then
-        return Nav.COLOUR_NORMAL
+function POINode:GetColour(isSelected)
+    if isSelected and self.known and not self.disabled then
+        return Nav.COLOUR_WHITE
+    elseif self.known and not self.disabled then
+        return Nav.COLOUR_POI
     else
         return Nav.COLOUR_DISABLED
     end
@@ -683,6 +685,16 @@ end
 
 --- @class KeepNode
 local KeepNode = Node:New()
+
+function KeepNode:GetColour(isSelected)
+    if isSelected and self.accessible then
+        return Nav.COLOUR_WHITE
+    elseif self.accessible then
+        return Nav.COLOUR_NORMAL
+    else
+        return Nav.COLOUR_POI
+    end
+end
 
 function KeepNode:OnClick()
     self:ZoomToPOI(false)
