@@ -269,9 +269,15 @@ function MT:buildScrollList(keepScrollPosition)
         local zone = Nav.Locations:getCurrentMapZone()
         if zone and zone.zoneId == Nav.ZONE_TAMRIEL then
             self.content = Nav.ZoneListContent:New()
+        elseif zone.zoneId == Nav.ZONE_CYRODIIL then
+            self.content = Nav.CyrodiilContent:New()
         elseif zone then
             self.content = Nav.ZoneContent:New(zone)
         end
+    end
+    if not self.content then
+        self.content = Nav.ZoneListContent:New()
+        Nav.logWarning("MT:buildScrollList: no content chosen")
     end
     self.content:Compose()
 

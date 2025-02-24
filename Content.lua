@@ -35,8 +35,8 @@ end
 --- @class Content
 local Content = {}
 
-function Content:New(o)
-    o = o or {
+function Content:New()
+    local o = {
         categories = {}
     }
     setmetatable(o, self)
@@ -77,24 +77,11 @@ function Content:AddRecentsCategory()
     end
 end
 
-
---- @class ZoneContent
-local ZoneContent = Content:New()
-
-function ZoneContent:New(zone)
-    local o = {
-        zone = zone
-    }
-    setmetatable(o, self)
-    self.__index = self
-    return o
-end
-
-function ZoneContent:AddZoneCategory(zone)
+function Content:AddZoneCategory(zone)
     local list = Nav.Locations:GetNodeList(zone.zoneId, false, Nav.saved.listPOIs)
     table.sort(list, Nav.Node.WeightComparison)
 
-    if Nav.isRecall and zone.zoneId ~= Nav.ZONE_CYRODIIL then
+    if Nav.jumpState == Nav.JUMPSTATE_WORLD and zone.zoneId ~= Nav.ZONE_CYRODIIL then
         local node = Nav.JumpToZoneNode:New(Nav.Utils.shallowCopy(zone))
         local playerInfo = Nav.Players:GetPlayerInZone(zone.zoneId)
         node.known = playerInfo ~= nil
@@ -108,6 +95,61 @@ function ZoneContent:AddZoneCategory(zone)
     })
 end
 
+function Content:AddCyrodiilCategories()
+    local list = Nav.Locations:GetNodeList(Nav.ZONE_CYRODIIL, false, Nav.saved.listPOIs)
+
+    local allianceNodes = {}
+    allianceNodes[ALLIANCE_ALDMERI_DOMINION] = {}
+    allianceNodes[ALLIANCE_DAGGERFALL_COVENANT] = {}
+    allianceNodes[ALLIANCE_EBONHEART_PACT] = {}
+    local poiNodes = {}
+
+    for i = 1, #list do
+        local node = list[i]
+        if node.alliance then
+            table.insert(allianceNodes[node.alliance], node)
+        else
+            table.insert(poiNodes, node)
+        end
+    end
+
+    local pa = Nav.currentAlliance
+    local allianceList =
+    (pa == ALLIANCE_ALDMERI_DOMINION and { ALLIANCE_ALDMERI_DOMINION, ALLIANCE_DAGGERFALL_COVENANT, ALLIANCE_EBONHEART_PACT }) or
+            (pa == ALLIANCE_DAGGERFALL_COVENANT and { ALLIANCE_DAGGERFALL_COVENANT, ALLIANCE_EBONHEART_PACT, ALLIANCE_ALDMERI_DOMINION }) or
+            (pa == ALLIANCE_EBONHEART_PACT and { ALLIANCE_EBONHEART_PACT, ALLIANCE_ALDMERI_DOMINION, ALLIANCE_DAGGERFALL_COVENANT })
+
+    for i = 1, #allianceList do
+        local alliance = allianceList[i]
+        table.sort(allianceNodes[alliance], Nav.Node.WeightComparison)
+        table.insert(self.categories, {
+            id = string.format("alliance_%d", alliance),
+            title = GetAllianceName(alliance),
+            list = allianceNodes[alliance]
+        })
+    end
+
+    table.sort(poiNodes, Nav.Node.WeightComparison)
+    table.insert(self.categories, {
+        id = "pois",
+        title = NAVIGATOR_CATEGORY_POI,
+        list = poiNodes
+    })
+end
+
+
+--- @class ZoneContent
+local ZoneContent = Content:New()
+
+function ZoneContent:New(zone)
+    local o = {
+        zone = zone
+    }
+    setmetatable(o, self)
+    self.__index = self
+    return o
+end
+
 function ZoneContent:Compose()
     self.categories = {}
 
@@ -115,6 +157,23 @@ function ZoneContent:Compose()
     self:AddBookmarksCategory()
     self:AddRecentsCategory()
     self:AddZoneCategory(self.zone)
+end
+
+
+--- @class CyrodiilContent
+local CyrodiilContent = Content:New()
+
+function CyrodiilContent:Compose()
+    self.categories = {}
+
+    self:AddGroupCategory()
+
+    if Nav.jumpState == Nav.JUMPSTATE_WAYSHRINE then
+        self:AddBookmarksCategory()
+        self:AddRecentsCategory()
+    end
+
+    self:AddCyrodiilCategories()
 end
 
 
@@ -147,7 +206,7 @@ local SearchContent = Content:New()
 
 function SearchContent:New(results)
     local o = {
-        result = results
+        results = results
     }
     setmetatable(o, self)
     self.__index = self
@@ -169,3 +228,5 @@ end
 Nav.Category = Category
 Nav.ZoneContent = ZoneContent
 Nav.ZoneListContent = ZoneListContent
+Nav.CyrodiilContent = CyrodiilContent
+Nav.SearchContent = SearchContent
