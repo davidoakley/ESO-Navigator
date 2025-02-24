@@ -664,6 +664,15 @@ function POINode:GetColour(isSelected)
     end
 end
 
+function POINode:GetSuffixColour()
+    if self.known and not self.disabled then
+        return Nav.COLOUR_SUFFIX_POI
+    else
+        return Nav.COLOUR_SUFFIX_DISABLED
+    end
+end
+POINode.GetTagColour = POINode.GetSuffixColour
+
 function POINode:OnClick()
     self:ZoomToPOI(false)
 end
