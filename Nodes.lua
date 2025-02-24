@@ -279,7 +279,7 @@ end
 local ZoneNode = Node:New()
 
 function ZoneNode:GetWeight()
-    return Nav.isRecall and 1.0 or 0.9
+    return Nav.jumpState == Nav.JUMPSTATE_WORLD and 1.0 or 0.9
 end
 
 function ZoneNode:GetIcon()
@@ -350,7 +350,7 @@ function ZoneNode:AddMenuItems()
         end)
     end
 
-    if Nav.isRecall and self.canJumpToPlayer and self.zoneId ~= Nav.ZONE_CYRODIIL then
+    if Nav.jumpState == Nav.JUMPSTATE_WORLD and self.canJumpToPlayer and self.zoneId ~= Nav.ZONE_CYRODIIL then
         AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE), self.zoneName), function()
             zo_callLater(function() self:JumpToZone() end, 10)
         end)
@@ -514,7 +514,7 @@ end
 local FastTravelNode = Node:New()
 
 function FastTravelNode:GetWeight()
-    local weight = self.freeRecall or not Nav.isRecall and 1.0 or
+    local weight = (self.freeRecall or Nav.jumpState == Nav.JUMPSTATE_WAYSHRINE) and 1.0 or
                   (self.disabled and 0.3 or 0.8)
 
     if Nav.Bookmarks:contains(self) then
@@ -554,7 +554,7 @@ function FastTravelNode:GetTagList(showBookmark)
 end
 
 function FastTravelNode:GetRecallCost()
-    if not Nav.isRecall or self.disabled then
+    if Nav.jumpState == Nav.JUMPSTATE_WAYSHRINE or self.disabled then
         return nil
     end
 
@@ -577,7 +577,7 @@ function FastTravelNode:Jump()
     ZO_Dialogs_ReleaseDialog("FAST_TRAVEL_CONFIRM")
     ZO_Dialogs_ReleaseDialog("RECALL_CONFIRM")
 
-    if Nav.isRecall == true then
+    if Nav.jumpState == Nav.JUMPSTATE_WORLD then
         -- Locked out of recall for a time
         local _, timeLeft = GetRecallCooldown()
         if timeLeft ~= 0 then
@@ -588,7 +588,7 @@ function FastTravelNode:Jump()
     end
 
     local confirm = Nav.saved.confirmFastTravel
-    local cost = Nav.isRecall and GetRecallCost(self.nodeIndex) or 0
+    local cost = Nav.jumpState == Nav.JUMPSTATE_WORLD and GetRecallCost(self.nodeIndex) or 0
     local currency = GetRecallCurrency(self.nodeIndex)
     local canAffordRecall = cost <= GetCurrencyAmount(currency, CURRENCY_LOCATION_CHARACTER)
     if (confirm == Nav.CONFIRMFASTTRAVEL_NEVER and canAffordRecall) or
@@ -596,7 +596,7 @@ function FastTravelNode:Jump()
         zo_callLater(function()
             FastTravelToNode(self.nodeIndex)
             SCENE_MANAGER:Hide("worldMap")
-            local id = Nav.isRecall and NAVIGATOR_RECALLING_TO_LOCATION_COST or NAVIGATOR_TRAVELING_TO_LOCATION
+            local id = Nav.jumpState == Nav.JUMPSTATE_WORLD and NAVIGATOR_RECALLING_TO_LOCATION_COST or NAVIGATOR_TRAVELING_TO_LOCATION
             local currencyString = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(CURT_MONEY, cost, ZO_CURRENCY_FORMAT_AMOUNT_ICON))
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.POSITIVE_CLICK,
                     zo_strformat(GetString(id), self.name, currencyString))
@@ -604,13 +604,13 @@ function FastTravelNode:Jump()
         return
     end
 
-    local id = (Nav.isRecall == true and "RECALL_CONFIRM") or "FAST_TRAVEL_CONFIRM"
+    local id = Nav.jumpState == Nav.JUMPSTATE_WORLD and "RECALL_CONFIRM" or "FAST_TRAVEL_CONFIRM"
     ZO_Dialogs_ShowPlatformDialog(id, {nodeIndex = self.nodeIndex}, {mainTextParams = {self.originalName}})
 end
 
 function FastTravelNode:AddMenuItems()
     if self:IsKnown() then
-        local strId = Nav.isRecall and SI_WORLD_MAP_ACTION_RECALL_TO_WAYSHRINE or SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE
+        local strId = Nav.jumpState == Nav.JUMPSTATE_WORLD and SI_WORLD_MAP_ACTION_RECALL_TO_WAYSHRINE or SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE
         AddMenuItem(zo_strformat(GetString(strId), self.name), function()
             self:Jump()
         end)

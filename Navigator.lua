@@ -9,7 +9,6 @@ Navigator = {
   Location = {},
   Wayshrine = {},
   Search = {},
-  isRecall = true,
   isCLI = false,
   isDeveloper = (GetDisplayName() == '@SirNightstorm' and true) or false,
   results = {},
@@ -24,6 +23,12 @@ Nav.CONFIRMFASTTRAVEL_NEVER = 2
 Nav.ACTION_SHOWONMAP = 0
 Nav.ACTION_SETDESTINATION = 1
 Nav.ACTION_TRAVEL = 2
+
+Nav.JUMPSTATE_WORLD = 0
+Nav.JUMPSTATE_WAYSHRINE = 1
+Nav.JUMPSTATE_CYRODIIL = 2
+Nav.JUMPSTATE_TRANSITUS = 3
+Nav.jumpState = Nav.JUMPSTATE_WORLD
 
 Nav.default = {
   recentNodes = {},
@@ -142,18 +147,19 @@ end
 
 local function OnStartFastTravel(eventCode, nodeIndex)
   Nav.log("OnStartFastTravel: "..eventCode..", "..nodeIndex)
-  Nav.isRecall = false
+  Nav.jumpState = Nav.JUMPSTATE_WAYSHRINE
   Nav.MapTab:ImmediateRefresh()
 end
 
 local function OnEndFastTravel()
   Nav.log("OnEndFastTravel")
-  Nav.isRecall = true
+  Nav.jumpState = Nav.JUMPSTATE_WORLD
 end
 
 local function OnPlayerActivated()
   Nav.log("OnPlayerActivated")
   Nav.Recents:onPlayerActivated()
+  Nav.jumpState = Nav.Locations:getCurrentMapZoneId() == Nav.ZONE_CYRODIIL and Nav.JUMPSTATE_CYRODIIL or Nav.JUMPSTATE_WORLD
 end
 
 local function OnPOIUpdated()
