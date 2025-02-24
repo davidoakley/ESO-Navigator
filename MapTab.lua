@@ -181,16 +181,17 @@ local function buildCategoryHeader(scrollData, id, title, collapsed)
     table.insert(scrollData, recentEntry)
 end
 
-local function buildList(scrollData, id, title, list, defaultString, maxEntries)
-    local collapsed = MT.collapsedCategories[id] and true or false
+local function buildCategory(scrollData, category)
+    local collapsed = MT.collapsedCategories[category.id] and true or false
     local hasFocus = MT.editControl:HasFocus()
+    local list = category.list
 
-    buildCategoryHeader(scrollData, id, title, collapsed)
+    buildCategoryHeader(scrollData, category.id, category.title, collapsed)
 
     if collapsed then
         return
-    elseif #list == 0 and defaultString then
-        list = {{ hint = GetString(defaultString) }}
+    elseif #list == 0 and category.emptyHint then
+        list = {{ hint = GetString(category.emptyHint) }}
     end
 
     local currentNodeIndex = MT.resultCount
@@ -210,13 +211,13 @@ local function buildList(scrollData, id, title, list, defaultString, maxEntries)
                 categoryEntryCount = #list
             }
 
-            local entry = ZO_ScrollList_CreateDataEntry(1, data, id)
+            local entry = ZO_ScrollList_CreateDataEntry(1, data, category.id)
             table.insert(scrollData, entry)
 
             currentNodeIndex = currentNodeIndex + 1
             listed = listed + 1
 
-            if maxEntries and listed >= maxEntries then
+            if category.maxEntries and listed >= category.maxEntries then
                 break
             end
         end
@@ -259,25 +260,25 @@ function MT:buildScrollList(keepScrollPosition)
 
     local scrollData = ZO_ScrollList_GetDataList(self.listControl)
 
-    local content
+    self.content = nil
     local isSearching = #Nav.results > 0 or (self.searchString and self.searchString ~= "")
 
     if isSearching then
-        content = Nav.SearchContent:New(Nav.results)
+        self.content = Nav.SearchContent:New(Nav.results)
     else
         local zone = Nav.Locations:getCurrentMapZone()
         if zone and zone.zoneId == Nav.ZONE_TAMRIEL then
-            content = Nav.ZoneListContent:New()
+            self.content = Nav.ZoneListContent:New()
         elseif zone then
-            content = Nav.ZoneContent:New(zone)
+            self.content = Nav.ZoneContent:New(zone)
         end
     end
-    content:Compose()
+    self.content:Compose()
 
     MT.resultCount = 0
-    for i = 1, #content.categories do
-        local category = content.categories[i]
-        buildList(scrollData, category.id, category.title, category.nodes, category.emptyHint, category.maxEntries)
+    for i = 1, #self.content.categories do
+        local category = self.content.categories[i]
+        buildCategory(scrollData, category)
     end
 
 	ZO_ScrollList_Commit(self.listControl)

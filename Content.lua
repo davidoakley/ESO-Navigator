@@ -19,7 +19,7 @@ function Category:New(o)
     o = o or {
         id = "",
         title = "",
-        nodes = {},
+        list = {},
         emptyHint = nil,
         maxEntries = nil,
         sort = nil
@@ -50,7 +50,7 @@ function Content:AddGroupCategory()
         table.insert(self.categories, {
             id = "group",
             title = SI_MAIN_MENU_GROUP,
-            nodes = group
+            list = group
         })
     end
 end
@@ -59,7 +59,7 @@ function Content:AddBookmarksCategory()
     table.insert(self.categories, {
         id = "bookmarks",
         title = NAVIGATOR_CATEGORY_BOOKMARKS,
-        nodes = Nav.Bookmarks:getBookmarks(),
+        list = Nav.Bookmarks:getBookmarks(),
         emptyHint = NAVIGATOR_HINT_NOBOOKMARKS
     })
 end
@@ -70,7 +70,7 @@ function Content:AddRecentsCategory()
         table.insert(self.categories, {
             id = "recents",
             title = NAVIGATOR_CATEGORY_RECENT,
-            nodes = Nav.Recents:getRecents(),
+            list = Nav.Recents:getRecents(),
             emptyHint = NAVIGATOR_HINT_NORECENTS,
             maxEntries = recentCount
         })
@@ -104,7 +104,7 @@ function ZoneContent:AddZoneCategory(zone)
     table.insert(self.categories, {
         id = "results",
         title = zone.name,
-        nodes = list
+        list = list
     })
 end
 
@@ -128,7 +128,7 @@ function ZoneListContent:AddZoneListCategory()
     table.insert(self.categories, {
         id = "zones",
         title = NAVIGATOR_CATEGORY_ZONES,
-        nodes = list
+        list = list
     })
 end
 
@@ -160,7 +160,7 @@ function SearchContent:Compose()
     table.insert(self.categories, {
         id = "results",
         title = NAVIGATOR_CATEGORY_RESULTS,
-        nodes = self.results,
+        list = self.results,
         emptyHint = NAVIGATOR_HINT_NORESULTS
     })
 end
