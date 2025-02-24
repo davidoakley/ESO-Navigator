@@ -740,9 +740,11 @@ function KeepNode:DoAction(action)
 end
 
 function KeepNode:GetWeight()
-    return (self.icon:find("AvA_borderKeep") and 0.9) or
-           (self.icon:find("AvA_town") and 1.1) or
-           (self.icon:find("AvA_outpost") and 1.2) or 1.3
+    local w = (self.icon:find("AvA_borderKeep") and 0.9) or
+              (self.icon:find("AvA_town") and 1.1) or
+              (self.icon:find("AvA_outpost") and 1.2) or 1.3
+    if self.accessible then w = w + 0.5 end
+    return w
 end
 
 Nav.Node = Node
