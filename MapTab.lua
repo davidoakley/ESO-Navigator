@@ -175,10 +175,6 @@ local function ShowUndiscovered()
     MT:ImmediateRefresh()
 end
 
-local function nameComparison(x, y)
-	return Utils.SortName(x) < Utils.SortName(y)
-end
-
 local function buildCategoryHeader(scrollData, id, title, collapsed)
     title = tonumber(title) ~= nil and GetString(title) or title
     local recentEntry = ZO_ScrollList_CreateDataEntry(collapsed and 2 or 0, { id = id, name = title })
@@ -263,43 +259,25 @@ function MT:buildScrollList(keepScrollPosition)
 
     local scrollData = ZO_ScrollList_GetDataList(self.listControl)
 
+    local content
     local isSearching = #Nav.results > 0 or (self.searchString and self.searchString ~= "")
-    MT.resultCount = 0
+
     if isSearching then
-        buildList(scrollData, "results", NAVIGATOR_CATEGORY_RESULTS, Nav.results, NAVIGATOR_HINT_NORESULTS)
+        content = Nav.SearchContent:New(Nav.results)
     else
-        local group = Nav.Players:GetGroupList()
-        if #group > 0 then
-            buildList(scrollData, "group", SI_MAIN_MENU_GROUP, group)
-        end
-
-        local bookmarks = Nav.Bookmarks:getBookmarks()
-        buildList(scrollData, "bookmarks", NAVIGATOR_CATEGORY_BOOKMARKS, bookmarks, NAVIGATOR_HINT_NOBOOKMARKS)
-
-        local recentCount = Nav.saved.recentsCount
-        if recentCount > 0 then
-            local recents = Nav.Recents:getRecents()
-            buildList(scrollData, "recents", NAVIGATOR_CATEGORY_RECENT, recents, NAVIGATOR_HINT_NORECENTS, recentCount)
-        end
-
         local zone = Nav.Locations:getCurrentMapZone()
         if zone and zone.zoneId == Nav.ZONE_TAMRIEL then
-            local list = Nav.Locations:GetZoneList()
-            table.sort(list, nameComparison)
-            buildList(scrollData, "zones", NAVIGATOR_CATEGORY_ZONES, list)
+            content = Nav.ZoneListContent:New()
         elseif zone then
-            local list = Nav.Locations:GetNodeList(zone.zoneId, false, Nav.saved.listPOIs)
-            table.sort(list, Nav.Node.WeightComparison)
-
-            if Nav.isRecall and zone.zoneId ~= Nav.ZONE_CYRODIIL then
-                local node = Nav.JumpToZoneNode:New(Utils.shallowCopy(zone))
-                local playerInfo = Nav.Players:GetPlayerInZone(zone.zoneId)
-                node.known = playerInfo ~= nil
-                table.insert(list, 1, node)
-            end
-
-            buildList(scrollData, "results", zone.name, list)
+            content = Nav.ZoneContent:New(zone)
         end
+    end
+    content:Compose()
+
+    MT.resultCount = 0
+    for i = 1, #content.categories do
+        local category = content.categories[i]
+        buildList(scrollData, category.id, category.title, category.nodes, category.emptyHint, category.maxEntries)
     end
 
 	ZO_ScrollList_Commit(self.listControl)

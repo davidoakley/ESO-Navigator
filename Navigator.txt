@@ -24,6 +24,8 @@ Chat.lua
 LAM_navactions.lua
 Settings.lua
 
+DisplayModel.lua
+
 MapTab.xml
 MapTab.lua
 
