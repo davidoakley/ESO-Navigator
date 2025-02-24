@@ -65,6 +65,9 @@ function MT:layoutRow(rowControl, data, _)
     local categoryId = data.dataEntry.categoryId
 
     local suffix = node:GetSuffix()
+    if node.zoneSuffix and categoryId == "results" then
+        node.suffix = node.zoneSuffix
+    end
     if suffix ~= nil then
         local colour = ZO_ColorDef:New(node:GetSuffixColour(isSelected))
         name = name .. " " .. colour:Colorize(suffix)

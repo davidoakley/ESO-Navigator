@@ -215,7 +215,7 @@ local function loadZonePOIs(self, zoneId, zoneIndex, zoneName, numPOIs)
                     pinType = pinType
                 })
                 if icon:find("poi_mundus") then
-                    node.suffix = zoneName
+                    node.zoneSuffix = zoneName
                 end
 
                 table.insert(self.nodes, node)
