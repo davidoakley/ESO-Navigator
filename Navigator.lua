@@ -146,24 +146,32 @@ local function OnMapChanged()
 end
 
 local function OnStartFastTravel(eventCode, nodeIndex)
-  Nav.log("OnStartFastTravel: "..eventCode..", "..nodeIndex)
-  Nav.jumpState = Nav.JUMPSTATE_WAYSHRINE
-  Nav.MapTab:ImmediateRefresh()
+    Nav.jumpState = Nav.JUMPSTATE_WAYSHRINE
+    Nav.log("OnStartFastTravel(%d,%d) jumpState %d", eventCode, nodeIndex, Nav.jumpState)
+    Nav.MapTab:ImmediateRefresh()
+end
+
+local function OnStartFastTravelKeep(eventCode, nodeIndex)
+    Nav.jumpState = Nav.JUMPSTATE_TRANSITUS
+    Nav.Locations:UpdateKeeps()
+    Nav.log("OnStartFastTravelKeep(%d,%d) jumpState %d", eventCode, nodeIndex, Nav.jumpState)
+    Nav.MapTab:ImmediateRefresh()
 end
 
 local function OnEndFastTravel()
-  Nav.log("OnEndFastTravel")
-  Nav.jumpState = Nav.JUMPSTATE_WORLD
+  Nav.jumpState = Nav.currentZoneId == Nav.ZONE_CYRODIIL and Nav.JUMPSTATE_CYRODIIL or Nav.JUMPSTATE_WORLD
+  Nav.Locations:SetKeepsInaccessible()
+  Nav.log("OnEndFastTravel() jumpState %d", Nav.jumpState)
 end
 
 local function OnPlayerActivated()
-  Nav.log("OnPlayerActivated")
   Nav.Recents:onPlayerActivated()
-  Nav.jumpState = Nav.Locations:getCurrentMapZoneId() == Nav.ZONE_CYRODIIL and Nav.JUMPSTATE_CYRODIIL or Nav.JUMPSTATE_WORLD
+  Nav.currentZoneId = ZO_ExplorationUtils_GetPlayerCurrentZoneId()
+  Nav.jumpState = Nav.currentZoneId == Nav.ZONE_CYRODIIL and Nav.JUMPSTATE_CYRODIIL or Nav.JUMPSTATE_WORLD
+  Nav.log("OnPlayerActivated() zoneId %d jumpState %d", Nav.currentZoneId, Nav.jumpState)
 end
 
 local function OnPOIUpdated()
-  Nav.log("OnPOIUpdated")
   Nav.Locations:clearKnownNodes()
 end
 
@@ -225,7 +233,9 @@ function Nav:initialize()
   CALLBACK_MANAGER:RegisterCallback("OnWorldMapModeChanged", OnMapChanged)
 
   addEvent(EVENT_START_FAST_TRAVEL_INTERACTION, OnStartFastTravel)
+  addEvent(EVENT_START_FAST_TRAVEL_KEEP_INTERACTION, OnStartFastTravelKeep)
   addEvent(EVENT_END_FAST_TRAVEL_INTERACTION, OnEndFastTravel)
+  addEvent(EVENT_END_FAST_TRAVEL_KEEP_INTERACTION, OnEndFastTravel)
   addEvent(EVENT_PLAYER_ACTIVATED, OnPlayerActivated)
 
   addEvents(OnPOIUpdated, EVENT_POI_DISCOVERED, EVENT_POI_UPDATED, EVENT_FAST_TRAVEL_NETWORK_UPDATED)

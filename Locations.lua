@@ -230,12 +230,15 @@ local function loadKeep(self, bgCtx, ktnnIndex, zone)
 
     local pinType,nx,ny  = GetKeepPinInfo(keepId, bgCtx)
     local name = GetKeepName(keepId)
-    local icon = "EsoUI/Art/Campaign/Gamepad/gp_overview_keepIcon.dds"
+    local icon = "EsoUI/Art/MapPins/AvA_largeKeep_neutral.dds"
 
-    icon = ZO_MapPin.PIN_DATA[pinType].texture or "/esoui/art/crafting/crafting_smithing_notrait.dds"
+    if pinType > 0 then
+        icon = ZO_MapPin.PIN_DATA[pinType].texture or "/esoui/art/crafting/crafting_smithing_notrait.dds"
+    end
 
     -- Replace strange default keep icon
-    if icon:find("UI-WorldMapPlayerPip") then icon = "EsoUI/Art/MapPins/AvA_largeKeep_neutral.dds" end
+    --Nav.log("loadKeep: icon %d '%s'", pinType, icon or "-")
+    --if icon:find("UI-WorldMapPlayerPip") then icon = "EsoUI/Art/MapPins/AvA_largeKeep_neutral.dds" end
 
     local node = Nav.KeepNode:New({
         ktnnIndex = ktnnIndex,
@@ -245,7 +248,7 @@ local function loadKeep(self, bgCtx, ktnnIndex, zone)
         zoneId = Nav.ZONE_CYRODIIL,
         icon = icon,
         known = true,
-        accessible = accessible,
+        accessible = Nav.jumpState == Nav.JUMPSTATE_TRANSITUS and accessible,
         pinType = pinType,
         alliance = GetKeepAlliance(keepId, bgCtx),
         bgCtx = bgCtx
@@ -347,15 +350,29 @@ function Locs:UpdateKeeps()
 
     for i = 1, #zone.keeps do
         local keep = zone.keeps[i]
-        keep.pinType  = GetKeepPinInfo(keep.keepId, bgCtx)
-        keep.accessible = GetKeepAccessible(keep.keepId, bgCtx)
+        keep.accessible = Nav.jumpState == Nav.JUMPSTATE_TRANSITUS and GetKeepAccessible(keep.keepId, bgCtx)
         keep.alliance = GetKeepAlliance(keep.keepId, bgCtx)
-        keep.icon = ZO_MapPin.PIN_DATA[keep.pinType].texture or "/esoui/art/crafting/crafting_smithing_notrait.dds"
+        local pinType = GetKeepPinInfo(keep.keepId, bgCtx)
+        if pinType > 0 then
+            keep.pinType  = pinType
+            keep.icon = ZO_MapPin.PIN_DATA[pinType].texture or "/esoui/art/crafting/crafting_smithing_notrait.dds"
+            --Nav.log("UpdateKeeps: icon %d '%s'", pinType, keep.icon or "-")
+        end
     end
 
     self.keepsDirty = false
 end
 
+function Locs:SetKeepsInaccessible()
+    if not self.zones then
+        return
+    end
+
+    local zone = self.zones[Nav.ZONE_CYRODIIL]
+    for i = 1, #zone.keeps do
+        zone.keeps[i].accessible = false
+    end
+end
 
 function Locs:GetNode(nodeIndex, includeUnknown)
     local node = self.nodeMap[nodeIndex]

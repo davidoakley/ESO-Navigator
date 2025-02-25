@@ -173,7 +173,7 @@ function CyrodiilContent:Compose()
 
     self:AddGroupCategory()
 
-    if Nav.jumpState == Nav.JUMPSTATE_WAYSHRINE then
+    if Nav.jumpState == Nav.JUMPSTATE_WORLD or Nav.jumpState == Nav.JUMPSTATE_WAYSHRINE then
         self:AddBookmarksCategory()
         self:AddRecentsCategory()
     end
