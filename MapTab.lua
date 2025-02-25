@@ -56,7 +56,6 @@ local function getDeveloperTooltip(node)
     return table.concat(items, "\n")
 end
 
---TODO: Move isSelected out of node data
 function MT:layoutRow(rowControl, data, _)
     local node = data.node
     local isSelected = data.isSelected

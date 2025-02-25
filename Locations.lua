@@ -340,8 +340,7 @@ function Locs:UpdateKeeps()
 
     ZO_WorldMap_RefreshKeeps()
 
-    --FIXME: Needs to be local campaign if in Cyrodiil
-    local bgCtx = ZO_WorldMap_GetBattlegroundQueryType() -- BGQUERY_ASSIGNED_CAMPAIGN
+    local bgCtx = ZO_WorldMap_GetBattlegroundQueryType()
 
     for i = 1, #zone.keeps do
         local keep = zone.keeps[i]
