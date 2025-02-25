@@ -28,7 +28,7 @@ mkstr("NAVIGATOR_CATEGORY_ZONES", "Zones")
 --mkstr("NAVIGATOR_HINT_NORESULTS", "No results found")
 --mkstr("NAVIGATOR_HINT_NORECENTS", "Destinations that you travel to will automatically appear here")
 --mkstr("NAVIGATOR_HINT_NOBOOKMARKS", "Right click a destination to create (or delete) a bookmark for it")
---mkstr("NAVIGATOR_HINT_SHOWUNDISCOVERED", "Tap to show undiscovered locations")
+--mkstr("NAVIGATOR_HINT_SHOWUNDISCOVERED", "Click to show undiscovered locations")
 
 -- Enter key label (keep it short!)
 mkstr("NAVIGATOR_KEY_ENTER", "Entrée")
