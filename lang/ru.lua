@@ -27,6 +27,7 @@ NAVIGATOR_CATEGORY_GROUP = SI_MAIN_MENU_GROUP
 mkstr("NAVIGATOR_HINT_NORESULTS", "Результаты не найдены")
 mkstr("NAVIGATOR_HINT_NORECENTS", "Здесь будут автоматически отображаться места, которые вы посещали недавно")
 mkstr("NAVIGATOR_HINT_NOBOOKMARKS", "Нажмите правой кнопкой мыши по месту, чтобы создать (или удалить) закладку для него")
+mkstr("NAVIGATOR_HINT_SHOWUNDISCOVERED", "Нажмите, чтобы отобразить неисследованные места")
 
 -- Enter key label (keep it short!)
 mkstr("NAVIGATOR_KEY_ENTER", "Enter")
