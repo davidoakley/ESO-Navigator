@@ -514,8 +514,9 @@ end
 local FastTravelNode = Node:New()
 
 function FastTravelNode:GetWeight()
-    local weight = (self.freeRecall or Nav.jumpState == Nav.JUMPSTATE_WAYSHRINE) and 1.0 or
-                  (self.disabled and 0.3 or 0.8)
+    local weight = ((self.freeRecall or Nav.jumpState == Nav.JUMPSTATE_WAYSHRINE) and 1.0) or
+            (not self.known and 0.4) or
+            (self.disabled and 0.3) or 0.8
 
     if Nav.Bookmarks:contains(self) then
         weight = weight + 0.15
@@ -688,7 +689,11 @@ function POINode:AddMenuItems()
 end
 
 function POINode:GetWeight()
-    return self:IsKnown() and 0.5 or 0.3
+    local weight = self:IsKnown() and 0.5 or 0.3
+    if Nav.Bookmarks:contains(self) then
+        weight = weight + 0.05
+    end
+    return weight
 end
 
 
@@ -749,10 +754,11 @@ function KeepNode:DoAction(action)
 end
 
 function KeepNode:GetWeight()
-    local w = (self.icon:find("AvA_borderKeep") and 0.9) or
-              (self.icon:find("AvA_town") and 1.1) or
-              (self.icon:find("AvA_outpost") and 1.2) or 1.3
-    if self.accessible then w = w + 0.5 end
+    --FIXME: Lower weight of non-accessible keeps
+    local w = (self.icon:find("AvA_borderKeep") and 1.07) or
+              (self.icon:find("AvA_town") and 1.08) or
+              (self.icon:find("AvA_outpost") and 1.09) or 1.1
+    if not self.accessible then w = w - 0.5 end
     return w
 end
 
