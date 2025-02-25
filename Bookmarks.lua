@@ -22,7 +22,7 @@ function Bookmarks:getIndex(entry)
         end
     elseif entry.poiIndex then
         for i = 1, #list do
-            if entry.poiIndex == list[i].poiIndex then
+            if entry.poiIndex == list[i].poiIndex and entry.zoneId == list[i].zoneId then
                 return i
             end
         end
@@ -33,10 +33,17 @@ function Bookmarks:getIndex(entry)
                 return i
             end
         end
-    elseif entry.zoneId then
+    elseif entry.keepId then
+        local keepId = entry.keepId
+        for i = 1, #list do
+            if keepId == list[i].keepId then
+                return i
+            end
+        end
+    elseif entry.zoneId and not entry.keepId then
         local zoneId = entry.zoneId
         for i = 1, #list do
-            if zoneId == list[i].zoneId then
+            if zoneId == list[i].zoneId and not list[i].poiIndex and not list[i].keepId then
                 return i
             end
         end

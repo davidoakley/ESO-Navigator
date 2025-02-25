@@ -117,20 +117,20 @@ function Node:GetRecallCost()
     return nil -- By default, free!
 end
 
-function Node:ZoomToPOI(setWaypoint)
-    local function getPOIMapInfo(self, zoneIndex, mapId)
-        if mapId == 2082 then
-            return 0.3485, 0.3805 -- The Shambles
-        elseif self.nodeIndex == 407 then
-            return 0.9273, 0.7105 -- Dragonguard Sanctum
-        else
-            return GetPOIMapInfo(zoneIndex, self.poiIndex)
-        end
+function Node:GetMapInfo(self, zoneIndex, mapId)
+    if mapId == 2082 then
+        return 0.3485, 0.3805 -- The Shambles
+    elseif self.nodeIndex == 407 then
+        return 0.9273, 0.7105 -- Dragonguard Sanctum
+    else
+        return GetPOIMapInfo(zoneIndex, self.poiIndex)
     end
+end
 
-    local function panToPOI(zoneIndex, mapId, poiIndex)
-        local normalizedX, normalizedZ = getPOIMapInfo(zoneIndex, mapId, poiIndex)
-        Nav.log("Node:ZoomToPOI: poiIndex=%d, %f,%f", poiIndex, normalizedX, normalizedZ)
+function Node:ZoomToPOI(setWaypoint, useCurrentZone)
+    local function panToPOI(self, zoneIndex, mapId)
+        local normalizedX, normalizedZ = self:GetMapInfo(self, zoneIndex, mapId)
+        Nav.log("Node:ZoomToPOI: poiIndex=%d, %f,%f", self.poiIndex or -1, normalizedX, normalizedZ)
         if setWaypoint then
             PingMap(MAP_PIN_TYPE_PLAYER_WAYPOINT, MAP_TYPE_LOCATION_CENTERED, normalizedX, normalizedZ)
         else
@@ -138,7 +138,7 @@ function Node:ZoomToPOI(setWaypoint)
         end
 
         local mapPanAndZoom = ZO_WorldMap_GetPanAndZoom()
-        mapPanAndZoom:PanToNormalizedPosition(normalizedX, normalizedZ, false)
+        mapPanAndZoom:PanToNormalizedPosition(normalizedX, normalizedZ, useCurrentZone)
     end
 
     local targetMapId = self.mapId or Nav.Locations.GetMapIdByZoneId(self.zoneId)
@@ -279,7 +279,7 @@ end
 local ZoneNode = Node:New()
 
 function ZoneNode:GetWeight()
-    return Nav.isRecall and 1.0 or 0.9
+    return Nav.jumpState == Nav.JUMPSTATE_WORLD and 1.0 or 0.9
 end
 
 function ZoneNode:GetIcon()
@@ -350,7 +350,7 @@ function ZoneNode:AddMenuItems()
         end)
     end
 
-    if Nav.isRecall and self.canJumpToPlayer and self.zoneId ~= Nav.ZONE_CYRODIIL then
+    if Nav.jumpState == Nav.JUMPSTATE_WORLD and self.canJumpToPlayer and self.zoneId ~= Nav.ZONE_CYRODIIL then
         AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE), self.zoneName), function()
             zo_callLater(function() self:JumpToZone() end, 10)
         end)
@@ -514,8 +514,9 @@ end
 local FastTravelNode = Node:New()
 
 function FastTravelNode:GetWeight()
-    local weight = self.freeRecall or not Nav.isRecall and 1.0 or
-                  (self.disabled and 0.3 or 0.8)
+    local weight = ((self.freeRecall or Nav.jumpState == Nav.JUMPSTATE_WAYSHRINE) and 1.0) or
+            (not self.known and 0.4) or
+            (self.disabled and 0.3) or 0.8
 
     if Nav.Bookmarks:contains(self) then
         weight = weight + 0.15
@@ -554,7 +555,7 @@ function FastTravelNode:GetTagList(showBookmark)
 end
 
 function FastTravelNode:GetRecallCost()
-    if not Nav.isRecall or self.disabled then
+    if Nav.jumpState == Nav.JUMPSTATE_WAYSHRINE or self.disabled then
         return nil
     end
 
@@ -577,7 +578,7 @@ function FastTravelNode:Jump()
     ZO_Dialogs_ReleaseDialog("FAST_TRAVEL_CONFIRM")
     ZO_Dialogs_ReleaseDialog("RECALL_CONFIRM")
 
-    if Nav.isRecall == true then
+    if Nav.jumpState == Nav.JUMPSTATE_WORLD then
         -- Locked out of recall for a time
         local _, timeLeft = GetRecallCooldown()
         if timeLeft ~= 0 then
@@ -588,7 +589,7 @@ function FastTravelNode:Jump()
     end
 
     local confirm = Nav.saved.confirmFastTravel
-    local cost = Nav.isRecall and GetRecallCost(self.nodeIndex) or 0
+    local cost = Nav.jumpState == Nav.JUMPSTATE_WORLD and GetRecallCost(self.nodeIndex) or 0
     local currency = GetRecallCurrency(self.nodeIndex)
     local canAffordRecall = cost <= GetCurrencyAmount(currency, CURRENCY_LOCATION_CHARACTER)
     if (confirm == Nav.CONFIRMFASTTRAVEL_NEVER and canAffordRecall) or
@@ -596,7 +597,7 @@ function FastTravelNode:Jump()
         zo_callLater(function()
             FastTravelToNode(self.nodeIndex)
             SCENE_MANAGER:Hide("worldMap")
-            local id = Nav.isRecall and NAVIGATOR_RECALLING_TO_LOCATION_COST or NAVIGATOR_TRAVELING_TO_LOCATION
+            local id = Nav.jumpState == Nav.JUMPSTATE_WORLD and NAVIGATOR_RECALLING_TO_LOCATION_COST or NAVIGATOR_TRAVELING_TO_LOCATION
             local currencyString = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(CURT_MONEY, cost, ZO_CURRENCY_FORMAT_AMOUNT_ICON))
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.POSITIVE_CLICK,
                     zo_strformat(GetString(id), self.name, currencyString))
@@ -604,13 +605,13 @@ function FastTravelNode:Jump()
         return
     end
 
-    local id = (Nav.isRecall == true and "RECALL_CONFIRM") or "FAST_TRAVEL_CONFIRM"
+    local id = Nav.jumpState == Nav.JUMPSTATE_WORLD and "RECALL_CONFIRM" or "FAST_TRAVEL_CONFIRM"
     ZO_Dialogs_ShowPlatformDialog(id, {nodeIndex = self.nodeIndex}, {mainTextParams = {self.originalName}})
 end
 
 function FastTravelNode:AddMenuItems()
     if self:IsKnown() then
-        local strId = Nav.isRecall and SI_WORLD_MAP_ACTION_RECALL_TO_WAYSHRINE or SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE
+        local strId = Nav.jumpState == Nav.JUMPSTATE_WORLD and SI_WORLD_MAP_ACTION_RECALL_TO_WAYSHRINE or SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE
         AddMenuItem(zo_strformat(GetString(strId), self.name), function()
             self:Jump()
         end)
@@ -654,13 +655,24 @@ local POINode = Node:New()
 
 function POINode:IsPOI() return true end
 
-function POINode:GetIconColour()
-    if self.known and not self.disabled then
-        return Nav.COLOUR_NORMAL
+function POINode:GetColour(isSelected)
+    if isSelected and self.known and not self.disabled then
+        return Nav.COLOUR_WHITE
+    elseif self.known and not self.disabled then
+        return Nav.COLOUR_POI
     else
         return Nav.COLOUR_DISABLED
     end
 end
+
+function POINode:GetSuffixColour()
+    if self.known and not self.disabled then
+        return Nav.COLOUR_SUFFIX_POI
+    else
+        return Nav.COLOUR_SUFFIX_DISABLED
+    end
+end
+POINode.GetTagColour = POINode.GetSuffixColour
 
 function POINode:OnClick()
     self:ZoomToPOI(false)
@@ -677,7 +689,97 @@ function POINode:AddMenuItems()
 end
 
 function POINode:GetWeight()
-    return self:IsKnown() and 0.5 or 0.3
+    local weight = self:IsKnown() and 0.5 or 0.3
+    if Nav.Bookmarks:contains(self) then
+        weight = weight + 0.05
+    end
+    return weight
+end
+
+
+--- @class KeepNode
+local KeepNode = Node:New()
+
+function KeepNode:GetColour(isSelected)
+    if isSelected and self.accessible then
+        return Nav.COLOUR_WHITE
+    elseif self.accessible then
+        return Nav.COLOUR_NORMAL
+    else
+        return Nav.COLOUR_POI
+    end
+end
+
+function KeepNode:OnClick()
+    self:ZoomToPOI(false)
+end
+
+function KeepNode:GetMapInfo(self, zoneIndex, mapId)
+    local pinType,nx,ny  = GetKeepPinInfo(self.keepId, self.bgCtx)
+    --if mapId == 2082 then
+    --    return 0.3485, 0.3805 -- The Shambles
+    --elseif self.nodeIndex == 407 then
+    --    return 0.9273, 0.7105 -- Dragonguard Sanctum
+    --else
+    --    return GetPOIMapInfo(zoneIndex, self.poiIndex)
+    --end
+    Nav.log("KeepNode:GetMapInfo: keepId=%d -> %f,%f", self.keepId, nx, ny)
+    return nx,ny
+end
+
+function KeepNode:Jump()
+    local canTravelToKeep = WORLD_MAP_MANAGER:IsInMode(MAP_MODE_AVA_KEEP_RECALL)
+    if not canTravelToKeep then
+        local startKeepId = GetKeepFastTravelInteraction()
+        canTravelToKeep = startKeepId and self.keepId ~= startKeepId
+    end
+    if canTravelToKeep then
+        TravelToKeep(self.keepId)
+        ZO_WorldMap_HideWorldMap()
+    end
+end
+
+function KeepNode:AddMenuItems()
+    if self.accessible then
+        local strId =
+        AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE), self.name), function()
+            self:Jump()
+        end)
+    end
+    AddMenuItem(GetString(NAVIGATOR_MENU_SHOWONMAP), function()
+        self:ZoomToPOI(false)
+    end)
+    AddMenuItem(GetString(NAVIGATOR_MENU_SETDESTINATION), function()
+        self:ZoomToPOI(true)
+    end)
+    self:AddBookmarkMenuItem({ nodeIndex = self.nodeIndex })
+end
+
+function KeepNode:OnClick(isDoubleClick)
+    local action = isDoubleClick and Nav.saved.destinationDoubleClick or Nav.saved.destinationSingleClick
+    if not self.accessible and action == Nav.ACTION_TRAVEL then
+        action = Nav.ACTION_SETDESTINATION
+    end
+    self:DoAction(action)
+end
+
+function KeepNode:DoAction(action)
+    if action == Nav.ACTION_SHOWONMAP then
+        self:ZoomToPOI(false, true)
+    elseif action == Nav.ACTION_SETDESTINATION then
+        self:ZoomToPOI(true, true)
+    elseif action == Nav.ACTION_TRAVEL then
+        self:Jump()
+    end
+end
+
+function KeepNode:GetWeight()
+    --FIXME: Lower weight of non-accessible keeps
+    local w = (self.icon:find("AvA_borderKeep") and 1.07) or
+              (self.icon:find("AvA_town") and 1.08) or
+              (self.icon:find("AvA_outpost") and 1.09) or 1.1
+    if not self.accessible then w = w - 0.5 end
+    return w
 end
 
 Nav.Node = Node
@@ -688,3 +790,4 @@ Nav.HouseNode = HouseNode
 Nav.FastTravelNode = FastTravelNode
 Nav.PlayerHouseNode = PlayerHouseNode
 Nav.POINode = POINode
+Nav.KeepNode = KeepNode

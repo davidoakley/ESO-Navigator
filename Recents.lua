@@ -68,12 +68,14 @@ function Recents:getRecents()
 end
 
 function Recents:onPlayerActivated()
-    if FTrecent ~= nil and #FTrecent >= 1 then
-        -- Pull the most recent nodeIndex from FasterTravel
-        local nodeIndex = FTrecent[1].nodeIndex
-        Nav.log("Recents:onPlayerActivated: adding recent from FasterTravel: "..nodeIndex)
-        self:insert(nodeIndex)
-    end
+    pcall(function()
+        if FTrecent ~= nil and #FTrecent >= 1 and FTrecent[1].nodeIndex then
+            -- Pull the most recent nodeIndex from FasterTravel
+            local nodeIndex = FTrecent[1].nodeIndex
+            Nav.log("Recents:onPlayerActivated: adding recent from FasterTravel: "..nodeIndex)
+            self:insert(nodeIndex)
+        end
+    end)
 end
 
 local travelDialogs = {
