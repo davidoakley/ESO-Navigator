@@ -97,6 +97,7 @@ end
 
 function Content:AddCyrodiilCategories()
     local list = Nav.Locations:GetNodeList(Nav.ZONE_CYRODIIL, false, Nav.saved.listPOIs)
+    local zone = Nav.Locations.zones[Nav.ZONE_CYRODIIL]
 
     local allianceNodes = {}
     allianceNodes[ALLIANCE_ALDMERI_DOMINION] = {}
@@ -106,11 +107,15 @@ function Content:AddCyrodiilCategories()
 
     for i = 1, #list do
         local node = list[i]
-        if node.alliance then
+        if node.alliance and allianceNodes[node.alliance] then
             table.insert(allianceNodes[node.alliance], node)
-        else
+        elseif node.alliance then
             table.insert(poiNodes, node)
         end
+    end
+
+    for _, poiNode in pairs(zone.pois) do
+        table.insert(poiNodes, poiNode)
     end
 
     local pa = Nav.currentAlliance

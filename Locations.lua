@@ -144,7 +144,7 @@ local function loadFastTravelNode(self, nodeIndex, nodeLookup, zoneLookup)
         if not zoneLookup[zoneId] then
             zoneId = GetParentZoneId(zoneId)
         end
-        if zoneLookup[zoneId] then --and zoneId ~= Nav.ZONE_CYRODIIL then
+        if zoneLookup[zoneId] and zoneId ~= Nav.ZONE_CYRODIIL then
             local _, _, _, zone = unpack(zoneLookup[zoneId])
             local node = createNode(self, nodeIndex, name, typePOI, icon, glowIcon, known, zone, poiIndex)
 
@@ -233,6 +233,9 @@ local function loadKeep(self, bgCtx, ktnnIndex, zone)
     local icon = "EsoUI/Art/Campaign/Gamepad/gp_overview_keepIcon.dds"
 
     icon = ZO_MapPin.PIN_DATA[pinType].texture or "/esoui/art/crafting/crafting_smithing_notrait.dds"
+
+    -- Replace strange default keep icon
+    if icon:find("UI-WorldMapPlayerPip") then icon = "EsoUI/Art/MapPins/AvA_largeKeep_neutral.dds" end
 
     local node = Nav.KeepNode:New({
         ktnnIndex = ktnnIndex,
