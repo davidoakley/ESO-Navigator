@@ -22,7 +22,7 @@ function Bookmarks:getIndex(entry)
         end
     elseif entry.poiIndex then
         for i = 1, #list do
-            if entry.poiIndex == list[i].poiIndex then
+            if entry.poiIndex == list[i].poiIndex and entry.zoneId == list[i].zoneId then
                 return i
             end
         end
@@ -36,7 +36,7 @@ function Bookmarks:getIndex(entry)
     elseif entry.zoneId then
         local zoneId = entry.zoneId
         for i = 1, #list do
-            if zoneId == list[i].zoneId then
+            if zoneId == list[i].zoneId and not list[i].poiIndex then
                 return i
             end
         end
