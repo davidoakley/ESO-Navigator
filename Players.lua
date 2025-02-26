@@ -122,7 +122,7 @@ local function groupComparison(x, y)
     elseif y.isLeader and not x.isLeader then
         return false
     end
-    return (x.barename or x.name) < (y.barename or y.name)
+    return x.name < y.name
 end
 
 function Players:GetGroupList()

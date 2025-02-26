@@ -20,7 +20,7 @@ local function matchComparison(x,y)
     if x.match ~= y.match then
         return x.match > y.match
     end
-	return (x.node.barename or x.node.name) < (y.node.barename or y.node.name)
+	return Utils.SearchName(x.node.name) < Utils.SearchName(y.node.name)
 end
 
 function Search:AddCandidates(list)

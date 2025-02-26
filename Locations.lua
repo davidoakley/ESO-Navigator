@@ -29,11 +29,6 @@ function Locs:IsZone(zoneId)
     return false
 end
 
-local function uniqueName(index, name, x, z)
-    return (index == 0) and string.format("%s:%.4f,%.4f", Utils.bareName(name), x, z)
-                         or string.format("%.4f,%.4f", x, z)
-end
-
 local function createNode(self, i, name, typePOI, icon, glowIcon, known, zone, poiIndex)
     if i >= 210 and i <= 212 then
         -- Save this character's alliance's Harborage
@@ -82,8 +77,6 @@ local function createNode(self, i, name, typePOI, icon, glowIcon, known, zone, p
     else
         Nav.logWarning("Unknown POI " .. i .. " '" .. name .. "' type " .. typePOI .. " " .. (glowIcon or "-"))
     end
-
-    nodeInfo.barename = Utils.bareName(nodeInfo.name)
 
     if nodeInfo.icon == "/esoui/art/icons/icon_missing.dds" then
         nodeInfo.icon = "/esoui/art/crafting/crafting_smithing_notrait.dds"
@@ -289,7 +282,7 @@ function Locs:SetupNodes()
     Nav.log("Locations:SetupNodes: Zones took %d ms", GetGameTimeMilliseconds() - beginTime)
 
     local beginTime  = GetGameTimeMilliseconds()
-    local nodeLookup = {} -- Match on barename:x,z or x,z
+    local nodeLookup = {}
     local totalNodes = GetNumFastTravelNodes()
     for i = 1, totalNodes do
         loadFastTravelNode(self, i, nodeLookup, zoneLookup)
