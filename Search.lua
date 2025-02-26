@@ -32,7 +32,7 @@ function Search:AddCandidates(list)
 end
 
 function Search:Execute(searchTerm)
-    searchTerm = Utils.removeAccents(searchTerm)
+    searchTerm = Utils.SimplifyAccents(searchTerm)
     local result = {}
 
     for i = 1, #self.candidates do

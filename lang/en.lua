@@ -1,7 +1,4 @@
-local mkstr = function(id, str)
-    ZO_CreateStringId(id, str)
-    SafeAddVersion(id, 1)
-end
+local mkstr = Navigator.mkstr
 
 -- Controls menu entry (opens the Navigator tab on the World Map)
 mkstr("SI_BINDING_NAME_NAVIGATOR_SEARCH", "Open on World Map")
@@ -70,3 +67,24 @@ mkstr("NAVIGATOR_SLASH_DESCRIPTION", "Navigator: Teleports to the given zone, wa
 
 -- Custom location names
 mkstr("NAVIGATOR_LOCATION_OBLIVIONPORTAL", "Oblivion Portal")
+
+
+-- Notes: "^Thing" matches "Thing" at the start of a name
+--        "Thing$" matches "Thing" at the end of a name
+function Navigator.DisplayName(name)
+        name = name:gsub("^Dungeon: ", "")
+        name = name:gsub("^Trial: ", "")
+        name = name:gsub(" Wayshrine$", "")
+        return name
+end
+function Navigator.SearchName(name)
+        name = name:gsub("^Dungeon: ", "")
+        name = name:gsub("^Trial: ", "")
+        name = name:gsub(" Wayshrine$", "")
+    return name
+end
+function Navigator.SortName(name)
+    name = string.lower(Navigator.Utils.DisplayName(name))
+    name = Navigator.Utils.SimplifyAccents(name)
+    return Navigator.Utils.trim(name)
+end

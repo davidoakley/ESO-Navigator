@@ -8,10 +8,11 @@
 ## OptionalDependsOn: LibDebugLogger>=263 pChat>=10006030 FasterTravel>=030105 LibSlashCommander>=36 LibWorldMapInfoTab>=127 PerfectPixel>=001317
 ## SavedVariables: Navigator_SavedVariables
 
+Navigator.lua
+
 lang/en.lua
 lang/$(language).lua
 
-Navigator.lua
 fzy.lua
 Data.lua
 Nodes.lua

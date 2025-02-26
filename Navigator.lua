@@ -70,6 +70,15 @@ function Nav.logWarning(...)
   end
 end
 
+function Nav.mkstr(id, str)
+    if _G[id] then
+        SafeAddString(_G[id], str, 1)
+    else
+        ZO_CreateStringId(id, str)
+        SafeAddVersion(id, 1)
+    end
+end
+
 local function GetUniqueEventId(id)
   local count = _events[id] or 0
   count = count + 1
@@ -100,18 +109,22 @@ local function addEvents(func, ...)
 end
 
 
-local ButtonGroup = {
-  {
-    name = GetString(NAVIGATOR_KEYBIND_SEARCH),
-    keybind = "NAVIGATOR_OPENTAB", --"UI_SHORTCUT_QUICK_SLOTS", --"NAVIGATOR_SEARCH",
-    order = 200,
-    visible = function() return true end,
-    callback = function() Nav.showSearch() end,
-    },
-    alignment = KEYBIND_STRIP_ALIGN_CENTER,
-  }
+local ButtonGroup
 
 local function OnMapStateChange(_, newState)
+    if not ButtonGroup then
+        ButtonGroup = {
+            {
+                name = GetString(NAVIGATOR_KEYBIND_SEARCH),
+                keybind = "NAVIGATOR_OPENTAB", --"UI_SHORTCUT_QUICK_SLOTS", --"NAVIGATOR_SEARCH",
+                order = 200,
+                visible = function() return true end,
+                callback = function() Nav.showSearch() end,
+            },
+            alignment = KEYBIND_STRIP_ALIGN_CENTER,
+        }
+    end
+
   if newState == SCENE_SHOWING then
     Nav.mapVisible = true
     local zone = Nav.Locations:getCurrentMapZone()

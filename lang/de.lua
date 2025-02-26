@@ -1,22 +1,22 @@
 local mkstr = Navigator.mkstr
 
 -- Controls menu entry (opens the Navigator tab on the World Map)
--- mkstr("SI_BINDING_NAME_NAVIGATOR_SEARCH", "Open on World Map")
+--mkstr("SI_BINDING_NAME_NAVIGATOR_SEARCH", "Open on World Map")
 
+-- Name of the tab on the World Map
+--mkstr("NAVIGATOR_TAB_SEARCH","Navigator")
 
-
-
-
+-- Shown on the bottom keybind bar
 
 
 -- Edit box hint text (<<1>> is replaced by 'Tab')
-mkstr("NAVIGATOR_SEARCH_KEYPRESS", "Rechercher (<<1>>)") -- 1:Keyname
-mkstr("NAVIGATOR_SEARCH","Rechercher des lieux / zones / @joueurs")
+mkstr("NAVIGATOR_SEARCH_KEYPRESS","Suchen (<<1>>)")
+--mkstr("NAVIGATOR_SEARCH","Search locations, zones or @players")
 
 -- Category Headings
-mkstr("NAVIGATOR_CATEGORY_BOOKMARKS", "Signets")
-mkstr("NAVIGATOR_CATEGORY_RECENT", "Récente")
-mkstr("NAVIGATOR_CATEGORY_ZONES", "Zones")
+mkstr("NAVIGATOR_CATEGORY_BOOKMARKS", "Merkliste")
+mkstr("NAVIGATOR_CATEGORY_RECENT", "Letzte")
+mkstr("NAVIGATOR_CATEGORY_ZONES", "Gebiete")
 
 
 
@@ -28,7 +28,7 @@ mkstr("NAVIGATOR_CATEGORY_ZONES", "Zones")
 --mkstr("NAVIGATOR_HINT_SHOWUNDISCOVERED", "Click to show undiscovered locations")
 
 -- Enter key label (keep it short!)
-mkstr("NAVIGATOR_KEY_ENTER", "Entrée")
+--mkstr("NAVIGATOR_KEY_ENTER", "Enter")
 
 
 
@@ -36,11 +36,11 @@ mkstr("NAVIGATOR_KEY_ENTER", "Entrée")
 
 
 -- Tooltips
--- mkstr("NAVIGATOR_NOT_KNOWN", "Not known by this character") -- Location not known
+--mkstr("NAVIGATOR_NOT_KNOWN", "Not known by this character") -- Location not known
 --mkstr("NAVIGATOR_TIP_DOUBLECLICK_TO_TRAVEL", "Double-click to travel to <<1>>") -- 1:zone
 
--- Actions items
-mkstr("NAVIGATOR_TRAVEL_TO_ZONE", "Se rendre à <<1>>") -- 1:Zone
+-- Action and menu items
+--mkstr("NAVIGATOR_TRAVEL_TO_ZONE", "Travel to <<1>>")
 --mkstr("NAVIGATOR_MENU_ADDBOOKMARK", "Add Bookmark")
 --mkstr("NAVIGATOR_MENU_ADDHOUSEBOOKMARK", "Add Primary Residence Bookmark")
 --mkstr("NAVIGATOR_MENU_REMOVEBOOKMARK", "Remove Bookmark")
@@ -63,7 +63,7 @@ mkstr("NAVIGATOR_TRAVEL_TO_ZONE", "Se rendre à <<1>>") -- 1:Zone
 --mkstr("NAVIGATOR_TRAVELING_TO_PLAYER_HOUSE", "Traveling to <<gu:1>> house") -- 1:house
 
 -- Chat slash command
--- mkstr("NAVIGATOR_SLASH_DESCRIPTION", "Navigator: Teleports to the given zone, wayshrine, house or player")
+--mkstr("NAVIGATOR_SLASH_DESCRIPTION", "Navigator: Teleports to the given zone, wayshrine, house or player")
 
 -- Custom location names
 --mkstr("NAVIGATOR_LOCATION_OBLIVIONPORTAL", "Oblivion Portal")
@@ -72,24 +72,23 @@ mkstr("NAVIGATOR_TRAVEL_TO_ZONE", "Se rendre à <<1>>") -- 1:Zone
 -- Notes: "^Thing" matches "Thing" at the start of a name
 --        "Thing$" matches "Thing" at the end of a name
 function Navigator.DisplayName(name)
-    name = name:gsub("^Donjon : ", "") -- note non-breaking space before colon!
-    name = name:gsub("^Épreuve : ", "") -- note non-breaking space before colon!
-    name = name:gsub("^Oratoire de la ", "La ")
-    name = name:gsub("^Oratoire des ", "Les ")
-    name = name:gsub("^Oratoire du ", "Le ")
-    name = name:gsub("^Oratoire de l'", "L'")
-    name = name:gsub("^Oratoire de ", "")
-    name = name:gsub("^Oratoire d'", "")
+    -- Note: Brackets need to be 'escaped' by putting a % in front
+    name = name:gsub(" %(Verlies%)$", "")
+    name = name:gsub(" %(Prüfung%)$", "")
+    name = name:gsub("^Wegschrein von ", "")
+    name = name:gsub("^Wegschrein der ", "Der ")
+    name = name:gsub("^Wegschrein die ", "Die ")
+    name = name:gsub("^Wegschrein des ", "Das ")
     return name
 end
 function Navigator.SearchName(name)
     name = Navigator.Utils.SimplifyAccents(name) -- The search string is also "simplified"
-    name = name:gsub("^Donjon : ", "") -- note non-breaking space before colon!
-    name = name:gsub("^Épreuve : ", "") -- note non-breaking space before colon!
-    name = name:gsub("^Oratoire de la ", "")
-    name = name:gsub("^Oratoire des ", "")
-    name = name:gsub("^Oratoire du ", "")
-    name = name:gsub("^Oratoire de ", "")
-    name = name:gsub("^Oratoire d'", "")
+    -- Note: Brackets need to be 'escaped' by putting a % in front
+    name = name:gsub(" %(Verlies%)$", "")
+    name = name:gsub(" %(Prüfung%)$", "")
+    name = name:gsub("^Wegschrein von ", "")
+    name = name:gsub("^Wegschrein der ", "")
+    name = name:gsub("^Wegschrein die ", "")
+    name = name:gsub("^Wegschrein des ", "")
     return name
 end
