@@ -192,7 +192,7 @@ end
 local function loadZonePOIs(self, zoneId, zoneIndex, zoneName, numPOIs)
     for poiIndex = 1, numPOIs do
         local nodeZoneId = zoneId
-        local poiName = GetPOIInfo(zoneIndex, poiIndex) -- might be wrong - "X" instead of "Dungeon: X"!
+        local poiName = Utils.FormatSimpleName(GetPOIInfo(zoneIndex, poiIndex)) -- might be wrong - "X" instead of "Dungeon: X"!
         local zone = getOrCreateZone(self, nodeZoneId, zoneName, zoneIndex)
         if zone and not zone.pois[poiIndex] and poiName ~= nil and poiName ~= "" then
             local _, _, pinType, icon, _, _, isDiscovered, _ = GetPOIMapInfo(zoneIndex, poiIndex)
@@ -222,7 +222,7 @@ local function loadKeep(self, bgCtx, ktnnIndex, zone)
     local keepId, accessible, normalizedX,  normalizedY = GetKeepTravelNetworkNodeInfo(ktnnIndex, bgCtx)
 
     local pinType,nx,ny  = GetKeepPinInfo(keepId, bgCtx)
-    local name = GetKeepName(keepId)
+    local name = Utils.FormatSimpleName(GetKeepName(keepId))
     local icon = "EsoUI/Art/MapPins/AvA_largeKeep_neutral.dds"
 
     if pinType > 0 then

@@ -129,7 +129,7 @@ function Content:AddCyrodiilCategories()
         table.sort(allianceNodes[alliance], Nav.Node.WeightComparison)
         table.insert(self.categories, {
             id = string.format("alliance_%d", alliance),
-            title = GetAllianceName(alliance),
+            title = Nav.Utils.FormatSimpleName(GetAllianceName(alliance)),
             list = allianceNodes[alliance]
         })
     end
