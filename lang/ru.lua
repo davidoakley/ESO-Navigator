@@ -1,7 +1,7 @@
 local mkstr = function(id, str)
-    ZO_CreateStringId(id, str)
-    SafeAddVersion(id, 1)
+    SafeAddString(_G[id], str, 1)
 end
+
 
 -- Controls menu entry (opens the Navigator tab on the World Map)
 mkstr("SI_BINDING_NAME_NAVIGATOR_SEARCH", "Открыть карту мира")
@@ -9,8 +9,8 @@ mkstr("SI_BINDING_NAME_NAVIGATOR_SEARCH", "Открыть карту мира")
 -- Name of the tab on the World Map
 mkstr("NAVIGATOR_TAB_SEARCH","Навигатор")
 
--- Shown on the bottom keybind bar
-NAVIGATOR_KEYBIND_SEARCH = SI_GAMEPAD_HELP_SEARCH
+
+
 
 -- Edit box hint text (<<1>> is replaced by 'Tab')
 mkstr("NAVIGATOR_SEARCH_KEYPRESS","Поиск (<<1>>)")
@@ -20,8 +20,9 @@ mkstr("NAVIGATOR_SEARCH","Название места, локации или @и
 mkstr("NAVIGATOR_CATEGORY_BOOKMARKS", "Закладки")
 mkstr("NAVIGATOR_CATEGORY_RECENT", "Недавние")
 mkstr("NAVIGATOR_CATEGORY_ZONES", "Локации")
-NAVIGATOR_CATEGORY_RESULTS = SI_GAMEPAD_TRADING_HOUSE_BROWSE_RESULTS_TITLE
-NAVIGATOR_CATEGORY_GROUP = SI_MAIN_MENU_GROUP
+
+
+
 
 -- Result hints
 mkstr("NAVIGATOR_HINT_NORESULTS", "Результаты не найдены")
@@ -32,10 +33,10 @@ mkstr("NAVIGATOR_HINT_SHOWUNDISCOVERED", "Нажмите, чтобы отобр�
 -- Enter key label (keep it short!)
 mkstr("NAVIGATOR_KEY_ENTER", "Enter")
 
--- Result types
-NAVIGATOR_DUNGEON = SI_GROUPFINDERCATEGORY0
-NAVIGATOR_ARENA = SI_GROUPFINDERCATEGORY1
-NAVIGATOR_TRIAL = SI_GROUPFINDERCATEGORY2
+
+
+
+
 
 -- Tooltips
 mkstr("NAVIGATOR_NOT_KNOWN", "Не открыто этим персонажем") -- Location not known
@@ -48,8 +49,8 @@ mkstr("NAVIGATOR_MENU_ADDHOUSEBOOKMARK", "Добавить закладку ос
 mkstr("NAVIGATOR_MENU_REMOVEBOOKMARK", "Удалить закладку")
 mkstr("NAVIGATOR_MENU_MOVEBOOKMARKUP", "Переместить закладку вверх")
 mkstr("NAVIGATOR_MENU_MOVEBOOKMARKDOWN", "Переместить закладку вниз")
-NAVIGATOR_MENU_SHOWONMAP = SI_QUEST_JOURNAL_SHOW_ON_MAP
-NAVIGATOR_MENU_SETDESTINATION = SI_WORLD_MAP_ACTION_SET_PLAYER_WAYPOINT
+
+
 
 -- Status / error messages
 mkstr("NAVIGATOR_NO_TRAVEL_PLAYER", "Нет игроков для перемещения")
