@@ -20,13 +20,13 @@ local function matchComparison(x,y)
     if x.match ~= y.match then
         return x.match > y.match
     end
-	return Utils.SearchName(x.node.name) < Utils.SearchName(y.node.name)
+	return Nav.SearchName(x.node.name) < Nav.SearchName(y.node.name)
 end
 
 function Search:AddCandidates(list)
     for i = 1, #list do
         local node = list[i]
-        local searchName = Utils.SearchName(node.originalName or node.name)
+        local searchName = Nav.SearchName(node.originalName or node.name)
         table.insert(self.candidates, { searchName = searchName, node = node })
     end
 end

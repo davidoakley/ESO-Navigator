@@ -41,8 +41,8 @@ local function getDeveloperTooltip(node)
     end
 
     local items = {
-        "searchName='" .. Utils.SearchName(node.originalName or node.name or '-').."'",
-        "sortName='" .. Utils.SortName(node).."'",
+        "searchName='" .. Nav.SearchName(node.originalName or node.name or '-').."'",
+        "sortName='" .. Nav.SortName(node.name).."'",
         "weight="..(node:GetWeight() or 0)
     }
     if node.originalName then

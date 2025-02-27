@@ -90,5 +90,8 @@ function Navigator.SearchName(name)
     name = name:gsub("^Wegschrein der ", "")
     name = name:gsub("^Wegschrein die ", "")
     name = name:gsub("^Wegschrein des ", "")
+
+    -- Allow searches like SDA2 (for City of Ash II) - note non-breaking space at start
+    name = name:gsub(" II$", "%sII 2", 1):gsub(" I$", " I 1", 1)
     return name
 end

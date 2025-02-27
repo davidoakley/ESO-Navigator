@@ -81,5 +81,9 @@ function Navigator.SearchName(name)
     name = name:gsub("^Подземелье: ", "") -- Dungeon
     name = name:gsub("^Испытание: ", "") -- Trial
     name = name:gsub("^Дорожное святилище ", "") -- Wayshrine
+
+    -- Allow searches like ГП2 (for City of Ash II)
+    -- "Город Пепла II"
+    name = name:gsub(" II$", " II 2", 1):gsub(" I$", " I 1", 1)
     return name
 end

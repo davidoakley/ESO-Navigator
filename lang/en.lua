@@ -81,10 +81,11 @@ function Navigator.SearchName(name)
         name = name:gsub("^Dungeon: ", "")
         name = name:gsub("^Trial: ", "")
         name = name:gsub(" Wayshrine$", "")
+        name = name:gsub(" II$", " II 2", 1):gsub(" I$", " I 1", 1) -- Allows searches like COA2 (for City of Ash II)
     return name
 end
 function Navigator.SortName(name)
-    name = string.lower(Navigator.Utils.DisplayName(name))
+    name = string.lower(Navigator.DisplayName(name))
     name = Navigator.Utils.SimplifyAccents(name)
     return Navigator.Utils.trim(name)
 end

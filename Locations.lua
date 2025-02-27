@@ -11,9 +11,6 @@ local Locs = Nav.Locations or {
 }
 local Utils = Nav.Utils
 
-function Locs:initialise()
-end
-
 function Locs:IsZone(zoneId)
     if (zoneId == GetParentZoneId(zoneId)
        or zoneId==267 -- Eyevea
@@ -39,7 +36,7 @@ local function createNode(self, i, name, typePOI, icon, glowIcon, known, zone, p
 
     local nodeInfo = {
         nodeIndex = i,
-        name = Utils.DisplayName(name),
+        name = Nav.DisplayName(name),
         originalName = name,
         type = typePOI,
         icon = icon,
@@ -199,7 +196,7 @@ local function loadZonePOIs(self, zoneId, zoneIndex, zoneName, numPOIs)
             if not icon:find("wayshrine") then -- Remove Cyrodiil's unusable wayshrines
                 local node = Nav.POINode:New({
                     poiIndex = poiIndex,
-                    name = Utils.DisplayName(poiName),
+                    name = Nav.DisplayName(poiName),
                     originalName = poiName,
                     zoneId = nodeZoneId,
                     icon = icon,
@@ -236,7 +233,7 @@ local function loadKeep(self, bgCtx, ktnnIndex, zone)
     local node = Nav.KeepNode:New({
         ktnnIndex = ktnnIndex,
         keepId = keepId,
-        name = Utils.DisplayName(name),
+        name = Nav.DisplayName(name),
         originalName = name,
         zoneId = Nav.ZONE_CYRODIIL,
         icon = icon,

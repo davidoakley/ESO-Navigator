@@ -8,7 +8,7 @@ local Nav = Navigator
 
 
 local function nameComparison(x, y)
-    return Nav.Utils.SortName(x) < Nav.Utils.SortName(y)
+    return Nav.SortName(x.name) < Nav.SortName(y.name)
 end
 
 

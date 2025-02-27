@@ -167,21 +167,6 @@ function Utils.FormatSimpleName(str)
 	end 
 end 
 
-function Utils.DisplayName(name)
-	return Navigator.DisplayName(name)
-end
-
-function Utils.SearchName(name)
-	local r = Navigator.SearchName(name)
-	r = r:gsub(" II$", " II 2", 1):gsub(" I$", " I 1", 1)
-	return r
-end
-
-function Utils.SortName(obj)
-	local name = type(obj) == "table" and obj.name or obj
-	return Navigator.SortName(name)
-end
-
 function Utils.shallowCopy(t)
 	if type(t) == "table" then
 		local t2 = {}
