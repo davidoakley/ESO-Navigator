@@ -55,10 +55,11 @@ end
 function Search:Run(searchTerm, filter)
     self.candidates = {}
 
-    searchTerm = searchTerm and string.lower(searchTerm) or "" -- FIXME: Should string.lower be removed?
-    searchTerm = searchTerm:gsub("[^%w ]", "")
+    searchTerm = Nav.Utils.trim(searchTerm or "")
     local hasSearch = searchTerm ~= ""
 
+    --Nav.Utils.logChars("Épreuve")
+    --Nav.Utils.logChars(searchTerm)
     -- Nav.log("Search:Run('%s', %d)", searchTerm, filter)
 
     if filter == Nav.FILTER_NONE and searchTerm == "" then

@@ -85,5 +85,7 @@ function Navigator.SearchName(name)
     -- Allow searches like ГП2 (for City of Ash II)
     -- "Город Пепла II"
     name = name:gsub(" II$", " II 2", 1):gsub(" I$", " I 1", 1)
+
+    name = Navigator.Utils.SimplifyAccents(name:upper()) -- The search string is also "simplified"
     return name
 end
