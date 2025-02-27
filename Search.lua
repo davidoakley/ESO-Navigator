@@ -20,19 +20,19 @@ local function matchComparison(x,y)
     if x.match ~= y.match then
         return x.match > y.match
     end
-	return (x.node.barename or x.node.name) < (y.node.barename or y.node.name)
+	return Nav.SearchName(x.node.name) < Nav.SearchName(y.node.name)
 end
 
 function Search:AddCandidates(list)
     for i = 1, #list do
         local node = list[i]
-        local searchName = Utils.SearchName(node.originalName or node.name)
+        local searchName = Nav.SearchName(node.originalName or node.name)
         table.insert(self.candidates, { searchName = searchName, node = node })
     end
 end
 
 function Search:Execute(searchTerm)
-    searchTerm = Utils.removeAccents(searchTerm)
+    searchTerm = Utils.SimplifyAccents(searchTerm)
     local result = {}
 
     for i = 1, #self.candidates do
@@ -55,10 +55,11 @@ end
 function Search:Run(searchTerm, filter)
     self.candidates = {}
 
-    searchTerm = searchTerm and string.lower(searchTerm) or "" -- FIXME: Should string.lower be removed?
-    searchTerm = searchTerm:gsub("[^%w ]", "")
+    searchTerm = Nav.Utils.trim(searchTerm or "")
     local hasSearch = searchTerm ~= ""
 
+    --Nav.Utils.logChars("Épreuve")
+    --Nav.Utils.logChars(searchTerm)
     -- Nav.log("Search:Run('%s', %d)", searchTerm, filter)
 
     if filter == Nav.FILTER_NONE and searchTerm == "" then

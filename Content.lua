@@ -8,7 +8,7 @@ local Nav = Navigator
 
 
 local function nameComparison(x, y)
-    return Nav.Utils.SortName(x) < Nav.Utils.SortName(y)
+    return Nav.SortName(x.name) < Nav.SortName(y.name)
 end
 
 
@@ -129,7 +129,7 @@ function Content:AddCyrodiilCategories()
         table.sort(allianceNodes[alliance], Nav.Node.WeightComparison)
         table.insert(self.categories, {
             id = string.format("alliance_%d", alliance),
-            title = GetAllianceName(alliance),
+            title = Nav.Utils.FormatSimpleName(GetAllianceName(alliance)),
             list = allianceNodes[alliance]
         })
     end

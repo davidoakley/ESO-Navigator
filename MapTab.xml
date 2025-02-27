@@ -147,7 +147,6 @@
 			<OnEffectivelyShown>
 				Navigator.log("Navigator_MapTab.OnEffectivelyShown")
 				self.visible = true
-				Navigator.Locations:initialise()
 				if self.needsRefresh then
 					self:ImmediateRefresh()
 				else

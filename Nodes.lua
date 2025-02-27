@@ -31,7 +31,7 @@ function Node.WeightComparison(x, y)
     if xWeight ~= yWeight then
         return xWeight > yWeight
     end
-    return Nav.Utils.SortName(x) < Nav.Utils.SortName(y)
+    return Nav.SortName(x.name) < Nav.SortName(y.name)
 end
 
 function Node:IsKnown()

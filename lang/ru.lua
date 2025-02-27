@@ -1,7 +1,4 @@
-local mkstr = function(id, str)
-    SafeAddString(_G[id], str, 1)
-end
-
+local mkstr = Navigator.mkstr
 
 -- Controls menu entry (opens the Navigator tab on the World Map)
 mkstr("SI_BINDING_NAME_NAVIGATOR_SEARCH", "Открыть карту мира")
@@ -70,3 +67,25 @@ mkstr("NAVIGATOR_SLASH_DESCRIPTION", "Навигатор: Перемещение
 
 -- Custom location names
 mkstr("NAVIGATOR_LOCATION_OBLIVIONPORTAL", "Портал Обливиона")
+
+-- Notes: gsub uses Lua patterns - https://www.lua.org/pil/20.2.html
+--        "^Thing" matches "Thing" at the start of a name
+--        "Thing$" matches "Thing" at the end of a name
+function Navigator.DisplayName(name)
+    name = name:gsub("^Подземелье: ", "") -- Dungeon
+    name = name:gsub("^Испытание: ", "") -- Trial
+    name = name:gsub("^Дорожное святилище ", "") -- Wayshrine
+    return name
+end
+function Navigator.SearchName(name)
+    name = name:gsub("^Подземелье: ", "") -- Dungeon
+    name = name:gsub("^Испытание: ", "") -- Trial
+    name = name:gsub("^Дорожное святилище ", "") -- Wayshrine
+
+    -- Allow searches like ГП2 (for City of Ash II)
+    -- "Город Пепла II"
+    name = name:gsub(" II$", " II 2", 1):gsub(" I$", " I 1", 1)
+
+    name = Navigator.Utils.SimplifyAccents(name:upper()) -- The search string is also "simplified"
+    return name
+end

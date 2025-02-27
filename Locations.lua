@@ -11,9 +11,6 @@ local Locs = Nav.Locations or {
 }
 local Utils = Nav.Utils
 
-function Locs:initialise()
-end
-
 function Locs:IsZone(zoneId)
     if (zoneId == GetParentZoneId(zoneId)
        or zoneId==267 -- Eyevea
@@ -29,11 +26,6 @@ function Locs:IsZone(zoneId)
     return false
 end
 
-local function uniqueName(index, name, x, z)
-    return (index == 0) and string.format("%s:%.4f,%.4f", Utils.bareName(name), x, z)
-                         or string.format("%.4f,%.4f", x, z)
-end
-
 local function createNode(self, i, name, typePOI, icon, glowIcon, known, zone, poiIndex)
     if i >= 210 and i <= 212 then
         -- Save this character's alliance's Harborage
@@ -44,7 +36,7 @@ local function createNode(self, i, name, typePOI, icon, glowIcon, known, zone, p
 
     local nodeInfo = {
         nodeIndex = i,
-        name = Utils.DisplayName(name),
+        name = Nav.DisplayName(name),
         originalName = name,
         type = typePOI,
         icon = icon,
@@ -82,8 +74,6 @@ local function createNode(self, i, name, typePOI, icon, glowIcon, known, zone, p
     else
         Nav.logWarning("Unknown POI " .. i .. " '" .. name .. "' type " .. typePOI .. " " .. (glowIcon or "-"))
     end
-
-    nodeInfo.barename = Utils.bareName(nodeInfo.name)
 
     if nodeInfo.icon == "/esoui/art/icons/icon_missing.dds" then
         nodeInfo.icon = "/esoui/art/crafting/crafting_smithing_notrait.dds"
@@ -199,14 +189,14 @@ end
 local function loadZonePOIs(self, zoneId, zoneIndex, zoneName, numPOIs)
     for poiIndex = 1, numPOIs do
         local nodeZoneId = zoneId
-        local poiName = GetPOIInfo(zoneIndex, poiIndex) -- might be wrong - "X" instead of "Dungeon: X"!
+        local poiName = Utils.FormatSimpleName(GetPOIInfo(zoneIndex, poiIndex)) -- might be wrong - "X" instead of "Dungeon: X"!
         local zone = getOrCreateZone(self, nodeZoneId, zoneName, zoneIndex)
         if zone and not zone.pois[poiIndex] and poiName ~= nil and poiName ~= "" then
             local _, _, pinType, icon, _, _, isDiscovered, _ = GetPOIMapInfo(zoneIndex, poiIndex)
             if not icon:find("wayshrine") then -- Remove Cyrodiil's unusable wayshrines
                 local node = Nav.POINode:New({
                     poiIndex = poiIndex,
-                    name = Utils.DisplayName(poiName),
+                    name = Nav.DisplayName(poiName),
                     originalName = poiName,
                     zoneId = nodeZoneId,
                     icon = icon,
@@ -229,7 +219,7 @@ local function loadKeep(self, bgCtx, ktnnIndex, zone)
     local keepId, accessible, normalizedX,  normalizedY = GetKeepTravelNetworkNodeInfo(ktnnIndex, bgCtx)
 
     local pinType,nx,ny  = GetKeepPinInfo(keepId, bgCtx)
-    local name = GetKeepName(keepId)
+    local name = Utils.FormatSimpleName(GetKeepName(keepId))
     local icon = "EsoUI/Art/MapPins/AvA_largeKeep_neutral.dds"
 
     if pinType > 0 then
@@ -243,7 +233,7 @@ local function loadKeep(self, bgCtx, ktnnIndex, zone)
     local node = Nav.KeepNode:New({
         ktnnIndex = ktnnIndex,
         keepId = keepId,
-        name = Utils.DisplayName(name),
+        name = Nav.DisplayName(name),
         originalName = name,
         zoneId = Nav.ZONE_CYRODIIL,
         icon = icon,
@@ -289,7 +279,7 @@ function Locs:SetupNodes()
     Nav.log("Locations:SetupNodes: Zones took %d ms", GetGameTimeMilliseconds() - beginTime)
 
     local beginTime  = GetGameTimeMilliseconds()
-    local nodeLookup = {} -- Match on barename:x,z or x,z
+    local nodeLookup = {}
     local totalNodes = GetNumFastTravelNodes()
     for i = 1, totalNodes do
         loadFastTravelNode(self, i, nodeLookup, zoneLookup)
