@@ -169,16 +169,10 @@ end
 
 function Utils.DisplayName(name)
 	return Navigator.DisplayName(name)
-	--elseif _lang == "ru" then
-	--	r = r:gsub("^Дорожное святилище ", "ДС ", 1)
-	--end
 end
 
 function Utils.SearchName(name)
 	local r = Navigator.SearchName(name)
-	--elseif _lang == "ru" then
-	--	r = r:gsub("Дорожное святилище ", "", 1):gsub("^Подземелье: ", "", 1):gsub("^Испытание: ", "", 1)
-	--end
 	r = r:gsub(" II$", " II 2", 1):gsub(" I$", " I 1", 1)
 	return r
 end
@@ -186,18 +180,6 @@ end
 function Utils.SortName(obj)
 	local name = type(obj) == "table" and obj.name or obj
 	return Navigator.SortName(name)
-	--name = string.lower(Utils.DisplayName(name))
-	--name = Utils.RemoveAccents(name)
-	--
-	--if Nav.saved.ignoreDefiniteArticlesInSort then
-	--	if _lang == "en" then
-	--		name = name:gsub("^The ", "", 1)
-	--	elseif _lang == "fr" then
-	--		name = name:gsub("^le ", "", 1):gsub("^la ", "", 1):gsub("^l'", "", 1):gsub("^les ", "", 1)
-	--	end
-	--end
-	--
-	--return Utils.trim(name)
 end
 
 function Utils.shallowCopy(t)
