@@ -216,7 +216,7 @@ function PlayerNode:GetSuffix() return self.zoneName or "" end
 
 function PlayerNode:GetOverlayIcon()
     if self.isFriend then
-        return "Navigator/media/overlays/player.dds", Nav.COLOUR_WHITE
+        return "Navigator/media/overlays/star.dds", Nav.COLOUR_FRIEND
     else
         return nil, nil
     end
