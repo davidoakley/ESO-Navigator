@@ -765,19 +765,31 @@ function KeepNode:GetColour(isSelected)
     end
 end
 
+function KeepNode:GetTagList(showBookmark)
+    local tagList = {}
+
+    if self:IsUnderAttack() then
+        table.insert(tagList, "attackburst")
+    end
+
+    return Nav.Utils.tableConcat(tagList, Node.GetTagList(self, showBookmark))
+end
+
+function KeepNode:GetTagColour()
+    return Nav.COLOUR_WHITE
+end
+
 function KeepNode:OnClick()
     self:ZoomToPOI(false)
 end
 
-function KeepNode:GetMapInfo(self, zoneIndex, mapId)
-    local pinType,nx,ny  = GetKeepPinInfo(self.keepId, self.bgCtx)
-    --if mapId == 2082 then
-    --    return 0.3485, 0.3805 -- The Shambles
-    --elseif self.nodeIndex == 407 then
-    --    return 0.9273, 0.7105 -- Dragonguard Sanctum
-    --else
-    --    return GetPOIMapInfo(zoneIndex, self.poiIndex)
-    --end
+function KeepNode:IsUnderAttack()
+    local historyPercent = ZO_WorldMap_GetHistoryPercentToUse()
+    return GetHistoricalKeepUnderAttack(self.keepId, self.bgContext, historyPercent)
+end
+
+function KeepNode:GetMapInfo(self, _, _)
+    local _,nx,ny  = GetKeepPinInfo(self.keepId, self.bgCtx)
     Nav.log("KeepNode:GetMapInfo: keepId=%d -> %f,%f", self.keepId, nx, ny)
     return nx,ny
 end

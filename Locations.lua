@@ -215,10 +215,10 @@ local function loadZonePOIs(self, zoneId, zoneIndex, zoneName, numPOIs)
     end
 end
 
-local function loadKeep(self, bgCtx, ktnnIndex, zone)
-    local keepId, accessible, normalizedX,  normalizedY = GetKeepTravelNetworkNodeInfo(ktnnIndex, bgCtx)
+local function loadKeep(self, bgContext, ktnnIndex, zone)
+    local keepId, accessible, normalizedX,  normalizedY = GetKeepTravelNetworkNodeInfo(ktnnIndex, bgContext)
 
-    local pinType,nx,ny  = GetKeepPinInfo(keepId, bgCtx)
+    local pinType, _, _  = GetKeepPinInfo(keepId, bgContext)
     local name = Utils.FormatSimpleName(GetKeepName(keepId))
     local icon = "EsoUI/Art/MapPins/AvA_largeKeep_neutral.dds"
 
@@ -231,6 +231,7 @@ local function loadKeep(self, bgCtx, ktnnIndex, zone)
     --if icon:find("UI-WorldMapPlayerPip") then icon = "EsoUI/Art/MapPins/AvA_largeKeep_neutral.dds" end
 
     local node = Nav.KeepNode:New({
+        bgContext = bgContext,
         ktnnIndex = ktnnIndex,
         keepId = keepId,
         name = Nav.DisplayName(name),
