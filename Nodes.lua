@@ -765,19 +765,48 @@ function KeepNode:GetColour(isSelected)
     end
 end
 
+function KeepNode:GetTagList(showBookmark)
+    local tagList = {}
+
+    local isUnderAttack = self:IsUnderAttack()
+    if isUnderAttack then
+        Nav.log("Keep %s %d UA %d", self.name, self.keepId, isUnderAttack)
+        table.insert(tagList, isUnderAttack == 2 and "attackburst" or "attackburst-small")
+    end
+
+    return Nav.Utils.tableConcat(tagList, Node.GetTagList(self, showBookmark))
+end
+
+function KeepNode:GetTagColour()
+    return Nav.COLOUR_WHITE
+end
+
 function KeepNode:OnClick()
     self:ZoomToPOI(false)
 end
 
-function KeepNode:GetMapInfo(self, zoneIndex, mapId)
-    local pinType,nx,ny  = GetKeepPinInfo(self.keepId, self.bgCtx)
-    --if mapId == 2082 then
-    --    return 0.3485, 0.3805 -- The Shambles
-    --elseif self.nodeIndex == 407 then
-    --    return 0.9273, 0.7105 -- Dragonguard Sanctum
-    --else
-    --    return GetPOIMapInfo(zoneIndex, self.poiIndex)
-    --end
+function KeepNode:IsUnderAttack()
+    local historyPercent = ZO_WorldMap_GetHistoryPercentToUse()
+    if GetHistoricalKeepUnderAttack(self.keepId, self.bgContext, historyPercent) then
+        return 2
+    end
+
+    for i = 1, 3 do
+        local resourceKeepId = GetResourceKeepForKeep(self.keepId, i)
+        if resourceKeepId > 0 then
+            -- Check if the resource is being attacked rather than reclaimed
+            if GetHistoricalKeepUnderAttack(resourceKeepId, self.bgContext, historyPercent) then
+               --and GetKeepAlliance(resourceKeepId, bgCtx) == self.alliance then
+                return 1
+            end
+        end
+    end
+
+    return nil
+end
+
+function KeepNode:GetMapInfo(self, _, _)
+    local _,nx,ny  = GetKeepPinInfo(self.keepId, self.bgCtx)
     Nav.log("KeepNode:GetMapInfo: keepId=%d -> %f,%f", self.keepId, nx, ny)
     return nx,ny
 end
@@ -796,7 +825,6 @@ end
 
 function KeepNode:AddMenuItems()
     if self.accessible then
-        local strId =
         AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE), self.name), function()
             self:Jump()
         end)
@@ -807,7 +835,7 @@ function KeepNode:AddMenuItems()
     AddMenuItem(GetString(NAVIGATOR_MENU_SETDESTINATION), function()
         self:ZoomToPOI(true)
     end)
-    self:AddBookmarkMenuItem({ nodeIndex = self.nodeIndex })
+    --self:AddBookmarkMenuItem({ nodeIndex = self.nodeIndex })
 end
 
 function KeepNode:OnClick(isDoubleClick)
