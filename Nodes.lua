@@ -303,6 +303,24 @@ function ZoneNode:GetTooltip()
     return zo_strformat(GetString(stringId), self.name)
 end
 
+function ZoneNode:IsJumpable()
+    local player = Nav.Players:GetPlayerInZone(self.zoneId)
+    return player and self.zoneId > Nav.ZONE_TAMRIEL and self.zoneId ~= Nav.ZONE_CYRODIIL
+end
+
+function ZoneNode:GetColour()
+    return (Nav.jumpState == Nav.JUMPSTATE_WAYSHRINE and Nav.COLOUR_NORMAL) or
+            (self:IsJumpable() and Nav.COLOUR_JUMPABLE) or Nav.COLOUR_POI
+end
+
+function ZoneNode:GetOverlayIcon()
+    if self:IsJumpable() and Nav.jumpState == Nav.JUMPSTATE_WORLD then
+        return "Navigator/media/overlays/dot.dds", Nav.COLOUR_JUMPABLE
+    else
+        return nil, nil
+    end
+end
+
 function ZoneNode:JumpToZone()
     Nav.Players:SetupPlayers()
     local zoneId = self.zoneId
