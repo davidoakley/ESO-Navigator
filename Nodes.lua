@@ -768,8 +768,10 @@ end
 function KeepNode:GetTagList(showBookmark)
     local tagList = {}
 
-    if self:IsUnderAttack() then
-        table.insert(tagList, "attackburst")
+    local isUnderAttack = self:IsUnderAttack()
+    if isUnderAttack then
+        Nav.log("Keep %s %d UA %d", self.name, self.keepId, isUnderAttack)
+        table.insert(tagList, isUnderAttack == 2 and "attackburst" or "attackburst-small")
     end
 
     return Nav.Utils.tableConcat(tagList, Node.GetTagList(self, showBookmark))
@@ -785,7 +787,22 @@ end
 
 function KeepNode:IsUnderAttack()
     local historyPercent = ZO_WorldMap_GetHistoryPercentToUse()
-    return GetHistoricalKeepUnderAttack(self.keepId, self.bgContext, historyPercent)
+    if GetHistoricalKeepUnderAttack(self.keepId, self.bgContext, historyPercent) then
+        return 2
+    end
+
+    for i = 1, 3 do
+        local resourceKeepId = GetResourceKeepForKeep(self.keepId, i)
+        if resourceKeepId > 0 then
+            -- Check if the resource is being attacked rather than reclaimed
+            if GetHistoricalKeepUnderAttack(resourceKeepId, self.bgContext, historyPercent) then
+               --and GetKeepAlliance(resourceKeepId, bgCtx) == self.alliance then
+                return 1
+            end
+        end
+    end
+
+    return nil
 end
 
 function KeepNode:GetMapInfo(self, _, _)
