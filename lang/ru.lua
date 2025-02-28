@@ -72,9 +72,11 @@ mkstr("NAVIGATOR_LOCATION_OBLIVIONPORTAL", "Портал Обливиона")
 --        "^Thing" matches "Thing" at the start of a name
 --        "Thing$" matches "Thing" at the end of a name
 function Navigator.DisplayName(name)
+    name = name:gsub("^Дорожное святилище ", "ДС ")
     name = name:gsub("^Подземелье: ", "") -- Dungeon
     name = name:gsub("^Испытание: ", "") -- Trial
     name = name:gsub("^Дорожное святилище ", "") -- Wayshrine
+    name = zo_strformat("<<C:1>>", name) -- Upper-case first letter
     return name
 end
 function Navigator.SearchName(name)
@@ -86,6 +88,6 @@ function Navigator.SearchName(name)
     -- "Город Пепла II"
     name = name:gsub(" II$", " II 2", 1):gsub(" I$", " I 1", 1)
 
-    name = Navigator.Utils.SimplifyAccents(name:upper()) -- The search string is also "simplified"
+    --name = Navigator.Utils.SimplifyAccents(name:upper()) -- The search string is also "simplified"
     return name
 end

@@ -16,43 +16,7 @@ CurrentLanguage()
 local accents
 
 if _lang == "ru" then
-	accents = {
-		-- Russian - see https://github.com/anyascii/anyascii/blob/master/input/tables/cyrillic.tsv
-		["А"] = "A",
-		["Б"] = "B",
-		["В"] = "V",
-		["Г"] = "G",
-		["Д"] = "D",
-		["д"] = "d",
-		["Е"] = "E",
-		["Ё"] = "E",
-		["Ж"] = "Zh",
-		["З"] = "Z",
-		["И"] = "I",
-		["Й"] = "Y",
-		["К"] = "K",
-		["Л"] = "L",
-		["М"] = "M",
-		["Н"] = "N",
-		["О"] = "O",
-		["П"] = "P",
-		["Р"] = "R",
-		["С"] = "S",
-		["Т"] = "T",
-		["У"] = "U",
-		["Ф"] = "F",
-		["Х"] = "Kh",
-		["Ц"] = "Ts",
-		["Ч"] = "Ch",
-		["Ш"] = "Sh",
-		["Щ"] = "Shch",
-		["Ъ"] = "'",
-		["Ы"] = "Y",
-		["Ь"] = "'",
-		["Э"] = "E",
-		["Ю"] = "Yu",
-		["Я"] = "Ya",
-	}
+	accents = {}
 else
 	accents = {
 		["à"] = "a",
