@@ -143,6 +143,25 @@ function Content:AddCyrodiilCategories()
 end
 
 
+--- @class BasicContent
+local BasicContent = Content:New()
+
+function BasicContent:New()
+    local o = {}
+    setmetatable(o, self)
+    self.__index = self
+    return o
+end
+
+function BasicContent:Compose()
+    self.categories = {}
+
+    self:AddGroupCategory()
+    self:AddBookmarksCategory()
+    self:AddRecentsCategory()
+end
+
+
 --- @class ZoneContent
 local ZoneContent = Content:New()
 
@@ -231,6 +250,7 @@ end
 
 
 Nav.Category = Category
+Nav.BasicContent = BasicContent
 Nav.ZoneContent = ZoneContent
 Nav.ZoneListContent = ZoneListContent
 Nav.CyrodiilContent = CyrodiilContent

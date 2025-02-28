@@ -200,7 +200,7 @@
 								self.editTextChanged = false
 							</OnBackspace>
 							<OnEnter>
-								Navigator.MapTab:selectCurrentResult()
+								Navigator.MapTab:OnEnter()
 							</OnEnter>
 							<OnEscape>
 								-- self:LoseFocus()
