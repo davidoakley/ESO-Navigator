@@ -81,6 +81,10 @@ function Node:GetTagList(showBookmark)
     return tagList
 end
 
+function Node:GetOverlayIcon()
+    return nil, nil
+end
+
 function Node:GetTooltip()
     return self.tooltip
 end
@@ -203,14 +207,20 @@ end
 function PlayerNode:GetIcon()
     if self.isGroupmate then
         return self.isLeader and "/esoui/art/icons/mapkey/mapkey_groupleader.dds" or "/esoui/art/icons/mapkey/mapkey_groupmember.dds"
-    elseif self.isFriend then
-        return "Navigator/media/player_friend.dds"
     else
         return "Navigator/media/player.dds"
     end
 end
 
 function PlayerNode:GetSuffix() return self.zoneName or "" end
+
+function PlayerNode:GetOverlayIcon()
+    if self.isFriend then
+        return "Navigator/media/overlays/player.dds", Nav.COLOUR_WHITE
+    else
+        return nil, nil
+    end
+end
 
 function PlayerNode:GetIconColour()
     if self.isFriend then
@@ -375,6 +385,10 @@ function JumpToZoneNode:GetIcon()
     return self.known and "Navigator/media/recall.dds" or "esoui/art/crafting/crafting_smithing_notrait.dds"
 end
 
+function JumpToZoneNode:GetOverlayIcon()
+    return nil, nil
+end
+
 function JumpToZoneNode:GetSuffix() return "" end
 function JumpToZoneNode:GetTagList() return {} end
 function JumpToZoneNode:GetTooltip() return nil end
@@ -431,8 +445,7 @@ function HouseNode:GetWeight()
 end
 
 function HouseNode:GetIcon()
-    return self:IsPrimary() and "Navigator/media/house_star.dds"
-                             or "Navigator/media/house.dds"
+    return "Navigator/media/house.dds"
 end
 
 function HouseNode:GetIconColour()
@@ -440,6 +453,14 @@ function HouseNode:GetIconColour()
         return Nav.COLOUR_WHITE
     else
         return Nav.COLOUR_DISABLED
+    end
+end
+
+function HouseNode:GetOverlayIcon()
+    if self:IsPrimary() then
+        return "Navigator/media/overlays/star.dds", Nav.COLOUR_WHITE
+    else
+        return nil, nil
     end
 end
 
@@ -554,6 +575,14 @@ function FastTravelNode:GetTagList(showBookmark)
     return Nav.Utils.tableConcat(tagList, Node.GetTagList(self, showBookmark))
 end
 
+function Node:GetOverlayIcon()
+    if self:GetRecallCost() then
+        return "Navigator/media/overlays/coin.dds", Nav.COLOUR_COIN
+    else
+        return nil, nil
+    end
+end
+
 function FastTravelNode:GetRecallCost()
     if Nav.jumpState == Nav.JUMPSTATE_WAYSHRINE or self.disabled then
         return nil
@@ -632,6 +661,14 @@ end
 
 --- @class PlayerHouseNode
 local PlayerHouseNode = Node:New()
+
+function PlayerHouseNode:GetIcon()
+    return "Navigator/media/house.dds"
+end
+
+function PlayerHouseNode:GetOverlayIcon()
+    return "Navigator/media/overlays/player.dds", Nav.COLOUR_WHITE
+end
 
 function PlayerHouseNode:OnClick()
     SCENE_MANAGER:Hide("worldMap")

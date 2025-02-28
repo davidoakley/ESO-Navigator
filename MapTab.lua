@@ -92,7 +92,14 @@ function MT:layoutRow(rowControl, data, _)
 		rowControl.icon:SetHidden(true)
 	end
 
-    rowControl.cost:SetHidden(not node:GetRecallCost())
+    local overlayIcon, overlayColour = node:GetOverlayIcon(isSelected)
+    if overlayIcon then
+        rowControl.overlay:SetColor(ZO_ColorDef.HexToFloats(overlayColour))
+        rowControl.overlay:SetTexture(overlayIcon)
+        rowControl.overlay:SetHidden(false)
+    else
+        rowControl.overlay:SetHidden(true)
+    end
 
     rowControl.keybind:SetHidden(not isSelected)
     rowControl.bg:SetHidden(not isSelected)

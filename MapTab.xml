@@ -54,7 +54,7 @@
 				self.offsetX = 30
 				self.label = self:GetNamedChild("Label")
 				self.icon = self:GetNamedChild("Icon")
-				self.cost = self:GetNamedChild("Cost")
+				self.overlay = self:GetNamedChild("Overlay")
 				self.keybind = self:GetNamedChild("Keybind")
 				self.bg = self:GetNamedChild("BG")
 			</OnInitialized>
@@ -72,9 +72,9 @@
 					<Anchor point="TOPLEFT" offsetX="10" offsetY="1" />
 					<TextureCoords top="0" bottom="1" left="0" right="1"/>
 				</Texture>
-				<Texture name="$(parent)Cost" textureFile="/esoui/art/currency/gamepad/gp_gold.dds" color="FFCC33" level="1" hidden="false" mouseEnabled="false">
-					<Dimensions x="13" y="13"/>
-					<Anchor point="TOPLEFT" offsetX="23" offsetY="11" />
+				<Texture name="$(parent)Overlay" textureFile="Navigator/media/overlays/coin.dds" color="FFCC33" level="1" hidden="false" mouseEnabled="false">
+					<Dimensions x="24" y="24"/>
+					<Anchor point="TOPLEFT" offsetX="10" offsetY="1" />
 					<TextureCoords top="0" bottom="1" left="0" right="1"/>
 				</Texture>
 
