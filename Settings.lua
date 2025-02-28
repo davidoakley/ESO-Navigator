@@ -1,5 +1,67 @@
 local Nav = Navigator --- @class Navigator
 
+local function getActionSettings(sv)
+    local submenuTable = {}
+    local actionTypes = { "singleClick", "doubleClick", "enterKey" }
+    local destinationActionDefaults = { Nav.ACTION_TRAVEL, Nav.ACTION_TRAVEL, Nav.ACTION_TRAVEL }
+    table.insert(submenuTable, {
+        type = "nav_actions",
+        name = "Travel Destinations",
+        tooltip = "Mouse and key actions for Wayshrines, Dungeons, Trials, Arenas and Keeps",
+        actions = {"Single-click", "Double-click", "[Enter] key"},
+        choices = function(_)
+            return {"Show On Map", "Set Destination", "Travel"}
+        end,
+        choicesValues = function(_)
+            return { Nav.ACTION_SHOWONMAP, Nav.ACTION_SETDESTINATION, Nav.ACTION_TRAVEL }
+        end,
+        choicesTooltips = function(index)
+            return index == 1 and { nil, nil, "If a single-click is set to Travel, the double-click action will not run" } or {"","",""}
+        end,
+        getFunc = function(index) return sv.destinationActions[actionTypes[index]] end,
+        setFunc = function(index, value) sv.destinationActions[actionTypes[index]] = value end,
+        default = function(index) return destinationActionDefaults[index] end,
+        reference = Nav.settingsName .. "_destinationActions"
+    })
+
+    local zoneActionDefaults = { Nav.ACTION_SHOWONMAP, Nav.ACTION_TRAVEL, Nav.ACTION_SHOWONMAP }
+    table.insert(submenuTable, {
+        type = "nav_actions",
+        name = "Zones",
+        actions = {"Single-click", "Double-click", "[Enter] key"},
+        choices = function(_)
+            return {"Show On Map", "Travel"}
+        end,
+        choicesValues = function(_)
+            return { Nav.ACTION_SHOWONMAP, Nav.ACTION_TRAVEL }
+        end,
+        getFunc = function(index) return sv.zoneActions[actionTypes[index]] end,
+        setFunc = function(index, value) sv.zoneActions[actionTypes[index]] = value end,
+        default = function(index) return zoneActionDefaults[index] end,
+        reference = Nav.settingsName .. "_zoneActions"
+    })
+
+    local poiActionDefaults = { Nav.ACTION_SHOWONMAP, Nav.ACTION_SETDESTINATION, Nav.ACTION_SHOWONMAP }
+    table.insert(submenuTable, {
+        type = "nav_actions",
+        name = "Points Of Interest",
+        tooltip = "Mouse and key actions for map locations such as towns, quest locations and striking locales",
+        actions = {"Single-click", "Double-click", "[Enter] key"},
+        choices = function(_)
+            return {"Show On Map", "Set Destination"}
+        end,
+        choicesValues = function(_)
+            return { Nav.ACTION_SHOWONMAP, Nav.ACTION_SETDESTINATION }
+        end,
+        getFunc = function(index) return sv.poiActions[actionTypes[index]] end,
+        setFunc = function(index, value) sv.poiActions[actionTypes[index]] = value end,
+        default = function(index) return poiActionDefaults[index] end,
+        reference = Nav.settingsName .. "_poiActions"
+    })
+
+    return submenuTable
+end
+
 function Navigator:loadSettings()
     local LAM = LibAddonMenu2
     local sv = self.saved
@@ -70,31 +132,7 @@ function Navigator:loadSettings()
     })
 
 
-    table.insert(optionsTable, { type = "divider" })
 
-    local actions = { "destinationSingleClick", "destinationDoubleClick", "zoneSingleClick", "zoneDoubleClick" }
-    local actionDefaults = { Nav.ACTION_SHOWONMAP, Nav.ACTION_TRAVEL, Nav.ACTION_SHOWONMAP, Nav.ACTION_TRAVEL }
-    table.insert(optionsTable, {
-        type = "nav_actions",
-        name = "Actions",
-        tooltip = "The action that happens if you single-left-click a destination such as a wayshrine or house",
-        columnHeadings = {"Single-click", "Double-click"},
-        rowHeadings = {"Destination action", "Zone action"},
-        choices = function(index)
-            return index >= 3 and {"Show On Map", "Travel"} or {"Show On Map", "Set Destination", "Travel"}
-        end,
-        choicesValues = function(index)
-            return index >= 3 and { Nav.ACTION_SHOWONMAP, Nav.ACTION_TRAVEL } or { Nav.ACTION_SHOWONMAP, Nav.ACTION_SETDESTINATION, Nav.ACTION_TRAVEL }
-        end,
-        getFunc = function(index) return sv[actions[index]] end,
-        setFunc = function(index, value) sv[actions[index]] = value end,
-        default = function(index) return actionDefaults[index] end,
-        reference = Nav.settingsName .. "_actions"
-    })
-
-    table.insert(optionsTable, { type = "divider" })
-
-    
     table.insert(optionsTable, {
         type = "checkbox",
         name = "Show Points Of Interest on the zone list",
@@ -164,6 +202,14 @@ function Navigator:loadSettings()
         text = "|cFFFF00|t24:24:/esoui/art/miscellaneous/eso_icon_warning.dds:inheritcolor|t|r Navigator's chat command is only available if the |c99FFFFLibSlashCommander|r add-on is installed and enabled"
       })
     end
+
+    table.insert(optionsTable, {
+        type = "submenu",
+        name = "Mouse click and Enter button actions",
+        tooltip = "If a single-click is set to Travel, the double-click action will not run",
+        controls = getActionSettings(sv),
+        reference = Nav.settingsName .. "_actions"
+    })
 
     if GetWorldName() == "EU Megaserver" then
         table.insert(optionsTable, {

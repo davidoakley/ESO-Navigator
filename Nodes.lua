@@ -344,8 +344,12 @@ function ZoneNode:JumpToZone()
     end
 end
 
+function ZoneNode:OnEnter()
+    self:DoAction(Nav.saved.zoneActions.enterKey)
+end
+
 function ZoneNode:OnClick(isDoubleClick)
-    self:DoAction(isDoubleClick and Nav.saved.zoneDoubleClick or Nav.saved.zoneSingleClick)
+    self:DoAction(Nav.saved.zoneActions[isDoubleClick and "doubleClick" or "singleClick"])
 end
 
 function ZoneNode:DoAction(action)
@@ -673,7 +677,11 @@ function FastTravelNode:AddMenuItems()
 end
 
 function FastTravelNode:OnClick(isDoubleClick)
-    self:DoAction(isDoubleClick and Nav.saved.destinationDoubleClick or Nav.saved.destinationSingleClick)
+    self:DoAction(Nav.saved.destinationActions[isDoubleClick and "doubleClick" or "singleClick"])
+end
+
+function FastTravelNode:OnEnter()
+    self:DoAction(Nav.saved.destinationActions.enterKey)
 end
 
 
@@ -729,8 +737,12 @@ function POINode:GetSuffixColour()
 end
 POINode.GetTagColour = POINode.GetSuffixColour
 
-function POINode:OnClick()
-    self:ZoomToPOI(false)
+function POINode:OnClick(isDoubleClick)
+    self:DoAction(Nav.saved.poiActions[isDoubleClick and "doubleClick" or "singleClick"])
+end
+
+function POINode:OnEnter()
+    self:DoAction(Nav.saved.poiActions.enterKey)
 end
 
 function POINode:AddMenuItems()

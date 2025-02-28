@@ -429,10 +429,14 @@ function MT:onTextChanged(editbox)
     self:executeSearch(searchString)
 end
 
-function MT:selectCurrentResult()
+function MT:OnEnter()
 	local data = self:getTargetData()
-	if data then
-		self:selectResult(nil, data, 1)
+	if data and data.node then
+        if data.node.OnEnter then
+            data.node:OnEnter()
+        elseif data.node.OnClick then
+            data.node:OnClick(false)
+        end
 	end
 end
 

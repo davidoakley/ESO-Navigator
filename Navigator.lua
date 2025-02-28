@@ -42,10 +42,21 @@ Nav.default = {
   ignoreDefiniteArticlesInSort = false,
   listPOIs = true,
   useHouseNicknames = false,
-  destinationSingleClick = Nav.ACTION_SHOWONMAP,
-  destinationDoubleClick = Nav.ACTION_TRAVEL,
-  zoneSingleClick = Nav.ACTION_SHOWONMAP,
-  zoneDoubleClick = Nav.ACTION_TRAVEL,
+  destinationActions = {
+      singleClick = Nav.ACTION_TRAVEL,
+      doubleClick = Nav.ACTION_TRAVEL,
+      enterKey = Nav.ACTION_TRAVEL
+  },
+  zoneActions = {
+      singleClick = Nav.ACTION_SHOWONMAP,
+      doubleClick = Nav.ACTION_TRAVEL,
+      enterKey = Nav.ACTION_SHOWONMAP
+  },
+  poiActions = {
+      singleClick = Nav.ACTION_SHOWONMAP,
+      doubleClick = Nav.ACTION_SETDESTINATION,
+      enterKey = Nav.ACTION_SHOWONMAP
+  },
   singleClickZone = false,
   confirmFastTravel = Nav.CONFIRMFASTTRAVEL_ALWAYS
 }
