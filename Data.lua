@@ -28,6 +28,7 @@ Nav.COLOUR_POI = "AAAAAA"
 Nav.COLOUR_SUFFIX_NORMAL = "82826F"
 Nav.COLOUR_SUFFIX_POI = "777777"
 Nav.COLOUR_SUFFIX_DISABLED = "444444"
+Nav.COLOUR_COIN = "FFCC33"
 
 -- Trader Locations, copied from Faster Travel by SimonIllyan, XanDDemoX, upyachka, Valandil
 local trader_counts = { -- nodeIndex -> traders_count
