@@ -278,12 +278,16 @@ function MT:buildScrollList(keepScrollPosition)
         self.content = Nav.SearchContent:New(Nav.results)
     else
         local zone = Nav.Locations:getCurrentMapZone()
-        if zone and zone.zoneId == Nav.ZONE_TAMRIEL then
-            self.content = Nav.ZoneListContent:New()
-        elseif zone.zoneId == Nav.ZONE_CYRODIIL then
-            self.content = Nav.CyrodiilContent:New()
-        elseif zone then
-            self.content = Nav.ZoneContent:New(zone)
+        if zone then
+            if zone.zoneId == Nav.ZONE_TAMRIEL then
+                self.content = Nav.ZoneListContent:New()
+            elseif zone.zoneId == Nav.ZONE_CYRODIIL then
+                self.content = Nav.CyrodiilContent:New()
+            else
+                self.content = Nav.ZoneContent:New(zone)
+            end
+        else
+            self.content = Nav.BasicContent:New()
         end
     end
     if not self.content then
