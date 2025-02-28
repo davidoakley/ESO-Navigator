@@ -796,7 +796,6 @@ end
 
 function KeepNode:AddMenuItems()
     if self.accessible then
-        local strId =
         AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE), self.name), function()
             self:Jump()
         end)
@@ -807,7 +806,7 @@ function KeepNode:AddMenuItems()
     AddMenuItem(GetString(NAVIGATOR_MENU_SETDESTINATION), function()
         self:ZoomToPOI(true)
     end)
-    self:AddBookmarkMenuItem({ nodeIndex = self.nodeIndex })
+    --self:AddBookmarkMenuItem({ nodeIndex = self.nodeIndex })
 end
 
 function KeepNode:OnClick(isDoubleClick)
