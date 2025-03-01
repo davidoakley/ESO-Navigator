@@ -310,15 +310,17 @@ end
 
 function ZoneNode:GetColour()
     return (Nav.jumpState == Nav.JUMPSTATE_WAYSHRINE and Nav.COLOUR_NORMAL) or
-            (self:IsJumpable() and Nav.COLOUR_JUMPABLE) or Nav.COLOUR_POI
+            (self:IsJumpable() and Nav.COLOUR_NORMAL) or Nav.COLOUR_POI
 end
 
-function ZoneNode:GetOverlayIcon()
+function ZoneNode:GetTagList(showBookmark)
+    local tagList = {}
+
     if self:IsJumpable() and Nav.jumpState == Nav.JUMPSTATE_WORLD then
-        return "Navigator/media/overlays/dot.dds", Nav.COLOUR_JUMPABLE
-    else
-        return nil, nil
+        table.insert(tagList, "player")
     end
+
+    return Nav.Utils.tableConcat(tagList, Node.GetTagList(self, showBookmark))
 end
 
 function ZoneNode:JumpToZone()
@@ -419,7 +421,7 @@ function JumpToZoneNode:GetColour(isSelected)
     if isSelected and self.known then
         return Nav.COLOUR_WHITE
     else
-        return self.known and Nav.COLOUR_JUMPABLE or Nav.COLOUR_DISABLED
+        return self.known and Nav.COLOUR_NORMAL or Nav.COLOUR_DISABLED
     end
 end
 
