@@ -37,6 +37,7 @@ mkstr("NAVIGATOR_CATEGORY_ZONES", "Gebiete")
 
 -- Tooltips
 --mkstr("NAVIGATOR_NOT_KNOWN", "Not known by this character") -- Location not known
+--mkstr("NAVIGATOR_TIP_CLICK_TO_TRAVEL", "Click to travel to <<1>>") -- 1:zone
 --mkstr("NAVIGATOR_TIP_DOUBLECLICK_TO_TRAVEL", "Double-click to travel to <<1>>") -- 1:zone
 
 -- Action and menu items

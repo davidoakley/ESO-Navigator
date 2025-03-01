@@ -37,7 +37,8 @@ NAVIGATOR_TRIAL = SI_GROUPFINDERCATEGORY2
 
 -- Tooltips
 mkstr("NAVIGATOR_NOT_KNOWN", "Not known by this character") -- Location not known
-mkstr("NAVIGATOR_TIP_DOUBLECLICK_TO_TRAVEL", "Double-click to travel to <<1>>") -- 1:zone
+mkstr("NAVIGATOR_TIP_CLICK_TO_TRAVEL", "Click to travel to <<1>>") -- 1:zone/destination
+mkstr("NAVIGATOR_TIP_DOUBLECLICK_TO_TRAVEL", "Double-click to travel to <<1>>") -- 1:zone/destination
 
 -- Action and menu items
 mkstr("NAVIGATOR_TRAVEL_TO_ZONE", "Travel to <<1>>")

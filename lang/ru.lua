@@ -37,6 +37,7 @@ mkstr("NAVIGATOR_KEY_ENTER", "Enter")
 
 -- Tooltips
 mkstr("NAVIGATOR_NOT_KNOWN", "Не открыто этим персонажем") -- Location not known
+mkstr("NAVIGATOR_TIP_CLICK_TO_TRAVEL", "Щелкните, чтобы переместиться в <<1>>") -- 1:zone
 mkstr("NAVIGATOR_TIP_DOUBLECLICK_TO_TRAVEL", "Щелкните дважды, чтобы переместиться в <<1>>") -- 1:zone
 
 -- Action and menu items
