@@ -89,7 +89,7 @@ function Content:AddZoneCategory(zone)
     end
 
     table.insert(self.categories, {
-        id = "results",
+        id = "zone",
         title = zone.name,
         list = list
     })
