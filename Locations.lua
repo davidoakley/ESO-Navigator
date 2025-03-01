@@ -509,6 +509,8 @@ function Locs:getCurrentMapZone()
     local mapId = GetCurrentMapId()
     local _, mapType, _, zoneIndex, _ = GetMapInfoById(mapId)
     local zoneId = GetZoneId(zoneIndex)
+    --Nav.log("Locs:getCurrentMapZone zoneId=%d mapId=%d mapType=%d", zoneId, mapId, mapType)
+
     if mapId == 2000 then
         zoneId = Nav.ZONE_ATOLLOFIMMOLATION
     elseif mapId == 2119 then
@@ -522,12 +524,12 @@ function Locs:getCurrentMapZone()
         return {
             zoneId = 2
         }
-    elseif mapType == MAPTYPE_SUBZONE and not self:IsZone(zoneId) then
+    elseif not self:IsZone(zoneId) then -- mapType == MAPTYPE_SUBZONE
         zoneId = GetParentZoneId(zoneId)
-        -- Nav.log("Locs:getCurrentMapZone parent zoneId = "..zoneId)
+         --Nav.log("Locs:getCurrentMapZone parent zoneId = "..zoneId)
     end
     if not self.zones[zoneId] then
-        Nav.log("Locs:getCurrentMapZone no info on zoneId "..zoneId)
+        Nav.log("Locs:getCurrentMapZone no info on zoneId %d", zoneId)
     end
     return self.zones[zoneId]
 end
