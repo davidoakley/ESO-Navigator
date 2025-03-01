@@ -6,17 +6,17 @@ local function getActionSettings(sv)
     local destinationActionDefaults = { Nav.ACTION_TRAVEL, Nav.ACTION_TRAVEL, Nav.ACTION_TRAVEL }
     table.insert(submenuTable, {
         type = "nav_actions",
-        name = "Travel Destinations",
-        tooltip = "Mouse and key actions for Wayshrines, Dungeons, Trials, Arenas and Keeps",
-        actions = {"Single-click", "Double-click", "[Enter] key"},
+        name = GetString(NAVIGATOR_SETTINGS_DESTINATION_ACTIONS_NAME),
+        tooltip = GetString(NAVIGATOR_SETTINGS_DESTINATION_ACTIONS_TOOLTIP),
+        actions = {GetString(NAVIGATOR_SETTINGS_ACTIONS_SINGLE_CLICK), GetString(NAVIGATOR_SETTINGS_ACTIONS_DOUBLE_CLICK), GetString(NAVIGATOR_SETTINGS_ACTIONS_ENTER_KEY)},
         choices = function(_)
-            return {"Show On Map", "Set Destination", "Travel"}
+            return {GetString(NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SHOW_ON_MAP), GetString(NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SET_DESTINATION), GetString(NAVIGATOR_SETTINGS_ACTIONS_CHOICE_TRAVEL)}
         end,
         choicesValues = function(_)
             return { Nav.ACTION_SHOWONMAP, Nav.ACTION_SETDESTINATION, Nav.ACTION_TRAVEL }
         end,
         choicesTooltips = function(index)
-            return index == 1 and { nil, nil, "If a single-click is set to Travel, the double-click action will not run" } or {"","",""}
+            return index == 1 and { nil, nil, GetString(NAVIGATOR_SETTINGS_DESTINATION_ACTIONS_WARNING) } or {"","",""}
         end,
         getFunc = function(index) return sv.destinationActions[actionTypes[index]] end,
         setFunc = function(index, value) sv.destinationActions[actionTypes[index]] = value end,
@@ -27,10 +27,10 @@ local function getActionSettings(sv)
     local zoneActionDefaults = { Nav.ACTION_SHOWONMAP, Nav.ACTION_TRAVEL, Nav.ACTION_SHOWONMAP }
     table.insert(submenuTable, {
         type = "nav_actions",
-        name = "Zones",
-        actions = {"Single-click", "Double-click", "[Enter] key"},
+        name = GetString(NAVIGATOR_SETTINGS_ZONE_ACTIONS_NAME),
+        actions = {GetString(NAVIGATOR_SETTINGS_ACTIONS_SINGLE_CLICK), GetString(NAVIGATOR_SETTINGS_ACTIONS_DOUBLE_CLICK), GetString(NAVIGATOR_SETTINGS_ACTIONS_ENTER_KEY)},
         choices = function(_)
-            return {"Show On Map", "Travel"}
+            return {GetString(NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SHOW_ON_MAP), GetString(NAVIGATOR_SETTINGS_ACTIONS_CHOICE_TRAVEL)}
         end,
         choicesValues = function(_)
             return { Nav.ACTION_SHOWONMAP, Nav.ACTION_TRAVEL }
@@ -44,11 +44,11 @@ local function getActionSettings(sv)
     local poiActionDefaults = { Nav.ACTION_SHOWONMAP, Nav.ACTION_SETDESTINATION, Nav.ACTION_SHOWONMAP }
     table.insert(submenuTable, {
         type = "nav_actions",
-        name = "Points Of Interest",
-        tooltip = "Mouse and key actions for map locations such as towns, quest locations and striking locales",
-        actions = {"Single-click", "Double-click", "[Enter] key"},
+        name = GetString(NAVIGATOR_SETTINGS_POI_ACTIONS_NAME),
+        tooltip = GetString(NAVIGATOR_SETTINGS_POI_ACTIONS_TOOLTIP),
+        actions = {GetString(NAVIGATOR_SETTINGS_ACTIONS_SINGLE_CLICK), GetString(NAVIGATOR_SETTINGS_ACTIONS_DOUBLE_CLICK), GetString(NAVIGATOR_SETTINGS_ACTIONS_ENTER_KEY)},
         choices = function(_)
-            return {"Show On Map", "Set Destination"}
+            return {GetString(NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SHOW_ON_MAP), GetString(NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SET_DESTINATION)}
         end,
         choicesValues = function(_)
             return { Nav.ACTION_SHOWONMAP, Nav.ACTION_SETDESTINATION }
@@ -84,8 +84,8 @@ function Navigator:loadSettings()
   
     table.insert(optionsTable, {
         type = "checkbox",
-        name = "Auto-select Navigator tab",
-        tooltip = "Automatically selects the Navigator tab when the Maps screen is opened.",
+        name = GetString(NAVIGATOR_SETTINGS_DEFAULT_TAB_NAME),
+        tooltip = GetString(NAVIGATOR_SETTINGS_DEFAULT_TAB_TOOLTIP),
         getFunc = function() return sv.defaultTab end,
         setFunc = function(value)
           sv.defaultTab = value
@@ -95,7 +95,7 @@ function Navigator:loadSettings()
         disabled = function() return FasterTravel ~= nil end,
         warning = function()
           if FasterTravel then
-            return "Navigator cannot auto-select its tab when the |c99FFFFFaster Travel|r addon is also enabled"
+            return GetString(NAVIGATOR_SETTINGS_DEFAULT_TAB_WARNING)
           else
             return nil
           end
@@ -104,8 +104,8 @@ function Navigator:loadSettings()
 
     table.insert(optionsTable, {
       type = "slider",
-      name = "Entries in Recent list",
-      tooltip = "Setting this to 0 will disable the Recent list",
+      name = GetString(NAVIGATOR_SETTINGS_RECENT_COUNT_NAME),
+      tooltip = GetString(NAVIGATOR_SETTINGS_RECENT_COUNT_TOOLTIP),
       min = 0,
       max = 20,
       getFunc = function() return sv.recentsCount end,
@@ -121,9 +121,9 @@ function Navigator:loadSettings()
     local gold = zo_iconFormat(iconMarkup, iconSize, iconSize)
     table.insert(optionsTable, {
         type = "dropdown",
-        name = "Confirm fast travel",
-        tooltip = "Whether/when to show the standard alert prompt when jumping to a wayshrine. Only affects Navigator, not the World Map",
-        choices = {"Always", zo_strformat("When costs <<1>>", gold), "Never"},
+        name = GetString(NAVIGATOR_SETTINGS_CONFIRM_FAST_TRAVEL_NAME),
+        tooltip = GetString(NAVIGATOR_SETTINGS_CONFIRM_FAST_TRAVEL_TOOLTIP),
+        choices = {GetString(NAVIGATOR_SETTINGS_CONFIRM_FAST_TRAVEL_CHOICE_1), zo_strformat(GetString(NAVIGATOR_SETTINGS_CONFIRM_FAST_TRAVEL_CHOICE_2), gold), GetString(NAVIGATOR_SETTINGS_CONFIRM_FAST_TRAVEL_CHOICE_3)},
         choicesValues = { self.CONFIRMFASTTRAVEL_ALWAYS, self.CONFIRMFASTTRAVEL_WHENCOST, self.CONFIRMFASTTRAVEL_NEVER },
         getFunc = function() return sv.confirmFastTravel end,
         setFunc = function(value) sv.confirmFastTravel = value end,
@@ -135,8 +135,8 @@ function Navigator:loadSettings()
 
     table.insert(optionsTable, {
         type = "checkbox",
-        name = "Show Points Of Interest on the zone list",
-        tooltip = "If this is disabled, only \"destinations\" such as wayshrines, dungeons, houses or players will be listed",
+        name = GetString(NAVIGATOR_SETTINGS_LIST_POI_NAME),
+        tooltip = GetString(NAVIGATOR_SETTINGS_LIST_POI_TOOLTIP),
         getFunc = function() return sv.listPOIs end,
         setFunc = function(value) sv.listPOIs = value end,
         default = self.default.listPOIs,
@@ -144,8 +144,8 @@ function Navigator:loadSettings()
 
     table.insert(optionsTable, {
         type = "checkbox",
-        name = "Show and search undiscovered locations",
-        tooltip = "List undiscovered locations and show them in search results",
+        name = GetString(NAVIGATOR_SETTINGS_INCLUDE_UNDISCOVERED_NAME),
+        tooltip = GetString(NAVIGATOR_SETTINGS_INCLUDE_UNDISCOVERED_TOOLTIP),
         getFunc = function() return sv.includeUndiscovered end,
         setFunc = function(value)
             sv.includeUndiscovered = value
@@ -155,7 +155,7 @@ function Navigator:loadSettings()
 
     table.insert(optionsTable, {
         type = "checkbox",
-        name = "Show and search house nicknames",
+        name = GetString(NAVIGATOR_SETTINGS_USE_HOUSE_NICKNAME_NAME),
         --tooltip = "",
         getFunc = function() return sv.useHouseNicknames end,
         setFunc = function(value)
@@ -167,22 +167,22 @@ function Navigator:loadSettings()
 
     table.insert(optionsTable, {
         type = "checkbox",
-        name = "Auto-focus Search box",
-        tooltip = "Automatically puts the cursor in the search box when the tab is selected. This means that the 'M' key can't be used to exit the map; use 'Escape' instead.",
+        name = GetString(NAVIGATOR_SETTINGS_AUTO_FOCUS_NAME),
+        tooltip = GetString(NAVIGATOR_SETTINGS_AUTO_FOCUS_TOOLTIP),
         getFunc = function() return sv.autoFocus end,
         setFunc = function(value)
             sv.autoFocus = value
         end,
         width = "full",
-        warning = "When active, the 'M' key can't be used to immediately exit the map; use 'Escape' instead."
+        warning = GetString(NAVIGATOR_SETTINGS_AUTO_FOCUS_WARNING)
     })
 
     if LibSlashCommander then
       table.insert(optionsTable, {
         type = "dropdown",
-        name = "Chat command",
-        tooltip = "Select what name to give the chat slash command",
-        choices = {"None", "/nav", "/tp"},
+        name = GetString(NAVIGATOR_SETTINGS_CHAT_COMMAND_NAME),
+        tooltip = GetString(NAVIGATOR_SETTINGS_CHAT_COMMAND_TOOLTIP),
+        choices = {GetString(NAVIGATOR_SETTINGS_CHAT_COMMAND_CHOICE_1), "/nav", "/tp"},
         getFunc = function() return sv.tpCommand end,
         setFunc = function(value) sv.tpCommand = value end,
         width = "full",
@@ -190,7 +190,7 @@ function Navigator:loadSettings()
         requiresReload = true,
         warning = function()
           if PITHKA and PITHKA.SV and PITHKA.SV.options.enableTeleport then
-            return "|c8080FFPithka's Achievement Tracker|r has its teleport command enabled, which also uses '/tp'"
+            return GetString(NAVIGATOR_SETTINGS_CHAT_COMMAND_WARNING)
           else
             return nil
           end
@@ -199,14 +199,14 @@ function Navigator:loadSettings()
     else
       table.insert(optionsTable, 	{
         type = "description",
-        text = "|cFFFF00|t24:24:/esoui/art/miscellaneous/eso_icon_warning.dds:inheritcolor|t|r Navigator's chat command is only available if the |c99FFFFLibSlashCommander|r add-on is installed and enabled"
+        text = GetString(NAVIGATOR_SETTINGS_CHAT_COMMAND_UNAVAILABLE)
       })
     end
 
     table.insert(optionsTable, {
         type = "submenu",
-        name = "Mouse click and Enter button actions",
-        tooltip = "If a single-click is set to Travel, the double-click action will not run",
+        name = GetString(NAVIGATOR_SETTINGS_ACTIONS_NAME),
+        tooltip = GetString(NAVIGATOR_SETTINGS_ACTIONS_TOOLTIP),
         controls = getActionSettings(sv),
         reference = Nav.settingsName .. "_actions"
     })
@@ -217,8 +217,8 @@ function Navigator:loadSettings()
         })
         table.insert(optionsTable, 	{
             type = "description",
-            title = "Join our guild!",
-            text = "|cC5C29E|H1:guild:767808|hMora's Whispers|h is a vibrant social lair with a free trader, loads of events, weekly raffles, fully equipped guild base, active Discord and so forth! Hit the link above to find out more!|r",
+            title = GetString(NAVIGATOR_SETTINGS_JOIN_GUILD_NAME),
+            text = GetString(NAVIGATOR_SETTINGS_JOIN_GUILD_DESCRIPTION),
             enableLinks = true,
             reference = Navigator.settingsName .. "_ad"
         })
