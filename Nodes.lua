@@ -298,9 +298,15 @@ end
 
 function ZoneNode:GetTooltip()
     if self.zoneId == Nav.ZONE_CYRODIIL then return nil end
+
+    local stringId
     local player = Nav.Players:GetPlayerInZone(self.zoneId)
-    local stringId = player and NAVIGATOR_TIP_DOUBLECLICK_TO_TRAVEL or NAVIGATOR_NO_TRAVEL_PLAYER
-    return zo_strformat(GetString(stringId), self.name)
+    if Nav.saved.zoneActions.singleClick == Nav.ACTION_TRAVEL then
+        stringId = player and NAVIGATOR_TIP_CLICK_TO_TRAVEL or NAVIGATOR_NO_TRAVEL_PLAYER
+    elseif Nav.saved.zoneActions.doubleClick == Nav.ACTION_TRAVEL then
+        stringId = player and NAVIGATOR_TIP_DOUBLECLICK_TO_TRAVEL or NAVIGATOR_NO_TRAVEL_PLAYER
+    end
+    return stringId and zo_strformat(GetString(stringId), self.name) or nil
 end
 
 function ZoneNode:IsJumpable()
@@ -622,6 +628,29 @@ function FastTravelNode:GetRecallCost()
     return nil -- It's free!
 end
 
+function FastTravelNode:GetTooltip()
+    local tips = {}
+
+    -- Click/double-click to travel
+    if Nav.saved.destinationActions.singleClick == Nav.ACTION_TRAVEL then
+        tips[#tips+1] = zo_strformat(GetString(NAVIGATOR_TIP_CLICK_TO_TRAVEL), self.name)
+    elseif Nav.saved.destinationActions.doubleClick == Nav.ACTION_TRAVEL then
+        tips[#tips+1] = zo_strformat(GetString(NAVIGATOR_TIP_DOUBLECLICK_TO_TRAVEL), self.name)
+    end
+
+    -- Recall cost
+    if not self.known and self.nodeIndex then
+        tips[#tips+1] = GetString(NAVIGATOR_NOT_KNOWN)
+    else
+        local recallCost = self:GetRecallCost()
+        if recallCost then
+            tips[#tips+1] = GetString(SI_TOOLTIP_RECALL_COST) .. "<<1>>"
+        end
+    end
+
+    return #tips > 0 and table.concat(tips, "\n") or nil
+end
+
 function FastTravelNode:Jump()
     if not self.known or self.disabled then
         Nav.log("FastTravelNode:Jump: unknown or disabled")
@@ -719,6 +748,13 @@ end
 local POINode = Node:New()
 
 function POINode:IsPOI() return true end
+
+function POINode:GetTooltip()
+    if not self.known then
+        return GetString(NAVIGATOR_NOT_KNOWN)
+    end
+    return nil
+end
 
 function POINode:GetColour(isSelected)
     if isSelected and self.known and not self.disabled then

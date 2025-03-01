@@ -115,22 +115,16 @@ function MT:layoutRow(rowControl, data, _)
 
     rowControl:SetHandler("OnMouseEnter", function(rc)
         local tooltipText
-        if not node.known and node.nodeIndex then
-            tooltipText = GetString(NAVIGATOR_NOT_KNOWN)
-        else
+
+        if node.GetTooltip then
+            tooltipText = node:GetTooltip()
+
             local recallCost = node:GetRecallCost()
             if recallCost then
                 local currencyType = CURT_MONEY
                 local formatType = ZO_CURRENCY_FORMAT_AMOUNT_ICON
                 local currencyString = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(currencyType, recallCost, formatType))
-                tooltipText = string.format(GetString(SI_TOOLTIP_RECALL_COST) .. "%s", currencyString)
-            end
-        end
-
-        if node.GetTooltip then
-            local t = node:GetTooltip()
-            if t then
-                tooltipText = (tooltipText and (tooltipText .. "\n") or "") .. t
+                tooltipText = zo_strformat(tooltipText, currencyString)
             end
         end
 
