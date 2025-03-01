@@ -30,7 +30,10 @@ function Bookmarks:getIndex(entry)
         local userID = entry.userID
         for i = 1, #list do
             if userID == list[i].userID and entry.action == list[i].action then
+                Nav.log("entry.userID")
                 return i
+            else
+                Nav.log("entry.userID %d: %s-%s %s-%s", i, userID or "-", list[i].userID or "-", entry.action or "-", list[i].action or "-")
             end
         end
     elseif entry.keepId then
@@ -109,6 +112,7 @@ function Bookmarks:getBookmarks()
             local node = Nav.PlayerHouseNode:New({
                 name = entry.userID,
                 userID = entry.userID,
+                action = entry.action,
                 suffix = entry.nickname and zo_strformat(GetString(SI_TOOLTIP_COLLECTIBLE_NICKNAME), entry.nickname)
                                          or GetString(SI_HOUSING_PRIMARY_RESIDENCE_HEADER),
                 known = true
