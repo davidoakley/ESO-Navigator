@@ -69,31 +69,6 @@ mkstr("NAVIGATOR_SLASH_DESCRIPTION", "Навигатор: Перемещение
 -- Custom location names
 mkstr("NAVIGATOR_LOCATION_OBLIVIONPORTAL", "Портал Обливиона")
 
--- Notes: gsub uses Lua patterns - https://www.lua.org/pil/20.2.html
---        "^Thing" matches "Thing" at the start of a name
---        "Thing$" matches "Thing" at the end of a name
-function Navigator.DisplayName(name)
-    name = name:gsub("^Дорожное святилище ", "ДС ")
-    name = name:gsub("^Подземелье: ", "") -- Dungeon
-    name = name:gsub("^Испытание: ", "") -- Trial
-    name = name:gsub("^Дорожное святилище ", "") -- Wayshrine
-    name = zo_strformat("<<C:1>>", name) -- Upper-case first letter
-    return name
-end
-function Navigator.SearchName(name)
-    name = name:gsub("^Подземелье: ", "") -- Dungeon
-    name = name:gsub("^Испытание: ", "") -- Trial
-    name = name:gsub("^Дорожное святилище ", "") -- Wayshrine
-
-    -- Allow searches like ГП2 (for City of Ash II)
-    -- "Город Пепла II"
-    name = name:gsub(" II$", " II 2", 1):gsub(" I$", " I 1", 1)
-
-    --name = Navigator.Utils.SimplifyAccents(name:upper()) -- The search string is also "simplified"
-    return name
-end
-
-
 -- Add-on Settings
 mkstr("NAVIGATOR_SETTINGS_DEFAULT_TAB_NAME",                "Автоматический выбор вкладки аддона")
 mkstr("NAVIGATOR_SETTINGS_DEFAULT_TAB_TOOLTIP",             "Автоматическое переключение на вкладку аддона при открытии карты.")
@@ -146,3 +121,28 @@ mkstr("NAVIGATOR_SETTINGS_POI_ACTIONS_TOOLTIP",             "Взаимодей�
 
 mkstr("NAVIGATOR_SETTINGS_JOIN_GUILD_NAME",                 "Присоединяйтесь к нашей гильдии!")
 mkstr("NAVIGATOR_SETTINGS_JOIN_GUILD_DESCRIPTION",          "|cC5C29E|H1:guild:767808|hMora's Whispers|h — это активная социальная гильдия с бесплатным торговцем, множеством событий, еженедельными лотереями, полностью оборудованным гильд-холлом, активным Discord и многим другим! Нажмите на ссылку выше, чтобы узнать больше!|r")
+
+
+-- -----------------------------------------------------------------------------
+-- Notes: gsub uses Lua patterns - https://www.lua.org/pil/20.2.html
+--        "^Thing" matches "Thing" at the start of a name
+--        "Thing$" matches "Thing" at the end of a name
+function Navigator.DisplayName(name)
+    name = name:gsub("^Дорожное святилище ", "ДС ")
+    name = name:gsub("^Подземелье: ", "") -- Dungeon
+    name = name:gsub("^Испытание: ", "") -- Trial
+    name = name:gsub("^Дорожное святилище ", "") -- Wayshrine
+    name = zo_strformat("<<C:1>>", name) -- Upper-case first letter
+    return name
+end
+function Navigator.SearchName(name)
+    name = name:gsub("^Подземелье: ", "") -- Dungeon
+    name = name:gsub("^Испытание: ", "") -- Trial
+    name = name:gsub("^Дорожное святилище ", "") -- Wayshrine
+
+    -- Allow searches like ГП2 (for City of Ash II)
+    -- "Город Пепла II"
+    name = name:gsub(" II$", " II 2", 1):gsub(" I$", " I 1", 1)
+    return name
+end
+

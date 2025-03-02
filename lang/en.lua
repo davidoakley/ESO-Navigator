@@ -69,29 +69,6 @@ mkstr("NAVIGATOR_SLASH_DESCRIPTION", "Navigator: Teleports to the given zone, wa
 -- Custom location names
 mkstr("NAVIGATOR_LOCATION_OBLIVIONPORTAL", "Oblivion Portal")
 
-
--- Notes: "^Thing" matches "Thing" at the start of a name
---        "Thing$" matches "Thing" at the end of a name
-function Navigator.DisplayName(name)
-        name = name:gsub("^Dungeon: ", "")
-        name = name:gsub("^Trial: ", "")
-        name = name:gsub(" Wayshrine$", "")
-        return name
-end
-function Navigator.SearchName(name)
-        name = name:gsub("^Dungeon: ", "")
-        name = name:gsub("^Trial: ", "")
-        name = name:gsub(" Wayshrine$", "")
-        name = name:gsub(" II$", " II 2", 1):gsub(" I$", " I 1", 1) -- Allows searches like COA2 (for City of Ash II)
-    return name
-end
-function Navigator.SortName(name)
-    name = string.lower(Navigator.DisplayName(name))
-    name = Navigator.Utils.SimplifyAccents(name)
-    return Navigator.Utils.trim(name)
-end
-
-
 -- Add-on Settings
 mkstr("NAVIGATOR_SETTINGS_DEFAULT_TAB_NAME",                "Auto-select Navigator tab")
 mkstr("NAVIGATOR_SETTINGS_DEFAULT_TAB_TOOLTIP",             "Automatically selects the Navigator tab when the Maps screen is opened.")
@@ -120,7 +97,7 @@ mkstr("NAVIGATOR_SETTINGS_AUTO_FOCUS_WARNING",              "When active, the 'M
 
 mkstr("NAVIGATOR_SETTINGS_CHAT_COMMAND_NAME",               "Chat command")
 mkstr("NAVIGATOR_SETTINGS_CHAT_COMMAND_TOOLTIP",            "Select what name to give the chat slash command")
-mkstr("NAVIGATOR_SETTINGS_CHAT_COMMAND_CHOICE_1",           "None")
+mkstr("NAVIGATOR_SETTINGS_CHAT_COMMAND_CHOICE_1",           "None") -- Chat command is disabled
 mkstr("NAVIGATOR_SETTINGS_CHAT_COMMAND_WARNING",            "|c8080FFPithka's Achievement Tracker|r has its teleport command enabled, which also uses '/tp'")
 mkstr("NAVIGATOR_SETTINGS_CHAT_COMMAND_UNAVAILABLE",        "|cFFFF00|t24:24:/esoui/art/miscellaneous/eso_icon_warning.dds:inheritcolor|t|r Navigator's chat command is only available if the |c99FFFFLibSlashCommander|r add-on is installed and enabled")
 
@@ -144,3 +121,27 @@ mkstr("NAVIGATOR_SETTINGS_POI_ACTIONS_TOOLTIP",             "Mouse and key actio
 
 mkstr("NAVIGATOR_SETTINGS_JOIN_GUILD_NAME",                 "Join our guild!")
 mkstr("NAVIGATOR_SETTINGS_JOIN_GUILD_DESCRIPTION",          "|cC5C29E|H1:guild:767808|hMora's Whispers|h is a vibrant social lair with a free trader, loads of events, weekly raffles, fully equipped guild base, active Discord and so forth! Hit the link above to find out more!|r")
+
+
+-- -----------------------------------------------------------------------------
+-- Notes: gsub uses Lua patterns - https://www.lua.org/pil/20.2.html
+--        "^Thing" matches "Thing" at the start of a name
+--        "Thing$" matches "Thing" at the end of a name
+function Navigator.DisplayName(name)
+    name = name:gsub("^Dungeon: ", "")
+    name = name:gsub("^Trial: ", "")
+    name = name:gsub(" Wayshrine$", "")
+    return name
+end
+function Navigator.SearchName(name)
+    name = name:gsub("^Dungeon: ", "")
+    name = name:gsub("^Trial: ", "")
+    name = name:gsub(" Wayshrine$", "")
+    name = name:gsub(" II$", " II 2", 1):gsub(" I$", " I 1", 1) -- Allows searches like COA2 (for City of Ash II)
+    return name
+end
+function Navigator.SortName(name)
+    name = string.lower(Navigator.DisplayName(name))
+    name = Navigator.Utils.SimplifyAccents(name)
+    return Navigator.Utils.trim(name)
+end
