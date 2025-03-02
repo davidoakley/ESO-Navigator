@@ -6,8 +6,8 @@ local function getActionSettings(sv)
     local destinationActionDefaults = { Nav.ACTION_TRAVEL, Nav.ACTION_TRAVEL, Nav.ACTION_TRAVEL }
     table.insert(submenuTable, {
         type = "nav_actions",
-        name = GetString(NAVIGATOR_SETTINGS_DESTINATION_ACTIONS_NAME),
-        tooltip = GetString(NAVIGATOR_SETTINGS_DESTINATION_ACTIONS_TOOLTIP),
+        name = NAVIGATOR_SETTINGS_DESTINATION_ACTIONS_NAME,
+        tooltip = NAVIGATOR_SETTINGS_DESTINATION_ACTIONS_TOOLTIP,
         actions = {GetString(NAVIGATOR_SETTINGS_ACTIONS_SINGLE_CLICK), GetString(NAVIGATOR_SETTINGS_ACTIONS_DOUBLE_CLICK), GetString(NAVIGATOR_SETTINGS_ACTIONS_ENTER_KEY)},
         choices = function(_)
             return {GetString(NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SHOW_ON_MAP), GetString(NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SET_DESTINATION), GetString(NAVIGATOR_SETTINGS_ACTIONS_CHOICE_TRAVEL)}
@@ -27,7 +27,7 @@ local function getActionSettings(sv)
     local zoneActionDefaults = { Nav.ACTION_SHOWONMAP, Nav.ACTION_TRAVEL, Nav.ACTION_SHOWONMAP }
     table.insert(submenuTable, {
         type = "nav_actions",
-        name = GetString(NAVIGATOR_SETTINGS_ZONE_ACTIONS_NAME),
+        name = NAVIGATOR_SETTINGS_ZONE_ACTIONS_NAME,
         actions = {GetString(NAVIGATOR_SETTINGS_ACTIONS_SINGLE_CLICK), GetString(NAVIGATOR_SETTINGS_ACTIONS_DOUBLE_CLICK), GetString(NAVIGATOR_SETTINGS_ACTIONS_ENTER_KEY)},
         choices = function(_)
             return {GetString(NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SHOW_ON_MAP), GetString(NAVIGATOR_SETTINGS_ACTIONS_CHOICE_TRAVEL)}
@@ -44,8 +44,8 @@ local function getActionSettings(sv)
     local poiActionDefaults = { Nav.ACTION_SHOWONMAP, Nav.ACTION_SETDESTINATION, Nav.ACTION_SHOWONMAP }
     table.insert(submenuTable, {
         type = "nav_actions",
-        name = GetString(NAVIGATOR_SETTINGS_POI_ACTIONS_NAME),
-        tooltip = GetString(NAVIGATOR_SETTINGS_POI_ACTIONS_TOOLTIP),
+        name = NAVIGATOR_SETTINGS_POI_ACTIONS_NAME,
+        tooltip = NAVIGATOR_SETTINGS_POI_ACTIONS_TOOLTIP,
         actions = {GetString(NAVIGATOR_SETTINGS_ACTIONS_SINGLE_CLICK), GetString(NAVIGATOR_SETTINGS_ACTIONS_DOUBLE_CLICK), GetString(NAVIGATOR_SETTINGS_ACTIONS_ENTER_KEY)},
         choices = function(_)
             return {GetString(NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SHOW_ON_MAP), GetString(NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SET_DESTINATION)}
@@ -84,8 +84,8 @@ function Navigator:loadSettings()
   
     table.insert(optionsTable, {
         type = "checkbox",
-        name = GetString(NAVIGATOR_SETTINGS_DEFAULT_TAB_NAME),
-        tooltip = GetString(NAVIGATOR_SETTINGS_DEFAULT_TAB_TOOLTIP),
+        name = NAVIGATOR_SETTINGS_DEFAULT_TAB_NAME,
+        tooltip = NAVIGATOR_SETTINGS_DEFAULT_TAB_TOOLTIP,
         getFunc = function() return sv.defaultTab end,
         setFunc = function(value)
           sv.defaultTab = value
@@ -104,8 +104,8 @@ function Navigator:loadSettings()
 
     table.insert(optionsTable, {
       type = "slider",
-      name = GetString(NAVIGATOR_SETTINGS_RECENT_COUNT_NAME),
-      tooltip = GetString(NAVIGATOR_SETTINGS_RECENT_COUNT_TOOLTIP),
+      name = NAVIGATOR_SETTINGS_RECENT_COUNT_NAME,
+      tooltip = NAVIGATOR_SETTINGS_RECENT_COUNT_TOOLTIP,
       min = 0,
       max = 20,
       getFunc = function() return sv.recentsCount end,
@@ -121,8 +121,8 @@ function Navigator:loadSettings()
     local gold = zo_iconFormat(iconMarkup, iconSize, iconSize)
     table.insert(optionsTable, {
         type = "dropdown",
-        name = GetString(NAVIGATOR_SETTINGS_CONFIRM_FAST_TRAVEL_NAME),
-        tooltip = GetString(NAVIGATOR_SETTINGS_CONFIRM_FAST_TRAVEL_TOOLTIP),
+        name = NAVIGATOR_SETTINGS_CONFIRM_FAST_TRAVEL_NAME,
+        tooltip = NAVIGATOR_SETTINGS_CONFIRM_FAST_TRAVEL_TOOLTIP,
         choices = {GetString(NAVIGATOR_SETTINGS_CONFIRM_FAST_TRAVEL_CHOICE_1), zo_strformat(GetString(NAVIGATOR_SETTINGS_CONFIRM_FAST_TRAVEL_CHOICE_2), gold), GetString(NAVIGATOR_SETTINGS_CONFIRM_FAST_TRAVEL_CHOICE_3)},
         choicesValues = { self.CONFIRMFASTTRAVEL_ALWAYS, self.CONFIRMFASTTRAVEL_WHENCOST, self.CONFIRMFASTTRAVEL_NEVER },
         getFunc = function() return sv.confirmFastTravel end,
@@ -135,8 +135,8 @@ function Navigator:loadSettings()
 
     table.insert(optionsTable, {
         type = "checkbox",
-        name = GetString(NAVIGATOR_SETTINGS_LIST_POI_NAME),
-        tooltip = GetString(NAVIGATOR_SETTINGS_LIST_POI_TOOLTIP),
+        name = NAVIGATOR_SETTINGS_LIST_POI_NAME,
+        tooltip = NAVIGATOR_SETTINGS_LIST_POI_TOOLTIP,
         getFunc = function() return sv.listPOIs end,
         setFunc = function(value) sv.listPOIs = value end,
         default = self.default.listPOIs,
@@ -144,8 +144,8 @@ function Navigator:loadSettings()
 
     table.insert(optionsTable, {
         type = "checkbox",
-        name = GetString(NAVIGATOR_SETTINGS_INCLUDE_UNDISCOVERED_NAME),
-        tooltip = GetString(NAVIGATOR_SETTINGS_INCLUDE_UNDISCOVERED_TOOLTIP),
+        name = NAVIGATOR_SETTINGS_INCLUDE_UNDISCOVERED_NAME,
+        tooltip = NAVIGATOR_SETTINGS_INCLUDE_UNDISCOVERED_TOOLTIP,
         getFunc = function() return sv.includeUndiscovered end,
         setFunc = function(value)
             sv.includeUndiscovered = value
@@ -155,7 +155,7 @@ function Navigator:loadSettings()
 
     table.insert(optionsTable, {
         type = "checkbox",
-        name = GetString(NAVIGATOR_SETTINGS_USE_HOUSE_NICKNAME_NAME),
+        name = NAVIGATOR_SETTINGS_USE_HOUSE_NICKNAME_NAME,
         --tooltip = "",
         getFunc = function() return sv.useHouseNicknames end,
         setFunc = function(value)
@@ -167,21 +167,21 @@ function Navigator:loadSettings()
 
     table.insert(optionsTable, {
         type = "checkbox",
-        name = GetString(NAVIGATOR_SETTINGS_AUTO_FOCUS_NAME),
-        tooltip = GetString(NAVIGATOR_SETTINGS_AUTO_FOCUS_TOOLTIP),
+        name = NAVIGATOR_SETTINGS_AUTO_FOCUS_NAME,
+        tooltip = NAVIGATOR_SETTINGS_AUTO_FOCUS_TOOLTIP,
         getFunc = function() return sv.autoFocus end,
         setFunc = function(value)
             sv.autoFocus = value
         end,
         width = "full",
-        warning = GetString(NAVIGATOR_SETTINGS_AUTO_FOCUS_WARNING)
+        warning = NAVIGATOR_SETTINGS_AUTO_FOCUS_WARNING
     })
 
     if LibSlashCommander then
       table.insert(optionsTable, {
         type = "dropdown",
-        name = GetString(NAVIGATOR_SETTINGS_CHAT_COMMAND_NAME),
-        tooltip = GetString(NAVIGATOR_SETTINGS_CHAT_COMMAND_TOOLTIP),
+        name = NAVIGATOR_SETTINGS_CHAT_COMMAND_NAME,
+        tooltip = NAVIGATOR_SETTINGS_CHAT_COMMAND_TOOLTIP,
         choices = {GetString(NAVIGATOR_SETTINGS_CHAT_COMMAND_CHOICE_1), "/nav", "/tp"},
         getFunc = function() return sv.tpCommand end,
         setFunc = function(value) sv.tpCommand = value end,
@@ -199,14 +199,14 @@ function Navigator:loadSettings()
     else
       table.insert(optionsTable, 	{
         type = "description",
-        text = GetString(NAVIGATOR_SETTINGS_CHAT_COMMAND_UNAVAILABLE)
+        text = NAVIGATOR_SETTINGS_CHAT_COMMAND_UNAVAILABLE
       })
     end
 
     table.insert(optionsTable, {
         type = "submenu",
-        name = GetString(NAVIGATOR_SETTINGS_ACTIONS_NAME),
-        tooltip = GetString(NAVIGATOR_SETTINGS_ACTIONS_TOOLTIP),
+        name = NAVIGATOR_SETTINGS_ACTIONS_NAME,
+        tooltip = NAVIGATOR_SETTINGS_ACTIONS_TOOLTIP,
         controls = getActionSettings(sv),
         reference = Nav.settingsName .. "_actions"
     })
@@ -217,8 +217,8 @@ function Navigator:loadSettings()
         })
         table.insert(optionsTable, 	{
             type = "description",
-            title = GetString(NAVIGATOR_SETTINGS_JOIN_GUILD_NAME),
-            text = GetString(NAVIGATOR_SETTINGS_JOIN_GUILD_DESCRIPTION),
+            title = NAVIGATOR_SETTINGS_JOIN_GUILD_NAME,
+            text = NAVIGATOR_SETTINGS_JOIN_GUILD_DESCRIPTION,
             enableLinks = true,
             reference = Navigator.settingsName .. "_ad"
         })
