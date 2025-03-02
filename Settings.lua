@@ -8,15 +8,20 @@ local function getActionSettings(sv)
         type = "nav_actions",
         name = NAVIGATOR_SETTINGS_DESTINATION_ACTIONS_NAME,
         tooltip = NAVIGATOR_SETTINGS_DESTINATION_ACTIONS_TOOLTIP,
-        actions = {GetString(NAVIGATOR_SETTINGS_ACTIONS_SINGLE_CLICK), GetString(NAVIGATOR_SETTINGS_ACTIONS_DOUBLE_CLICK), GetString(NAVIGATOR_SETTINGS_ACTIONS_ENTER_KEY)},
+        actions = {GetString(NAVIGATOR_SETTINGS_ACTIONS_SINGLE_CLICK),
+                   GetString(NAVIGATOR_SETTINGS_ACTIONS_DOUBLE_CLICK),
+                   GetString(NAVIGATOR_SETTINGS_ACTIONS_ENTER_KEY)},
         choices = function(_)
-            return {GetString(NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SHOW_ON_MAP), GetString(NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SET_DESTINATION), GetString(NAVIGATOR_SETTINGS_ACTIONS_CHOICE_TRAVEL)}
+            return {GetString(NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SHOW_ON_MAP),
+                    GetString(NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SET_DESTINATION),
+                    GetString(NAVIGATOR_SETTINGS_ACTIONS_CHOICE_TRAVEL)}
         end,
         choicesValues = function(_)
             return { Nav.ACTION_SHOWONMAP, Nav.ACTION_SETDESTINATION, Nav.ACTION_TRAVEL }
         end,
         choicesTooltips = function(index)
-            return index == 1 and { nil, nil, GetString(NAVIGATOR_SETTINGS_DESTINATION_ACTIONS_WARNING) } or {"","",""}
+            return index == 1 and { nil, nil, GetString(NAVIGATOR_SETTINGS_DESTINATION_ACTIONS_WARNING) }
+                               or {"","",""}
         end,
         getFunc = function(index) return sv.destinationActions[actionTypes[index]] end,
         setFunc = function(index, value) sv.destinationActions[actionTypes[index]] = value end,
@@ -28,9 +33,12 @@ local function getActionSettings(sv)
     table.insert(submenuTable, {
         type = "nav_actions",
         name = NAVIGATOR_SETTINGS_ZONE_ACTIONS_NAME,
-        actions = {GetString(NAVIGATOR_SETTINGS_ACTIONS_SINGLE_CLICK), GetString(NAVIGATOR_SETTINGS_ACTIONS_DOUBLE_CLICK), GetString(NAVIGATOR_SETTINGS_ACTIONS_ENTER_KEY)},
+        actions = {GetString(NAVIGATOR_SETTINGS_ACTIONS_SINGLE_CLICK),
+                   GetString(NAVIGATOR_SETTINGS_ACTIONS_DOUBLE_CLICK),
+                   GetString(NAVIGATOR_SETTINGS_ACTIONS_ENTER_KEY)},
         choices = function(_)
-            return {GetString(NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SHOW_ON_MAP), GetString(NAVIGATOR_SETTINGS_ACTIONS_CHOICE_TRAVEL)}
+            return {GetString(NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SHOW_ON_MAP),
+                    GetString(NAVIGATOR_SETTINGS_ACTIONS_CHOICE_TRAVEL)}
         end,
         choicesValues = function(_)
             return { Nav.ACTION_SHOWONMAP, Nav.ACTION_TRAVEL }
@@ -46,9 +54,12 @@ local function getActionSettings(sv)
         type = "nav_actions",
         name = NAVIGATOR_SETTINGS_POI_ACTIONS_NAME,
         tooltip = NAVIGATOR_SETTINGS_POI_ACTIONS_TOOLTIP,
-        actions = {GetString(NAVIGATOR_SETTINGS_ACTIONS_SINGLE_CLICK), GetString(NAVIGATOR_SETTINGS_ACTIONS_DOUBLE_CLICK), GetString(NAVIGATOR_SETTINGS_ACTIONS_ENTER_KEY)},
+        actions = {GetString(NAVIGATOR_SETTINGS_ACTIONS_SINGLE_CLICK),
+                   GetString(NAVIGATOR_SETTINGS_ACTIONS_DOUBLE_CLICK),
+                   GetString(NAVIGATOR_SETTINGS_ACTIONS_ENTER_KEY)},
         choices = function(_)
-            return {GetString(NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SHOW_ON_MAP), GetString(NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SET_DESTINATION)}
+            return {GetString(NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SHOW_ON_MAP),
+                    GetString(NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SET_DESTINATION)}
         end,
         choicesValues = function(_)
             return { Nav.ACTION_SHOWONMAP, Nav.ACTION_SETDESTINATION }
@@ -123,8 +134,12 @@ function Navigator:loadSettings()
         type = "dropdown",
         name = NAVIGATOR_SETTINGS_CONFIRM_FAST_TRAVEL_NAME,
         tooltip = NAVIGATOR_SETTINGS_CONFIRM_FAST_TRAVEL_TOOLTIP,
-        choices = {GetString(NAVIGATOR_SETTINGS_CONFIRM_FAST_TRAVEL_CHOICE_1), zo_strformat(GetString(NAVIGATOR_SETTINGS_CONFIRM_FAST_TRAVEL_CHOICE_2), gold), GetString(NAVIGATOR_SETTINGS_CONFIRM_FAST_TRAVEL_CHOICE_3)},
-        choicesValues = { self.CONFIRMFASTTRAVEL_ALWAYS, self.CONFIRMFASTTRAVEL_WHENCOST, self.CONFIRMFASTTRAVEL_NEVER },
+        choices = {GetString(NAVIGATOR_SETTINGS_CONFIRM_FAST_TRAVEL_CHOICE_1),
+                   zo_strformat(GetString(NAVIGATOR_SETTINGS_CONFIRM_FAST_TRAVEL_CHOICE_2), gold),
+                   GetString(NAVIGATOR_SETTINGS_CONFIRM_FAST_TRAVEL_CHOICE_3)},
+        choicesValues = {self.CONFIRMFASTTRAVEL_ALWAYS,
+                         self.CONFIRMFASTTRAVEL_WHENCOST,
+                         self.CONFIRMFASTTRAVEL_NEVER},
         getFunc = function() return sv.confirmFastTravel end,
         setFunc = function(value) sv.confirmFastTravel = value end,
         width = "full",
