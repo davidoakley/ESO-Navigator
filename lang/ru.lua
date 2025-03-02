@@ -69,6 +69,61 @@ mkstr("NAVIGATOR_SLASH_DESCRIPTION", "Навигатор: Перемещение
 -- Custom location names
 mkstr("NAVIGATOR_LOCATION_OBLIVIONPORTAL", "Портал Обливиона")
 
+-- Add-on Settings
+mkstr("NAVIGATOR_SETTINGS_DEFAULT_TAB_NAME",                "Автоматический выбор вкладки аддона")
+mkstr("NAVIGATOR_SETTINGS_DEFAULT_TAB_TOOLTIP",             "Автоматическое переключение на вкладку аддона при открытии карты.")
+mkstr("NAVIGATOR_SETTINGS_DEFAULT_TAB_WARNING",             "Этот аддон не может автоматически переключаться на вкладку, когда включен аддон «|c99FFFFFaster Travel|r».")
+
+mkstr("NAVIGATOR_SETTINGS_RECENT_COUNT_NAME",               "Количество последних направлений")
+mkstr("NAVIGATOR_SETTINGS_RECENT_COUNT_TOOLTIP",            "Укажите 0, чтобы отключить список «Недавнее».")
+
+mkstr("NAVIGATOR_SETTINGS_CONFIRM_FAST_TRAVEL_NAME",        "Подтверждение быстрого перемещения")
+mkstr("NAVIGATOR_SETTINGS_CONFIRM_FAST_TRAVEL_TOOLTIP",     "Использование стандартного оповещения при взаимодействии с дорожными святилищами. Активно только на вкладке аддона и не затрагивает карту мира.")
+mkstr("NAVIGATOR_SETTINGS_CONFIRM_FAST_TRAVEL_CHOICE_1",    "Всегда")
+mkstr("NAVIGATOR_SETTINGS_CONFIRM_FAST_TRAVEL_CHOICE_2",    "Когда имеется стоимость <<1>>") --  1:goldicon
+mkstr("NAVIGATOR_SETTINGS_CONFIRM_FAST_TRAVEL_CHOICE_3",    "Никогда")
+
+mkstr("NAVIGATOR_SETTINGS_LIST_POI_NAME",                   "Отображение точек интереса в локации")
+mkstr("NAVIGATOR_SETTINGS_LIST_POI_TOOLTIP",                "Когда отключено, в списке будут отображаться только такие «направления» как дорожные святилища, подземелья, дома или игроки.")
+
+mkstr("NAVIGATOR_SETTINGS_INCLUDE_UNDISCOVERED_NAME",       "Отображение и поиск неисследованных мест")
+mkstr("NAVIGATOR_SETTINGS_INCLUDE_UNDISCOVERED_TOOLTIP",    "Отображение неисследованных мест в списке локаций и в результатах поиска.")
+
+mkstr("NAVIGATOR_SETTINGS_USE_HOUSE_NICKNAME_NAME",         "Отображение и поиск названий домов")
+
+mkstr("NAVIGATOR_SETTINGS_AUTO_FOCUS_NAME",                 "Автофокус на строке поиска")
+mkstr("NAVIGATOR_SETTINGS_AUTO_FOCUS_TOOLTIP",              "Автоматическое переключение курсора на в строку поиска при открытии вкладки аддона. Это приведёт к невозможности закрыть карту клавишей [M] или [Alt]. Используйте клавишу [Escape] для выхода.")
+mkstr("NAVIGATOR_SETTINGS_AUTO_FOCUS_WARNING",              "Когда опция включена, клавиши [M] и [Alt] не будет закрывать карту. Используйте клавишу [Escape] для выхода.")
+
+mkstr("NAVIGATOR_SETTINGS_CHAT_COMMAND_NAME",               "Команда чата")
+mkstr("NAVIGATOR_SETTINGS_CHAT_COMMAND_TOOLTIP",            "Выбор используемой чат-команды.")
+mkstr("NAVIGATOR_SETTINGS_CHAT_COMMAND_CHOICE_1",           "Отключена")
+mkstr("NAVIGATOR_SETTINGS_CHAT_COMMAND_WARNING",            "Аддон «|c8080FFPithka's Achievement Tracker|r» также использует команду «/tp».")
+mkstr("NAVIGATOR_SETTINGS_CHAT_COMMAND_UNAVAILABLE",        "|cFFFF00|t24:24:/esoui/art/miscellaneous/eso_icon_warning.dds:inheritcolor|t|r Чат-команды доступны только при использовании аддона «|c99FFFFLibSlashCommander|r».")
+
+mkstr("NAVIGATOR_SETTINGS_ACTIONS_NAME",                    "Управление с помощью мыши и клавиатуры")
+mkstr("NAVIGATOR_SETTINGS_ACTIONS_TOOLTIP",                 "Когда одиночное нажатие установлено для перемещения, двойное нажатие будет недоступно.")
+mkstr("NAVIGATOR_SETTINGS_ACTIONS_SINGLE_CLICK",            "Одиночное нажатие")
+mkstr("NAVIGATOR_SETTINGS_ACTIONS_DOUBLE_CLICK",            "Двойное нажатие")
+mkstr("NAVIGATOR_SETTINGS_ACTIONS_ENTER_KEY",               "Клавиша [Enter]")
+mkstr("NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SHOW_ON_MAP",      "Показать на карте")
+mkstr("NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SET_DESTINATION",  "Указать пункт назначения")
+mkstr("NAVIGATOR_SETTINGS_ACTIONS_CHOICE_TRAVEL",           "Переместиться")
+
+mkstr("NAVIGATOR_SETTINGS_DESTINATION_ACTIONS_NAME",        "Основные направления")
+mkstr("NAVIGATOR_SETTINGS_DESTINATION_ACTIONS_TOOLTIP",     "Взаимодействие с дорожными святилищами, подземельями, испытаниями, аренами и крепостями.")
+mkstr("NAVIGATOR_SETTINGS_DESTINATION_ACTIONS_WARNING",     "Когда одиночное нажатие установлено для перемещения, двойное нажатие будет недоступно.")
+
+mkstr("NAVIGATOR_SETTINGS_ZONE_ACTIONS_NAME",               "Локации")
+
+mkstr("NAVIGATOR_SETTINGS_POI_ACTIONS_NAME",                "Точки интереса")
+mkstr("NAVIGATOR_SETTINGS_POI_ACTIONS_TOOLTIP",             "Взаимодействие с такими местами как города, камни Мундуса и примечательные места.")
+
+mkstr("NAVIGATOR_SETTINGS_JOIN_GUILD_NAME",                 "Присоединяйтесь к нашей гильдии!")
+mkstr("NAVIGATOR_SETTINGS_JOIN_GUILD_DESCRIPTION",          "|cC5C29E|H1:guild:767808|hMora's Whispers|h — это активная социальная гильдия с бесплатным торговцем, множеством событий, еженедельными лотереями, полностью оборудованным гильд-холлом, активным Discord и многим другим! Нажмите на ссылку выше, чтобы узнать больше!|r")
+
+
+-- -----------------------------------------------------------------------------
 -- Notes: gsub uses Lua patterns - https://www.lua.org/pil/20.2.html
 --        "^Thing" matches "Thing" at the start of a name
 --        "Thing$" matches "Thing" at the end of a name
@@ -88,7 +143,6 @@ function Navigator.SearchName(name)
     -- Allow searches like ГП2 (for City of Ash II)
     -- "Город Пепла II"
     name = name:gsub(" II$", " II 2", 1):gsub(" I$", " I 1", 1)
-
-    --name = Navigator.Utils.SimplifyAccents(name:upper()) -- The search string is also "simplified"
     return name
 end
+
