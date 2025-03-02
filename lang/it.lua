@@ -69,8 +69,63 @@ mkstr("NAVIGATOR_SLASH_DESCRIPTION", "Navigator: Teletrasporto verso la zona, la
 -- Custom location names
 mkstr("NAVIGATOR_LOCATION_OBLIVIONPORTAL", "Portale per Oblivion")
 
+-- Add-on Settings
+mkstr("NAVIGATOR_SETTINGS_DEFAULT_TAB_NAME",                "Selezione automatica scheda Navigator")
+mkstr("NAVIGATOR_SETTINGS_DEFAULT_TAB_TOOLTIP",             "Apertura automatica scheda Navigator all apertura della mappa.")
+mkstr("NAVIGATOR_SETTINGS_DEFAULT_TAB_WARNING",             "Navigator non può selezionare automaticamente la sua scheda quando l'addon |c99FFFFFaster Travel|r è attivo")
 
--- Notes: "^Thing" matches "Thing" at the start of a name
+mkstr("NAVIGATOR_SETTINGS_RECENT_COUNT_NAME",               "Voci nella lista recenti")
+mkstr("NAVIGATOR_SETTINGS_RECENT_COUNT_TOOLTIP",            "Impostare questo a 0 disabilitera la lista dei recenti")
+
+mkstr("NAVIGATOR_SETTINGS_CONFIRM_FAST_TRAVEL_NAME",        "Conferma viaggio rapido")
+mkstr("NAVIGATOR_SETTINGS_CONFIRM_FAST_TRAVEL_TOOLTIP",     "Se/Quando mostrare l'avviso standard quando si salta a una wayshrine. Influisce solo su Navigator, non la mappa del mondo")
+mkstr("NAVIGATOR_SETTINGS_CONFIRM_FAST_TRAVEL_CHOICE_1",    "Sempre")
+mkstr("NAVIGATOR_SETTINGS_CONFIRM_FAST_TRAVEL_CHOICE_2",    "Prezzo <<1>>") --  1:goldicon
+mkstr("NAVIGATOR_SETTINGS_CONFIRM_FAST_TRAVEL_CHOICE_3",    "Mai")
+
+mkstr("NAVIGATOR_SETTINGS_LIST_POI_NAME",                   "Mostra punti di interesse nella mappa della zona")
+mkstr("NAVIGATOR_SETTINGS_LIST_POI_TOOLTIP",                "Se questo è disabilitato, solo le \"destinazioni\" come le wayshrines, dungeons, case o giocatori verranno elencate")
+
+mkstr("NAVIGATOR_SETTINGS_INCLUDE_UNDISCOVERED_NAME",       "Mostra e cerca luoghi non ancora scoperti")
+mkstr("NAVIGATOR_SETTINGS_INCLUDE_UNDISCOVERED_TOOLTIP",    "Elenca le posizioni non scoperte e mostrale nei risultati di ricerca")
+
+mkstr("NAVIGATOR_SETTINGS_USE_HOUSE_NICKNAME_NAME",         "Mostra e cerca i soprannomi delle case")
+
+mkstr("NAVIGATOR_SETTINGS_AUTO_FOCUS_NAME",                 "Selezione automatica della casella di ricerca")
+mkstr("NAVIGATOR_SETTINGS_AUTO_FOCUS_TOOLTIP",              "Inserisce automaticamente il cursore nella casella di ricerca quando la scheda è selezionata. Ciò significa che il tasto 'M' non può essere utilizzato per uscire dalla mappa; usa invece il tasto 'Esc'.")
+mkstr("NAVIGATOR_SETTINGS_AUTO_FOCUS_WARNING",              "Quando attivo, il tasto 'M' non può essere usato per uscire dalla mappa; dovrai usare 'Esc'.")
+
+mkstr("NAVIGATOR_SETTINGS_CHAT_COMMAND_NAME",               "Comando chat")
+mkstr("NAVIGATOR_SETTINGS_CHAT_COMMAND_TOOLTIP",            "Seleziona quale nome dare al comando in chat")
+mkstr("NAVIGATOR_SETTINGS_CHAT_COMMAND_CHOICE_1",           "Off") -- Chat command is disabled
+mkstr("NAVIGATOR_SETTINGS_CHAT_COMMAND_WARNING",            "|c8080FFPithka's Achievement Tracker|r ha il comando di teletrasporto abilitato che occupa '/tp'")
+mkstr("NAVIGATOR_SETTINGS_CHAT_COMMAND_UNAVAILABLE",        "|cFFFF00|t24:24:/esoui/art/miscellaneous/eso_icon_warning.dds:inheritcolor|t|r Il comando chat diNavigator è disponibile solo se l' addon |c99FFFFLibSlashCommander|r è installato e abilitato")
+
+mkstr("NAVIGATOR_SETTINGS_ACTIONS_NAME",                    "Azioni del clic del mouse e tasto Invio")
+mkstr("NAVIGATOR_SETTINGS_ACTIONS_TOOLTIP",                 "Se il clic singolo è impostato su Viaggia, l'azione del doppio clic non verrà eseguita.")
+mkstr("NAVIGATOR_SETTINGS_ACTIONS_SINGLE_CLICK",             "Click singolo")
+mkstr("NAVIGATOR_SETTINGS_ACTIONS_DOUBLE_CLICK",            "Click doppio")
+mkstr("NAVIGATOR_SETTINGS_ACTIONS_ENTER_KEY",               "Tasto [Invio]")
+mkstr("NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SHOW_ON_MAP",      "Mostra in mappa")
+mkstr("NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SET_DESTINATION",  "Imposta destinazione")
+mkstr("NAVIGATOR_SETTINGS_ACTIONS_CHOICE_TRAVEL",           "Viaggia")
+
+mkstr("NAVIGATOR_SETTINGS_DESTINATION_ACTIONS_NAME",        "Destinazioni di viaggio")
+mkstr("NAVIGATOR_SETTINGS_DESTINATION_ACTIONS_TOOLTIP",     "Azione per Mouse e tasti per Wayshrines, Dungeons, Trials, Arene e Castelli")
+mkstr("NAVIGATOR_SETTINGS_DESTINATION_ACTIONS_WARNING",     "Se il clic singolo è impostato su Viaggia, l'azione del doppio clic non verrà eseguita")
+
+mkstr("NAVIGATOR_SETTINGS_ZONE_ACTIONS_NAME",               "Zone")
+
+mkstr("NAVIGATOR_SETTINGS_POI_ACTIONS_NAME",                "Punti di interesse")
+mkstr("NAVIGATOR_SETTINGS_POI_ACTIONS_TOOLTIP",             "Azioni del mouse e tasti per posizioni sulla mappa come città, luoghi di missioni e localita sorprendenti")
+
+mkstr("NAVIGATOR_SETTINGS_JOIN_GUILD_NAME",                 "Unisciti alla nostra gilda!")
+mkstr("NAVIGATOR_SETTINGS_JOIN_GUILD_DESCRIPTION",          "|cC5C29E|H1:guild:767808|hMora's Whispers|h è un vivace rifugio sociale con un mercante gratuito, un sacco di eventi, lotterie settimanali, la base della gilda completamente attrezzata e un discord molto attivo! Clicca sul link sopra per scoprire di più. |r")
+
+
+-- -----------------------------------------------------------------------------
+-- Notes: gsub uses Lua patterns - https://www.lua.org/pil/20.2.html
+--        "^Thing" matches "Thing" at the start of a name
 --        "Thing$" matches "Thing" at the end of a name
 function Navigator.DisplayName(name)
     name = name:gsub("^Dungeon: ", "")
