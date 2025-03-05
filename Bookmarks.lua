@@ -30,10 +30,7 @@ function Bookmarks:getIndex(entry)
         local userID = entry.userID
         for i = 1, #list do
             if userID == list[i].userID and entry.action == list[i].action then
-                Nav.log("entry.userID")
                 return i
-            else
-                Nav.log("entry.userID %d: %s-%s %s-%s", i, userID or "-", list[i].userID or "-", entry.action or "-", list[i].action or "-")
             end
         end
     elseif entry.keepId then
