@@ -134,7 +134,7 @@ end
 function Node:ZoomToPOI(setWaypoint, useCurrentZone)
     local function panToPOI(self, zoneIndex, mapId)
         local normalizedX, normalizedZ = self:GetMapInfo(self, zoneIndex, mapId)
-        Nav.log("Node:ZoomToPOI: poiIndex=%d, %f,%f", self.poiIndex or -1, normalizedX, normalizedZ)
+        --Nav.log("Node:ZoomToPOI: poiIndex=%d, %f,%f", self.poiIndex or -1, normalizedX, normalizedZ)
         if setWaypoint then
             PingMap(MAP_PIN_TYPE_PLAYER_WAYPOINT, MAP_TYPE_LOCATION_CENTERED, normalizedX, normalizedZ)
         else
@@ -179,6 +179,31 @@ function Node.RemovePings()
         pingEvent = nil
         ZO_WorldMap_GetPinManager():RemovePins("pings", MAP_PIN_TYPE_AUTO_MAP_NAVIGATION_PING)
     end
+end
+
+local singleClickEvent
+function Node:OnClick(isDoubleClick)
+    local action = self.GetActions()[isDoubleClick and "doubleClick" or "singleClick"]
+    if isDoubleClick and singleClickEvent then
+        zo_removeCallLater(singleClickEvent)
+        singleClickEvent = nil
+    end
+    if not isDoubleClick and (action == Nav.ACTION_TRAVEL or action == Nav.ACTION_TRAVELOUTSIDE) then
+        singleClickEvent = zo_callLater(function()
+            self:DoAction(action)
+        end, 400)
+    else
+        singleClickEvent = nil
+        self:DoAction(action)
+    end
+end
+
+function Node:OnEnter()
+    self:DoAction(self:GetActions().enterKey)
+end
+
+function Node:GetActions()
+    return {}
 end
 
 function Node:DoAction(action)
@@ -365,12 +390,8 @@ function ZoneNode:JumpToZone()
     end
 end
 
-function ZoneNode:OnEnter()
-    self:DoAction(Nav.saved.zoneActions.enterKey)
-end
-
-function ZoneNode:OnClick(isDoubleClick)
-    self:DoAction(Nav.saved.zoneActions[isDoubleClick and "doubleClick" or "singleClick"])
+function ZoneNode:GetActions()
+    return Nav.saved.zoneActions
 end
 
 function ZoneNode:DoAction(action)
@@ -378,9 +399,8 @@ function ZoneNode:DoAction(action)
         local mapZoneId = Nav.Locations:getCurrentMapZoneId()
         local currentMapId = GetCurrentMapId()
         local targetMapId = self.mapId or Nav.Locations.GetMapIdByZoneId(self.zoneId)
-        Nav.log("ZoneNode:OnClick: self.zoneId %d self.mapId %d mapZoneId %d mapId %d", self.zoneId, self.mapId or 0, mapZoneId, targetMapId)
+        --Nav.log("ZoneNode:OnClick: self.zoneId %d self.mapId %d mapZoneId %d mapId %d", self.zoneId, self.mapId or 0, mapZoneId, targetMapId)
         if self.zoneId ~= mapZoneId or (self.mapId and self.mapId ~= currentMapId) then
-            --Nav.log("selectResult: mapId %d", targetMapId or 0)
             if targetMapId then
                 -- Delay single click to give time for the double-click to occur
                 clickEvent = zo_callLater(function()
@@ -535,12 +555,8 @@ function HouseNode:Jump(jumpOutside)
     zo_callLater(function() SCENE_MANAGER:Hide("worldMap") end, 10)
 end
 
-function HouseNode:OnClick(isDoubleClick)
-    self:DoAction(Nav.saved.houseActions[isDoubleClick and "doubleClick" or "singleClick"])
-end
-
-function HouseNode:OnEnter()
-    self:DoAction(Nav.saved.houseActions.enterKey)
+function HouseNode:GetActions()
+    return Nav.saved.houseActions
 end
 
 function HouseNode:DoAction(action)
@@ -732,12 +748,8 @@ function FastTravelNode:AddMenuItems()
     self:AddBookmarkMenuItem({ nodeIndex = self.nodeIndex })
 end
 
-function FastTravelNode:OnClick(isDoubleClick)
-    self:DoAction(Nav.saved.destinationActions[isDoubleClick and "doubleClick" or "singleClick"])
-end
-
-function FastTravelNode:OnEnter()
-    self:DoAction(Nav.saved.destinationActions.enterKey)
+function FastTravelNode:GetActions()
+    return Nav.saved.destinationActions
 end
 
 
@@ -800,14 +812,6 @@ function POINode:GetSuffixColour()
 end
 POINode.GetTagColour = POINode.GetSuffixColour
 
-function POINode:OnClick(isDoubleClick)
-    self:DoAction(Nav.saved.poiActions[isDoubleClick and "doubleClick" or "singleClick"])
-end
-
-function POINode:OnEnter()
-    self:DoAction(Nav.saved.poiActions.enterKey)
-end
-
 function POINode:AddMenuItems()
     AddMenuItem(GetString(NAVIGATOR_MENU_SHOWONMAP), function()
         self:ZoomToPOI(false)
@@ -816,6 +820,10 @@ function POINode:AddMenuItems()
         self:ZoomToPOI(true)
     end)
     self:AddBookmarkMenuItem({ poiIndex = self.poiIndex, zoneId = self.zoneId })
+end
+
+function POINode:GetActions()
+    return Nav.saved.poiActions
 end
 
 function POINode:GetWeight()
@@ -845,7 +853,7 @@ function KeepNode:GetTagList(showBookmark)
 
     local isUnderAttack = self:IsUnderAttack()
     if isUnderAttack then
-        Nav.log("Keep %s %d UA %d", self.name, self.keepId, isUnderAttack)
+        --Nav.log("Keep %s %d UA %d", self.name, self.keepId, isUnderAttack)
         table.insert(tagList, isUnderAttack == 2 and "attackburst" or "attackburst-small")
     end
 
@@ -854,10 +862,6 @@ end
 
 function KeepNode:GetTagColour()
     return Nav.COLOUR_WHITE
-end
-
-function KeepNode:OnClick()
-    self:ZoomToPOI(false)
 end
 
 function KeepNode:IsUnderAttack()
@@ -913,15 +917,14 @@ function KeepNode:AddMenuItems()
     --self:AddBookmarkMenuItem({ nodeIndex = self.nodeIndex })
 end
 
-function KeepNode:OnClick(isDoubleClick)
-    local action = isDoubleClick and Nav.saved.destinationDoubleClick or Nav.saved.destinationSingleClick
-    if not self.accessible and action == Nav.ACTION_TRAVEL then
-        action = Nav.ACTION_SETDESTINATION
-    end
-    self:DoAction(action)
+function KeepNode:GetActions()
+    return Nav.saved.destinationActions
 end
 
 function KeepNode:DoAction(action)
+    if not self.accessible and action == Nav.ACTION_TRAVEL then
+        action = Nav.ACTION_SETDESTINATION
+    end
     if action == Nav.ACTION_SHOWONMAP then
         self:ZoomToPOI(false, true)
     elseif action == Nav.ACTION_SETDESTINATION then
@@ -932,7 +935,6 @@ function KeepNode:DoAction(action)
 end
 
 function KeepNode:GetWeight()
-    --FIXME: Lower weight of non-accessible keeps
     local w = (self.icon:find("AvA_borderKeep") and 1.07) or
               (self.icon:find("AvA_town") and 1.08) or
               (self.icon:find("AvA_outpost") and 1.09) or 1.1
