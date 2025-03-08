@@ -20,13 +20,14 @@ local function matchComparison(x,y)
     if x.match ~= y.match then
         return x.match > y.match
     end
-	return Nav.SearchName(x.node.name) < Nav.SearchName(y.node.name)
+	return x.searchName < y.searchName -- Nav.SearchName(x.node.name) < Nav.SearchName(y.node.name)
 end
 
 function Search:AddCandidates(list)
     for i = 1, #list do
         local node = list[i]
         local searchName = Nav.SearchName(node.originalName or node.name)
+        searchName = searchName:gsub("^@", "") -- remove '@' prefix
         table.insert(self.candidates, { searchName = searchName, node = node })
     end
 end
