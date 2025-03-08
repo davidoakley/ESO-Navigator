@@ -630,7 +630,7 @@ function FastTravelNode:GetTagList(showBookmark)
     return Nav.Utils.tableConcat(tagList, Node.GetTagList(self, showBookmark))
 end
 
-function Node:GetOverlayIcon()
+function FastTravelNode:GetOverlayIcon()
     if self:GetRecallCost() then
         return "Navigator/media/overlays/coin.dds", Nav.COLOUR_COIN
     else
