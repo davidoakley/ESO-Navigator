@@ -23,6 +23,7 @@ Nav.CONFIRMFASTTRAVEL_NEVER = 2
 Nav.ACTION_SHOWONMAP = 0
 Nav.ACTION_SETDESTINATION = 1
 Nav.ACTION_TRAVEL = 2
+Nav.ACTION_TRAVELOUTSIDE = 3
 
 Nav.JUMPSTATE_WORLD = 0
 Nav.JUMPSTATE_WAYSHRINE = 1
@@ -56,6 +57,11 @@ Nav.default = {
       singleClick = Nav.ACTION_SHOWONMAP,
       doubleClick = Nav.ACTION_SETDESTINATION,
       enterKey = Nav.ACTION_SHOWONMAP
+  },
+  houseActions = {
+      singleClick = Nav.ACTION_TRAVEL,
+      doubleClick = Nav.ACTION_TRAVELOUTSIDE,
+      enterKey = Nav.ACTION_TRAVEL
   },
   singleClickZone = false,
   confirmFastTravel = Nav.CONFIRMFASTTRAVEL_ALWAYS

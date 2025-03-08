@@ -3,7 +3,6 @@ local Nav = Navigator --- @class Navigator
 local function getActionSettings(sv)
     local submenuTable = {}
     local actionTypes = { "singleClick", "doubleClick", "enterKey" }
-    local destinationActionDefaults = { Nav.ACTION_TRAVEL, Nav.ACTION_TRAVEL, Nav.ACTION_TRAVEL }
     table.insert(submenuTable, {
         type = "nav_actions",
         name = NAVIGATOR_SETTINGS_DESTINATION_ACTIONS_NAME,
@@ -25,11 +24,10 @@ local function getActionSettings(sv)
         end,
         getFunc = function(index) return sv.destinationActions[actionTypes[index]] end,
         setFunc = function(index, value) sv.destinationActions[actionTypes[index]] = value end,
-        default = function(index) return destinationActionDefaults[index] end,
+        default = function(index) return Nav.default.destinationActions[index] end,
         reference = Nav.settingsName .. "_destinationActions"
     })
 
-    local zoneActionDefaults = { Nav.ACTION_SHOWONMAP, Nav.ACTION_TRAVEL, Nav.ACTION_SHOWONMAP }
     table.insert(submenuTable, {
         type = "nav_actions",
         name = NAVIGATOR_SETTINGS_ZONE_ACTIONS_NAME,
@@ -45,11 +43,32 @@ local function getActionSettings(sv)
         end,
         getFunc = function(index) return sv.zoneActions[actionTypes[index]] end,
         setFunc = function(index, value) sv.zoneActions[actionTypes[index]] = value end,
-        default = function(index) return zoneActionDefaults[index] end,
+        default = function(index) return Nav.default.zoneActions[index] end,
         reference = Nav.settingsName .. "_zoneActions"
     })
 
-    local poiActionDefaults = { Nav.ACTION_SHOWONMAP, Nav.ACTION_SETDESTINATION, Nav.ACTION_SHOWONMAP }
+    table.insert(submenuTable, {
+        type = "nav_actions",
+        name = NAVIGATOR_SETTINGS_HOUSE_ACTIONS_NAME,
+        tooltip = NAVIGATOR_SETTINGS_HOUSE_ACTIONS_TOOLTIP,
+        actions = {GetString(NAVIGATOR_SETTINGS_ACTIONS_SINGLE_CLICK),
+                   GetString(NAVIGATOR_SETTINGS_ACTIONS_DOUBLE_CLICK),
+                   GetString(NAVIGATOR_SETTINGS_ACTIONS_ENTER_KEY)},
+        choices = function(_)
+            return {GetString(NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SHOW_ON_MAP),
+                    GetString(NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SET_DESTINATION),
+                    zo_strformat(GetString(SI_GAMEPAD_WORLD_MAP_TRAVEL_TO_HOUSE_INSIDE), GetString(NAVIGATOR_SETTINGS_ACTIONS_CHOICE_TRAVEL)),
+                    zo_strformat(GetString(SI_GAMEPAD_WORLD_MAP_TRAVEL_TO_HOUSE_OUTSIDE), GetString(NAVIGATOR_SETTINGS_ACTIONS_CHOICE_TRAVEL))}
+        end,
+        choicesValues = function(_)
+            return { Nav.ACTION_SHOWONMAP, Nav.ACTION_SETDESTINATION, Nav.ACTION_TRAVEL, Nav.ACTION_TRAVELOUTSIDE }
+        end,
+        getFunc = function(index) return sv.houseActions[actionTypes[index]] end,
+        setFunc = function(index, value) sv.houseActions[actionTypes[index]] = value end,
+        default = function(index) return Nav.default.houseActions[index] end,
+        reference = Nav.settingsName .. "_houseActions"
+    })
+
     table.insert(submenuTable, {
         type = "nav_actions",
         name = NAVIGATOR_SETTINGS_POI_ACTIONS_NAME,
@@ -66,7 +85,7 @@ local function getActionSettings(sv)
         end,
         getFunc = function(index) return sv.poiActions[actionTypes[index]] end,
         setFunc = function(index, value) sv.poiActions[actionTypes[index]] = value end,
-        default = function(index) return poiActionDefaults[index] end,
+        default = function(index) return Nav.default.poiActions[index] end,
         reference = Nav.settingsName .. "_poiActions"
     })
 

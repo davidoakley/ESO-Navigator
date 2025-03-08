@@ -535,8 +535,20 @@ function HouseNode:Jump(jumpOutside)
     zo_callLater(function() SCENE_MANAGER:Hide("worldMap") end, 10)
 end
 
-function HouseNode:OnClick()
-    self:Jump(false)
+function HouseNode:OnClick(isDoubleClick)
+    self:DoAction(Nav.saved.houseActions[isDoubleClick and "doubleClick" or "singleClick"])
+end
+
+function HouseNode:OnEnter()
+    self:DoAction(Nav.saved.houseActions.enterKey)
+end
+
+function HouseNode:DoAction(action)
+    if action == Nav.ACTION_TRAVELOUTSIDE then
+        self:Jump(true)
+    else
+        Node.DoAction(self, action)
+    end
 end
 
 function HouseNode:AddMenuItems()

@@ -106,9 +106,9 @@ mkstr("NAVIGATOR_SETTINGS_ACTIONS_TOOLTIP",                 "If a single-click i
 mkstr("NAVIGATOR_SETTINGS_ACTIONS_SINGLE_CLICK",             "Single-click")
 mkstr("NAVIGATOR_SETTINGS_ACTIONS_DOUBLE_CLICK",            "Double-click")
 mkstr("NAVIGATOR_SETTINGS_ACTIONS_ENTER_KEY",               "[Enter] key")
-mkstr("NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SHOW_ON_MAP",      "Show On Map")
+mkstr("NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SHOW_ON_MAP",      GetString(SI_QUEST_JOURNAL_SHOW_ON_MAP))
 mkstr("NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SET_DESTINATION",  "Set Destination")
-mkstr("NAVIGATOR_SETTINGS_ACTIONS_CHOICE_TRAVEL",           "Travel")
+mkstr("NAVIGATOR_SETTINGS_ACTIONS_CHOICE_TRAVEL",           GetString(SI_GAMEPAD_WORLD_MAP_INTERACT_TRAVEL))
 
 mkstr("NAVIGATOR_SETTINGS_DESTINATION_ACTIONS_NAME",        "Travel Destinations")
 mkstr("NAVIGATOR_SETTINGS_DESTINATION_ACTIONS_TOOLTIP",     "Mouse and key actions for Wayshrines, Dungeons, Trials, Arenas and Keeps")
@@ -116,7 +116,10 @@ mkstr("NAVIGATOR_SETTINGS_DESTINATION_ACTIONS_WARNING",     "If a single-click i
 
 mkstr("NAVIGATOR_SETTINGS_ZONE_ACTIONS_NAME",               "Zones")
 
-mkstr("NAVIGATOR_SETTINGS_POI_ACTIONS_NAME",                "Points Of Interest")
+mkstr("NAVIGATOR_SETTINGS_HOUSE_ACTIONS_NAME",              GetString(SI_MAP_INFO_MODE_HOUSES))
+mkstr("NAVIGATOR_SETTINGS_HOUSE_ACTIONS_TOOLTIP",           "Mouse and key actions for your houses")
+
+mkstr("NAVIGATOR_SETTINGS_POI_ACTIONS_NAME",                GetString(SI_ZONECOMPLETIONTYPE2))
 mkstr("NAVIGATOR_SETTINGS_POI_ACTIONS_TOOLTIP",             "Mouse and key actions for map locations such as towns, quest locations and striking locales")
 
 mkstr("NAVIGATOR_SETTINGS_JOIN_GUILD_NAME",                 "Join our guild!")
