@@ -188,7 +188,8 @@ function Node:OnClick(isDoubleClick)
         zo_removeCallLater(singleClickEvent)
         singleClickEvent = nil
     end
-    if not isDoubleClick and (action == Nav.ACTION_TRAVEL or action == Nav.ACTION_TRAVELOUTSIDE) then
+    if not isDoubleClick and (action == Nav.ACTION_TRAVEL or action == Nav.ACTION_TRAVELOUTSIDE) and
+       action ~= self.GetActions().doubleClick then
         singleClickEvent = zo_callLater(function()
             self:DoAction(action)
         end, 400)
