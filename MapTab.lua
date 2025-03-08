@@ -228,7 +228,7 @@ local function buildCategory(scrollData, category)
         end
     end
 
-    if #list > 0 and listed == 0 then
+    if #list > 0 and listed == 0 and MT.filter ~= Nav.FILTER_PLAYERS and MT.filter ~= Nav.FILTER_HOUSES then
         local entry = ZO_ScrollList_CreateDataEntry(3, { hint = GetString(NAVIGATOR_HINT_SHOWUNDISCOVERED), onClick = ShowUndiscovered })
         table.insert(scrollData, entry)
     end
@@ -266,7 +266,8 @@ function MT:buildScrollList(keepScrollPosition)
     local scrollData = ZO_ScrollList_GetDataList(self.listControl)
 
     self.content = nil
-    local isSearching = #Nav.results > 0 or (self.searchString and self.searchString ~= "")
+    local isSearching = #Nav.results > 0 or (self.searchString and self.searchString ~= "") or
+                        self.filter == Nav.FILTER_HOUSES or self.filter == Nav.FILTER_PLAYERS
 
     if isSearching then
         self.content = Nav.SearchContent:New(Nav.results)
