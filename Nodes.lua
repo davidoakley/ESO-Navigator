@@ -195,13 +195,16 @@ end
 local PlayerNode = Node:New()
 
 function PlayerNode:GetWeight()
+    local w
     if self.isGroupmate then
-        return self.isLeader and 1.3 or 1.2
+        w = self.isLeader and 1.3 or 1.2
     elseif self.isFriend then
-        return 1.1
+        w = 1.1
     else
-        return 1.0
+        w = 1.0
     end
+    if not self.isOnline then w = w - 0.4 end
+    return w
 end
 
 function PlayerNode:GetIcon()
@@ -212,13 +215,21 @@ function PlayerNode:GetIcon()
     end
 end
 
-function PlayerNode:GetSuffix() return self.zoneName or "" end
+function PlayerNode:GetSuffix() return self.isOnline and self.zoneName or "" end
 
 function PlayerNode:GetOverlayIcon()
     if self.isFriend then
         return "Navigator/media/overlays/star.dds", Nav.COLOUR_FRIEND
     else
         return nil, nil
+    end
+end
+
+function PlayerNode:GetColour(isSelected)
+    if isSelected and self.isOnline then
+        return Nav.COLOUR_WHITE
+    else
+        return (self.isOnline) and Nav.COLOUR_NORMAL or Nav.COLOUR_DISABLED
     end
 end
 
@@ -259,9 +270,11 @@ function PlayerNode:OnClick()
 end
 
 function PlayerNode:AddMenuItems()
-    AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE), self.userID), function()
-        zo_callLater(function() self:JumpToPlayer() end, 10)
-    end)
+    if self.isOnline then
+        AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE), self.userID), function()
+            zo_callLater(function() self:JumpToPlayer() end, 10)
+        end)
+    end
     if Nav.Players:IsGroupLeader() and self.isGroupmate then
         AddMenuItem(GetString(SI_GROUP_LIST_MENU_PROMOTE_TO_LEADER), function()
             GroupPromote(self.unitTag)

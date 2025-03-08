@@ -9,7 +9,7 @@ local Players = Nav.Players or {
 }
 local Utils = Nav.Utils
 
-local function addPlayer(self, zones, zoneId, zoneName, userID, charName)
+local function addPlayer(self, zones, zoneId, zoneName, userID, charName, isOnline)
     if self.players[userID] then
         return self.players[userID]
     end
@@ -20,7 +20,8 @@ local function addPlayer(self, zones, zoneId, zoneName, userID, charName)
         zoneName = Utils.FormatSimpleName(zoneName),
         userID = userID,
         known = true,
-        canJumpToPlayer = zones[zoneId] and zones[zoneId].canJumpToPlayer
+        canJumpToPlayer = zones[zoneId] and zones[zoneId].canJumpToPlayer,
+        isOnline = isOnline
     })
 
     self.players[userID] = player
@@ -34,7 +35,6 @@ end
 function Players:SetupPlayers()
     local zones = Nav.Locations:GetZones()
 
-    local myID = GetDisplayName()
     self.players = {}
 
     local guildCount = GetNumGuilds()
@@ -43,14 +43,12 @@ function Players:SetupPlayers()
         local guildMembers = GetNumGuildMembers(guildID)
 
         for i = 1, guildMembers do
-            local userID, _, _, playerStatus = GetGuildMemberInfo(guildID, i)
+            local userID, _, _, playerStatus, secsSinceLogoff = GetGuildMemberInfo(guildID, i)
 
-            if playerStatus ~= PLAYER_STATUS_OFFLINE and userID ~= myID then
-                local hasChar, charName, zoneName, _, _, _, _, zoneId = GetGuildMemberCharacterInfo(guildID, i)
-                if hasChar then
-                    local player = addPlayer(self, zones, zoneId, zoneName, userID, charName)
-                    player.isGuildmate = true
-                end
+            local hasChar, charName, zoneName, _, _, _, _, zoneId = GetGuildMemberCharacterInfo(guildID, i)
+            if hasChar then
+                local player = addPlayer(self, zones, zoneId, zoneName, userID, charName, playerStatus ~= PLAYER_STATUS_OFFLINE and secsSinceLogoff == 0)
+                player.isGuildmate = true
             end
         end
     end
@@ -59,12 +57,10 @@ function Players:SetupPlayers()
     for i = 1, friendCount do
         local userID, _, playerStatus, secsSinceLogoff = GetFriendInfo(i)
 
-        if playerStatus ~= PLAYER_STATUS_OFFLINE and secsSinceLogoff == 0 then
-            local hasChar, charName, zoneName, _, _, _, _, zoneId = GetFriendCharacterInfo(i)
-            if hasChar then
-                local player = addPlayer(self, zones, zoneId, zoneName, userID, charName)
-                player.isFriend = true
-            end
+        local hasChar, charName, zoneName, _, _, _, _, zoneId = GetFriendCharacterInfo(i)
+        if hasChar then
+            local player = addPlayer(self, zones, zoneId, zoneName, userID, charName, playerStatus ~= PLAYER_STATUS_OFFLINE and secsSinceLogoff == 0)
+            player.isFriend = true
         end
     end
 
@@ -75,10 +71,10 @@ function Players:SetupPlayers()
         if unitTag then
             local charName = GetUnitName(unitTag)
             local userID = GetUnitDisplayName(unitTag)
-            if IsUnitOnline(unitTag) and string.lower(charName) ~= playerName then
+            if string.lower(charName) ~= playerName then
                 local zoneId = GetZoneId(GetUnitZoneIndex(unitTag))
                 local zoneName = GetZoneNameById(zoneId)
-                local player = addPlayer(self, zones, zoneId, zoneName, userID or '"'..charName..'"', charName)
+                local player = addPlayer(self, zones, zoneId, zoneName, userID or '"'..charName..'"', charName, IsUnitOnline(unitTag))
                 if player then
                     player.isGroupmate = true
                     player.canJumpToPlayer = true
@@ -94,12 +90,14 @@ function Players:ClearPlayers()
     self.players = nil
 end
 
-function Players:GetPlayerList()
+function Players:GetPlayerList(includeOffline)
     if self.players == nil then self:SetupPlayers() end
 
     local nodes = {}
     for _, player in pairs(self.players) do
-        table.insert(nodes, player)
+        if includeOffline or player.isOnline then
+            table.insert(nodes, player)
+        end
     end
 
     return nodes
@@ -109,7 +107,7 @@ function Players:GetPlayerInZone(zoneId)
     if self.players == nil then self:SetupPlayers() end
 
     for _, player in pairs(self.players) do
-        if player.zoneId == zoneId then
+        if player.zoneId == zoneId and player.isOnline then
             return player
         end
     end
