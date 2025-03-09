@@ -241,8 +241,8 @@ local function loadKeep(self, bgContext, ktnnIndex, zone)
         known = true,
         accessible = Nav.jumpState == Nav.JUMPSTATE_TRANSITUS and accessible,
         pinType = pinType,
-        alliance = GetKeepAlliance(keepId, bgCtx),
-        bgCtx = bgCtx
+        alliance = GetKeepAlliance(keepId, bgContext),
+        bgContext = bgContext
     })
 
     table.insert(self.nodes, node)
@@ -255,12 +255,12 @@ local function loadKeeps(self)
     local zone = self.zones[Nav.ZONE_CYRODIIL]
     zone.keeps = {}
 
-    local bgCtx = BGQUERY_ASSIGNED_CAMPAIGN --ZO_WorldMap_GetBattlegroundQueryType()
+    local bgContext = BGQUERY_ASSIGNED_CAMPAIGN --ZO_WorldMap_GetBattlegroundQueryType()
 
-    local count = GetNumKeepTravelNetworkNodes(bgCtx)
+    local count = GetNumKeepTravelNetworkNodes(bgContext)
     Nav.log("loadKeeps: GetNumKeepTravelNetworkNodes=%d, GetNumKeeps=%d", count, GetNumKeeps())
     for ktnnIndex = 1, count do
-        loadKeep(self, bgCtx, ktnnIndex, zone)
+        loadKeep(self, bgContext, ktnnIndex, zone)
     end
 end
 
@@ -335,13 +335,13 @@ function Locs:UpdateKeeps()
 
     ZO_WorldMap_RefreshKeeps()
 
-    local bgCtx = ZO_WorldMap_GetBattlegroundQueryType()
+    local bgContext = ZO_WorldMap_GetBattlegroundQueryType()
 
     for i = 1, #zone.keeps do
         local keep = zone.keeps[i]
-        keep.accessible = Nav.jumpState == Nav.JUMPSTATE_TRANSITUS and GetKeepAccessible(keep.keepId, bgCtx)
-        keep.alliance = GetKeepAlliance(keep.keepId, bgCtx)
-        local pinType = GetKeepPinInfo(keep.keepId, bgCtx)
+        keep.accessible = Nav.jumpState == Nav.JUMPSTATE_TRANSITUS and GetKeepAccessible(keep.keepId, bgContext)
+        keep.alliance = GetKeepAlliance(keep.keepId, bgContext)
+        local pinType = GetKeepPinInfo(keep.keepId, bgContext)
         if pinType > 0 then
             keep.pinType  = pinType
             keep.icon = ZO_MapPin.PIN_DATA[pinType].texture or "/esoui/art/crafting/crafting_smithing_notrait.dds"

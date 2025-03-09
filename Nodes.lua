@@ -131,7 +131,7 @@ function Node:GetMapInfo(self, zoneIndex, mapId)
     end
 end
 
-function Node:ZoomToPOI(setWaypoint, useCurrentZone)
+function Node:ZoomToPOI(setWaypoint, useCurrentZoom)
     local function panToPOI(self, zoneIndex, mapId)
         local normalizedX, normalizedZ = self:GetMapInfo(self, zoneIndex, mapId)
         --Nav.log("Node:ZoomToPOI: poiIndex=%d, %f,%f", self.poiIndex or -1, normalizedX, normalizedZ)
@@ -142,7 +142,7 @@ function Node:ZoomToPOI(setWaypoint, useCurrentZone)
         end
 
         local mapPanAndZoom = ZO_WorldMap_GetPanAndZoom()
-        mapPanAndZoom:PanToNormalizedPosition(normalizedX, normalizedZ, useCurrentZone)
+        mapPanAndZoom:PanToNormalizedPosition(normalizedX, normalizedZ, useCurrentZoom)
     end
 
     local targetMapId = self.mapId or Nav.Locations.GetMapIdByZoneId(self.zoneId)
@@ -885,7 +885,7 @@ function KeepNode:IsUnderAttack()
         if resourceKeepId > 0 then
             -- Check if the resource is being attacked rather than reclaimed
             if GetHistoricalKeepUnderAttack(resourceKeepId, self.bgContext, historyPercent) then
-               --and GetKeepAlliance(resourceKeepId, bgCtx) == self.alliance then
+               --and GetKeepAlliance(resourceKeepId, bgContext) == self.alliance then
                 return 1
             end
         end
@@ -895,7 +895,7 @@ function KeepNode:IsUnderAttack()
 end
 
 function KeepNode:GetMapInfo(self, _, _)
-    local _,nx,ny  = GetKeepPinInfo(self.keepId, self.bgCtx)
+    local _,nx,ny  = GetKeepPinInfo(self.keepId, self.bgContext)
     Nav.log("KeepNode:GetMapInfo: keepId=%d -> %f,%f", self.keepId, nx, ny)
     return nx,ny
 end
@@ -919,10 +919,10 @@ function KeepNode:AddMenuItems()
         end)
     end
     AddMenuItem(GetString(NAVIGATOR_MENU_SHOWONMAP), function()
-        self:ZoomToPOI(false)
+        self:ZoomToPOI(false, true)
     end)
     AddMenuItem(GetString(NAVIGATOR_MENU_SETDESTINATION), function()
-        self:ZoomToPOI(true)
+        self:ZoomToPOI(true, true)
     end)
     --self:AddBookmarkMenuItem({ nodeIndex = self.nodeIndex })
 end
