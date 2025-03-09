@@ -102,7 +102,6 @@ mkstr("NAVIGATOR_SETTINGS_CHAT_COMMAND_WARNING",            "|c8080FFPithka's Ac
 mkstr("NAVIGATOR_SETTINGS_CHAT_COMMAND_UNAVAILABLE",        "|cFFFF00|t24:24:/esoui/art/miscellaneous/eso_icon_warning.dds:inheritcolor|t|r Navigator's chat command is only available if the |c99FFFFLibSlashCommander|r add-on is installed and enabled")
 
 mkstr("NAVIGATOR_SETTINGS_ACTIONS_NAME",                    "Mouse click and Enter button actions")
-mkstr("NAVIGATOR_SETTINGS_ACTIONS_TOOLTIP",                 "If a single-click is set to Travel, the double-click action will not run")
 mkstr("NAVIGATOR_SETTINGS_ACTIONS_SINGLE_CLICK",             "Single-click")
 mkstr("NAVIGATOR_SETTINGS_ACTIONS_DOUBLE_CLICK",            "Double-click")
 mkstr("NAVIGATOR_SETTINGS_ACTIONS_ENTER_KEY",               "[Enter] key")

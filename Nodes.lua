@@ -291,9 +291,8 @@ function PlayerNode:JumpToPlayer()
     end
 end
 
-function PlayerNode:OnClick()
-    self:JumpToPlayer()
-end
+function PlayerNode:OnClick() self:JumpToPlayer() end
+function PlayerNode:OnEnter() self:JumpToPlayer() end
 
 function PlayerNode:AddMenuItems()
     if self.isOnline then

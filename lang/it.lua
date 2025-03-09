@@ -102,7 +102,6 @@ mkstr("NAVIGATOR_SETTINGS_CHAT_COMMAND_WARNING",            "|c8080FFPithka's Ac
 mkstr("NAVIGATOR_SETTINGS_CHAT_COMMAND_UNAVAILABLE",        "|cFFFF00|t24:24:/esoui/art/miscellaneous/eso_icon_warning.dds:inheritcolor|t|r Il comando chat diNavigator è disponibile solo se l' addon |c99FFFFLibSlashCommander|r è installato e abilitato")
 
 mkstr("NAVIGATOR_SETTINGS_ACTIONS_NAME",                    "Azioni del clic del mouse e tasto Invio")
-mkstr("NAVIGATOR_SETTINGS_ACTIONS_TOOLTIP",                 "Se il clic singolo è impostato su Viaggia, l'azione del doppio clic non verrà eseguita.")
 mkstr("NAVIGATOR_SETTINGS_ACTIONS_SINGLE_CLICK",             "Click singolo")
 mkstr("NAVIGATOR_SETTINGS_ACTIONS_DOUBLE_CLICK",            "Click doppio")
 mkstr("NAVIGATOR_SETTINGS_ACTIONS_ENTER_KEY",               "Tasto [Invio]")

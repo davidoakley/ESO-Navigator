@@ -102,7 +102,6 @@ mkstr("NAVIGATOR_SETTINGS_CHAT_COMMAND_WARNING",            "Аддон «|c8080
 mkstr("NAVIGATOR_SETTINGS_CHAT_COMMAND_UNAVAILABLE",        "|cFFFF00|t24:24:/esoui/art/miscellaneous/eso_icon_warning.dds:inheritcolor|t|r Чат-команды доступны только при использовании аддона «|c99FFFFLibSlashCommander|r».")
 
 mkstr("NAVIGATOR_SETTINGS_ACTIONS_NAME",                    "Управление с помощью мыши и клавиатуры")
-mkstr("NAVIGATOR_SETTINGS_ACTIONS_TOOLTIP",                 "Когда одиночное нажатие установлено для перемещения, двойное нажатие будет недоступно.")
 mkstr("NAVIGATOR_SETTINGS_ACTIONS_SINGLE_CLICK",            "Одиночное нажатие")
 mkstr("NAVIGATOR_SETTINGS_ACTIONS_DOUBLE_CLICK",            "Двойное нажатие")
 mkstr("NAVIGATOR_SETTINGS_ACTIONS_ENTER_KEY",               "Клавиша [Enter]")
