@@ -203,6 +203,10 @@ function Node:OnEnter()
     self:DoAction(self:GetActions().enterKey)
 end
 
+function Node:OnSlash()
+    self:DoAction(self:GetActions().slash)
+end
+
 function Node:GetActions()
     return {}
 end
@@ -292,6 +296,7 @@ function PlayerNode:JumpToPlayer()
 end
 
 function PlayerNode:OnClick() self:JumpToPlayer() end
+function PlayerNode:OnSlash() self:JumpToPlayer() end
 function PlayerNode:OnEnter() self:JumpToPlayer() end
 
 function PlayerNode:AddMenuItems()

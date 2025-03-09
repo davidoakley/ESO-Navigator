@@ -2,14 +2,16 @@ local Nav = Navigator --- @class Navigator
 
 local function getActionSettings(sv)
     local submenuTable = {}
-    local actionTypes = { "singleClick", "doubleClick", "enterKey" }
+    local actionTypes = { "singleClick", "doubleClick", "enterKey", "slash" }
+    local actionStrings = {GetString(NAVIGATOR_SETTINGS_ACTIONS_SINGLE_CLICK),
+                           GetString(NAVIGATOR_SETTINGS_ACTIONS_DOUBLE_CLICK),
+                           GetString(NAVIGATOR_SETTINGS_ACTIONS_ENTER_KEY),
+                           GetString(NAVIGATOR_SETTINGS_CHAT_COMMAND_NAME)}
     table.insert(submenuTable, {
         type = "nav_actions",
         name = NAVIGATOR_SETTINGS_DESTINATION_ACTIONS_NAME,
         tooltip = NAVIGATOR_SETTINGS_DESTINATION_ACTIONS_TOOLTIP,
-        actions = {GetString(NAVIGATOR_SETTINGS_ACTIONS_SINGLE_CLICK),
-                   GetString(NAVIGATOR_SETTINGS_ACTIONS_DOUBLE_CLICK),
-                   GetString(NAVIGATOR_SETTINGS_ACTIONS_ENTER_KEY)},
+        actions = actionStrings,
         choices = function(_)
             return {GetString(NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SHOW_ON_MAP),
                     GetString(NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SET_DESTINATION),
@@ -31,9 +33,7 @@ local function getActionSettings(sv)
     table.insert(submenuTable, {
         type = "nav_actions",
         name = NAVIGATOR_SETTINGS_ZONE_ACTIONS_NAME,
-        actions = {GetString(NAVIGATOR_SETTINGS_ACTIONS_SINGLE_CLICK),
-                   GetString(NAVIGATOR_SETTINGS_ACTIONS_DOUBLE_CLICK),
-                   GetString(NAVIGATOR_SETTINGS_ACTIONS_ENTER_KEY)},
+        actions = actionStrings,
         choices = function(_)
             return {GetString(NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SHOW_ON_MAP),
                     GetString(NAVIGATOR_SETTINGS_ACTIONS_CHOICE_TRAVEL)}
@@ -51,9 +51,7 @@ local function getActionSettings(sv)
         type = "nav_actions",
         name = NAVIGATOR_SETTINGS_HOUSE_ACTIONS_NAME,
         tooltip = NAVIGATOR_SETTINGS_HOUSE_ACTIONS_TOOLTIP,
-        actions = {GetString(NAVIGATOR_SETTINGS_ACTIONS_SINGLE_CLICK),
-                   GetString(NAVIGATOR_SETTINGS_ACTIONS_DOUBLE_CLICK),
-                   GetString(NAVIGATOR_SETTINGS_ACTIONS_ENTER_KEY)},
+        actions = actionStrings,
         choices = function(_)
             return {GetString(NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SHOW_ON_MAP),
                     GetString(NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SET_DESTINATION),
@@ -73,9 +71,7 @@ local function getActionSettings(sv)
         type = "nav_actions",
         name = NAVIGATOR_SETTINGS_POI_ACTIONS_NAME,
         tooltip = NAVIGATOR_SETTINGS_POI_ACTIONS_TOOLTIP,
-        actions = {GetString(NAVIGATOR_SETTINGS_ACTIONS_SINGLE_CLICK),
-                   GetString(NAVIGATOR_SETTINGS_ACTIONS_DOUBLE_CLICK),
-                   GetString(NAVIGATOR_SETTINGS_ACTIONS_ENTER_KEY)},
+        actions = actionStrings,
         choices = function(_)
             return {GetString(NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SHOW_ON_MAP),
                     GetString(NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SET_DESTINATION)}
