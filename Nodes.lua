@@ -204,7 +204,12 @@ function Node:OnEnter()
 end
 
 function Node:OnSlash()
-    self:DoAction(self:GetActions().slash)
+    local action = self:GetActions().slash
+    if action == Nav.ACTION_SHOWONMAP or action == Nav.ACTION_SETDESTINATION then
+        Nav.showSearch(function() self:DoAction(action) end)
+    else
+        self:DoAction(action)
+    end
 end
 
 function Node:GetActions()

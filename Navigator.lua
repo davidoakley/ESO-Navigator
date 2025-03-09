@@ -216,16 +216,19 @@ local function SetKeepsDirty(_)
     Nav.MapTab:queueRefresh()
 end
 
-function Nav.showSearch()
-  Nav.log("showSearch")
-  local tabVisible = Nav.MapTab.visible
-  MAIN_MENU_KEYBOARD:ShowScene("worldMap")
-  WORLD_MAP_INFO:SelectTab(NAVIGATOR_TAB_SEARCH)
-  Nav.MapTab:resetSearch()
-  if Nav.saved.autoFocus or tabVisible then
-    Nav.MapTab.editControl:TakeFocus()
-    Nav.log("showSearch: setting editControl focus")
-  end
+function Nav.showSearch(callback)
+    Nav.log("showSearch")
+    local tabVisible = Nav.MapTab.visible
+    MAIN_MENU_KEYBOARD:ShowScene("worldMap")
+    WORLD_MAP_INFO:SelectTab(NAVIGATOR_TAB_SEARCH)
+    Nav.MapTab:resetSearch()
+    if Nav.saved.autoFocus or tabVisible then
+        Nav.MapTab.editControl:TakeFocus()
+        Nav.log("showSearch: setting editControl focus")
+    end
+    if callback then
+        callback()
+    end
 end
 
 local function moveTabToFirst()
