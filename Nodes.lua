@@ -885,7 +885,7 @@ function KeepNode:IsUnderAttack()
         if resourceKeepId > 0 then
             -- Check if the resource is being attacked rather than reclaimed
             if GetHistoricalKeepUnderAttack(resourceKeepId, self.bgContext, historyPercent) then
-               --and GetKeepAlliance(resourceKeepId, bgCtx) == self.alliance then
+               --and GetKeepAlliance(resourceKeepId, bgContext) == self.alliance then
                 return 1
             end
         end
@@ -895,7 +895,7 @@ function KeepNode:IsUnderAttack()
 end
 
 function KeepNode:GetMapInfo(self, _, _)
-    local _,nx,ny  = GetKeepPinInfo(self.keepId, self.bgCtx)
+    local _,nx,ny  = GetKeepPinInfo(self.keepId, self.bgContext)
     Nav.log("KeepNode:GetMapInfo: keepId=%d -> %f,%f", self.keepId, nx, ny)
     return nx,ny
 end
