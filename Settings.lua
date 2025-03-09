@@ -240,7 +240,6 @@ function Navigator:loadSettings()
     table.insert(optionsTable, {
         type = "submenu",
         name = NAVIGATOR_SETTINGS_ACTIONS_NAME,
-        tooltip = NAVIGATOR_SETTINGS_ACTIONS_TOOLTIP,
         controls = getActionSettings(sv),
         reference = Nav.settingsName .. "_actions"
     })
