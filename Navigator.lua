@@ -46,32 +46,32 @@ Nav.default = {
   destinationActions = {
       singleClick = Nav.ACTION_TRAVEL,
       doubleClick = Nav.ACTION_TRAVEL,
-      enterKey = Nav.ACTION_TRAVEL
+      enterKey = Nav.ACTION_TRAVEL,
+      slash = Nav.ACTION_TRAVEL
   },
   zoneActions = {
       singleClick = Nav.ACTION_SHOWONMAP,
       doubleClick = Nav.ACTION_TRAVEL,
-      enterKey = Nav.ACTION_SHOWONMAP
+      enterKey = Nav.ACTION_SHOWONMAP,
+      slash = Nav.ACTION_TRAVEL
   },
   poiActions = {
       singleClick = Nav.ACTION_SHOWONMAP,
       doubleClick = Nav.ACTION_SETDESTINATION,
-      enterKey = Nav.ACTION_SHOWONMAP
+      enterKey = Nav.ACTION_SHOWONMAP,
+      slash = Nav.ACTION_SHOWONMAP
   },
   houseActions = {
       singleClick = Nav.ACTION_TRAVEL,
       doubleClick = Nav.ACTION_TRAVELOUTSIDE,
-      enterKey = Nav.ACTION_TRAVEL
+      enterKey = Nav.ACTION_TRAVEL,
+      slash = Nav.ACTION_TRAVEL
   },
   singleClickZone = false,
   confirmFastTravel = Nav.CONFIRMFASTTRAVEL_ALWAYS
 }
 
-local logger
-
-if LibDebugLogger then
-  logger = LibDebugLogger(Nav.name)
-end
+local logger = LibDebugLogger and LibDebugLogger(Nav.name)
 
 local _events = {}
 
@@ -216,16 +216,19 @@ local function SetKeepsDirty(_)
     Nav.MapTab:queueRefresh()
 end
 
-function Nav.showSearch()
-  Nav.log("showSearch")
-  local tabVisible = Nav.MapTab.visible
-  MAIN_MENU_KEYBOARD:ShowScene("worldMap")
-  WORLD_MAP_INFO:SelectTab(NAVIGATOR_TAB_SEARCH)
-  Nav.MapTab:resetSearch()
-  if Nav.saved.autoFocus or tabVisible then
-    Nav.MapTab.editControl:TakeFocus()
-    Nav.log("showSearch: setting editControl focus")
-  end
+function Nav.showSearch(callback)
+    Nav.log("showSearch")
+    local tabVisible = Nav.MapTab.visible
+    MAIN_MENU_KEYBOARD:ShowScene("worldMap")
+    WORLD_MAP_INFO:SelectTab(NAVIGATOR_TAB_SEARCH)
+    Nav.MapTab:resetSearch()
+    if Nav.saved.autoFocus or tabVisible then
+        Nav.MapTab.editControl:TakeFocus()
+        Nav.log("showSearch: setting editControl focus")
+    end
+    if callback then
+        callback()
+    end
 end
 
 local function moveTabToFirst()

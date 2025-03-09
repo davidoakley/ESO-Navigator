@@ -203,6 +203,15 @@ function Node:OnEnter()
     self:DoAction(self:GetActions().enterKey)
 end
 
+function Node:OnSlash()
+    local action = self:GetActions().slash
+    if action == Nav.ACTION_SHOWONMAP or action == Nav.ACTION_SETDESTINATION then
+        Nav.showSearch(function() self:DoAction(action) end)
+    else
+        self:DoAction(action)
+    end
+end
+
 function Node:GetActions()
     return {}
 end
@@ -292,6 +301,7 @@ function PlayerNode:JumpToPlayer()
 end
 
 function PlayerNode:OnClick() self:JumpToPlayer() end
+function PlayerNode:OnSlash() self:JumpToPlayer() end
 function PlayerNode:OnEnter() self:JumpToPlayer() end
 
 function PlayerNode:AddMenuItems()

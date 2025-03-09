@@ -99,7 +99,9 @@ function Chat:TP(text)
         return
     end
 
-    if result.Jump then
+    if result.OnSlash then
+        result:OnSlash()
+    elseif result.Jump then
         result:Jump()
     elseif result.JumpToPlayer then
         result:JumpToPlayer()
