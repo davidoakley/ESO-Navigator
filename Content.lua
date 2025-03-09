@@ -107,9 +107,10 @@ function Content:AddCyrodiilCategories()
 
     for i = 1, #list do
         local node = list[i]
-        if node.alliance and allianceNodes[node.alliance] then
+        if node.alliance and allianceNodes[node.alliance] and
+           (not node.icon:find("borderKeep") or node.alliance == Nav.currentAlliance) then
             table.insert(allianceNodes[node.alliance], node)
-        elseif node.alliance then
+        elseif node.alliance and not node.icon:find("borderKeep") then
             table.insert(poiNodes, node)
         end
     end

@@ -245,10 +245,8 @@ local function loadKeep(self, bgContext, ktnnIndex, zone)
         bgCtx = bgCtx
     })
 
-    if not node.icon:find("borderKeep") or node.alliance == Nav.currentAlliance then
-        table.insert(self.nodes, node)
-        table.insert(zone.keeps, node)
-    end
+    table.insert(self.nodes, node)
+    table.insert(zone.keeps, node)
 end
 
 local function loadKeeps(self)
