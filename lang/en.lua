@@ -39,6 +39,8 @@ NAVIGATOR_TRIAL = SI_GROUPFINDERCATEGORY2
 mkstr("NAVIGATOR_NOT_KNOWN", "Not known by this character") -- Location not known
 mkstr("NAVIGATOR_TIP_CLICK_TO_TRAVEL", "Click to travel to <<1>>") -- 1:zone/destination
 mkstr("NAVIGATOR_TIP_DOUBLECLICK_TO_TRAVEL", "Double-click to travel to <<1>>") -- 1:zone/destination
+mkstr("NAVIGATOR_TOOLTIP_ACTION_RESULT", "<<1>>: <<2>>") -- e.g. 1:"Single-click" 2:"Show On Map"
+mkstr("NAVIGATOR_TOOLTIP_GUILDTRADERS", "<<1[/1 Guild Trader nearby/$d Guild Traders nearby]>>")
 
 -- Action and menu items
 mkstr("NAVIGATOR_TRAVEL_TO_ZONE", "Travel to <<1>>")

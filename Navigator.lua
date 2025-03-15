@@ -13,6 +13,7 @@ Navigator = {
   isDeveloper = (GetDisplayName() == '@SirNightstorm' and true) or false,
   results = {},
   mapVisible = false,
+  currentNodeIndex = nil,
 }
 local Nav = Navigator
 
@@ -177,6 +178,7 @@ end
 
 local function OnStartFastTravel(eventCode, nodeIndex)
     Nav.jumpState = Nav.JUMPSTATE_WAYSHRINE
+    Nav.currentNodeIndex = nodeIndex
     Nav.log("OnStartFastTravel(%d,%d) jumpState %d", eventCode, nodeIndex, Nav.jumpState)
     Nav.MapTab:ImmediateRefresh()
 end
@@ -190,6 +192,7 @@ end
 
 local function OnEndFastTravel()
   Nav.jumpState = Nav.currentZoneId == Nav.ZONE_CYRODIIL and Nav.JUMPSTATE_CYRODIIL or Nav.JUMPSTATE_WORLD
+  Nav.currentNodeIndex = nil
   Nav.Locations:SetKeepsInaccessible()
   Nav.log("OnEndFastTravel() jumpState %d", Nav.jumpState)
 end

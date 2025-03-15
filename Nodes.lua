@@ -85,8 +85,84 @@ function Node:GetOverlayIcon()
     return nil, nil
 end
 
-function Node:GetTooltip()
-    return self.tooltip
+function Node:GetTooltip(control, nameOverride)
+    local tooltip = InformationTooltip
+    InitializeTooltip(InformationTooltip, control, TOPRIGHT, 0, -2, TOPLEFT)
+    tooltip:AddLine(zo_strformat(SI_WORLD_MAP_LOCATION_NAME, nameOverride or self.name), "ZoFontWinH3", ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB())
+    ZO_Tooltip_AddDivider(InformationTooltip)
+    return tooltip
+end
+
+function Node:GetInteractionName(interaction)
+    return interaction == "singleClick" and GetString(NAVIGATOR_SETTINGS_ACTIONS_SINGLE_CLICK)
+                                          or GetString(NAVIGATOR_SETTINGS_ACTIONS_DOUBLE_CLICK)
+end
+
+local function ellipsisString(stringId)
+    return GetString(stringId):gsub(" <<1>>", "...")
+end
+
+function Node:GetActionDescription(action)
+    if action == Nav.ACTION_SHOWONMAP then
+        return GetString(NAVIGATOR_MENU_SHOWONMAP)
+    elseif action == Nav.ACTION_SETDESTINATION then
+        return GetString(NAVIGATOR_MENU_SETDESTINATION)
+    elseif action == Nav.ACTION_TRAVEL then
+        if Nav.jumpState == Nav.JUMPSTATE_WORLD then
+            local s = ellipsisString(SI_WORLD_MAP_ACTION_RECALL_TO_WAYSHRINE)
+            local recallCost = self:GetRecallCost()
+            if recallCost then
+                local currencyType = CURT_MONEY
+                local formatType = ZO_CURRENCY_FORMAT_AMOUNT_ICON
+                local currencyString = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(currencyType, recallCost, formatType))
+                s = s .. " (" .. currencyString .. ")"
+            end
+            return s
+        else
+            return ellipsisString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE)
+        end
+    else
+        Nav.log("Unknown action %d", action or -1)
+    end
+end
+
+function Node:AddTooltipActions(tooltip)
+    local actions = self:GetActions()
+
+    local actionLines = {}
+    local interaction = self:GetInteractionName("singleClick")
+    local action = self:GetActionDescription(actions["singleClick"])
+    if action then
+        table.insert(actionLines, zo_strformat(GetString(NAVIGATOR_TOOLTIP_ACTION_RESULT), interaction, action))
+    end
+    interaction = self:GetInteractionName("doubleClick")
+    action = self:GetActionDescription(actions["doubleClick"])
+    if action then
+        table.insert(actionLines, zo_strformat(GetString(NAVIGATOR_TOOLTIP_ACTION_RESULT), interaction, action))
+    end
+    if #actionLines > 0 then
+        tooltip:AddLine(table.concat(actionLines, "\n"), 'ZoFontGame',  0.7725, 0.7608, 0.6196)
+    end
+    --if Nav.currentNodeIndex == nil then --Recall
+    --    local _, premiumTimeLeft = GetRecallCooldown()
+    --    if premiumTimeLeft == 0 then --CLICK: Recall
+    --        local text = GetString(nodeIsHousePreview and SI_TOOLTIP_WAYSHRINE_CLICK_TO_PREVIEW_HOUSE or SI_TOOLTIP_WAYSHRINE_CLICK_TO_RECALL)
+    --        tooltip:AddLine(text, "", ZO_HIGHLIGHT_TEXT:UnpackRGB())
+    --
+    --        local cost = GetRecallCost(nodeIndex)
+    --        if cost > 0 then
+    --            local currency = GetRecallCurrency(nodeIndex)
+    --            local notEnoughCurrency = cost > GetCurrencyAmount(currency, CURRENCY_LOCATION_CHARACTER)
+    --            tooltip:AddMoney(tooltip, cost, SI_TOOLTIP_RECALL_COST, notEnoughCurrency)
+    --        end
+    --    else --NO CLICK: Waiting on cooldown
+    --        local cooldownText = zo_strformat(SI_TOOLTIP_WAYSHRINE_RECALL_COOLDOWN, ZO_FormatTimeMilliseconds(premiumTimeLeft, TIME_FORMAT_STYLE_DESCRIPTIVE, TIME_FORMAT_PRECISION_SECONDS))
+    --        tooltip:AddLine(cooldownText, "", ZO_HIGHLIGHT_TEXT:UnpackRGB())
+    --    end
+    --else --CLICK: Fast Travel
+    --    local text = GetString(nodeIsHousePreview and SI_TOOLTIP_WAYSHRINE_CLICK_TO_PREVIEW_HOUSE or SI_TOOLTIP_WAYSHRINE_CLICK_TO_FAST_TRAVEL)
+    --    tooltip:AddLine(text, "", ZO_HIGHLIGHT_TEXT:UnpackRGB())
+    --end
 end
 
 function Node:GetColour(isSelected)
@@ -344,17 +420,22 @@ function ZoneNode:GetIcon()
     return "Navigator/media/zone.dds"
 end
 
-function ZoneNode:GetTooltip()
-    if self.zoneId == Nav.ZONE_CYRODIIL then return nil end
-
-    local stringId
-    local player = Nav.Players:GetPlayerInZone(self.zoneId)
-    if Nav.saved.zoneActions.singleClick == Nav.ACTION_TRAVEL then
-        stringId = player and NAVIGATOR_TIP_CLICK_TO_TRAVEL or NAVIGATOR_NO_TRAVEL_PLAYER
-    elseif Nav.saved.zoneActions.doubleClick == Nav.ACTION_TRAVEL then
-        stringId = player and NAVIGATOR_TIP_DOUBLECLICK_TO_TRAVEL or NAVIGATOR_NO_TRAVEL_PLAYER
+function ZoneNode:GetActionDescription(action)
+    if action == Nav.ACTION_TRAVEL then
+        local s = ellipsisString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE)
+        if not self:IsJumpable() and Nav.jumpState ~= Nav.JUMPSTATE_WAYSHRINE then
+            s = "|c666666|l0:1:0:-25%:2:666666|l"..s.."|l|r"
+        end
+        return s
+    else
+        return Node.GetActionDescription(self, action)
     end
-    return stringId and zo_strformat(GetString(stringId), self.name) or nil
+end
+
+function ZoneNode:GetTooltip(control)
+    local tooltip = Node.GetTooltip(self, control)
+    self:AddTooltipActions(tooltip)
+    return tooltip
 end
 
 function ZoneNode:IsJumpable()
@@ -464,7 +545,32 @@ end
 
 function JumpToZoneNode:GetSuffix() return "" end
 function JumpToZoneNode:GetTagList() return {} end
-function JumpToZoneNode:GetTooltip() return nil end
+
+function JumpToZoneNode:GetActionDescription(action)
+    if action == Nav.ACTION_TRAVEL then
+        local s = ellipsisString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE)
+        if not self.known then
+            s = "|c666666|l0:1:0:-25%:2:666666|l"..s.."|l|r"
+        end
+        return s
+    else
+        return Node.GetActionDescription(self, action)
+    end
+end
+
+function JumpToZoneNode:GetTooltip(control)
+    local tooltip = Node.GetTooltip(self, control)
+
+    local interaction = self:GetInteractionName("singleClick")
+    local action = zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE), self.name)
+    if not self.known then
+        action = "|c666666|l0:1:0:-25%:2:666666|l"..action.."|l|r"
+    end
+    tooltip:AddLine(zo_strformat(GetString(NAVIGATOR_TOOLTIP_ACTION_RESULT), interaction, action), 'ZoFontGame',  0.7725, 0.7608, 0.6196)
+
+    return tooltip
+end
+
 
 function JumpToZoneNode:GetColour(isSelected)
     if isSelected and self.known then
@@ -519,6 +625,22 @@ end
 
 function HouseNode:GetIcon()
     return "Navigator/media/house.dds"
+end
+
+function HouseNode:GetActionDescription(action)
+    if action == Nav.ACTION_TRAVEL then
+        return ellipsisString(SI_WORLD_MAP_ACTION_TRAVEL_TO_HOUSE_INSIDE)
+    elseif action == Nav.ACTION_TRAVELOUTSIDE then
+        return ellipsisString(SI_WORLD_MAP_ACTION_TRAVEL_TO_HOUSE_OUTSIDE)
+    else
+        return Node.GetActionDescription(self, action)
+    end
+end
+
+function HouseNode:GetTooltip(control)
+    local tooltip = Node.GetTooltip(self, control)
+    self:AddTooltipActions(tooltip)
+    return tooltip
 end
 
 function HouseNode:GetIconColour()
@@ -679,27 +801,49 @@ function FastTravelNode:GetRecallCost()
     return nil -- It's free!
 end
 
-function FastTravelNode:GetTooltip()
-    local tips = {}
+function FastTravelNode:GetTooltip(control)
+    -- Converted from ESOUI: InformationTooltipMixin:AppendWayshrineTooltip(pin)
+    local nodeIndex = self.nodeIndex
+    local informationTooltip = Node.GetTooltip(self, control, name)
 
-    -- Click/double-click to travel
-    if Nav.saved.destinationActions.singleClick == Nav.ACTION_TRAVEL then
-        tips[#tips+1] = zo_strformat(GetString(NAVIGATOR_TIP_CLICK_TO_TRAVEL), self.name)
-    elseif Nav.saved.destinationActions.doubleClick == Nav.ACTION_TRAVEL then
-        tips[#tips+1] = zo_strformat(GetString(NAVIGATOR_TIP_DOUBLECLICK_TO_TRAVEL), self.name)
-    end
-
-    -- Recall cost
-    if not self.known and self.nodeIndex then
-        tips[#tips+1] = GetString(NAVIGATOR_NOT_KNOWN)
-    else
-        local recallCost = self:GetRecallCost()
-        if recallCost then
-            tips[#tips+1] = GetString(SI_TOOLTIP_RECALL_COST) .. "<<1>>"
+    local isCurrentLoc = Nav.currentNodeIndex == nodeIndex
+    local isOutboundOnly, outboundOnlyErrorStringId = GetFastTravelNodeOutboundOnlyInfo(nodeIndex)
+    if isCurrentLoc then --NO CLICK: Can't travel to origin
+        informationTooltip:AddLine(GetString(SI_TOOLTIP_WAYSHRINE_CURRENT_LOC), "", ZO_HIGHLIGHT_TEXT:UnpackRGB())
+    elseif Nav.currentNodeIndex == nil and IsInCampaign() then --NO CLICK: Can't recall while inside AvA zone
+        informationTooltip:AddLine(GetString(SI_TOOLTIP_WAYSHRINE_CANT_RECALL_AVA), "", ZO_ERROR_COLOR:UnpackRGB())
+    elseif isOutboundOnly then --NO CLICK: Can't travel to this wayshrine, only from it
+        local message = GetErrorString(outboundOnlyErrorStringId)
+        informationTooltip:AddLine(message, "", ZO_ERROR_COLOR:UnpackRGB())
+    elseif not CanLeaveCurrentLocationViaTeleport() then --NO CLICK: Current Zone or Subzone restricts jumping
+        local cantLeaveStringId
+        if IsInOutlawZone() then
+            cantLeaveStringId = SI_TOOLTIP_WAYSHRINE_CANT_RECALL_OUTLAW_REFUGE
+        else
+            cantLeaveStringId = SI_TOOLTIP_WAYSHRINE_CANT_RECALL_FROM_LOCATION
         end
+        informationTooltip:AddLine(GetString(cantLeaveStringId), "", ZO_ERROR_COLOR:UnpackRGB())
+        --elseif pin:IsLockedByLinkedCollectible() then --CLICK: Open the store
+        --    local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_MARKET_COLORS, MARKET_COLORS_ON_SALE)
+        --    local SET_TO_FULL_SIZE = true
+        --    informationTooltip:AddLine(ZO_WorldMap_GetWayshrineTooltipCollectibleLockedText(pin), "", r, g, b, CENTER, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_CENTER, SET_TO_FULL_SIZE)
+        --
+        --    if pin:GetLinkedCollectibleType() == COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
+        --        informationTooltip:AddLine(GetString(SI_TOOLTIP_WAYSHRINE_CLICK_TO_UPGRADE_CHAPTER), "", ZO_HIGHLIGHT_TEXT:UnpackRGB())
+        --    else
+        --        informationTooltip:AddLine(GetString(SI_TOOLTIP_WAYSHRINE_CLICK_TO_OPEN_CROWN_STORE), "", ZO_HIGHLIGHT_TEXT:UnpackRGB())
+        --    end
+    elseif IsUnitDead("player") then --NO CLICK: Dead
+        informationTooltip:AddLine(GetString(SI_TOOLTIP_WAYSHRINE_CANT_RECALL_WHEN_DEAD), "", ZO_ERROR_COLOR:UnpackRGB())
+    else
+        self:AddTooltipActions(informationTooltip)
     end
 
-    return #tips > 0 and table.concat(tips, "\n") or nil
+    if self.traders and self.traders > 0 then
+        informationTooltip:AddLine(zo_strformat(GetString(NAVIGATOR_TOOLTIP_GUILDTRADERS), self.traders), "", ZO_NORMAL_TEXT:UnpackRGB())
+      end
+
+    return informationTooltip
 end
 
 function FastTravelNode:Jump()
@@ -772,6 +916,16 @@ end
 
 function PlayerHouseNode:GetOverlayIcon()
     return "Navigator/media/overlays/player.dds", Nav.COLOUR_WHITE
+end
+
+function PlayerHouseNode:GetTooltip(control)
+    local tooltip = Node.GetTooltip(self, control)
+
+    local interaction = self:GetInteractionName("singleClick")
+    local action = GetString(SI_SOCIAL_MENU_VISIT_HOUSE)
+    tooltip:AddLine(zo_strformat(GetString(NAVIGATOR_TOOLTIP_ACTION_RESULT), interaction, action), 'ZoFontGame',  0.7725, 0.7608, 0.6196)
+    --self:AddTooltipActions(tooltip)
+    return tooltip
 end
 
 function PlayerHouseNode:OnClick()
