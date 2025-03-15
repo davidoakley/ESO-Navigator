@@ -406,7 +406,11 @@ end
 
 function HouseNode:DoAction(action)
     if action == Nav.ACTION_TRAVELOUTSIDE then
-        self:Jump(true)
+        if self.owned then
+            self:Jump(true)
+        else
+            ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, SI_JUMPRESULT17)
+        end
     else
         Node.DoAction(self, action)
     end
