@@ -15,6 +15,7 @@ lang/$(language).lua
 
 fzy.lua
 Data.lua
+Node.lua
 Nodes.lua
 Utils.lua
 Locations.lua
