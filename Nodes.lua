@@ -251,23 +251,11 @@ end
 function JumpToZoneNode:GetSuffix() return "" end
 function JumpToZoneNode:GetTagList() return {} end
 
-function JumpToZoneNode:GetActionDescription(action)
-    if action == Nav.ACTION_TRAVEL then
-        local s = Nav.Utils.EllipsisString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE)
-        if not self.known then
-            s = Nav.Utils.StrikethroughString(s)
-        end
-        return s
-    else
-        return Node.GetActionDescription(self, action)
-    end
-end
-
 function JumpToZoneNode:GetTooltip(control)
     local tooltip = Node.GetTooltip(self, control)
 
     local interaction = self:GetInteractionName("singleClick")
-    local action = zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE), self.name)
+    local action = Nav.Utils.EllipsisString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE)
     if not self.known then
         action = Nav.Utils.StrikethroughString(action)
     end
