@@ -511,9 +511,12 @@ function FastTravelNode:GetTooltip(control)
     local nodeIndex = self.nodeIndex
     local informationTooltip = Node.GetTooltip(self, control, name)
 
-    local isCurrentLoc = Nav.currentNodeIndex == nodeIndex
+    if self.traders and self.traders > 0 then
+        informationTooltip:AddLine(zo_strformat(GetString(NAVIGATOR_TOOLTIP_GUILDTRADERS), self.traders), "", ZO_NORMAL_TEXT:UnpackRGB())
+    end
+
     local isOutboundOnly, outboundOnlyErrorStringId = GetFastTravelNodeOutboundOnlyInfo(nodeIndex)
-    if isCurrentLoc then --NO CLICK: Can't travel to origin
+    if Nav.currentNodeIndex == nodeIndex then --NO CLICK: Can't travel to origin
         informationTooltip:AddLine(GetString(SI_TOOLTIP_WAYSHRINE_CURRENT_LOC), "", ZO_HIGHLIGHT_TEXT:UnpackRGB())
     elseif Nav.currentNodeIndex == nil and IsInCampaign() then --NO CLICK: Can't recall while inside AvA zone
         informationTooltip:AddLine(GetString(SI_TOOLTIP_WAYSHRINE_CANT_RECALL_AVA), "", ZO_ERROR_COLOR:UnpackRGB())
@@ -543,10 +546,6 @@ function FastTravelNode:GetTooltip(control)
     else
         self:AddTooltipActions(informationTooltip)
     end
-
-    if self.traders and self.traders > 0 then
-        informationTooltip:AddLine(zo_strformat(GetString(NAVIGATOR_TOOLTIP_GUILDTRADERS), self.traders), "", ZO_NORMAL_TEXT:UnpackRGB())
-      end
 
     return informationTooltip
 end
@@ -655,11 +654,40 @@ local POINode = Node:New()
 
 function POINode:IsPOI() return true end
 
-function POINode:GetTooltip()
+function POINode:GetTooltip(control)
+    local tooltip = Node.GetTooltip(self, control)
+
     if not self.known then
-        return GetString(NAVIGATOR_NOT_KNOWN)
+        tooltip:AddLine(GetString(NAVIGATOR_NOT_KNOWN), "", ZO_DISABLED_TEXT:UnpackRGB())
     end
-    return nil
+
+    local skyshardId = GetPOISkyshardId(self.zoneIndex, self.poiIndex)
+    if skyshardId ~= 0 then
+        local hintText = GetSkyshardHint(skyshardId)
+        tooltip:AddLine(zo_strformat(SI_WORLD_MAP_SKYSHARD_HINT_FORMATTER, hintText), "", ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB())
+
+        local skyshardDiscoveryStatus = GetSkyshardDiscoveryStatus(skyshardId)
+        tooltip:AddLine(zo_strformat(SI_WORLD_MAP_SKYSHARD_STATUS_FORMATTER, GetString("SI_SKYSHARDDISCOVERYSTATUS", skyshardDiscoveryStatus)), "", ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB())
+    end
+
+    local poiName, _, poiStartDesc, poiFinishedDesc = GetPOIInfo(self.zoneIndex, self.poiIndex)
+
+    if self.pinType == MAP_PIN_TYPE_POI_COMPLETE and poiFinishedDesc then
+        tooltip:AddLine(poiFinishedDesc, "", ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB())
+    elseif poiStartDesc then
+        tooltip:AddLine(poiStartDesc, "", ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB())
+    end
+
+    --local interaction = self:GetInteractionName("singleClick")
+    --local action = Nav.Utils.EllipsisString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE)
+    --if not self.known then
+    --    action = Nav.Utils.StrikethroughString(action)
+    --end
+    --tooltip:AddLine(zo_strformat(GetString(NAVIGATOR_TOOLTIP_ACTION_RESULT), interaction, action), 'ZoFontGame',  0.7725, 0.7608, 0.6196)
+
+    self:AddTooltipActions(tooltip)
+
+    return tooltip
 end
 
 function POINode:GetColour(isSelected)
