@@ -137,12 +137,6 @@ function ZoneNode:GetActionDescription(action)
     end
 end
 
-function ZoneNode:GetTooltip(control)
-    local tooltip = Node.GetTooltip(self, control)
-    self:AddTooltipActions(tooltip)
-    return tooltip
-end
-
 function ZoneNode:IsJumpable()
     local player = Nav.Players:GetPlayerInZone(self.zoneId)
     return player and self.zoneId > Nav.ZONE_TAMRIEL and self.zoneId ~= Nav.ZONE_CYRODIIL
@@ -251,19 +245,17 @@ end
 function JumpToZoneNode:GetSuffix() return "" end
 function JumpToZoneNode:GetTagList() return {} end
 
-function JumpToZoneNode:GetTooltip(control)
-    local tooltip = Node.GetTooltip(self, control)
-
-    local interaction = self:GetInteractionName("singleClick")
-    local action = Nav.Utils.EllipsisString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE)
-    if not self.known then
-        action = Nav.Utils.StrikethroughString(action)
-    end
-    tooltip:AddLine(zo_strformat(GetString(NAVIGATOR_TOOLTIP_ACTION_RESULT), interaction, action), 'ZoFontGame',  0.7725, 0.7608, 0.6196)
-
-    return tooltip
+function JumpToZoneNode:GetActions()
+    return { singleClick = Nav.ACTION_TRAVEL }
 end
 
+function JumpToZoneNode:GetActionDescription(_)
+    local desc = Nav.Utils.EllipsisString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE)
+    if not self.known then
+        desc = Nav.Utils.StrikethroughString(desc)
+    end
+    return desc
+end
 
 function JumpToZoneNode:GetColour(isSelected)
     if isSelected and self.known then
@@ -336,12 +328,6 @@ function HouseNode:GetActionDescription(action)
     else
         return Node.GetActionDescription(self, action)
     end
-end
-
-function HouseNode:GetTooltip(control)
-    local tooltip = Node.GetTooltip(self, control)
-    self:AddTooltipActions(tooltip)
-    return tooltip
 end
 
 function HouseNode:GetIconColour()
@@ -484,7 +470,7 @@ function FastTravelNode:GetTagList(showBookmark)
 end
 
 function FastTravelNode:GetOverlayIcon()
-    if self:GetRecallCost() then
+    if self.known and self:GetRecallCost() then
         return "Navigator/media/overlays/coin.dds", Nav.COLOUR_COIN
     else
         return nil, nil
@@ -506,6 +492,7 @@ function FastTravelNode:GetRecallCost()
     return nil -- It's free!
 end
 
+---TODO: Convert FastTravelNode:GetTooltip into Nav.Tooltip
 function FastTravelNode:GetTooltip(control)
     -- Converted from ESOUI: InformationTooltipMixin:AppendWayshrineTooltip(pin)
     local nodeIndex = self.nodeIndex
@@ -622,14 +609,8 @@ function PlayerHouseNode:GetOverlayIcon()
     return "Navigator/media/overlays/player.dds", Nav.COLOUR_WHITE
 end
 
-function PlayerHouseNode:GetTooltip(control)
-    local tooltip = Node.GetTooltip(self, control)
-
-    local interaction = self:GetInteractionName("singleClick")
-    local action = GetString(SI_SOCIAL_MENU_VISIT_HOUSE)
-    tooltip:AddLine(zo_strformat(GetString(NAVIGATOR_TOOLTIP_ACTION_RESULT), interaction, action), 'ZoFontGame',  0.7725, 0.7608, 0.6196)
-    --self:AddTooltipActions(tooltip)
-    return tooltip
+function PlayerHouseNode:GetActions()
+    return { singleClick = Nav.ACTION_VISITHOUSE }
 end
 
 function PlayerHouseNode:OnClick()
@@ -653,42 +634,6 @@ end
 local POINode = Node:New()
 
 function POINode:IsPOI() return true end
-
-function POINode:GetTooltip(control)
-    local tooltip = Node.GetTooltip(self, control)
-
-    if not self.known then
-        tooltip:AddLine(GetString(NAVIGATOR_NOT_KNOWN), "", ZO_DISABLED_TEXT:UnpackRGB())
-    end
-
-    local skyshardId = GetPOISkyshardId(self.zoneIndex, self.poiIndex)
-    if skyshardId ~= 0 then
-        local hintText = GetSkyshardHint(skyshardId)
-        tooltip:AddLine(zo_strformat(SI_WORLD_MAP_SKYSHARD_HINT_FORMATTER, hintText), "", ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB())
-
-        local skyshardDiscoveryStatus = GetSkyshardDiscoveryStatus(skyshardId)
-        tooltip:AddLine(zo_strformat(SI_WORLD_MAP_SKYSHARD_STATUS_FORMATTER, GetString("SI_SKYSHARDDISCOVERYSTATUS", skyshardDiscoveryStatus)), "", ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB())
-    end
-
-    local poiName, _, poiStartDesc, poiFinishedDesc = GetPOIInfo(self.zoneIndex, self.poiIndex)
-
-    if self.pinType == MAP_PIN_TYPE_POI_COMPLETE and poiFinishedDesc then
-        tooltip:AddLine(poiFinishedDesc, "", ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB())
-    elseif poiStartDesc then
-        tooltip:AddLine(poiStartDesc, "", ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB())
-    end
-
-    --local interaction = self:GetInteractionName("singleClick")
-    --local action = Nav.Utils.EllipsisString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE)
-    --if not self.known then
-    --    action = Nav.Utils.StrikethroughString(action)
-    --end
-    --tooltip:AddLine(zo_strformat(GetString(NAVIGATOR_TOOLTIP_ACTION_RESULT), interaction, action), 'ZoFontGame',  0.7725, 0.7608, 0.6196)
-
-    self:AddTooltipActions(tooltip)
-
-    return tooltip
-end
 
 function POINode:GetColour(isSelected)
     if isSelected and self.known and not self.disabled then
@@ -755,16 +700,6 @@ function KeepNode:GetTagList(showBookmark)
     end
 
     return Nav.Utils.tableConcat(tagList, Node.GetTagList(self, showBookmark))
-end
-
-function KeepNode:GetTooltip(control)
-    local tooltip = ZO_WorldMap_GetTooltipForMode(ZO_MAP_TOOLTIP_MODE.KEEP)
-    InitializeTooltip(tooltip, control, TOPRIGHT, 0, -2, TOPLEFT)
-    tooltip:SetKeep(self.keepId, self.bgContext, ZO_WorldMap_GetHistoryPercentToUse())
-    tooltip:SetAnchor(TOPRIGHT, control, TOPLEFT, 0, -2)
-    --local tooltip = Node.GetTooltip(self, control)
-    --self:AddTooltipActions(tooltip)
-    return tooltip
 end
 
 function KeepNode:GetTagColour()

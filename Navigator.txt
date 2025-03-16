@@ -22,6 +22,7 @@ Locations.lua
 Players.lua
 Search.lua
 Chat.lua
+Tooltip.lua
 
 LAM_navactions.lua
 Settings.lua

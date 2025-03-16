@@ -119,36 +119,17 @@ function MT:layoutRow(rowControl, data, _)
         --InitializeTooltip(InformationTooltip, rc, TOPRIGHT, 0, -2, BOTTOMLEFT)
         --currentTooltip = InformationTooltip
 
-        if node.GetTooltip then
-            local tooltip = node:GetTooltip(rc)
-
-            --local recallCost = node:GetRecallCost()
-            --if tooltipText and recallCost then
-            --    local currencyType = CURT_MONEY
-            --    local formatType = ZO_CURRENCY_FORMAT_AMOUNT_ICON
-            --    local currencyString = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(currencyType, recallCost, formatType))
-            --    tooltipText = zo_strformat(tooltipText, currencyString)
-            --end
-            --Nav.log(type(tooltip))
-            if type(tooltip) == 'userdata' then
-                currentTooltip = tooltip
-            elseif type(tooltip) == 'string' then
-                InitializeTooltip(InformationTooltip, rc, TOPRIGHT, 0, -2, BOTTOMLEFT)
-                currentTooltip = InformationTooltip
-                InformationTooltip:AddLine(tooltip, 'ZoFontGame', 1, 1, 1, TOPLEFT, MODIFY_TEXT_TYPE_NONE, CENTER, false)
-            end
-        end
+        currentTooltip = Nav.Tooltip:New(node, rc)
 
         local devTooltip = getDeveloperTooltip(node)
         if currentTooltip and devTooltip then
             --tooltipText = (tooltipText and (tooltipText .. "\n") or "") .. devTooltip
-            currentTooltip:AddLine(devTooltip, 'ZoFontGameSmall', 0.7725, 0.7608, 0.6196, TOPLEFT, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_LEFT, false)
+            currentTooltip.tooltip:AddLine(devTooltip, 'ZoFontGameSmall', 0.7725, 0.7608, 0.6196, TOPLEFT, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_LEFT, false)
         end
     end)
     rowControl:SetHandler("OnMouseExit", function(_)
         if currentTooltip then
-            currentTooltip:SetHidden(true)
-            ClearTooltip(currentTooltip)
+            currentTooltip:Clear()
             currentTooltip = nil
         end
         --ZO_Tooltips_HideTextTooltip()
