@@ -757,6 +757,16 @@ function KeepNode:GetTagList(showBookmark)
     return Nav.Utils.tableConcat(tagList, Node.GetTagList(self, showBookmark))
 end
 
+function KeepNode:GetTooltip(control)
+    local tooltip = ZO_WorldMap_GetTooltipForMode(ZO_MAP_TOOLTIP_MODE.KEEP)
+    InitializeTooltip(tooltip, control, TOPRIGHT, 0, -2, TOPLEFT)
+    tooltip:SetKeep(self.keepId, self.bgContext, ZO_WorldMap_GetHistoryPercentToUse())
+    tooltip:SetAnchor(TOPRIGHT, control, TOPLEFT, 0, -2)
+    --local tooltip = Node.GetTooltip(self, control)
+    --self:AddTooltipActions(tooltip)
+    return tooltip
+end
+
 function KeepNode:GetTagColour()
     return Nav.COLOUR_WHITE
 end

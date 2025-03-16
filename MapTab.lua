@@ -147,6 +147,7 @@ function MT:layoutRow(rowControl, data, _)
     end)
     rowControl:SetHandler("OnMouseExit", function(_)
         if currentTooltip then
+            currentTooltip:SetHidden(true)
             ClearTooltip(currentTooltip)
             currentTooltip = nil
         end
