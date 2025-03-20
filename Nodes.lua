@@ -251,9 +251,6 @@ end
 
 function JumpToZoneNode:GetActionDescription(_)
     local desc = Nav.Utils.EllipsisString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE)
-    if not self.known then
-        desc = Nav.Utils.StrikethroughString(desc)
-    end
     return desc
 end
 
