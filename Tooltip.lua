@@ -24,7 +24,9 @@ function Tooltip:New(node, control)
         o.tooltip:AddLine(GetString(NAVIGATOR_NOT_KNOWN), "", ZO_DISABLED_TEXT:UnpackRGB())
     end
 
-    if node.poiIndex then
+    if node.nodeIndex and not node.houseId then
+        o:AddFastTravelNodeInfo()
+    elseif node.poiIndex then
         o:AddPOIInfo()
     end
 
@@ -57,6 +59,57 @@ function Tooltip:AddPOIInfo()
     if hasContent then ZO_Tooltip_AddDivider(self.tooltip) end
 end
 
+function Tooltip:AddFastTravelNodeInfo()
+    local hasContent = false
+    -- Converted from ESOUI: InformationTooltipMixin:AppendWayshrineTooltip(pin)
+    local nodeIndex = self.node.nodeIndex
+
+    if self.node.traders and self.node.traders > 0 then
+        self.tooltip:AddLine(zo_strformat(GetString(NAVIGATOR_TOOLTIP_GUILDTRADERS), self.node.traders), "", ZO_NORMAL_TEXT:UnpackRGB())
+        hasContent = true
+    end
+
+    local isOutboundOnly, outboundOnlyErrorStringId = GetFastTravelNodeOutboundOnlyInfo(nodeIndex)
+    if Nav.currentNodeIndex == nodeIndex then --NO CLICK: Can't travel to origin
+        self.tooltip:AddLine(GetString(SI_TOOLTIP_WAYSHRINE_CURRENT_LOC), "", ZO_HIGHLIGHT_TEXT:UnpackRGB())
+        hasContent = true
+    elseif Nav.currentNodeIndex == nil and IsInCampaign() then --NO CLICK: Can't recall while inside AvA zone
+        self.tooltip:AddLine(GetString(SI_TOOLTIP_WAYSHRINE_CANT_RECALL_AVA), "", ZO_ERROR_COLOR:UnpackRGB())
+        hasContent = true
+    elseif isOutboundOnly then --NO CLICK: Can't travel to this wayshrine, only from it
+        local message = GetErrorString(outboundOnlyErrorStringId)
+        self.tooltip:AddLine(message, "", ZO_ERROR_COLOR:UnpackRGB())
+        hasContent = true
+    elseif not CanLeaveCurrentLocationViaTeleport() then --NO CLICK: Current Zone or Subzone restricts jumping
+        local cantLeaveStringId
+        if IsInOutlawZone() then
+            cantLeaveStringId = SI_TOOLTIP_WAYSHRINE_CANT_RECALL_OUTLAW_REFUGE
+        else
+            cantLeaveStringId = SI_TOOLTIP_WAYSHRINE_CANT_RECALL_FROM_LOCATION
+        end
+        self.tooltip:AddLine(GetString(cantLeaveStringId), "", ZO_ERROR_COLOR:UnpackRGB())
+        hasContent = true
+        --elseif pin:IsLockedByLinkedCollectible() then --CLICK: Open the store
+        --    local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_MARKET_COLORS, MARKET_COLORS_ON_SALE)
+        --    local SET_TO_FULL_SIZE = true
+        --    self.tooltip:AddLine(ZO_WorldMap_GetWayshrineTooltipCollectibleLockedText(pin), "", r, g, b, CENTER, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_CENTER, SET_TO_FULL_SIZE)
+        --
+        --    if pin:GetLinkedCollectibleType() == COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
+        --        self.tooltip:AddLine(GetString(SI_TOOLTIP_WAYSHRINE_CLICK_TO_UPGRADE_CHAPTER), "", ZO_HIGHLIGHT_TEXT:UnpackRGB())
+        --    else
+        --        self.tooltip:AddLine(GetString(SI_TOOLTIP_WAYSHRINE_CLICK_TO_OPEN_CROWN_STORE), "", ZO_HIGHLIGHT_TEXT:UnpackRGB())
+        --    end
+    elseif IsUnitDead("player") then --NO CLICK: Dead
+        self.tooltip:AddLine(GetString(SI_TOOLTIP_WAYSHRINE_CANT_RECALL_WHEN_DEAD), "", ZO_ERROR_COLOR:UnpackRGB())
+        hasContent = true
+    --else
+    --    self:AddTooltipActions(self.tooltip)
+    end
+
+    if hasContent then
+        ZO_Tooltip_AddDivider(self.tooltip)
+    end
+end
 
 function Tooltip:AddKeepInfo()
     --local LINE_SPACING = 3
