@@ -58,6 +58,8 @@ local function getDeveloperTooltip(node)
     return table.concat(items, "\n")
 end
 
+local currentTooltip = nil
+
 function MT:layoutRow(rowControl, data, _)
     local node = data.node
     local isSelected = data.isSelected
@@ -114,31 +116,23 @@ function MT:layoutRow(rowControl, data, _)
     rowControl.label:SetColor(ZO_ColorDef.HexToFloats(node:GetColour(isSelected)))
 
     rowControl:SetHandler("OnMouseEnter", function(rc)
-        local tooltipText
+        --InitializeTooltip(InformationTooltip, rc, TOPRIGHT, 0, -2, BOTTOMLEFT)
+        --currentTooltip = InformationTooltip
 
-        if node.GetTooltip then
-            tooltipText = node:GetTooltip()
-
-            local recallCost = node:GetRecallCost()
-            if recallCost then
-                local currencyType = CURT_MONEY
-                local formatType = ZO_CURRENCY_FORMAT_AMOUNT_ICON
-                local currencyString = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(currencyType, recallCost, formatType))
-                tooltipText = zo_strformat(tooltipText, currencyString)
-            end
-        end
+        currentTooltip = Nav.Tooltip:New(node, rc)
 
         local devTooltip = getDeveloperTooltip(node)
-        if devTooltip then
-            tooltipText = (tooltipText and (tooltipText .. "\n") or "") .. devTooltip
-        end
-
-        if tooltipText then
-            ZO_Tooltips_ShowTextTooltip(rc, LEFT, tooltipText)
+        if currentTooltip and devTooltip then
+            --tooltipText = (tooltipText and (tooltipText .. "\n") or "") .. devTooltip
+            currentTooltip.tooltip:AddLine(devTooltip, 'ZoFontGameSmall', 0.7725, 0.7608, 0.6196, TOPLEFT, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_LEFT, false)
         end
     end)
     rowControl:SetHandler("OnMouseExit", function(_)
-        ZO_Tooltips_HideTextTooltip()
+        if currentTooltip then
+            currentTooltip:Clear()
+            currentTooltip = nil
+        end
+        --ZO_Tooltips_HideTextTooltip()
         rowControl.label:SetColor(ZO_ColorDef.HexToFloats(node:GetColour()))
     end)
 end

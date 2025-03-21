@@ -39,6 +39,7 @@ mkstr("NAVIGATOR_KEY_ENTER", "Entrée")
 mkstr("NAVIGATOR_NOT_KNOWN", "Non découvert par ce personnage") -- Location not known
 mkstr("NAVIGATOR_TIP_CLICK_TO_TRAVEL", "Double-cliquez pour voyager à <<1>>") -- 1:zone
 mkstr("NAVIGATOR_TIP_DOUBLECLICK_TO_TRAVEL", "Cliquez pour voyager à <<1>>") -- 1:zone
+mkstr("NAVIGATOR_TOOLTIP_ACTION_RESULT", "<<1>> : <<2>>") -- e.g. 1:"Single-click" 2:"Show On Map"
 
 -- Actions items
 mkstr("NAVIGATOR_TRAVEL_TO_ZONE", "Se rendre à <<1>>") -- 1:Zone

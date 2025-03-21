@@ -5,226 +5,7 @@
 ---
 
 local Nav = Navigator
-
-local pingEvent
-
---- @class Node
-local Node = {}
-
-function Node:New(o)
-    o = o or {}
-    setmetatable(o, self)
-    self.__index = self
-    return o
-end
-
-function Node:IsHouse() return false end
-function Node:IsPOI() return false end
-
----WeightComparison
----@param x Node
----@param y Node
-function Node.WeightComparison(x, y)
-    local xWeight = x:GetWeight()
-    local yWeight = y:GetWeight()
-
-    if xWeight ~= yWeight then
-        return xWeight > yWeight
-    end
-    return Nav.SortName(x.name) < Nav.SortName(y.name)
-end
-
-function Node:IsKnown()
-    if self.known == nil then
-        if self.nodeIndex then
-            local known, _, _, _, _, _, _, _, _ = GetFastTravelNodeInfo(self.nodeIndex)
-            self.known = known
-        else
-            local x, z, iconType, icon, isShownInCurrentMap, linkedCollectibleIsLocked, isDiscovered, isNearby = GetPOIMapInfo(self.zoneIndex, self.poiIndex)
-            self.known = isDiscovered
-        end
-    end
-    return self.known
-end
-
-function Node:GetWeight()
-    return 1.0
-end
-
-function Node:AddBookmarkMenuItem(entry)
-    if entry and not Nav.Bookmarks:contains(entry) then
-        AddMenuItem(GetString(NAVIGATOR_MENU_ADDBOOKMARK), function()
-            Nav.Bookmarks:add(entry)
-            Nav.MapTab.menuOpen = false
-            zo_callLater(function() Nav.MapTab:ImmediateRefresh() end, 10)
-        end)
-    end
-end
-
-function Node:GetName()
-    return self.name or ""
-end
-
-function Node:GetIcon()
-    return self.icon
-end
-
-function Node:GetSuffix()
-    return self.suffix or ""
-end
-
-function Node:GetTagList(showBookmark)
-    local tagList = {}
-    if showBookmark and Nav.Bookmarks:contains(self) then
-        table.insert(tagList, "bookmark")
-    end
-    return tagList
-end
-
-function Node:GetOverlayIcon()
-    return nil, nil
-end
-
-function Node:GetTooltip()
-    return self.tooltip
-end
-
-function Node:GetColour(isSelected)
-    if isSelected and self.known and not self.disabled then
-        return Nav.COLOUR_WHITE
-    elseif self.known and not self.disabled then
-        return Nav.COLOUR_NORMAL
-    else
-        return Nav.COLOUR_DISABLED
-    end
-end
-
-function Node:GetIconColour()
-    if self.known and not self.disabled then
-        return Nav.COLOUR_WHITE
-    else
-        return Nav.COLOUR_DISABLED
-    end
-end
-
-function Node:GetSuffixColour()
-    if self.known and not self.disabled then
-        return Nav.COLOUR_SUFFIX_NORMAL
-    else
-        return Nav.COLOUR_SUFFIX_DISABLED
-    end
-    --return (self.known and not self.disabled) and Nav.COLOUR_SUFFIX_NORMAL or Nav.COLOUR_SUFFIX_DISABLED
-end
-Node.GetTagColour = Node.GetSuffixColour
-
-function Node:GetRecallCost()
-    return nil -- By default, free!
-end
-
-function Node:GetMapInfo(self, zoneIndex, mapId)
-    if mapId == 2082 then
-        return 0.3485, 0.3805 -- The Shambles
-    elseif self.nodeIndex == 407 then
-        return 0.9273, 0.7105 -- Dragonguard Sanctum
-    else
-        return GetPOIMapInfo(zoneIndex, self.poiIndex)
-    end
-end
-
-function Node:ZoomToPOI(setWaypoint, useCurrentZoom)
-    local function panToPOI(self, zoneIndex, mapId)
-        local normalizedX, normalizedZ = self:GetMapInfo(self, zoneIndex, mapId)
-        --Nav.log("Node:ZoomToPOI: poiIndex=%d, %f,%f", self.poiIndex or -1, normalizedX, normalizedZ)
-        if setWaypoint then
-            PingMap(MAP_PIN_TYPE_PLAYER_WAYPOINT, MAP_TYPE_LOCATION_CENTERED, normalizedX, normalizedZ)
-        else
-            Node.AddPing(normalizedX, normalizedZ)
-        end
-
-        local mapPanAndZoom = ZO_WorldMap_GetPanAndZoom()
-        mapPanAndZoom:PanToNormalizedPosition(normalizedX, normalizedZ, useCurrentZoom)
-    end
-
-    local targetMapId = self.mapId or Nav.Locations.GetMapIdByZoneId(self.zoneId)
-    local currentMapId = GetCurrentMapId()
-    local targetZoneIndex = GetZoneIndex(self.zoneId)
-    if self.nodeIndex == 407 then -- Dragonguard Sanctum
-        targetMapId = 1654
-    end
-
-    if targetMapId ~= currentMapId then
-        WORLD_MAP_MANAGER:SetMapById(targetMapId)
-
-        zo_callLater(function()
-            panToPOI(self, targetZoneIndex, targetMapId)
-        end, 100)
-    else
-        panToPOI(self, targetZoneIndex, targetMapId)
-    end
-end
-
-function Node.AddPing(x, y)
-    Node.RemovePings()
-    local pinMgr = ZO_WorldMap_GetPinManager()
-    pinMgr:CreatePin(MAP_PIN_TYPE_AUTO_MAP_NAVIGATION_PING, "pings", x, y)
-    pingEvent = zo_callLater(function()
-        Node.RemovePings()
-        pingEvent = nil
-    end, 2800)
-end
-
-function Node.RemovePings()
-    if pingEvent then
-        zo_removeCallLater(pingEvent)
-        pingEvent = nil
-        ZO_WorldMap_GetPinManager():RemovePins("pings", MAP_PIN_TYPE_AUTO_MAP_NAVIGATION_PING)
-    end
-end
-
-local singleClickEvent
-function Node:OnClick(isDoubleClick)
-    local action = self.GetActions()[isDoubleClick and "doubleClick" or "singleClick"]
-    if isDoubleClick and singleClickEvent then
-        zo_removeCallLater(singleClickEvent)
-        singleClickEvent = nil
-    end
-    if not isDoubleClick and (action == Nav.ACTION_TRAVEL or action == Nav.ACTION_TRAVELOUTSIDE) and
-       action ~= self.GetActions().doubleClick then
-        singleClickEvent = zo_callLater(function()
-            self:DoAction(action)
-        end, 400)
-    else
-        singleClickEvent = nil
-        self:DoAction(action)
-    end
-end
-
-function Node:OnEnter()
-    self:DoAction(self:GetActions().enterKey)
-end
-
-function Node:OnSlash()
-    local action = self:GetActions().slash
-    if action == Nav.ACTION_SHOWONMAP or action == Nav.ACTION_SETDESTINATION then
-        Nav.showSearch(function() self:DoAction(action) end)
-    else
-        self:DoAction(action)
-    end
-end
-
-function Node:GetActions()
-    return {}
-end
-
-function Node:DoAction(action)
-    if action == Nav.ACTION_SHOWONMAP then
-        self:ZoomToPOI(false)
-    elseif action == Nav.ACTION_SETDESTINATION then
-        self:ZoomToPOI(true)
-    elseif action == Nav.ACTION_TRAVEL then
-        self:Jump()
-    end
-end
+local Node = Nav.Node
 
 --- @class PlayerNode
 local PlayerNode = Node:New()
@@ -344,17 +125,16 @@ function ZoneNode:GetIcon()
     return "Navigator/media/zone.dds"
 end
 
-function ZoneNode:GetTooltip()
-    if self.zoneId == Nav.ZONE_CYRODIIL then return nil end
-
-    local stringId
-    local player = Nav.Players:GetPlayerInZone(self.zoneId)
-    if Nav.saved.zoneActions.singleClick == Nav.ACTION_TRAVEL then
-        stringId = player and NAVIGATOR_TIP_CLICK_TO_TRAVEL or NAVIGATOR_NO_TRAVEL_PLAYER
-    elseif Nav.saved.zoneActions.doubleClick == Nav.ACTION_TRAVEL then
-        stringId = player and NAVIGATOR_TIP_DOUBLECLICK_TO_TRAVEL or NAVIGATOR_NO_TRAVEL_PLAYER
+function ZoneNode:GetActionDescription(action)
+    if action == Nav.ACTION_TRAVEL then
+        local s = Nav.Utils.EllipsisString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE)
+        if not self:IsJumpable() and Nav.jumpState ~= Nav.JUMPSTATE_WAYSHRINE then
+            s = Nav.Utils.StrikethroughString(s)
+        end
+        return s
+    else
+        return Node.GetActionDescription(self, action)
     end
-    return stringId and zo_strformat(GetString(stringId), self.name) or nil
 end
 
 function ZoneNode:IsJumpable()
@@ -464,7 +244,15 @@ end
 
 function JumpToZoneNode:GetSuffix() return "" end
 function JumpToZoneNode:GetTagList() return {} end
-function JumpToZoneNode:GetTooltip() return nil end
+
+function JumpToZoneNode:GetActions()
+    return { singleClick = Nav.ACTION_TRAVEL }
+end
+
+function JumpToZoneNode:GetActionDescription(_)
+    local desc = Nav.Utils.EllipsisString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE)
+    return desc
+end
 
 function JumpToZoneNode:GetColour(isSelected)
     if isSelected and self.known then
@@ -521,6 +309,24 @@ function HouseNode:GetIcon()
     return "Navigator/media/house.dds"
 end
 
+function HouseNode:GetActionDescription(action)
+    if action == Nav.ACTION_TRAVEL then
+        if self.owned then
+            return Nav.Utils.EllipsisString(SI_WORLD_MAP_ACTION_TRAVEL_TO_HOUSE_INSIDE)
+        else
+            return Nav.Utils.EllipsisString(SI_WORLD_MAP_ACTION_PREVIEW_HOUSE)
+        end
+    elseif action == Nav.ACTION_TRAVELOUTSIDE then
+        local s = Nav.Utils.EllipsisString(SI_WORLD_MAP_ACTION_TRAVEL_TO_HOUSE_OUTSIDE)
+        if not self.owned then
+            s = Nav.Utils.StrikethroughString(s)
+        end
+        return s
+    else
+        return Node.GetActionDescription(self, action)
+    end
+end
+
 function HouseNode:GetIconColour()
     if self.owned then
         return Nav.COLOUR_WHITE
@@ -571,7 +377,11 @@ end
 
 function HouseNode:DoAction(action)
     if action == Nav.ACTION_TRAVELOUTSIDE then
-        self:Jump(true)
+        if self.owned then
+            self:Jump(true)
+        else
+            ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, SI_JUMPRESULT17)
+        end
     else
         Node.DoAction(self, action)
     end
@@ -657,7 +467,7 @@ function FastTravelNode:GetTagList(showBookmark)
 end
 
 function FastTravelNode:GetOverlayIcon()
-    if self:GetRecallCost() then
+    if self.known and self:GetRecallCost() then
         return "Navigator/media/overlays/coin.dds", Nav.COLOUR_COIN
     else
         return nil, nil
@@ -679,27 +489,49 @@ function FastTravelNode:GetRecallCost()
     return nil -- It's free!
 end
 
-function FastTravelNode:GetTooltip()
-    local tips = {}
+---TODO: Convert FastTravelNode:GetTooltip into Nav.Tooltip
+function FastTravelNode:GetTooltip(control)
+    -- Converted from ESOUI: InformationTooltipMixin:AppendWayshrineTooltip(pin)
+    local nodeIndex = self.nodeIndex
+    local informationTooltip = Node.GetTooltip(self, control, name)
 
-    -- Click/double-click to travel
-    if Nav.saved.destinationActions.singleClick == Nav.ACTION_TRAVEL then
-        tips[#tips+1] = zo_strformat(GetString(NAVIGATOR_TIP_CLICK_TO_TRAVEL), self.name)
-    elseif Nav.saved.destinationActions.doubleClick == Nav.ACTION_TRAVEL then
-        tips[#tips+1] = zo_strformat(GetString(NAVIGATOR_TIP_DOUBLECLICK_TO_TRAVEL), self.name)
+    if self.traders and self.traders > 0 then
+        informationTooltip:AddLine(zo_strformat(GetString(NAVIGATOR_TOOLTIP_GUILDTRADERS), self.traders), "", ZO_NORMAL_TEXT:UnpackRGB())
     end
 
-    -- Recall cost
-    if not self.known and self.nodeIndex then
-        tips[#tips+1] = GetString(NAVIGATOR_NOT_KNOWN)
-    else
-        local recallCost = self:GetRecallCost()
-        if recallCost then
-            tips[#tips+1] = GetString(SI_TOOLTIP_RECALL_COST) .. "<<1>>"
+    local isOutboundOnly, outboundOnlyErrorStringId = GetFastTravelNodeOutboundOnlyInfo(nodeIndex)
+    if Nav.currentNodeIndex == nodeIndex then --NO CLICK: Can't travel to origin
+        informationTooltip:AddLine(GetString(SI_TOOLTIP_WAYSHRINE_CURRENT_LOC), "", ZO_HIGHLIGHT_TEXT:UnpackRGB())
+    elseif Nav.currentNodeIndex == nil and IsInCampaign() then --NO CLICK: Can't recall while inside AvA zone
+        informationTooltip:AddLine(GetString(SI_TOOLTIP_WAYSHRINE_CANT_RECALL_AVA), "", ZO_ERROR_COLOR:UnpackRGB())
+    elseif isOutboundOnly then --NO CLICK: Can't travel to this wayshrine, only from it
+        local message = GetErrorString(outboundOnlyErrorStringId)
+        informationTooltip:AddLine(message, "", ZO_ERROR_COLOR:UnpackRGB())
+    elseif not CanLeaveCurrentLocationViaTeleport() then --NO CLICK: Current Zone or Subzone restricts jumping
+        local cantLeaveStringId
+        if IsInOutlawZone() then
+            cantLeaveStringId = SI_TOOLTIP_WAYSHRINE_CANT_RECALL_OUTLAW_REFUGE
+        else
+            cantLeaveStringId = SI_TOOLTIP_WAYSHRINE_CANT_RECALL_FROM_LOCATION
         end
+        informationTooltip:AddLine(GetString(cantLeaveStringId), "", ZO_ERROR_COLOR:UnpackRGB())
+        --elseif pin:IsLockedByLinkedCollectible() then --CLICK: Open the store
+        --    local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_MARKET_COLORS, MARKET_COLORS_ON_SALE)
+        --    local SET_TO_FULL_SIZE = true
+        --    informationTooltip:AddLine(ZO_WorldMap_GetWayshrineTooltipCollectibleLockedText(pin), "", r, g, b, CENTER, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_CENTER, SET_TO_FULL_SIZE)
+        --
+        --    if pin:GetLinkedCollectibleType() == COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
+        --        informationTooltip:AddLine(GetString(SI_TOOLTIP_WAYSHRINE_CLICK_TO_UPGRADE_CHAPTER), "", ZO_HIGHLIGHT_TEXT:UnpackRGB())
+        --    else
+        --        informationTooltip:AddLine(GetString(SI_TOOLTIP_WAYSHRINE_CLICK_TO_OPEN_CROWN_STORE), "", ZO_HIGHLIGHT_TEXT:UnpackRGB())
+        --    end
+    elseif IsUnitDead("player") then --NO CLICK: Dead
+        informationTooltip:AddLine(GetString(SI_TOOLTIP_WAYSHRINE_CANT_RECALL_WHEN_DEAD), "", ZO_ERROR_COLOR:UnpackRGB())
+    else
+        self:AddTooltipActions(informationTooltip)
     end
 
-    return #tips > 0 and table.concat(tips, "\n") or nil
+    return informationTooltip
 end
 
 function FastTravelNode:Jump()
@@ -774,6 +606,10 @@ function PlayerHouseNode:GetOverlayIcon()
     return "Navigator/media/overlays/player.dds", Nav.COLOUR_WHITE
 end
 
+function PlayerHouseNode:GetActions()
+    return { singleClick = Nav.ACTION_VISITHOUSE }
+end
+
 function PlayerHouseNode:OnClick()
     SCENE_MANAGER:Hide("worldMap")
     ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.POSITIVE_CLICK,zo_strformat(GetString(NAVIGATOR_TRAVELING_TO_PLAYER_HOUSE), self.userID))
@@ -795,13 +631,6 @@ end
 local POINode = Node:New()
 
 function POINode:IsPOI() return true end
-
-function POINode:GetTooltip()
-    if not self.known then
-        return GetString(NAVIGATOR_NOT_KNOWN)
-    end
-    return nil
-end
 
 function POINode:GetColour(isSelected)
     if isSelected and self.known and not self.disabled then
@@ -952,7 +781,6 @@ function KeepNode:GetWeight()
     return w
 end
 
-Nav.Node = Node
 Nav.PlayerNode = PlayerNode
 Nav.ZoneNode = ZoneNode
 Nav.JumpToZoneNode = JumpToZoneNode

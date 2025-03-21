@@ -214,4 +214,12 @@ function Utils.logChars(s)
 	Nav.log("UNICODE: '%s' -> '%s'", s, table.concat(chars, '|'))
 end
 
+function Utils.EllipsisString(stringId)
+	return GetString(stringId):gsub(" <<1>>", "...")
+end
+
+function Utils.StrikethroughString(str)
+	return "|c666666|l0:1:0:-25%:2:666666|l"..str.."|l|r"
+end
+
 Nav.Utils = Utils
