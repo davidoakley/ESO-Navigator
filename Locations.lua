@@ -492,6 +492,8 @@ function Locs:getCurrentMapZoneId()
     -- Nav.log("Locs:getCurrentMapZone zoneId = "..zoneId.." type "..mapType)
     if mapId == 2119 then
         zoneId = Nav.ZONE_FARGRAVE
+    elseif mapId == Nav.MAPID_BLACKREACH then
+        return Nav.ZONE_BLACKREACH
     elseif mapType == MAPTYPE_SUBZONE and not self:IsZone(zoneId) then
         zoneId = GetParentZoneId(zoneId)
         -- Nav.log("Locs:getCurrentMapZone parent zoneId = "..zoneId)
@@ -514,10 +516,8 @@ function Locs:getCurrentMapZone()
         zoneId = Nav.ZONE_ATOLLOFIMMOLATION
     elseif mapId == 2119 then
         zoneId = Nav.ZONE_FARGRAVE
-    elseif mapId == 1782 then
-        zoneId = Nav.ZONE_BLACKREACH
-        mapType = MAPTYPE_ZONE
-        --return { zoneId = Nav.ZONE_BLACKREACH, name = GetMapNameById(mapId), mapId = mapId }
+    elseif mapId == Nav.MAPID_BLACKREACH then
+        return self.zones[Nav.ZONE_BLACKREACH]
     end
     if zoneId == Nav.ZONE_TAMRIEL then
         return {
