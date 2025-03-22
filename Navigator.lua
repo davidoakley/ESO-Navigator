@@ -155,10 +155,10 @@ local function OnMapStateChange(_, newState)
       WORLD_MAP_INFO:SelectTab(NAVIGATOR_TAB_SEARCH)
     end
 
-    if not zone or zone.zoneId > 2 then
-      Nav.MapTab.collapsedCategories = {}
+    if zone and Nav.Locations:ShouldCollapseCategories(zone.zoneId) then
+        Nav.MapTab.collapsedCategories = { bookmarks = true, recents = true }
     else
-      Nav.MapTab.collapsedCategories = { bookmarks = true, recents = true }
+        Nav.MapTab.collapsedCategories = {}
     end
   elseif newState == SCENE_HIDDEN then
     Nav.log("WorldMap hidden")
