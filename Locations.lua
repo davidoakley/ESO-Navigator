@@ -19,11 +19,16 @@ function Locs:IsZone(zoneId)
        or zoneId==1413 -- Apocrypha
        or zoneId==1463 -- The Scholarium
        or zoneId==1272 -- Atoll of Immolation
+       or zoneId==Nav.ZONE_IMPERIALSEWERS
        )
        then
         return true
     end
     return false
+end
+
+function Locs:ShouldCollapseCategories(zoneId)
+    return zoneId <= 2 or zoneId == Nav.ZONE_CYRODIIL or zoneId == Nav.ZONE_IMPERIALCITY or zoneId == Nav.ZONE_IMPERIALSEWERS
 end
 
 local function createNode(self, i, name, typePOI, icon, glowIcon, known, zone, poiIndex)
@@ -165,7 +170,6 @@ local function loadPopulatedZones(self, zoneLookup)
         if self:IsZone(zoneId) then
             local zoneName = GetZoneNameById(zoneId)
             if zoneName ~= nil and zoneName ~= ""
-                    and zoneId ~= 643 -- Imperial Sewers
             then
                 zoneIdLimit = math.max(zoneIdLimit, zoneId + 50)
                 zoneName = Utils.FormatSimpleName(zoneName)

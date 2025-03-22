@@ -81,7 +81,8 @@ function Content:AddZoneCategory(zone)
     local list = Nav.Locations:GetNodeList(zone.zoneId, false, Nav.saved.listPOIs)
     table.sort(list, Nav.Node.WeightComparison)
 
-    if Nav.jumpState == Nav.JUMPSTATE_WORLD and zone.zoneId ~= Nav.ZONE_CYRODIIL then
+    if Nav.jumpState == Nav.JUMPSTATE_WORLD and zone.zoneId ~= Nav.ZONE_CYRODIIL and
+       zone.zoneId ~= Nav.ZONE_IMPERIALCITY and zone.zoneId ~= Nav.ZONE_IMPERIALSEWERS then
         local node = Nav.JumpToZoneNode:New(Nav.Utils.shallowCopy(zone))
         local playerInfo = Nav.Players:GetPlayerInZone(zone.zoneId)
         node.known = playerInfo ~= nil

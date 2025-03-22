@@ -54,6 +54,12 @@ local function getDeveloperTooltip(node)
     if node.zoneId then
         table.insert(items, "zoneId="..(node.zoneId or "-"))
     end
+    if node.pinType then
+        table.insert(items, "pinType="..(node.pinType or "-"))
+    end
+    if node.icon or node.originalIcon then
+        table.insert(items, "icon="..(node.originalIcon or node.icon or "-"))
+    end
 
     return table.concat(items, "\n")
 end
@@ -627,7 +633,7 @@ function MT:OnMapChanged()
         self.currentMapId = mapId
         local zone = Nav.Locations:getCurrentMapZone()
         Nav.log("OnMapChanged: now zoneId=%d mapId=%d initial=%d", zone and zone.zoneId or 0, mapId or 0, Nav.initialMapZoneId or 0)
-        if zone and (zone.zoneId <= 2 or zone.zoneId == Nav.ZONE_CYRODIIL) then
+        if zone and Nav.Locations:ShouldCollapseCategories(zone.zoneId) then
             self.collapsedCategories = { bookmarks = true, recents = true }
         else
             self.collapsedCategories = {}
