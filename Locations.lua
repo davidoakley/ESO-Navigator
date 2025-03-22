@@ -276,31 +276,28 @@ function Locs:SetupNodes()
     self.zoneIndices = {}
     self.locMap = {}
 
-    beginTime = GetGameTimeMilliseconds()
+    local beginTime = GetGameTimeMilliseconds()
     local zoneLookup = {}
     loadPopulatedZones(self, zoneLookup)
     self.zoneLookup = zoneLookup
-    Nav.log("Locations:SetupNodes: Zones took %d ms", GetGameTimeMilliseconds() - beginTime)
+    local endTime_zones = GetGameTimeMilliseconds()
 
-    local beginTime  = GetGameTimeMilliseconds()
     local nodeLookup = {}
     local totalNodes = GetNumFastTravelNodes()
     for i = 1, totalNodes do
         loadFastTravelNode(self, i, nodeLookup, zoneLookup)
     end
-    Nav.log("Locations:SetupNodes: FTNodes took %d ms", GetGameTimeMilliseconds() - beginTime)
+    local endTime_ft  = GetGameTimeMilliseconds()
 
-    beginTime = GetGameTimeMilliseconds()
     -- Iterate through zones to find correct zones for nodes
     for zoneId, zoneData in pairs(zoneLookup) do
         local zoneName, zoneIndex, numPOIs = unpack(zoneData)
         loadZonePOIs(self, zoneId, zoneIndex, zoneName, numPOIs)
     end
-    Nav.log("Locations:SetupNodes: POIs took %d ms", GetGameTimeMilliseconds() - beginTime)
+    local endTime_pois = GetGameTimeMilliseconds()
 
-    beginTime = GetGameTimeMilliseconds()
     loadKeeps(self)
-    Nav.log("Locations:SetupNodes: Keeps took %d ms", GetGameTimeMilliseconds() - beginTime)
+    local endTime_keeps = GetGameTimeMilliseconds()
 
     for i = 1, #self.nodes do
         if not self.nodes[i].poiIndex and self.nodes[i].zoneId ~= Nav.ZONE_CYRODIIL then
@@ -310,6 +307,10 @@ function Locs:SetupNodes()
             Nav.log(" x %s - nodeIndex %d no zoneId", self.nodes[i].name, self.nodes[i].nodeIndex)
         end
     end
+
+    Nav.log("Locations:SetupNodes: %dms (zones %dms, ft %dms, pois %dms, keeps %dms)",
+            endTime_keeps-beginTime, endTime_zones-beginTime, endTime_ft-endTime_zones,
+            endTime_pois-endTime_ft, endTime_keeps-endTime_pois)
 end
 
 function Locs:clearKnownNodes()
