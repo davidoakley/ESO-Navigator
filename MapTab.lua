@@ -54,6 +54,12 @@ local function getDeveloperTooltip(node)
     if node.zoneId then
         table.insert(items, "zoneId="..(node.zoneId or "-"))
     end
+    if node.pinType then
+        table.insert(items, "pinType="..(node.pinType or "-"))
+    end
+    if node.icon or node.originalIcon then
+        table.insert(items, "icon="..(node.originalIcon or node.icon or "-"))
+    end
 
     return table.concat(items, "\n")
 end
