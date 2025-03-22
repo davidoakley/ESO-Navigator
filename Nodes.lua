@@ -154,6 +154,11 @@ function ZoneNode:GetTagList(showBookmark)
         table.insert(tagList, "player")
     end
 
+    if self.treasure then
+        if self.treasure.survey then table.insert(tagList, "survey") end
+        if self.treasure.treasure then table.insert(tagList, "treasure") end
+    end
+
     return Nav.Utils.tableConcat(tagList, Node.GetTagList(self, showBookmark))
 end
 

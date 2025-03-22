@@ -28,6 +28,8 @@ function Tooltip:New(node, control)
         o:AddFastTravelNodeInfo()
     elseif node.poiIndex then
         o:AddPOIInfo()
+    elseif node.zoneIndex then
+        o:AddZoneInfo()
     end
 
     o:AddActions()
@@ -107,6 +109,25 @@ function Tooltip:AddFastTravelNodeInfo()
     end
 
     if hasContent then
+        ZO_Tooltip_AddDivider(self.tooltip)
+    end
+end
+
+function Tooltip:AddZoneInfo()
+    local textList = {}
+
+    if self.node.treasure then
+        for _, itemList in pairs(self.node.treasure) do
+            for i = 1, #itemList do
+                local text = string.format("|u12:0::|u|t18:24:Navigator/media/tags/%s.dds:inheritcolor|t %s", itemList[i][1], itemList[i][2])
+                table.insert(textList, text)
+            end
+        end
+    end
+
+    if #textList > 0 then
+        local r, g, b = ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB()
+        self.tooltip:AddLine(table.concat(textList, "\n"), "", r, g, b, TOPLEFT, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_LEFT, true)
         ZO_Tooltip_AddDivider(self.tooltip)
     end
 end
