@@ -202,6 +202,17 @@ function Utils.tableContains(table, element)
     return false
 end
 
+function Utils.RemoveElement(array, element)
+	local i = 1
+	while i <= #array do
+		if array[i] == element then
+			table.remove(array, i)
+		else
+			i = i + 1
+		end
+	end
+end
+
 function Utils.logChars(s)
 	--local s = "Épreuve" -- "Дорожное святилище"
 	local chars = {}

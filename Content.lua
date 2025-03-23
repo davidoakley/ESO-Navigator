@@ -92,7 +92,7 @@ function Content:AddZoneCategory(zone)
     local title = zone.name
     local tagString = zone:CreateTagListString(false, false)
     if tagString then
-        title = title .. " " .. tagString
+        title = title .. "  " .. tagString
     end
 
     table.insert(self.categories, {

@@ -74,9 +74,9 @@ function Node:GetSuffix()
     return self.suffix or ""
 end
 
-function Node:GetTagList(showBookmark)
+function Node:GetTagList()
     local tagList = {}
-    if showBookmark and Nav.Bookmarks:contains(self) then
+    if Nav.Bookmarks:contains(self) then
         table.insert(tagList, "bookmark")
     end
     return tagList
@@ -254,8 +254,11 @@ function Node:DoAction(action)
     end
 end
 
-function Node:CreateTagListString(showBookmark, isSelected)
-    local tagList = self:GetTagList(showBookmark)
+function Node:CreateTagListString(isSelected, showBookmark)
+    local tagList = self:GetTagList()
+    if not showBookmark then
+        Nav.Utils.RemoveElement(tagList, "bookmark")
+    end
     local colour = ZO_ColorDef:New(self:GetTagColour(isSelected))
     if tagList and #tagList > 0 then
         local tagStrings = {}

@@ -77,14 +77,14 @@ function MT:layoutRow(rowControl, data, _)
     if node.zoneSuffix and categoryId == "results" then
         node.suffix = node.zoneSuffix
     end
-    if suffix ~= nil then
+    if suffix ~= nil and suffix ~= "" then
         local colour = ZO_ColorDef:New(node:GetSuffixColour(isSelected))
         name = name .. " " .. colour:Colorize(suffix)
     end
 
-    local tagString = node:CreateTagListString(categoryId ~= "bookmarks", isSelected)
+    local tagString = node:CreateTagListString(isSelected, categoryId ~= "bookmarks")
     if tagString then
-        name = name .. " " .. tagString
+        name = name .. "  " .. tagString
     end
 
 	if icon ~= nil then
