@@ -138,8 +138,12 @@ function ZoneNode:GetActionDescription(action)
 end
 
 function ZoneNode:IsJumpable()
+    if not CanJumpToPlayerInZone(self.zoneId) or
+       self.zoneId <= Nav.ZONE_TAMRIEL and self.zoneId == Nav.ZONE_CYRODIIL then
+        return false
+    end
     local player = Nav.Players:GetPlayerInZone(self.zoneId)
-    return player and self.zoneId > Nav.ZONE_TAMRIEL and self.zoneId ~= Nav.ZONE_CYRODIIL
+    return player and true or false
 end
 
 function ZoneNode:GetColour()
