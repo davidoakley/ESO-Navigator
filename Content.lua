@@ -89,9 +89,15 @@ function Content:AddZoneCategory(zone)
         table.insert(list, 1, node)
     end
 
+    local title = zone.name
+    local tagString = zone:CreateTagListString(false, false)
+    if tagString then
+        title = title .. " " .. tagString
+    end
+
     table.insert(self.categories, {
         id = "zone",
-        title = zone.name,
+        title = title,
         list = list
     })
 end

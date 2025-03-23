@@ -254,4 +254,19 @@ function Node:DoAction(action)
     end
 end
 
+function Node:CreateTagListString(showBookmark, isSelected)
+    local tagList = self:GetTagList(showBookmark)
+    local colour = ZO_ColorDef:New(self:GetTagColour(isSelected))
+    if tagList and #tagList > 0 then
+        local tagStrings = {}
+        for i = 1, #tagList do
+            table.insert(tagStrings, string.format("|t18:24:Navigator/media/tags/%s.dds:inheritcolor|t", tagList[i]))
+        end
+        return colour:Colorize(table.concat(tagStrings, ""))
+    end
+    return nil
+end
+
+
+
 Nav.Node = Node
