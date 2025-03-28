@@ -154,6 +154,7 @@ local function OnMapStateChange(_, newState)
     if Nav.saved and Nav.saved["defaultTab"] and not FasterTravel then
       WORLD_MAP_INFO:SelectTab(NAVIGATOR_TAB_SEARCH)
     end
+    Nav.Locations:SetTreasureData()
 
     if zone and Nav.Locations:ShouldCollapseCategories(zone.zoneId) then
         Nav.MapTab.collapsedCategories = { bookmarks = true, recents = true }

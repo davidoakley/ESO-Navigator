@@ -564,4 +564,36 @@ function Locs.GetMapIdByZoneId(zoneId)
     end
 end
 
+function Locs:SetTreasureData()
+    if not LibTreasure_GetItemIdData then -- Check if LibTreasure is available
+        return
+    end
+    if self.zones == nil then
+        self:SetupNodes()
+    end
+
+    local beginTime = GetGameTimeMilliseconds()
+    local bag = SHARED_INVENTORY.bagCache[BAG_BACKPACK]
+    local mapIndexMap = {}
+    for _, slotData in pairs(bag) do
+        local itemId = GetItemId(slotData.bagId, slotData.slotIndex)
+        local thatMap = LibTreasure_GetItemIdData(itemId)
+        if thatMap ~= nil then
+            local mapID = thatMap.mapId
+            local _, _, _,zoneIndex, _ = GetMapInfoById(mapID)
+            local pinType = thatMap.pinType
+            local itemName = GetItemName(slotData.bagId, slotData.slotIndex)
+            if pinType == "survey" then itemName = itemName:gsub("%s*:.*$", "") end
+            if not mapIndexMap[zoneIndex] then mapIndexMap[zoneIndex] = {} end
+            if not mapIndexMap[zoneIndex][pinType] then mapIndexMap[zoneIndex][pinType] = {} end
+            table.insert(mapIndexMap[zoneIndex][pinType], { pinType, itemName })
+        end
+    end
+
+    for _, zone in pairs(self.zones) do
+        zone.treasure = mapIndexMap[zone.zoneIndex]
+    end
+    Nav.log("Locs:SetTreasureData: %dms", GetGameTimeMilliseconds() - beginTime)
+end
+
 Nav.Locations = Locs

@@ -138,8 +138,12 @@ function ZoneNode:GetActionDescription(action)
 end
 
 function ZoneNode:IsJumpable()
+    if not CanJumpToPlayerInZone(self.zoneId) or
+       self.zoneId <= Nav.ZONE_TAMRIEL and self.zoneId == Nav.ZONE_CYRODIIL then
+        return false
+    end
     local player = Nav.Players:GetPlayerInZone(self.zoneId)
-    return player and self.zoneId > Nav.ZONE_TAMRIEL and self.zoneId ~= Nav.ZONE_CYRODIIL
+    return player and true or false
 end
 
 function ZoneNode:GetColour()
@@ -147,14 +151,19 @@ function ZoneNode:GetColour()
             (self:IsJumpable() and Nav.COLOUR_NORMAL) or Nav.COLOUR_POI
 end
 
-function ZoneNode:GetTagList(showBookmark)
+function ZoneNode:GetTagList()
     local tagList = {}
 
     if self:IsJumpable() and Nav.jumpState == Nav.JUMPSTATE_WORLD then
         table.insert(tagList, "player")
     end
 
-    return Nav.Utils.tableConcat(tagList, Node.GetTagList(self, showBookmark))
+    if self.treasure then
+        if self.treasure.survey then table.insert(tagList, "survey") end
+        if self.treasure.treasure then table.insert(tagList, "treasure") end
+    end
+
+    return Nav.Utils.tableConcat(tagList, Node.GetTagList(self))
 end
 
 function ZoneNode:JumpToZone()
@@ -451,7 +460,7 @@ function FastTravelNode:GetSuffix()
     return ""
 end
 
-function FastTravelNode:GetTagList(showBookmark)
+function FastTravelNode:GetTagList()
     local tagList = {}
 
     if self.traders and self.traders > 0 then
@@ -463,7 +472,7 @@ function FastTravelNode:GetTagList(showBookmark)
         table.insert(tagList, "trader")
     end
 
-    return Nav.Utils.tableConcat(tagList, Node.GetTagList(self, showBookmark))
+    return Nav.Utils.tableConcat(tagList, Node.GetTagList(self))
 end
 
 function FastTravelNode:GetOverlayIcon()
@@ -687,7 +696,7 @@ function KeepNode:GetColour(isSelected)
     end
 end
 
-function KeepNode:GetTagList(showBookmark)
+function KeepNode:GetTagList()
     local tagList = {}
 
     local isUnderAttack = self:IsUnderAttack()
@@ -696,7 +705,7 @@ function KeepNode:GetTagList(showBookmark)
         table.insert(tagList, isUnderAttack == 2 and "attackburst" or "attackburst-small")
     end
 
-    return Nav.Utils.tableConcat(tagList, Node.GetTagList(self, showBookmark))
+    return Nav.Utils.tableConcat(tagList, Node.GetTagList(self))
 end
 
 function KeepNode:GetTagColour()

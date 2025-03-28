@@ -5,7 +5,7 @@
 ## Version: 0
 ## AddOnVersion: 0
 ## DependsOn: LibAddonMenu-2.0>=37
-## OptionalDependsOn: LibDebugLogger>=263 pChat>=10006030 FasterTravel>=030105 LibSlashCommander>=36 LibWorldMapInfoTab>=127 PerfectPixel>=001317
+## OptionalDependsOn: LibDebugLogger>=263 pChat>=10006030 FasterTravel>=030105 LibSlashCommander>=36 LibWorldMapInfoTab>=127 PerfectPixel>=001317 LibTreasure>=21
 ## SavedVariables: Navigator_SavedVariables
 
 Navigator.lua
