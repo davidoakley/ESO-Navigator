@@ -106,7 +106,7 @@ mkstr("NAVIGATOR_SETTINGS_ACTIONS_NAME",                    "Azioni del clic del
 mkstr("NAVIGATOR_SETTINGS_ACTIONS_SINGLE_CLICK",             "Click singolo")
 mkstr("NAVIGATOR_SETTINGS_ACTIONS_DOUBLE_CLICK",            "Click doppio")
 mkstr("NAVIGATOR_SETTINGS_ACTIONS_ENTER_KEY",               "Tasto [Invio]")
-mkstr("NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SHOW_ON_MAP",      "Mostra in mappa")
+--mkstr("NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SHOW_ON_MAP",      "Mostra in mappa")
 mkstr("NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SET_DESTINATION",  "Imposta destinazione")
 mkstr("NAVIGATOR_SETTINGS_ACTIONS_CHOICE_TRAVEL",           "Viaggia")
 

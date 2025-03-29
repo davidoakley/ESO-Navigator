@@ -105,7 +105,7 @@ mkstr("NAVIGATOR_SETTINGS_ACTIONS_NAME",                    "Управлени�
 mkstr("NAVIGATOR_SETTINGS_ACTIONS_SINGLE_CLICK",            "Одиночное нажатие")
 mkstr("NAVIGATOR_SETTINGS_ACTIONS_DOUBLE_CLICK",            "Двойное нажатие")
 mkstr("NAVIGATOR_SETTINGS_ACTIONS_ENTER_KEY",               "Клавиша [Enter]")
-mkstr("NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SHOW_ON_MAP",      "Показать на карте")
+--mkstr("NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SHOW_ON_MAP",      "Показать на карте")
 mkstr("NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SET_DESTINATION",  "Указать пункт назначения")
 mkstr("NAVIGATOR_SETTINGS_ACTIONS_CHOICE_TRAVEL",           "Переместиться")
 
