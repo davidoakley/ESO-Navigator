@@ -39,6 +39,8 @@ mkstr("NAVIGATOR_KEY_ENTER", "Enter")
 mkstr("NAVIGATOR_NOT_KNOWN", "Не открыто этим персонажем") -- Location not known
 mkstr("NAVIGATOR_TIP_CLICK_TO_TRAVEL", "Щелкните, чтобы переместиться в <<1>>") -- 1:zone
 mkstr("NAVIGATOR_TIP_DOUBLECLICK_TO_TRAVEL", "Щелкните дважды, чтобы переместиться в <<1>>") -- 1:zone
+mkstr("NAVIGATOR_TOOLTIP_ACTION_RESULT", "<<1>>: <<2>>") -- e.g. 1:"Single-click" 2:"Show On Map"
+--mkstr("NAVIGATOR_TOOLTIP_GUILDTRADERS", "<<1[/1 Guild Trader nearby/$d Guild Traders nearby]>>")
 
 -- Action and menu items
 mkstr("NAVIGATOR_TRAVEL_TO_ZONE", "Переместиться в <<1>>")
@@ -105,17 +107,18 @@ mkstr("NAVIGATOR_SETTINGS_ACTIONS_NAME",                    "Управлени�
 mkstr("NAVIGATOR_SETTINGS_ACTIONS_SINGLE_CLICK",            "Одиночное нажатие")
 mkstr("NAVIGATOR_SETTINGS_ACTIONS_DOUBLE_CLICK",            "Двойное нажатие")
 mkstr("NAVIGATOR_SETTINGS_ACTIONS_ENTER_KEY",               "Клавиша [Enter]")
-mkstr("NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SHOW_ON_MAP",      "Показать на карте")
+--mkstr("NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SHOW_ON_MAP",      "Показать на карте")
 mkstr("NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SET_DESTINATION",  "Указать пункт назначения")
-mkstr("NAVIGATOR_SETTINGS_ACTIONS_CHOICE_TRAVEL",           "Переместиться")
+--mkstr("NAVIGATOR_SETTINGS_ACTIONS_CHOICE_TRAVEL",           "Переместиться")
 
 mkstr("NAVIGATOR_SETTINGS_DESTINATION_ACTIONS_NAME",        "Основные направления")
 mkstr("NAVIGATOR_SETTINGS_DESTINATION_ACTIONS_TOOLTIP",     "Взаимодействие с дорожными святилищами, подземельями, испытаниями, аренами и крепостями.")
 mkstr("NAVIGATOR_SETTINGS_DESTINATION_ACTIONS_WARNING",     "Когда одиночное нажатие установлено для перемещения, двойное нажатие будет недоступно.")
 
 mkstr("NAVIGATOR_SETTINGS_ZONE_ACTIONS_NAME",               "Локации")
+--mkstr("NAVIGATOR_SETTINGS_ZONE_ACTIONS_TOOLTIP",            "Mouse and key actions for zones")
 
-mkstr("NAVIGATOR_SETTINGS_POI_ACTIONS_NAME",                "Точки интереса")
+--mkstr("NAVIGATOR_SETTINGS_POI_ACTIONS_NAME",                "Точки интереса")
 mkstr("NAVIGATOR_SETTINGS_POI_ACTIONS_TOOLTIP",             "Взаимодействие с такими местами как города, камни Мундуса и примечательные места.")
 
 mkstr("NAVIGATOR_SETTINGS_JOIN_GUILD_NAME",                 "Присоединяйтесь к нашей гильдии!")

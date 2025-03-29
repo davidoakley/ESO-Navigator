@@ -1,0 +1,15 @@
+{
+  "$schema": "https://docs.tolgee.io/cli-schema.json",
+  "projectId": 14800,
+  "format": "JSON_TOLGEE",
+  "patterns": ["./??.json"],
+  "push": {
+    "filesTemplate": "./{languageTag}.json",
+    "language": ["en", "fr", "it", "ru"],
+    "convertPlaceholdersToIcu": false
+  },
+  "pull": {
+    "path": "."
+  }
+}
+

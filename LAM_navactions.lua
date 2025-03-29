@@ -244,6 +244,14 @@ local function AdjustDimensions(control, dropdown, dropdownData)
     scrollContent:SetAnchor(BOTTOMRIGHT, nil, nil, anchorOffset)
 end
 
+local function GetStringFromValue(value)
+    if type(value) == "function" then
+        return value()
+    elseif type(value) == "number" then
+        return GetString(value)
+    end
+    return value
+end
 
 function LAMCreateControl.nav_actions(parent, dropdownData, controlName)
 
@@ -261,6 +269,11 @@ function LAMCreateControl.nav_actions(parent, dropdownData, controlName)
 
     control:SetDimensionConstraints(width, height, width, height)
     control:SetResizeToFitConstrains(ANCHOR_CONSTRAINS_Y)
+
+    control.data.tooltipText = GetStringFromValue(control.data.tooltip)
+    control:SetMouseEnabled(true)
+    control:SetHandler("OnMouseEnter", ZO_Options_OnMouseEnter)
+    control:SetHandler("OnMouseExit", ZO_Options_OnMouseExit)
 
     local countControl = parent
     local name = parent:GetName()

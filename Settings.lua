@@ -33,6 +33,7 @@ local function getActionSettings(sv)
     table.insert(submenuTable, {
         type = "nav_actions",
         name = NAVIGATOR_SETTINGS_ZONE_ACTIONS_NAME,
+        tooltip = NAVIGATOR_SETTINGS_ZONE_ACTIONS_TOOLTIP,
         actions = actionStrings,
         choices = function(_)
             return {GetString(NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SHOW_ON_MAP),

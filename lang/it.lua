@@ -106,17 +106,18 @@ mkstr("NAVIGATOR_SETTINGS_ACTIONS_NAME",                    "Azioni del clic del
 mkstr("NAVIGATOR_SETTINGS_ACTIONS_SINGLE_CLICK",             "Click singolo")
 mkstr("NAVIGATOR_SETTINGS_ACTIONS_DOUBLE_CLICK",            "Click doppio")
 mkstr("NAVIGATOR_SETTINGS_ACTIONS_ENTER_KEY",               "Tasto [Invio]")
-mkstr("NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SHOW_ON_MAP",      "Mostra in mappa")
+--mkstr("NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SHOW_ON_MAP",      "Mostra in mappa")
 mkstr("NAVIGATOR_SETTINGS_ACTIONS_CHOICE_SET_DESTINATION",  "Imposta destinazione")
-mkstr("NAVIGATOR_SETTINGS_ACTIONS_CHOICE_TRAVEL",           "Viaggia")
+--mkstr("NAVIGATOR_SETTINGS_ACTIONS_CHOICE_TRAVEL",           "Viaggia")
 
 mkstr("NAVIGATOR_SETTINGS_DESTINATION_ACTIONS_NAME",        "Destinazioni di viaggio")
 mkstr("NAVIGATOR_SETTINGS_DESTINATION_ACTIONS_TOOLTIP",     "Azione per Mouse e tasti per Wayshrines, Dungeons, Trials, Arene e Castelli")
 mkstr("NAVIGATOR_SETTINGS_DESTINATION_ACTIONS_WARNING",     "Se il clic singolo è impostato su Viaggia, l'azione del doppio clic non verrà eseguita")
 
 mkstr("NAVIGATOR_SETTINGS_ZONE_ACTIONS_NAME",               "Zone")
+--mkstr("NAVIGATOR_SETTINGS_ZONE_ACTIONS_TOOLTIP",            "Mouse and key actions for zones")
 
-mkstr("NAVIGATOR_SETTINGS_POI_ACTIONS_NAME",                "Punti di interesse")
+--mkstr("NAVIGATOR_SETTINGS_POI_ACTIONS_NAME",                "Punti di interesse")
 mkstr("NAVIGATOR_SETTINGS_POI_ACTIONS_TOOLTIP",             "Azioni del mouse e tasti per posizioni sulla mappa come città, luoghi di missioni e localita sorprendenti")
 
 mkstr("NAVIGATOR_SETTINGS_JOIN_GUILD_NAME",                 "Unisciti alla nostra gilda!")
