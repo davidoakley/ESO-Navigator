@@ -116,6 +116,7 @@ mkstr("NAVIGATOR_SETTINGS_DESTINATION_ACTIONS_TOOLTIP",     "Взаимодей�
 mkstr("NAVIGATOR_SETTINGS_DESTINATION_ACTIONS_WARNING",     "Когда одиночное нажатие установлено для перемещения, двойное нажатие будет недоступно.")
 
 mkstr("NAVIGATOR_SETTINGS_ZONE_ACTIONS_NAME",               "Локации")
+--mkstr("NAVIGATOR_SETTINGS_ZONE_ACTIONS_TOOLTIP",            "Mouse and key actions for zones")
 
 --mkstr("NAVIGATOR_SETTINGS_POI_ACTIONS_NAME",                "Точки интереса")
 mkstr("NAVIGATOR_SETTINGS_POI_ACTIONS_TOOLTIP",             "Взаимодействие с такими местами как города, камни Мундуса и примечательные места.")

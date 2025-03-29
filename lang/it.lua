@@ -115,6 +115,7 @@ mkstr("NAVIGATOR_SETTINGS_DESTINATION_ACTIONS_TOOLTIP",     "Azione per Mouse e 
 mkstr("NAVIGATOR_SETTINGS_DESTINATION_ACTIONS_WARNING",     "Se il clic singolo è impostato su Viaggia, l'azione del doppio clic non verrà eseguita")
 
 mkstr("NAVIGATOR_SETTINGS_ZONE_ACTIONS_NAME",               "Zone")
+--mkstr("NAVIGATOR_SETTINGS_ZONE_ACTIONS_TOOLTIP",            "Mouse and key actions for zones")
 
 --mkstr("NAVIGATOR_SETTINGS_POI_ACTIONS_NAME",                "Punti di interesse")
 mkstr("NAVIGATOR_SETTINGS_POI_ACTIONS_TOOLTIP",             "Azioni del mouse e tasti per posizioni sulla mappa come città, luoghi di missioni e localita sorprendenti")
