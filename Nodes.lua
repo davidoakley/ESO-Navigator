@@ -139,7 +139,7 @@ end
 
 function ZoneNode:IsJumpable()
     if not CanJumpToPlayerInZone(self.zoneId) or
-       self.zoneId <= Nav.ZONE_TAMRIEL and self.zoneId == Nav.ZONE_CYRODIIL then
+       self.zoneId <= Nav.ZONE_TAMRIEL or self.zoneId == Nav.ZONE_CYRODIIL then
         return false
     end
     local player = Nav.Players:GetPlayerInZone(self.zoneId)
