@@ -260,7 +260,7 @@ local function loadKeeps(self)
     local zone = self.zones[Nav.ZONE_CYRODIIL]
     zone.keeps = {}
 
-    local bgContext = BGQUERY_ASSIGNED_CAMPAIGN --ZO_WorldMap_GetBattlegroundQueryType()
+    local bgContext = ZO_WorldMap_GetBattlegroundQueryType() --BGQUERY_ASSIGNED_CAMPAIGN
 
     local count = GetNumKeepTravelNetworkNodes(bgContext)
     Nav.log("loadKeeps: GetNumKeepTravelNetworkNodes=%d, GetNumKeeps=%d", count, GetNumKeeps())
@@ -345,6 +345,7 @@ function Locs:UpdateKeeps()
 
     for i = 1, #zone.keeps do
         local keep = zone.keeps[i]
+        keep.bgContext = bgContext
         keep.accessible = Nav.jumpState == Nav.JUMPSTATE_TRANSITUS and GetKeepAccessible(keep.keepId, bgContext)
         keep.alliance = GetKeepAlliance(keep.keepId, bgContext)
         local pinType = GetKeepPinInfo(keep.keepId, bgContext)
