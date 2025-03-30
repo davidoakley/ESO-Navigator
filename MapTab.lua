@@ -82,6 +82,14 @@ function MT:layoutRow(rowControl, data, _)
         name = name .. " " .. colour:Colorize(suffix)
     end
 
+    if categoryId == "bookmarks" then
+        local alias = Nav.Bookmarks:GetAlias(node)
+        if alias then
+            name = alias
+            suffix = nil
+        end
+    end
+
     local tagString = node:CreateTagListString(isSelected, categoryId ~= "bookmarks")
     if tagString then
         name = name .. "  " .. tagString
@@ -519,6 +527,14 @@ local function showWayshrineMenu(owner, data)
             end, nil, nil, nil, nil, yPad)
             yPad = 0
         end
+        AddMenuItem(GetString(NAVIGATOR_MENU_RENAMEBOOKMARK), function()
+            Nav.MapTab.menuOpen = false
+            zo_callLater(function()
+                ZO_Dialogs_ShowDialog("NAVIGATOR_RENAMEBOOKMARK",
+                        { node = data.node, finishedCallback = null },
+                        { initialEditText = Nav.Bookmarks:GetAlias(data.node) or "", initialDefaultText = "Enter name here"})
+            end, 10)
+        end)
         AddMenuItem(GetString(NAVIGATOR_MENU_REMOVEBOOKMARK), function()
             bookmarks:remove(data.node)
             MT.menuOpen = false

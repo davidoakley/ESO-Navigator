@@ -121,4 +121,23 @@ function Bookmarks:getBookmarks()
     return results
 end
 
+function Bookmarks:GetAlias(node)
+    local i = self:getIndex(node)
+    if i then
+        return Nav.saved.bookmarks[i].alias
+    end
+    return nil
+end
+
+function Bookmarks:SetAlias(node, text)
+    local i = self:getIndex(node)
+    if i then
+        if text == "" then
+            Nav.saved.bookmarks[i].alias = nil
+        else
+            Nav.saved.bookmarks[i].alias = text
+        end
+    end
+end
+
 Nav.Bookmarks = Bookmarks

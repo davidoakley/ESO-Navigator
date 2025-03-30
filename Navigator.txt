@@ -29,6 +29,9 @@ Settings.lua
 
 Content.lua
 
+Dialogs.xml
+Dialogs.lua
+
 MapTab.xml
 MapTab.lua
 

@@ -266,6 +266,7 @@ function Nav:initialize()
   self.Bookmarks:init()
   self.Chat:Init()
   self:loadSettings()
+  self.Dialogs:Init()
 
   CALLBACK_MANAGER:RegisterCallback("OnWorldMapChanged", OnMapChanged)
   CALLBACK_MANAGER:RegisterCallback("OnWorldMapModeChanged", OnMapChanged)

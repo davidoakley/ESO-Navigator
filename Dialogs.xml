@@ -1,0 +1,75 @@
+<GuiXml>
+    <Controls>
+
+        <TopLevelControl name="Navigator_RenameBookmarkDialog" inherits="ZO_CustomDialogBase" hidden="true">
+            <ResizeToFitPadding width="50" height="33" />
+            <Controls>
+                <Label name="$(parent)Text" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame"/>
+                <Control name="$(parent)Container" resizeToFitDescendents="true">
+                    <OnInitialized>
+                        --self.dropdown = ZO_ComboBox_ObjectFromContainer(self:GetNamedChild("Dropdown"))
+                    </OnInitialized>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Text" relativePoint="BOTTOMLEFT" offsetY="16" />
+                    <Controls>
+
+<!--                        <Label name="$(parent)NameHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" text="SI_COLLECTIONS_INVENTORY_DIALOG_RENAME_COLLECTIBLE_MAIN">-->
+<!--                            <Anchor point="TOPLEFT" offsetX="-12" />-->
+<!--                        </Label>-->
+
+                        <Backdrop name="$(parent)Edit" inherits="ZO_SingleLineEditBackdrop_Keyboard">
+<!--                            <Anchor point="TOPLEFT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMLEFT" offsetY="5"/>-->
+                            <Anchor point="LEFT"/>
+                            <Dimensions x="340" />
+                            <Controls>
+                                <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop">
+                                    <OnTextChanged>
+<!--                                        ZO_CollectibleRenameDialog_UpdateViolations(self)-->
+                                    </OnTextChanged>
+                                    <OnEffectivelyShown>
+                                        self:TakeFocus()
+                                    </OnEffectivelyShown>
+                                    <OnFocusGained>
+<!--                                        ZO_CollectibleRenameDialog_UpdateViolations(self)-->
+                                    </OnFocusGained>
+                                    <OnFocusLost>
+<!--                                        ZO_CollectibleRenameDialog_HideViolations(self)-->
+                                    </OnFocusLost>
+                                </EditBox>
+                            </Controls>
+                        </Backdrop>
+
+<!--                        <Control name="$(parent)Dropdown" inherits="ZO_ComboBox">-->
+<!--                            <Dimensions x="340"/>-->
+<!--                            <Anchor point="LEFT"/>-->
+<!--                        </Control>-->
+                    </Controls>
+                </Control>
+
+            <Control name="$(parent)Buttons" resizeToFitDescendents="true">
+                <Anchor point="TOP" relativeTo="$(parent)Container" relativePoint="BOTTOM" offsetY="33" />
+                <Controls>
+
+                    <Control name="$(parent)Default" inherits="ZO_DialogButton">
+                        <Anchor point="LEFT" />
+                    </Control>
+                    <Control name="$(parent)Ok" inherits="ZO_DialogButton">
+                        <Anchor point="LEFT" relativeTo="$(parent)Default" relativePoint="RIGHT" offsetX="20"/>
+                    </Control>
+                    <Control name="$(parent)Cancel" inherits="ZO_DialogButton">
+                        <Anchor point="LEFT" relativeTo="$(parent)Ok" relativePoint="RIGHT" offsetX="20"/>
+                    </Control>
+
+                </Controls>
+            </Control>
+
+                <!--                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton">-->
+<!--                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SelectSound" relativePoint="BOTTOMRIGHT" offsetY="23" />-->
+<!--                </Control>-->
+<!--                <Control name="$(parent)Confirm" inherits="ZO_CustomDialogButton">-->
+<!--                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Cancel" relativePoint="TOPLEFT" offsetX="-15"/>-->
+<!--                </Control>-->
+            </Controls>
+        </TopLevelControl>
+
+    </Controls>
+</GuiXml>
