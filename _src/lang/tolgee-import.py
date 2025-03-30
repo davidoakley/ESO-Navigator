@@ -4,6 +4,7 @@ import subprocess
 import glob
 
 def convert(lang):
+    print(f"Importing {lang}...")
     with open(f'{lang}.json', 'r', errors='ignore', encoding='utf-8') as json_file:
         data = json.load(json_file)
 
@@ -12,13 +13,19 @@ def convert(lang):
 
         with open(f'../../lang/{lang}.lua', 'w', errors='ignore', encoding='utf-8') as lua_file:
             for line in lua_lines:
-                match = re.search(r'^(\s*mkstr\(")(.*?)(",\s*")(.*?[^\\])(".*)', line)
+                match = re.search(r'^-?-?(\s*mkstr\(")(.*?)(",\s*")(.*?[^\\])(".*)', line)
                 if match:
                     key = match.group(2)
-                    value = data[key]
-                    value = re.sub(r'"', r'\\"', value)
-                    line = f"{match.group(1)}{key}{match.group(3)}{value}{match.group(5)}\n" #re.sub(r'^(\s*mkstr\(".*?",\s*"(.*?[^\\])', data[key], line)
-                    del data[key]
+                    if key in data:
+                        value = data[key]
+                        del data[key]
+                        value = re.sub(r'"', r'\\"', value)
+                        comment_prefix = ""
+                    else:
+                        value = match.group(4)
+                        comment_prefix = "--"
+
+                    line = f"{comment_prefix}{match.group(1)}{key}{match.group(3)}{value}{match.group(5)}\n"
 
                 lua_file.write(line)
 
