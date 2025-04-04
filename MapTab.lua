@@ -138,30 +138,6 @@ function MT:layoutRow(rowControl, data, _)
     end)
 end
 
-function MT:showFilterControl(text)
-    self.filterControl:SetHidden(false)
-    self.filterControl:SetText("|u6:6::"..text.."|u")
-    self.editControl:SetAnchor(TOPLEFT, self.filterControl, TOPRIGHT, 2, -1)
-end
-
-function MT:hideFilterControl()
-    self.filterControl:SetHidden(true)
-    self.editControl:SetAnchor(TOPLEFT, self.searchControl, TOPLEFT, 4, -1)
-end
-
-function MT:updateFilterControl()
-    if self.filter == Nav.FILTER_NONE then
-        self:hideFilterControl()
-        return
-    elseif self.filter == Nav.FILTER_PLAYERS then
-        self:showFilterControl('Players')
-    elseif self.filter == Nav.FILTER_HOUSES then
-        self:showFilterControl('Houses')
-    elseif self.filter == Nav.FILTER_ALL then
-        self:showFilterControl('All')
-    end
-end
-
 function MT:layoutCategoryRow(rowControl, data, _)
 	rowControl.label:SetText(data.name)
 end
@@ -223,7 +199,7 @@ local function buildCategory(scrollData, category)
         end
     end
 
-    if #list > 0 and listed == 0 and MT.filter ~= Nav.FILTER_PLAYERS and MT.filter ~= Nav.FILTER_HOUSES then
+    if #list > 0 and listed == 0 and (MT.filter == Nav.FILTER_NONE or MT.filter ~= Nav.FILTER_ALL) then
         local entry = ZO_ScrollList_CreateDataEntry(3, { hint = GetString(NAVIGATOR_HINT_SHOWUNDISCOVERED), onClick = ShowUndiscovered })
         table.insert(scrollData, entry)
     end
@@ -262,7 +238,7 @@ function MT:buildScrollList(keepScrollPosition)
 
     self.content = nil
     local isSearching = #Nav.results > 0 or (self.searchString and self.searchString ~= "") or
-                        self.filter == Nav.FILTER_HOUSES or self.filter == Nav.FILTER_PLAYERS
+                        (self.filter ~= Nav.FILTER_NONE and self.filter == Nav.FILTER_ALL)
 
     if isSearching then
         self.content = Nav.SearchContent:New(Nav.results)
@@ -317,7 +293,7 @@ function MT:executeSearch(searchString, keepTargetNode)
     end
 
 	MT:buildScrollList(keepTargetNode)
-    MT:updateFilterControl()
+    --MT:updateFilterControl()
 end
 
 function MT:getTargetDataIndex()
@@ -476,7 +452,7 @@ end
 function MT:resetFilter()
 	Nav.log("MT.resetFilter")
     self.filter = Nav.FILTER_NONE
-    self:hideFilterControl()
+    --self:hideFilterControl()
     self:ImmediateRefresh()
 	ZO_ScrollList_ResetToTop(self.listControl)
 end
@@ -485,7 +461,7 @@ function MT:resetSearch()
 	Nav.log("MT.resetSearch")
 	self.editControl:SetText("")
     self.filter = Nav.FILTER_NONE
-    self:hideFilterControl()
+    --self:hideFilterControl()
     self:ImmediateRefresh()
 
 	--ZO_EditDefaultText_Initialize(editbox, GetString(FASTER_TRAVEL_WAYSHRINES_SEARCH))
@@ -606,7 +582,7 @@ function MT:CategoryRowMouseUp(control, mouseButton)
         Nav.log("Toggling category %s", data.id)
         self.collapsedCategories[data.id] = not self.collapsedCategories[data.id]
         MT:buildScrollList(true)
-        MT:updateFilterControl()
+        --MT:updateFilterControl()
     end
 end
 
@@ -642,6 +618,62 @@ function MT:OnMapChanged()
 
         Nav.Node.RemovePings()
     end
+end
+
+function MT:OpenViewMenu()
+    ClearMenu()
+
+    local doFilter = function(filterId)
+        self.filter = filterId
+        self:UpdateFilterControl()
+        self:queueRefresh()
+    end
+
+    local addItem = function (icon, stringId, callback, gap)
+        AddMenuItem(string.format("|t24:24:Navigator/media/icons/%s.dds:inheritcolor|t %s",
+                                  icon, GetString(stringId)),
+                    callback, nil, nil, nil, nil, gap or 0)
+    end
+
+    addItem("zone", NAVIGATOR_SETTINGS_ZONE_ACTIONS_NAME, function() doFilter(Nav.FILTER_ZONES) end)
+    addItem("player", NAVIGATOR_MENU_PLAYERS, function() doFilter(Nav.FILTER_PLAYERS) end)
+    addItem("house", NAVIGATOR_SETTINGS_HOUSE_ACTIONS_NAME, function() doFilter(Nav.FILTER_HOUSES) end)
+    addItem("trader", NAVIGATOR_MENU_GUILDTRADERS, function() doFilter(Nav.FILTER_TRADERS) end)
+    addItem("map", NAVIGATOR_MENU_TREASUREMAPS_SURVEYS, function() doFilter(Nav.FILTER_TREASURE) end)
+    addItem("search_up", NAVIGATOR_MENU_CLEARVIEW, function() doFilter(Nav.FILTER_NONE) end, 12)
+
+    --AddMenuItem("|t24:24:Navigator/media/icons/search_up.dds|t Clear view", function() doFilter(Nav.FILTER_NONE) end,
+    --        nil, nil, nil, nil, 12)
+
+    MT.menuOpen = true
+    ShowMenu(self.searchControl)
+    ZO_Menu:ClearAnchors()
+    ZO_Menu:SetAnchor(TOPLEFT, self.searchControl, BOTTOMLEFT, 0, 2)
+
+    SetMenuHiddenCallback(function()
+        Nav.log("SetMenuHiddenCallback: Menu hidden")
+        MT.menuOpen = false
+        if MT.needsRefresh then
+            MT:ImmediateRefresh()
+        end
+    end)
+end
+
+function MT:UpdateFilterControl()
+    local textures = { "search_up", "search_down", "search_over" }
+
+    if     self.filter == Nav.FILTER_PLAYERS  then textures = { "player" }
+    elseif self.filter == Nav.FILTER_HOUSES   then textures = { "house" }
+    elseif self.filter == Nav.FILTER_ZONES    then textures = { "zone" }
+    elseif self.filter == Nav.FILTER_TRADERS  then textures = { "trader" }
+    elseif self.filter == Nav.FILTER_TREASURE then textures = { "map" }
+    --elseif self.filter == Nav.FILTER_NONE then
+    --elseif self.filter == Nav.FILTER_ALL then
+    end
+
+    self.viewButton:SetNormalTexture(string.format("Navigator/media/icons/%s.dds", textures[1]))
+    self.viewButton:SetPressedTexture(string.format("Navigator/media/icons/%s.dds", textures[2] or textures[1]))
+    self.viewButton:SetMouseOverTexture(string.format("Navigator/media/icons/%s.dds", textures[3] or textures[1]))
 end
 
 Nav.MapTab = MT

@@ -27,7 +27,7 @@ function PlayerNode:GetIcon()
     if self.isGroupmate then
         return self.isLeader and "/esoui/art/icons/mapkey/mapkey_groupleader.dds" or "/esoui/art/icons/mapkey/mapkey_groupmember.dds"
     else
-        return "Navigator/media/player.dds"
+        return "Navigator/media/icons/player.dds"
     end
 end
 
@@ -122,7 +122,7 @@ function ZoneNode:GetWeight()
 end
 
 function ZoneNode:GetIcon()
-    return "Navigator/media/zone.dds"
+    return "Navigator/media/icons/zone.dds"
 end
 
 function ZoneNode:GetActionDescription(action)
@@ -244,7 +244,7 @@ function JumpToZoneNode:GetName()
 end
 
 function JumpToZoneNode:GetIcon()
-    return self.known and "Navigator/media/recall.dds" or "esoui/art/crafting/crafting_smithing_notrait.dds"
+    return self.known and "Navigator/media/icons/recall.dds" or "esoui/art/crafting/crafting_smithing_notrait.dds"
 end
 
 function JumpToZoneNode:GetOverlayIcon()
@@ -315,7 +315,7 @@ function HouseNode:GetWeight()
 end
 
 function HouseNode:GetIcon()
-    return "Navigator/media/house.dds"
+    return "Navigator/media/icons/house.dds"
 end
 
 function HouseNode:GetActionDescription(action)
@@ -608,7 +608,7 @@ end
 local PlayerHouseNode = Node:New()
 
 function PlayerHouseNode:GetIcon()
-    return "Navigator/media/house.dds"
+    return "Navigator/media/icons/house.dds"
 end
 
 function PlayerHouseNode:GetOverlayIcon()

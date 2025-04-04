@@ -36,6 +36,7 @@ function Search:Execute(searchTerm)
     searchTerm = Utils.SimplifyAccents(searchTerm)
     local result = {}
 
+    Nav.log("Search:Execute: %d candidates", #self.candidates or -1)
     for i = 1, #self.candidates do
         local candidate = self.candidates[i]
         local matchLevel = searchTerm ~= "" and match(candidate.searchName, searchTerm) or 1.0
@@ -71,6 +72,14 @@ function Search:Run(searchTerm, filter)
         self:AddCandidates(Nav.Players:GetPlayerList(hasSearch))
     elseif filter == Nav.FILTER_HOUSES then
         self:AddCandidates(Locations:GetHouseList(hasSearch))
+    elseif filter == Nav.FILTER_ZONES then
+        local list = Nav.Locations:GetZoneList()
+        table.sort(list, Nav.Node.NameComparison)
+        self:AddCandidates(list)
+    elseif filter == Nav.FILTER_TREASURE then
+        self:AddCandidates(Locations:GetMapZones())
+    elseif filter == Nav.FILTER_TRADERS then
+        self:AddCandidates(Locations:GetTraderNodeList())
     else
         self:AddCandidates(Locations:GetNodeList(nil, hasSearch))
         self:AddCandidates(Locations:GetZoneList(true))

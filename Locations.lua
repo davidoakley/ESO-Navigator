@@ -71,7 +71,7 @@ local function createNode(self, i, name, typePOI, icon, glowIcon, known, zone, p
     elseif typePOI == 1 then
         nodeInfo.poiType = Nav.POI_WAYSHRINE
         if icon:find("poi_wayshrine_complete") or icon == "/esoui/art/icons/icon_missing.dds" then
-            nodeInfo.icon = "Navigator/media/wayshrine.dds"
+            nodeInfo.icon = "Navigator/media/icons/wayshrine.dds"
         end
     elseif glowIcon == "/esoui/art/icons/poi/poi_soloinstance_glow.dds" or
             glowIcon == "/esoui/art/icons/poi/poi_groupinstance_glow.dds" then
@@ -450,11 +450,39 @@ function Locs:GetHouseList(includeAliases)
     return nodes
 end
 
+function Locs:GetTraderNodeList()
+    local nodeList = self:GetNodeList(nil, false, false)
+    local filteredList = {}
+
+    for i = 1, #nodeList do
+        local node = nodeList[i]
+        if node.traders and node.traders > 0 then
+            table.insert(filteredList, node)
+        end
+    end
+
+    table.sort(filteredList, Nav.Node.TradersComparison)
+
+    return filteredList
+end
+
 function Locs:GetZones()
     if not self.zones then
         self:SetupNodes()
     end
     return self.zones
+end
+
+function Locs:GetMapZones()
+    local zones = self:GetZoneList()
+    local filteredZones = {}
+    for i = 1, #zones do
+        local zone = zones[i]
+        if zone.treasure and (zone.treasure.survey or zone.treasure.treasure) then
+            table.insert(filteredZones, zone)
+        end
+    end
+    return filteredZones
 end
 
 function Locs:GetZoneList(includeAliases)

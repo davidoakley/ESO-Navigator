@@ -35,6 +35,18 @@ function Node.WeightComparison(x, y)
     return Nav.SortName(x.name) < Nav.SortName(y.name)
 end
 
+function Node.NameComparison(x, y)
+    return Nav.SortName(x.name) < Nav.SortName(y.name)
+end
+
+function Node.TradersComparison(x, y)
+    if x.traders ~= y.traders then
+        return x.traders > y.traders
+    end
+    return Node.NameComparison(x, y)
+end
+
+
 function Node:IsKnown()
     if self.known == nil then
         if self.nodeIndex then
