@@ -31,7 +31,7 @@ function MT:ImmediateRefresh()
     if Nav.Locations.keepsDirty then
         Nav.Locations:UpdateKeeps()
     end
-    self:executeSearch(self.searchString, true)
+    self:UpdateContent(self.searchString, true)
     self.needsRefresh = false
 end
 
@@ -236,31 +236,6 @@ function MT:buildScrollList(keepScrollPosition)
 
     local scrollData = ZO_ScrollList_GetDataList(self.listControl)
 
-    self.content = nil
-    local isSearching = #Nav.results > 0 or (self.searchString and self.searchString ~= "") or
-                        (self.filter ~= Nav.FILTER_NONE and self.filter == Nav.FILTER_ALL)
-
-    if isSearching then
-        self.content = Nav.SearchContent:New(Nav.results)
-    else
-        local zone = Nav.Locations:getCurrentMapZone()
-        if zone then
-            if zone.zoneId == Nav.ZONE_TAMRIEL then
-                self.content = Nav.ZoneListContent:New()
-            elseif zone.zoneId == Nav.ZONE_CYRODIIL then
-                self.content = Nav.CyrodiilContent:New()
-            else
-                self.content = Nav.ZoneContent:New(zone)
-            end
-        else
-            self.content = Nav.BasicContent:New()
-        end
-    end
-    if not self.content then
-        self.content = Nav.ZoneListContent:New()
-        Nav.logWarning("MT:buildScrollList: no content chosen")
-    end
-    self.content:Compose()
 
     MT.resultCount = 0
     for i = 1, #self.content.categories do
@@ -270,6 +245,12 @@ function MT:buildScrollList(keepScrollPosition)
 
 	ZO_ScrollList_Commit(self.listControl)
 
+    if not keepScrollPosition or self.targetNode >= (self.resultCount or 0) then
+        -- Nav.log("executeSearch: reset targetNode keep=%d, oldTarget=%d, count=%d", keepTargetNode and 1 or 0, self.targetNode, (MT.resultCount or 0))
+        self.targetNode = 0
+        keepScrollPosition = false
+    end
+
     if keepScrollPosition then
         ZO_ScrollList_ScrollAbsolute(self.listControl, scrollPosition)
     elseif MT.resultCount > 0 then
@@ -278,22 +259,12 @@ function MT:buildScrollList(keepScrollPosition)
     end
 end
 
-function MT:executeSearch(searchString, keepTargetNode)
-	local results
+function MT:UpdateContent(searchString, keepTargetNode)
+    self.searchString = searchString
 
-    MT.searchString = searchString
+    self.content = Nav.ContentBuilder.Build(self.searchString, self.filter)
 
-    results = Search:Run(searchString or "", MT.filter)
-
-	Nav.results = results
-    if not keepTargetNode or self.targetNode >= (MT.resultCount or 0) then
-        -- Nav.log("executeSearch: reset targetNode keep=%d, oldTarget=%d, count=%d", keepTargetNode and 1 or 0, self.targetNode, (MT.resultCount or 0))
-    	self.targetNode = 0
-        keepTargetNode = false
-    end
-
-	MT:buildScrollList(keepTargetNode)
-    --MT:updateFilterControl()
+    self:buildScrollList(keepTargetNode)
 end
 
 function MT:getTargetDataIndex()
@@ -396,7 +367,7 @@ function MT:onTextChanged(editbox)
         self.editControl.editTextChanged = true
     end
 
-    self:executeSearch(searchString)
+    self:UpdateContent(searchString)
 end
 
 function MT:OnEnter()
@@ -611,9 +582,9 @@ function MT:OnMapChanged()
         end
 
         if (self.searchString or "") == "" and self.filter == Nav.FILTER_NONE then
-            Nav.log("MT:OnMapChanged: executeSearch")
+            Nav.log("MT:OnMapChanged: UpdateContent")
             self.targetNode = 0
-            self:executeSearch("")
+            self:UpdateContent("")
         end
 
         Nav.Node.RemovePings()

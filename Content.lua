@@ -30,6 +30,40 @@ function Category:New(o)
 end
 
 
+---@class ContentBuilder
+local ContentBuilder = {}
+
+function ContentBuilder.Build(searchString, filter)
+    local results = Nav.Search:Run(searchString or "", filter)
+
+    local content
+    local isSearching = #results > 0 or (searchString and searchString ~= "") or
+            (filter ~= Nav.FILTER_NONE and filter == Nav.FILTER_ALL)
+
+    if isSearching then
+        content = Nav.SearchContent:New(results)
+    else
+        local zone = Nav.Locations:getCurrentMapZone()
+        if zone then
+            if zone.zoneId == Nav.ZONE_TAMRIEL then
+                content = Nav.ZoneListContent:New()
+            elseif zone.zoneId == Nav.ZONE_CYRODIIL then
+                content = Nav.CyrodiilContent:New()
+            else
+                content = Nav.ZoneContent:New(zone)
+            end
+        else
+            content = Nav.BasicContent:New()
+        end
+    end
+    if not content then
+        content = Nav.ZoneListContent:New()
+        Nav.logWarning("Content:Build: no content chosen")
+    end
+    content:Compose()
+
+    return content
+end
 
 
 --- @class Content
@@ -258,6 +292,7 @@ end
 
 
 Nav.Category = Category
+Nav.ContentBuilder = ContentBuilder
 Nav.BasicContent = BasicContent
 Nav.ZoneContent = ZoneContent
 Nav.ZoneListContent = ZoneListContent
