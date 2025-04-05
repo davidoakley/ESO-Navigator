@@ -432,6 +432,7 @@ function MT:resetSearch()
 	Nav.log("MT.resetSearch")
 	self.editControl:SetText("")
     self.filter = Nav.FILTER_NONE
+    self:UpdateFilterControl()
     --self:hideFilterControl()
     self:ImmediateRefresh()
 

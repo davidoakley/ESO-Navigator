@@ -36,7 +36,7 @@ function Search:Execute(searchTerm)
     searchTerm = Utils.SimplifyAccents(searchTerm)
     local result = {}
 
-    Nav.log("Search:Execute: %d candidates", #self.candidates or -1)
+    --Nav.log("Search:Execute: %d candidates", #self.candidates or -1)
     for i = 1, #self.candidates do
         local candidate = self.candidates[i]
         local matchLevel = searchTerm ~= "" and match(candidate.searchName, searchTerm) or 1.0
@@ -97,6 +97,24 @@ function Search:Run(searchTerm, filter)
     end
 
     return resultNodes
+end
+
+function Search:FilterContent(content, searchTerm)
+    for c = 1, #content.categories do
+        local category = content.categories[c]
+
+        self.candidates = {}
+        self:AddCandidates(category.list)
+
+        local result = self:Execute(searchTerm)
+        table.sort(result, matchComparison)
+
+        local newList = {}
+        for i = 1, #result do
+            table.insert(newList, result[i].node)
+        end
+        category.list = newList
+    end
 end
   
 function Search.highlightResult(result, matchChars)

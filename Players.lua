@@ -114,11 +114,14 @@ function Players:GetPlayerInZone(zoneId)
     return nil
 end
 
-local function groupComparison(x, y)
+function Players.GroupComparison(x, y)
     if x.isLeader and not y.isLeader then -- There can be only one
         return true
     elseif y.isLeader and not x.isLeader then
         return false
+    end
+    if x.isOnline ~= y.isOnline then
+        return (x.isOnline and 1 or 0) > (y.isOnline and 1 or 0)
     end
     return x.name < y.name
 end
@@ -133,7 +136,7 @@ function Players:GetGroupList()
         end
     end
 
-    table.sort(list, groupComparison)
+    table.sort(list, Nav.Players.GroupComparison)
 
     return list
 end
