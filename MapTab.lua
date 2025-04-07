@@ -338,30 +338,28 @@ end
 
 function MT:onTextChanged(editbox)
 	local searchString = string.lower(editbox:GetText())
+    local setFilter = function(filter)
+        self.filter = filter
+        editbox:SetText("")
+        editbox.editTextChanged = false
+        searchString = ""
+        self:UpdateFilterControl()
+    end
+
     if searchString == "z:" then
-        local mapId = Nav.Locations.GetMapIdByZoneId(2) -- Tamriel
-        Nav.log("MT:onTextChanged mapId %d", mapId or -1)
-        -- if mapId then
-        WORLD_MAP_MANAGER:SetMapById(mapId)
-        -- end
-        MT.filter = Nav.FILTER_NONE
-        editbox:SetText("")
-        editbox.editTextChanged = false
-        searchString = ""
+        setFilter(Nav.FILTER_ZONES)
     elseif searchString == "h:" then
-        self.filter = Nav.FILTER_HOUSES
-        editbox:SetText("")
-        editbox.editTextChanged = false
-        searchString = ""
+        setFilter(Nav.FILTER_HOUSES)
+    elseif searchString == '@' or searchString == "p:" then
+        setFilter(Nav.FILTER_PLAYERS)
+    elseif searchString == "t:" then
+        setFilter(Nav.FILTER_TRADERS)
+    elseif searchString == "m:" then
+        setFilter(Nav.FILTER_TREASURE)
     elseif searchString == "a:" then
         self.filter = Nav.FILTER_ALL
         editbox:SetText("")
         editbox.editTextChanged = false
-        searchString = ""
-    elseif searchString == '@' or searchString == "p:" then
-        self.filter = Nav.FILTER_PLAYERS
-        editbox.editTextChanged = false
-        editbox:SetText("")
         searchString = ""
     else
         self.editControl.editTextChanged = true
