@@ -609,7 +609,9 @@ function MT:OpenViewMenu()
     addItem("player", NAVIGATOR_MENU_PLAYERS, function() doFilter(Nav.FILTER_PLAYERS) end)
     addItem("house", NAVIGATOR_SETTINGS_HOUSE_ACTIONS_NAME, function() doFilter(Nav.FILTER_HOUSES) end)
     addItem("trader", NAVIGATOR_MENU_GUILDTRADERS, function() doFilter(Nav.FILTER_TRADERS) end)
-    addItem("map", NAVIGATOR_MENU_TREASUREMAPS_SURVEYS, function() doFilter(Nav.FILTER_TREASURE) end)
+    if LibTreasure_GetItemIdData then
+        addItem("map", NAVIGATOR_MENU_TREASUREMAPS_SURVEYS, function() doFilter(Nav.FILTER_TREASURE) end)
+    end
     addItem("search_up", NAVIGATOR_MENU_CLEARVIEW, function() doFilter(Nav.FILTER_NONE) end, 12)
 
     --AddMenuItem("|t24:24:Navigator/media/icons/search_up.dds|t Clear view", function() doFilter(Nav.FILTER_NONE) end,
