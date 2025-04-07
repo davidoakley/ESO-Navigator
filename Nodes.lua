@@ -154,7 +154,7 @@ end
 function ZoneNode:GetTagList()
     local tagList = {}
 
-    if self:IsJumpable() and Nav.jumpState == Nav.JUMPSTATE_WORLD then
+    if Nav.MapTab.filter ~= Nav.FILTER_TREASURE and self:IsJumpable() and Nav.jumpState == Nav.JUMPSTATE_WORLD then
         table.insert(tagList, "player")
     end
 
@@ -456,6 +456,8 @@ function FastTravelNode:GetSuffix()
         return GetString(NAVIGATOR_TRIAL)
     elseif self.poiType == Nav.POI_ARENA then
         return GetString(NAVIGATOR_ARENA)
+    elseif Nav.MapTab.filter == Nav.FILTER_TRADERS and self.traders > 0 then
+        return "  "..self.traders
     end
     return ""
 end
@@ -464,10 +466,12 @@ function FastTravelNode:GetTagList()
     local tagList = {}
 
     if self.traders and self.traders > 0 then
-        if self.traders >= 5 then
-            table.insert(tagList, "city")
-        elseif self.traders >= 2 then
-            table.insert(tagList, "town")
+        if Nav.MapTab.filter ~= Nav.FILTER_TRADERS then
+            if self.traders >= 5 then
+                table.insert(tagList, "city")
+            elseif self.traders >= 2 then
+                table.insert(tagList, "town")
+            end
         end
         table.insert(tagList, "trader")
     end
