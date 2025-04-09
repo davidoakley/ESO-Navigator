@@ -48,6 +48,7 @@ function Players:SetupPlayers()
             local hasChar, charName, zoneName, _, _, _, _, zoneId = GetGuildMemberCharacterInfo(guildID, i)
             if hasChar then
                 local player = addPlayer(self, zones, zoneId, zoneName, userID, charName, playerStatus ~= PLAYER_STATUS_OFFLINE and secsSinceLogoff == 0)
+                player.guildID = guild
                 player.isGuildmate = true
             end
         end
@@ -60,6 +61,7 @@ function Players:SetupPlayers()
         local hasChar, charName, zoneName, _, _, _, _, zoneId = GetFriendCharacterInfo(i)
         if hasChar then
             local player = addPlayer(self, zones, zoneId, zoneName, userID, charName, playerStatus ~= PLAYER_STATUS_OFFLINE and secsSinceLogoff == 0)
+            player.friendIndex = i
             player.isFriend = true
         end
     end
@@ -88,6 +90,37 @@ end
 
 function Players:ClearPlayers()
     self.players = nil
+end
+
+function Players:UpdatePlayer(userID)
+    if not self.players then return end
+
+    local player = self.players[userID]
+    if not player then
+        Nav.logWarning("Players:UpdatePlayer: can't find '%s'", userID)
+        self:ClearPlayers()
+        return
+    end
+
+    if player.isFriend then
+        local hasChar, _, zoneName, _, _, _, _, zoneId = GetFriendCharacterInfo(player.friendIndex)
+        player.zoneName = zoneName
+        player.zoneId = zoneId
+        player.isOnline = hasChar
+    elseif player.isGuildmate then
+        local i = GetGuildMemberIndexFromDisplayName(player.guildID, userID)
+        local hasChar, _, zoneName, _, _, _, _, zoneId = GetGuildMemberCharacterInfo(player.guildID, i)
+        player.zoneName = zoneName
+        player.zoneId = zoneId
+        player.isOnline = hasChar
+    elseif player.isGroupmate then
+        if player.unitTag then
+            local zoneId = GetZoneId(GetUnitZoneIndex(player.unitTag))
+            player.zoneId = zoneId
+            player.zoneName = GetZoneNameById(zoneId)
+            player.isOnline = IsUnitOnline(player.unitTag)
+        end
+    end
 end
 
 function Players:GetPlayerList(includeOffline)

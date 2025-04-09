@@ -98,6 +98,21 @@ function Nav.mkstr(id, str)
     end
 end
 
+function Nav.showSearch(callback)
+    Nav.log("showSearch")
+    local tabVisible = Nav.MapTab.visible
+    MAIN_MENU_KEYBOARD:ShowScene("worldMap")
+    WORLD_MAP_INFO:SelectTab(NAVIGATOR_TAB_SEARCH)
+    Nav.MapTab:resetSearch()
+    if Nav.saved.autoFocus or tabVisible then
+        Nav.MapTab.editControl:TakeFocus()
+        Nav.log("showSearch: setting editControl focus")
+    end
+    if callback then
+        callback()
+    end
+end
+
 local function GetUniqueEventId(id)
   local count = _events[id] or 0
   count = count + 1
@@ -126,7 +141,6 @@ local function addEvents(func, ...)
   end
   end
 end
-
 
 local ButtonGroup
 
@@ -216,39 +230,68 @@ local function SetPlayersDirty(_)
   Nav.MapTab:queueRefresh()
 end
 
+local function UpdatePlayer(userID)
+    Nav.Players:UpdatePlayer(userID)
+    Nav.MapTab:queueRefresh()
+end
+
 local function SetKeepsDirty(_)
     Nav.Locations:SetKeepsDirty()
     Nav.MapTab:queueRefresh()
 end
 
-function Nav.showSearch(callback)
-    Nav.log("showSearch")
-    local tabVisible = Nav.MapTab.visible
-    MAIN_MENU_KEYBOARD:ShowScene("worldMap")
-    WORLD_MAP_INFO:SelectTab(NAVIGATOR_TAB_SEARCH)
-    Nav.MapTab:resetSearch()
-    if Nav.saved.autoFocus or tabVisible then
-        Nav.MapTab.editControl:TakeFocus()
-        Nav.log("showSearch: setting editControl focus")
-    end
-    if callback then
-        callback()
-    end
+local function setupEvents()
+    CALLBACK_MANAGER:RegisterCallback("OnWorldMapChanged", OnMapChanged)
+    CALLBACK_MANAGER:RegisterCallback("OnWorldMapModeChanged", OnMapChanged)
+
+    addEvent(EVENT_START_FAST_TRAVEL_INTERACTION, OnStartFastTravel)
+    addEvent(EVENT_START_FAST_TRAVEL_KEEP_INTERACTION, OnStartFastTravelKeep)
+    addEvent(EVENT_END_FAST_TRAVEL_INTERACTION, OnEndFastTravel)
+    addEvent(EVENT_END_FAST_TRAVEL_KEEP_INTERACTION, OnEndFastTravel)
+    addEvent(EVENT_PLAYER_ACTIVATED, OnPlayerActivated)
+
+    addEvents(OnPOIUpdated, EVENT_POI_DISCOVERED, EVENT_POI_UPDATED, EVENT_FAST_TRAVEL_NETWORK_UPDATED)
+
+    addEvents(SetPlayersDirty,
+            EVENT_GROUP_MEMBER_JOINED, EVENT_GROUP_MEMBER_LEFT, EVENT_GROUP_MEMBER_CONNECTED_STATUS,
+            EVENT_GUILD_SELF_JOINED_GUILD, EVENT_GUILD_SELF_LEFT_GUILD, EVENT_GUILD_MEMBER_ADDED, EVENT_GUILD_MEMBER_REMOVED,
+            EVENT_FRIEND_ADDED, EVENT_FRIEND_REMOVED, EVENT_GROUP_MEMBER_ROLE_CHANGED)
+
+    addEvent(EVENT_GUILD_MEMBER_CHARACTER_ZONE_CHANGED, function(_, _, displayName, _, _)
+        UpdatePlayer(displayName);
+    end)
+
+    addEvent(EVENT_FRIEND_CHARACTER_ZONE_CHANGED, function(_, displayName, _, _)
+        UpdatePlayer(displayName);
+    end)
+
+    addEvent(EVENT_GUILD_MEMBER_PLAYER_STATUS_CHANGED, function(_, _, displayName, oldStatus, newStatus)
+        if newStatus == PLAYER_STATUS_OFFLINE or (oldStatus == PLAYER_STATUS_OFFLINE and newStatus == PLAYER_STATUS_ONLINE) then
+            --Nav.log("EVENT_GUILD_MEMBER_PLAYER_STATUS_CHANGED displayName=%s, status=%s", displayName, newStatus)
+            UpdatePlayer(displayName);
+        end
+    end)
+
+    addEvents(SetKeepsDirty, EVENT_FAST_TRAVEL_NETWORK_UPDATED, EVENT_FAST_TRAVEL_KEEP_NETWORK_UPDATED,
+            EVENT_FAST_TRAVEL_KEEP_NETWORK_LINK_CHANGED, EVENT_CAMPAIGN_STATE_INITIALIZED,
+            EVENT_CAMPAIGN_SELECTION_DATA_CHANGED, EVENT_CURRENT_CAMPAIGN_CHANGED, EVENT_ASSIGNED_CAMPAIGN_CHANGED,
+            EVENT_KEEPS_INITIALIZED, EVENT_KEEP_ALLIANCE_OWNER_CHANGED, EVENT_KEEP_UNDER_ATTACK_CHANGED
+    )
 end
 
 local function moveTabToFirst()
-  local buttons = WORLD_MAP_INFO.modeBar.menuBar.m_object.m_buttons
-  local ourButton = buttons[#buttons]
-  buttons[#buttons] = nil
-  table.insert(buttons, 1, ourButton)
+    local buttons = WORLD_MAP_INFO.modeBar.menuBar.m_object.m_buttons
+    local ourButton = buttons[#buttons]
+    buttons[#buttons] = nil
+    table.insert(buttons, 1, ourButton)
 
-  local buttonData = WORLD_MAP_INFO.modeBar.buttonData
-  local ourData = buttonData[#buttonData]
-  buttonData[#buttonData] = nil
-  table.insert(buttonData, 1, ourData)
+    local buttonData = WORLD_MAP_INFO.modeBar.buttonData
+    local ourData = buttonData[#buttonData]
+    buttonData[#buttonData] = nil
+    table.insert(buttonData, 1, ourData)
 
-  WORLD_MAP_INFO.modeBar:UpdateButtons(false)
-  Nav.log("Menu re-ordered")
+    WORLD_MAP_INFO.modeBar:UpdateButtons(false)
+    Nav.log("Menu re-ordered")
 end
 
 function Nav:initialize()
@@ -267,34 +310,7 @@ function Nav:initialize()
   self.Chat:Init()
   self:loadSettings()
 
-  CALLBACK_MANAGER:RegisterCallback("OnWorldMapChanged", OnMapChanged)
-  CALLBACK_MANAGER:RegisterCallback("OnWorldMapModeChanged", OnMapChanged)
-
-  addEvent(EVENT_START_FAST_TRAVEL_INTERACTION, OnStartFastTravel)
-  addEvent(EVENT_START_FAST_TRAVEL_KEEP_INTERACTION, OnStartFastTravelKeep)
-  addEvent(EVENT_END_FAST_TRAVEL_INTERACTION, OnEndFastTravel)
-  addEvent(EVENT_END_FAST_TRAVEL_KEEP_INTERACTION, OnEndFastTravel)
-  addEvent(EVENT_PLAYER_ACTIVATED, OnPlayerActivated)
-
-  addEvents(OnPOIUpdated, EVENT_POI_DISCOVERED, EVENT_POI_UPDATED, EVENT_FAST_TRAVEL_NETWORK_UPDATED)
-
-  addEvents(SetPlayersDirty,
-    EVENT_GROUP_MEMBER_JOINED, EVENT_GROUP_MEMBER_LEFT, EVENT_GROUP_MEMBER_CONNECTED_STATUS,
-    EVENT_GUILD_SELF_JOINED_GUILD, EVENT_GUILD_SELF_LEFT_GUILD, EVENT_GUILD_MEMBER_ADDED, EVENT_GUILD_MEMBER_REMOVED,
-    EVENT_GUILD_MEMBER_CHARACTER_ZONE_CHANGED, EVENT_FRIEND_CHARACTER_ZONE_CHANGED,
-    EVENT_FRIEND_ADDED, EVENT_FRIEND_REMOVED, EVENT_GROUP_MEMBER_ROLE_CHANGED)
-
-  addEvent(EVENT_GUILD_MEMBER_PLAYER_STATUS_CHANGED, function(_, _, _, oldStatus, newStatus)
-    if newStatus == PLAYER_STATUS_OFFLINE or (oldStatus == PLAYER_STATUS_OFFLINE and newStatus == PLAYER_STATUS_ONLINE) then
-      SetPlayersDirty()
-    end
-  end)
-
-  addEvents(SetKeepsDirty, EVENT_FAST_TRAVEL_NETWORK_UPDATED, EVENT_FAST_TRAVEL_KEEP_NETWORK_UPDATED,
-          EVENT_FAST_TRAVEL_KEEP_NETWORK_LINK_CHANGED, EVENT_CAMPAIGN_STATE_INITIALIZED,
-          EVENT_CAMPAIGN_SELECTION_DATA_CHANGED, EVENT_CURRENT_CAMPAIGN_CHANGED, EVENT_ASSIGNED_CAMPAIGN_CHANGED,
-          EVENT_KEEPS_INITIALIZED, EVENT_KEEP_ALLIANCE_OWNER_CHANGED, EVENT_KEEP_UNDER_ATTACK_CHANGED
-  )
+  setupEvents()
 
   local buttonData = {
     pressed = "Navigator/media/tabicon_down.dds",
