@@ -372,7 +372,7 @@ function MT:onTextChanged(editbox)
         self.editControl.editTextChanged = true
     end
 
-    self:UpdateContent(searchString)
+    self:UpdateContent(searchString, false)
 end
 
 function MT:OnEnter()
@@ -396,7 +396,8 @@ function MT:nextResult()
             known = true
         end
     until known or self.targetNode == startNode
-	self:buildScrollList()
+    ZO_ScrollList_RefreshVisible(self.listControl)
+    ZO_ScrollList_ScrollDataIntoView(self.listControl, self.targetNode + 1, nil, true)
 end
 
 function MT:previousResult()
@@ -412,12 +413,12 @@ function MT:previousResult()
             known = true
         end
     until known or self.targetNode == startNode
-	self:buildScrollList()
+	self:buildScrollList(true)
 end
 
 function MT:nextCategory()
     self.targetNode = self:getNextCategoryFirstIndex()
-	self:buildScrollList()
+	self:buildScrollList(true)
 end
 
 function MT:previousCategory()
@@ -590,7 +591,7 @@ function MT:OnMapChanged()
         if (self.searchString or "") == "" and self.filter == Nav.FILTER_NONE then
             Nav.log("MT:OnMapChanged: UpdateContent")
             self.targetNode = 0
-            self:UpdateContent("")
+            self:UpdateContent("", false)
         end
 
         Nav.Node.RemovePings()
