@@ -36,6 +36,10 @@ Nav.COLOUR_SUFFIX_POI = "777777"
 Nav.COLOUR_SUFFIX_DISABLED = "444444"
 Nav.COLOUR_COIN = "FFCC33"
 
+Nav.REFRESH_NONE = 0
+Nav.REFRESH_EXISTING = 1
+Nav.REFRESH_REBUILD = 2
+
 -- Trader Locations, copied from Faster Travel by SimonIllyan, XanDDemoX, upyachka, Valandil
 local trader_counts = { -- nodeIndex -> traders_count
     [  1] = 1, -- Wyrd Tree Wayshrine

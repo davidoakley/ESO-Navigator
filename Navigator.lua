@@ -232,7 +232,7 @@ end
 
 local function UpdatePlayer(userID)
     Nav.Players:UpdatePlayer(userID)
-    Nav.MapTab:queueRefresh()
+    Nav.MapTab:queueRefresh(Nav.REFRESH_EXISTING)
 end
 
 local function SetKeepsDirty(_)

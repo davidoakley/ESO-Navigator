@@ -4,17 +4,17 @@ local Search = Nav.Search
 local Utils = Nav.Utils
 
 MT.filter = Nav.FILTER_NONE
-MT.needsRefresh = false
+MT.needsRefresh = Nav.REFRESH_NONE
 MT.collapsedCategories = {}
 MT.targetNode = 0
 
-function MT:queueRefresh()
-    if not self.needsRefresh then
-        self.needsRefresh = true
+function MT:queueRefresh(refreshMode)
+    if self.needsRefresh == Nav.REFRESH_NONE then
+        self.needsRefresh = refreshMode
         if self.visible and not self.menuOpen then
             zo_callLater(function()
-                if self.needsRefresh and self.visible and not self.menuOpen then
-                    self:ImmediateRefresh()
+                if self.needsRefresh ~= Nav.REFRESH_NONE and self.visible and not self.menuOpen then
+                    self:ImmediateRefresh(self.needsRefresh)
                 else
                     -- Nav.log("MT:queueRefresh: skipped")
                 end
@@ -26,13 +26,20 @@ function MT:queueRefresh()
     end
 end
 
-function MT:ImmediateRefresh()
-    -- Nav.log("MT:ImmediateRefresh")
+function MT:ImmediateRefresh(refreshMode)
+    if refreshMode == nil then
+        refreshMode = Nav.REFRESH_REBUILD
+    end
+
     if Nav.Locations.keepsDirty then
         Nav.Locations:UpdateKeeps()
     end
-    self:UpdateContent(self.searchString, true)
-    self.needsRefresh = false
+    if refreshMode == Nav.REFRESH_REBUILD then
+        self:UpdateContent(self.searchString, true)
+    else
+        ZO_ScrollList_RefreshVisible(self.listControl)
+    end
+    self.needsRefresh = Nav.REFRESH_NONE
 end
 
 local function getDeveloperTooltip(node)
@@ -68,7 +75,7 @@ local currentTooltip = nil
 
 function MT:layoutRow(rowControl, data, _)
     local node = data.node
-    local isSelected = data.isSelected
+    local isSelected = self.editControl:HasFocus() and node.known and (data.nodeIndex == MT.targetNode)
 	local name = node:GetName()
     local icon = node:GetIcon()
     local categoryId = data.dataEntry.categoryId
@@ -179,12 +186,11 @@ local function buildCategory(scrollData, category)
             local entry = ZO_ScrollList_CreateDataEntry(3, { hint = list[i].hint })
             table.insert(scrollData, entry)
         elseif list[i].known or includeUnknown then
-            local isSelected = hasFocus and list[i].known and (currentNodeIndex == MT.targetNode)
             local data = {
                 node = list[i],
-                isSelected = isSelected,
                 indexInCategory = i,
-                categoryEntryCount = #list
+                categoryEntryCount = #list,
+                nodeIndex = currentNodeIndex
             }
 
             local entry = ZO_ScrollList_CreateDataEntry(1, data, category.id)
@@ -253,7 +259,8 @@ function MT:buildScrollList(keepScrollPosition)
 
     if keepScrollPosition then
         ZO_ScrollList_ScrollAbsolute(self.listControl, scrollPosition)
-    elseif MT.resultCount > 0 then
+    end
+    if MT.resultCount > 0 then
         -- FIXME: this doesn't account for the headings
         ZO_ScrollList_ScrollDataIntoView(self.listControl, self.targetNode + 1, nil, true)
     end
