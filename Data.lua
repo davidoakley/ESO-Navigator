@@ -20,7 +20,10 @@ Nav.POI_GROUP_DUNGEON = 7
 Nav.FILTER_NONE = 0
 Nav.FILTER_PLAYERS = 1
 Nav.FILTER_ALL = 2
+Nav.FILTER_TRADERS = 3
 Nav.FILTER_HOUSES = 4
+Nav.FILTER_ZONES = 5
+Nav.FILTER_TREASURE = 6
 
 Nav.COLOUR_WHITE = "FFFFFF"
 Nav.COLOUR_DISABLED = "666666"
@@ -32,6 +35,10 @@ Nav.COLOUR_SUFFIX_NORMAL = "82826F"
 Nav.COLOUR_SUFFIX_POI = "777777"
 Nav.COLOUR_SUFFIX_DISABLED = "444444"
 Nav.COLOUR_COIN = "FFCC33"
+
+Nav.REFRESH_NONE = 0
+Nav.REFRESH_EXISTING = 1
+Nav.REFRESH_REBUILD = 2
 
 -- Trader Locations, copied from Faster Travel by SimonIllyan, XanDDemoX, upyachka, Valandil
 local trader_counts = { -- nodeIndex -> traders_count

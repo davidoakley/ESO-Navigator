@@ -27,7 +27,7 @@ function PlayerNode:GetIcon()
     if self.isGroupmate then
         return self.isLeader and "/esoui/art/icons/mapkey/mapkey_groupleader.dds" or "/esoui/art/icons/mapkey/mapkey_groupmember.dds"
     else
-        return "Navigator/media/player.dds"
+        return "Navigator/media/icons/player.dds"
     end
 end
 
@@ -85,6 +85,10 @@ function PlayerNode:OnClick() self:JumpToPlayer() end
 function PlayerNode:OnSlash() self:JumpToPlayer() end
 function PlayerNode:OnEnter() self:JumpToPlayer() end
 
+function PlayerNode:GetActions()
+    return { singleClick = Nav.ACTION_TRAVEL }
+end
+
 function PlayerNode:AddMenuItems()
     if self.isOnline then
         AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE), self.userID), function()
@@ -122,7 +126,7 @@ function ZoneNode:GetWeight()
 end
 
 function ZoneNode:GetIcon()
-    return "Navigator/media/zone.dds"
+    return "Navigator/media/icons/zone.dds"
 end
 
 function ZoneNode:GetActionDescription(action)
@@ -154,7 +158,7 @@ end
 function ZoneNode:GetTagList()
     local tagList = {}
 
-    if self:IsJumpable() and Nav.jumpState == Nav.JUMPSTATE_WORLD then
+    if Nav.MapTab.filter ~= Nav.FILTER_TREASURE and self:IsJumpable() and Nav.jumpState == Nav.JUMPSTATE_WORLD then
         table.insert(tagList, "player")
     end
 
@@ -244,7 +248,7 @@ function JumpToZoneNode:GetName()
 end
 
 function JumpToZoneNode:GetIcon()
-    return self.known and "Navigator/media/recall.dds" or "esoui/art/crafting/crafting_smithing_notrait.dds"
+    return self.known and "Navigator/media/icons/recall.dds" or "esoui/art/crafting/crafting_smithing_notrait.dds"
 end
 
 function JumpToZoneNode:GetOverlayIcon()
@@ -315,7 +319,7 @@ function HouseNode:GetWeight()
 end
 
 function HouseNode:GetIcon()
-    return "Navigator/media/house.dds"
+    return "Navigator/media/icons/house.dds"
 end
 
 function HouseNode:GetActionDescription(action)
@@ -456,6 +460,8 @@ function FastTravelNode:GetSuffix()
         return GetString(NAVIGATOR_TRIAL)
     elseif self.poiType == Nav.POI_ARENA then
         return GetString(NAVIGATOR_ARENA)
+    elseif Nav.MapTab.filter == Nav.FILTER_TRADERS and self.traders > 0 then
+        return "  "..self.traders
     end
     return ""
 end
@@ -464,10 +470,12 @@ function FastTravelNode:GetTagList()
     local tagList = {}
 
     if self.traders and self.traders > 0 then
-        if self.traders >= 5 then
-            table.insert(tagList, "city")
-        elseif self.traders >= 2 then
-            table.insert(tagList, "town")
+        if Nav.MapTab.filter ~= Nav.FILTER_TRADERS then
+            if self.traders >= 5 then
+                table.insert(tagList, "city")
+            elseif self.traders >= 2 then
+                table.insert(tagList, "town")
+            end
         end
         table.insert(tagList, "trader")
     end
@@ -608,7 +616,7 @@ end
 local PlayerHouseNode = Node:New()
 
 function PlayerHouseNode:GetIcon()
-    return "Navigator/media/house.dds"
+    return "Navigator/media/icons/house.dds"
 end
 
 function PlayerHouseNode:GetOverlayIcon()

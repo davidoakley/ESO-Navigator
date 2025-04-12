@@ -35,6 +35,18 @@ function Node.WeightComparison(x, y)
     return Nav.SortName(x.name) < Nav.SortName(y.name)
 end
 
+function Node.NameComparison(x, y)
+    return Nav.SortName(x.name) < Nav.SortName(y.name)
+end
+
+function Node.TradersComparison(x, y)
+    if x.traders ~= y.traders then
+        return x.traders > y.traders
+    end
+    return Node.NameComparison(x, y)
+end
+
+
 function Node:IsKnown()
     if self.known == nil then
         if self.nodeIndex then
@@ -76,7 +88,7 @@ end
 
 function Node:GetTagList()
     local tagList = {}
-    if Nav.Bookmarks:contains(self) then
+    if Nav.MapTab.filter ~= Nav.FILTER_TREASURE and Nav.MapTab.filter ~= Nav.FILTER_TRADERS and Nav.Bookmarks:contains(self) then
         table.insert(tagList, "bookmark")
     end
     return tagList
@@ -97,7 +109,7 @@ function Node:GetActionDescription(action)
     elseif action == Nav.ACTION_SETDESTINATION then
         return GetString(NAVIGATOR_MENU_SETDESTINATION)
     elseif action == Nav.ACTION_TRAVEL then
-        if Nav.jumpState == Nav.JUMPSTATE_WORLD then
+        if Nav.jumpState == Nav.JUMPSTATE_WORLD and not self.userID then
             local s = Nav.Utils.EllipsisString(SI_WORLD_MAP_ACTION_RECALL_TO_WAYSHRINE)
             local recallCost = self.known and self:GetRecallCost() or nil
             if recallCost then

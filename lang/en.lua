@@ -41,6 +41,7 @@ mkstr("NAVIGATOR_TIP_CLICK_TO_TRAVEL", "Click to travel to <<1>>") -- 1:zone/des
 mkstr("NAVIGATOR_TIP_DOUBLECLICK_TO_TRAVEL", "Double-click to travel to <<1>>") -- 1:zone/destination
 mkstr("NAVIGATOR_TOOLTIP_ACTION_RESULT", "<<1>>: <<2>>") -- e.g. 1:"Single-click" 2:"Show On Map"
 mkstr("NAVIGATOR_TOOLTIP_GUILDTRADERS", "<<1[/1 Guild Trader nearby/$d Guild Traders nearby]>>")
+mkstr("NAVIGATOR_TOOLTIP_VIEWMENU", "Switch to alternative views")
 
 -- Action and menu items
 mkstr("NAVIGATOR_TRAVEL_TO_ZONE", "Travel to <<1>>")
@@ -49,6 +50,10 @@ mkstr("NAVIGATOR_MENU_ADDHOUSEBOOKMARK", "Add Primary Residence Bookmark")
 mkstr("NAVIGATOR_MENU_REMOVEBOOKMARK", "Remove Bookmark")
 mkstr("NAVIGATOR_MENU_MOVEBOOKMARKUP", "Move Bookmark up")
 mkstr("NAVIGATOR_MENU_MOVEBOOKMARKDOWN", "Move Bookmark down")
+mkstr("NAVIGATOR_MENU_PLAYERS", "Players")
+mkstr("NAVIGATOR_MENU_GUILDTRADERS", "Guild Traders")
+mkstr("NAVIGATOR_MENU_TREASUREMAPS_SURVEYS", "Treasure Maps & Surveys")
+mkstr("NAVIGATOR_MENU_CLEARVIEW", "Clear view")
 NAVIGATOR_MENU_SHOWONMAP = SI_QUEST_JOURNAL_SHOW_ON_MAP
 NAVIGATOR_MENU_SETDESTINATION = SI_WORLD_MAP_ACTION_SET_PLAYER_WAYPOINT
 

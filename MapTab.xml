@@ -134,7 +134,8 @@
                 self.listControl = self:GetNamedChild("List")
 				self.searchControl = self:GetNamedChild("Search")
 				self.editControl = self:GetNamedChild("SearchEdit")
-				self.filterControl = self:GetNamedChild("SearchFilter")
+				--self.filterControl = self:GetNamedChild("SearchFilter")
+				self.viewButton = self.searchControl:GetNamedChild("View")
 
 				self.fragment = ZO_FadeSceneFragment:New(self)
 				self.fragment.duration = 100
@@ -166,6 +167,7 @@
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT" offsetX="0" offsetY="-30" />
 
 					<Controls>
+						<!--
 						<Label name="$(parent)Filter" font="$(MEDIUM_FONT)|$(KB_14)" text="|u6:6::Reaper's March|u" hidden="true">
 							<Anchor point="TOPLEFT" offsetX="0" offsetY="6"/>
 							<Controls>
@@ -175,6 +177,22 @@
 								</Backdrop>
 							</Controls>
 						</Label>
+						-->
+						<Button name="$(parent)View" tier="HIGH">
+							<Anchor point="TOPLEFT" offsetX="2" offsetY="3"/>
+							<OnMouseUp>Navigator.MapTab:OpenViewMenu()</OnMouseUp>
+							<Dimensions x="24" y="24" />
+							<Textures 	 normal="Navigator/media/icons/search_up.dds"
+										pressed="Navigator/media/icons/search_down.dds"
+									  mouseOver="Navigator/media/icons/search_over.dds"
+							/>
+						</Button>
+
+						<Texture name="$(parent)Separator" textureFile="Navigator/media/verticalbar.dds" hidden="false" mouseEnabled="false">
+							<Anchor point="TOPLEFT" relativeTo="$(parent)View" relativePoint="TOPRIGHT" offsetX="2" offsetY="0" />
+							<Dimensions x="4" y="24"/>
+							<!--<TextureCoords top="0" bottom="1" left="0" right="1"/>-->
+						</Texture>
 
 						<Button name="$(parent)Clear" tier="HIGH">
 							<Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT" offsetX="-5" offsetY="5"/>
@@ -188,7 +206,7 @@
 
 						<EditBox name="$(parent)Edit" maxInputCharacters="30" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText" newLineEnabled="true" >
 							<!--<Anchor point="TOPLEFT" relativeTo="$(parent)Filter" relativePoint="TOPRIGHT" offsetX="0" offsetY="-1" />-->
-							<Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="2" offsetY="-1" />
+							<Anchor point="TOPLEFT" relativeTo="$(parent)Separator" relativePoint="TOPRIGHT" offsetX="2" offsetY="-1" />
 							<Anchor point="TOPRIGHT" relativeTo="$(parent)Clear" relativePoint="TOPLEFT" offsetX="-4" offsetY="-1" />
 							<OnInitialized>
 							</OnInitialized>
