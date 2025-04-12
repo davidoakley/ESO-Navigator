@@ -1,7 +1,5 @@
 local MT = Navigator_MapTab -- from XML
 local Nav = Navigator
-local Search = Nav.Search
-local Utils = Nav.Utils
 
 MT.filter = Nav.FILTER_NONE
 MT.needsRefresh = Nav.REFRESH_NONE
@@ -71,7 +69,7 @@ local function getDeveloperTooltip(node)
     return table.concat(items, "\n")
 end
 
-local currentTooltip = nil
+local currentTooltip
 
 function MT:layoutRow(rowControl, data, _)
     local node = data.node
@@ -166,7 +164,6 @@ end
 
 local function buildCategory(scrollData, category)
     local collapsed = MT.collapsedCategories[category.id] and true or false
-    local hasFocus = MT.editControl:HasFocus()
     local list = category.list
 
     buildCategoryHeader(scrollData, category.id, category.title, collapsed)
@@ -565,9 +562,11 @@ function MT:CategoryRowMouseUp(control, mouseButton)
 end
 
 function MT:HintRowMouseUp(control, mouseButton)
-    local data = ZO_ScrollList_GetData(control)
-    if data.onClick then
-        data.onClick()
+    if mouseButton == 1 then
+        local data = ZO_ScrollList_GetData(control)
+        if data.onClick then
+            data.onClick()
+        end
     end
 end
 
@@ -655,5 +654,16 @@ function MT:UpdateFilterControl()
     self.viewButton:SetPressedTexture(string.format("Navigator/media/icons/%s.dds", textures[2] or textures[1]))
     self.viewButton:SetMouseOverTexture(string.format("Navigator/media/icons/%s.dds", textures[3] or textures[1]))
 end
+
+function MT:SetViewButtonTooltip()
+    self.viewButton:SetHandler("OnMouseEnter", function(control)
+        ZO_Tooltips_ShowTextTooltip(control, LEFT, GetString(NAVIGATOR_TOOLTIP_VIEWMENU))
+    end)
+    self.viewButton:SetHandler("OnMouseExit", function(_)
+        ZO_Tooltips_HideTextTooltip()
+    end)
+end
+
+MT:SetViewButtonTooltip()
 
 Nav.MapTab = MT
