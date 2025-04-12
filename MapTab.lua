@@ -606,21 +606,23 @@ function MT:OpenViewMenu()
         self:queueRefresh()
     end
 
-    local addItem = function (icon, stringId, callback, gap)
+    local addItem = function (icon, stringId, filterId, gap)
+        local callback = function() doFilter(filterId) end
+        local colour = filterId == self.filter and ZO_WHITE or nil
         AddMenuItem(string.format("|t24:24:Navigator/media/icons/%s.dds:inheritcolor|t %s",
                                   icon, GetString(stringId)),
-                    callback, nil, nil, nil, nil, gap or 0)
+                    callback, nil, nil, colour, nil, gap or 0)
     end
 
-    addItem("zone", NAVIGATOR_SETTINGS_ZONE_ACTIONS_NAME, function() doFilter(Nav.FILTER_ZONES) end)
-    addItem("player", NAVIGATOR_MENU_PLAYERS, function() doFilter(Nav.FILTER_PLAYERS) end)
-    addItem("house", NAVIGATOR_SETTINGS_HOUSE_ACTIONS_NAME, function() doFilter(Nav.FILTER_HOUSES) end)
-    addItem("trader", NAVIGATOR_MENU_GUILDTRADERS, function() doFilter(Nav.FILTER_TRADERS) end)
+    addItem("zone", NAVIGATOR_SETTINGS_ZONE_ACTIONS_NAME, Nav.FILTER_ZONES)
+    addItem("player", NAVIGATOR_MENU_PLAYERS, Nav.FILTER_PLAYERS)
+    addItem("house", NAVIGATOR_SETTINGS_HOUSE_ACTIONS_NAME, Nav.FILTER_HOUSES)
+    addItem("trader", NAVIGATOR_MENU_GUILDTRADERS, Nav.FILTER_TRADERS)
     if LibTreasure_GetItemIdData then
-        addItem("map", NAVIGATOR_MENU_TREASUREMAPS_SURVEYS, function() doFilter(Nav.FILTER_TREASURE) end)
+        addItem("map", NAVIGATOR_MENU_TREASUREMAPS_SURVEYS, Nav.FILTER_TREASURE)
     end
     if self.filter ~= Nav.FILTER_NONE then
-        addItem("search_up", NAVIGATOR_MENU_CLEARVIEW, function() doFilter(Nav.FILTER_NONE) end, 12)
+        addItem("search_up", NAVIGATOR_MENU_CLEARVIEW, Nav.FILTER_NONE, 12)
     end
 
     --AddMenuItem("|t24:24:Navigator/media/icons/search_up.dds|t Clear view", function() doFilter(Nav.FILTER_NONE) end,
