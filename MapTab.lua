@@ -619,7 +619,9 @@ function MT:OpenViewMenu()
     if LibTreasure_GetItemIdData then
         addItem("map", NAVIGATOR_MENU_TREASUREMAPS_SURVEYS, function() doFilter(Nav.FILTER_TREASURE) end)
     end
-    addItem("search_up", NAVIGATOR_MENU_CLEARVIEW, function() doFilter(Nav.FILTER_NONE) end, 12)
+    if self.filter ~= Nav.FILTER_NONE then
+        addItem("search_up", NAVIGATOR_MENU_CLEARVIEW, function() doFilter(Nav.FILTER_NONE) end, 12)
+    end
 
     --AddMenuItem("|t24:24:Navigator/media/icons/search_up.dds|t Clear view", function() doFilter(Nav.FILTER_NONE) end,
     --        nil, nil, nil, nil, 12)

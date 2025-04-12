@@ -41,6 +41,7 @@ mkstr("NAVIGATOR_TIP_CLICK_TO_TRAVEL", "Premi per viaggiare a <<1>>") -- 1:zone/
 mkstr("NAVIGATOR_TIP_DOUBLECLICK_TO_TRAVEL", "Doppio-click per viaggiare a <<1>>") -- 1:zone/destination
 mkstr("NAVIGATOR_TOOLTIP_ACTION_RESULT", "<<1>>: <<2>>") -- e.g. 1:"Single-click" 2:"Show On Map"
 mkstr("NAVIGATOR_TOOLTIP_GUILDTRADERS", "<<1[/1 mercante di gilda nelle vicinanze/$d mercanti di gilde nelle vicinanze]>>")
+--mkstr("NAVIGATOR_TOOLTIP_VIEWMENU", "Switch to alternative views")
 
 -- Action and menu items
 mkstr("NAVIGATOR_TRAVEL_TO_ZONE", "Viaggia a <<1>>")
@@ -49,6 +50,10 @@ mkstr("NAVIGATOR_MENU_ADDHOUSEBOOKMARK", "Aggiungi residenza principale ai prefe
 mkstr("NAVIGATOR_MENU_REMOVEBOOKMARK", "Rimuovi preferito")
 mkstr("NAVIGATOR_MENU_MOVEBOOKMARKUP", "Sposta su")
 mkstr("NAVIGATOR_MENU_MOVEBOOKMARKDOWN", "Sposta giù")
+--mkstr("NAVIGATOR_MENU_PLAYERS", "Players")
+--mkstr("NAVIGATOR_MENU_GUILDTRADERS", "Guild Traders")
+--mkstr("NAVIGATOR_MENU_TREASUREMAPS_SURVEYS", "Treasure Maps & Surveys")
+--mkstr("NAVIGATOR_MENU_CLEARVIEW", "Clear view")
 
 
 

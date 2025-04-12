@@ -41,6 +41,7 @@ mkstr("NAVIGATOR_TIP_CLICK_TO_TRAVEL", "Щелкните, чтобы перем�
 mkstr("NAVIGATOR_TIP_DOUBLECLICK_TO_TRAVEL", "Щелкните дважды, чтобы переместиться в <<1>>") -- 1:zone
 mkstr("NAVIGATOR_TOOLTIP_ACTION_RESULT", "<<1>>: <<2>>") -- e.g. 1:"Single-click" 2:"Show On Map"
 --mkstr("NAVIGATOR_TOOLTIP_GUILDTRADERS", "<<1[/1 Guild Trader nearby/$d Guild Traders nearby]>>")
+--mkstr("NAVIGATOR_TOOLTIP_VIEWMENU", "Switch to alternative views")
 
 -- Action and menu items
 mkstr("NAVIGATOR_TRAVEL_TO_ZONE", "Переместиться в <<1>>")
@@ -49,6 +50,10 @@ mkstr("NAVIGATOR_MENU_ADDHOUSEBOOKMARK", "Добавить закладку ос
 mkstr("NAVIGATOR_MENU_REMOVEBOOKMARK", "Удалить закладку")
 mkstr("NAVIGATOR_MENU_MOVEBOOKMARKUP", "Переместить закладку вверх")
 mkstr("NAVIGATOR_MENU_MOVEBOOKMARKDOWN", "Переместить закладку вниз")
+--mkstr("NAVIGATOR_MENU_PLAYERS", "Players")
+--mkstr("NAVIGATOR_MENU_GUILDTRADERS", "Guild Traders")
+--mkstr("NAVIGATOR_MENU_TREASUREMAPS_SURVEYS", "Treasure Maps & Surveys")
+--mkstr("NAVIGATOR_MENU_CLEARVIEW", "Clear view")
 
 
 
@@ -118,7 +123,10 @@ mkstr("NAVIGATOR_SETTINGS_DESTINATION_ACTIONS_WARNING",     "Когда один
 mkstr("NAVIGATOR_SETTINGS_ZONE_ACTIONS_NAME",               "Локации")
 --mkstr("NAVIGATOR_SETTINGS_ZONE_ACTIONS_TOOLTIP",            "Mouse and key actions for zones")
 
---mkstr("NAVIGATOR_SETTINGS_POI_ACTIONS_NAME",                "Точки интереса")
+
+--mkstr("NAVIGATOR_SETTINGS_HOUSE_ACTIONS_TOOLTIP",           "Mouse and key actions for your houses")
+
+
 mkstr("NAVIGATOR_SETTINGS_POI_ACTIONS_TOOLTIP",             "Взаимодействие с такими местами как города, камни Мундуса и примечательные места.")
 
 mkstr("NAVIGATOR_SETTINGS_JOIN_GUILD_NAME",                 "Присоединяйтесь к нашей гильдии!")
