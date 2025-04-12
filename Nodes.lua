@@ -85,6 +85,10 @@ function PlayerNode:OnClick() self:JumpToPlayer() end
 function PlayerNode:OnSlash() self:JumpToPlayer() end
 function PlayerNode:OnEnter() self:JumpToPlayer() end
 
+function PlayerNode:GetActions()
+    return { singleClick = Nav.ACTION_TRAVEL }
+end
+
 function PlayerNode:AddMenuItems()
     if self.isOnline then
         AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE), self.userID), function()

@@ -109,7 +109,7 @@ function Node:GetActionDescription(action)
     elseif action == Nav.ACTION_SETDESTINATION then
         return GetString(NAVIGATOR_MENU_SETDESTINATION)
     elseif action == Nav.ACTION_TRAVEL then
-        if Nav.jumpState == Nav.JUMPSTATE_WORLD then
+        if Nav.jumpState == Nav.JUMPSTATE_WORLD and not self.userID then
             local s = Nav.Utils.EllipsisString(SI_WORLD_MAP_ACTION_RECALL_TO_WAYSHRINE)
             local recallCost = self.known and self:GetRecallCost() or nil
             if recallCost then
