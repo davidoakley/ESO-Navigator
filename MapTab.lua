@@ -7,6 +7,8 @@ MT.collapsedCategories = {}
 MT.targetNode = 0
 
 function MT:queueRefresh(refreshMode)
+    if refreshMode == nil then refreshMode = Nav.REFRESH_REBUILD end
+
     if self.needsRefresh == Nav.REFRESH_NONE then
         self.needsRefresh = refreshMode
         if self.visible and not self.menuOpen then
@@ -25,9 +27,7 @@ function MT:queueRefresh(refreshMode)
 end
 
 function MT:ImmediateRefresh(refreshMode)
-    if refreshMode == nil then
-        refreshMode = Nav.REFRESH_REBUILD
-    end
+    if refreshMode == nil then refreshMode = Nav.REFRESH_REBUILD end
 
     if Nav.Locations.keepsDirty then
         Nav.Locations:UpdateKeeps()
