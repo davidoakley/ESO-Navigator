@@ -1,20 +1,20 @@
 local MT = Navigator_MapTab -- from XML
 local Nav = Navigator
-local Search = Nav.Search
-local Utils = Nav.Utils
 
 MT.filter = Nav.FILTER_NONE
-MT.needsRefresh = false
+MT.needsRefresh = Nav.REFRESH_NONE
 MT.collapsedCategories = {}
 MT.targetNode = 0
 
-function MT:queueRefresh()
-    if not self.needsRefresh then
-        self.needsRefresh = true
+function MT:queueRefresh(refreshMode)
+    if refreshMode == nil then refreshMode = Nav.REFRESH_REBUILD end
+
+    if self.needsRefresh == Nav.REFRESH_NONE then
+        self.needsRefresh = refreshMode
         if self.visible and not self.menuOpen then
             zo_callLater(function()
-                if self.needsRefresh and self.visible and not self.menuOpen then
-                    self:ImmediateRefresh()
+                if self.needsRefresh ~= Nav.REFRESH_NONE and self.visible and not self.menuOpen then
+                    self:ImmediateRefresh(self.needsRefresh)
                 else
                     -- Nav.log("MT:queueRefresh: skipped")
                 end
@@ -26,13 +26,18 @@ function MT:queueRefresh()
     end
 end
 
-function MT:ImmediateRefresh()
-    -- Nav.log("MT:ImmediateRefresh")
+function MT:ImmediateRefresh(refreshMode)
+    if refreshMode == nil then refreshMode = Nav.REFRESH_REBUILD end
+
     if Nav.Locations.keepsDirty then
         Nav.Locations:UpdateKeeps()
     end
-    self:executeSearch(self.searchString, true)
-    self.needsRefresh = false
+    if refreshMode == Nav.REFRESH_REBUILD then
+        self:UpdateContent(self.searchString, true)
+    else
+        ZO_ScrollList_RefreshVisible(self.listControl)
+    end
+    self.needsRefresh = Nav.REFRESH_NONE
 end
 
 local function getDeveloperTooltip(node)
@@ -64,11 +69,11 @@ local function getDeveloperTooltip(node)
     return table.concat(items, "\n")
 end
 
-local currentTooltip = nil
+local currentTooltip
 
 function MT:layoutRow(rowControl, data, _)
     local node = data.node
-    local isSelected = data.isSelected
+    local isSelected = self.editControl:HasFocus() and node.known and (data.nodeIndex == MT.targetNode)
 	local name = node:GetName()
     local icon = node:GetIcon()
     local categoryId = data.dataEntry.categoryId
@@ -146,30 +151,6 @@ function MT:layoutRow(rowControl, data, _)
     end)
 end
 
-function MT:showFilterControl(text)
-    self.filterControl:SetHidden(false)
-    self.filterControl:SetText("|u6:6::"..text.."|u")
-    self.editControl:SetAnchor(TOPLEFT, self.filterControl, TOPRIGHT, 2, -1)
-end
-
-function MT:hideFilterControl()
-    self.filterControl:SetHidden(true)
-    self.editControl:SetAnchor(TOPLEFT, self.searchControl, TOPLEFT, 4, -1)
-end
-
-function MT:updateFilterControl()
-    if self.filter == Nav.FILTER_NONE then
-        self:hideFilterControl()
-        return
-    elseif self.filter == Nav.FILTER_PLAYERS then
-        self:showFilterControl('Players')
-    elseif self.filter == Nav.FILTER_HOUSES then
-        self:showFilterControl('Houses')
-    elseif self.filter == Nav.FILTER_ALL then
-        self:showFilterControl('All')
-    end
-end
-
 function MT:layoutCategoryRow(rowControl, data, _)
 	rowControl.label:SetText(data.name)
 end
@@ -191,7 +172,6 @@ end
 
 local function buildCategory(scrollData, category)
     local collapsed = MT.collapsedCategories[category.id] and true or false
-    local hasFocus = MT.editControl:HasFocus()
     local list = category.list
 
     buildCategoryHeader(scrollData, category.id, category.title, collapsed)
@@ -211,12 +191,11 @@ local function buildCategory(scrollData, category)
             local entry = ZO_ScrollList_CreateDataEntry(3, { hint = list[i].hint })
             table.insert(scrollData, entry)
         elseif list[i].known or includeUnknown then
-            local isSelected = hasFocus and list[i].known and (currentNodeIndex == MT.targetNode)
             local data = {
                 node = list[i],
-                isSelected = isSelected,
                 indexInCategory = i,
-                categoryEntryCount = #list
+                categoryEntryCount = #list,
+                nodeIndex = currentNodeIndex
             }
 
             local entry = ZO_ScrollList_CreateDataEntry(1, data, category.id)
@@ -231,7 +210,7 @@ local function buildCategory(scrollData, category)
         end
     end
 
-    if #list > 0 and listed == 0 and MT.filter ~= Nav.FILTER_PLAYERS and MT.filter ~= Nav.FILTER_HOUSES then
+    if #list > 0 and listed == 0 and (MT.filter == Nav.FILTER_NONE or MT.filter ~= Nav.FILTER_ALL) then
         local entry = ZO_ScrollList_CreateDataEntry(3, { hint = GetString(NAVIGATOR_HINT_SHOWUNDISCOVERED), onClick = ShowUndiscovered })
         table.insert(scrollData, entry)
     end
@@ -268,31 +247,6 @@ function MT:buildScrollList(keepScrollPosition)
 
     local scrollData = ZO_ScrollList_GetDataList(self.listControl)
 
-    self.content = nil
-    local isSearching = #Nav.results > 0 or (self.searchString and self.searchString ~= "") or
-                        self.filter == Nav.FILTER_HOUSES or self.filter == Nav.FILTER_PLAYERS
-
-    if isSearching then
-        self.content = Nav.SearchContent:New(Nav.results)
-    else
-        local zone = Nav.Locations:getCurrentMapZone()
-        if zone then
-            if zone.zoneId == Nav.ZONE_TAMRIEL then
-                self.content = Nav.ZoneListContent:New()
-            elseif zone.zoneId == Nav.ZONE_CYRODIIL then
-                self.content = Nav.CyrodiilContent:New()
-            else
-                self.content = Nav.ZoneContent:New(zone)
-            end
-        else
-            self.content = Nav.BasicContent:New()
-        end
-    end
-    if not self.content then
-        self.content = Nav.ZoneListContent:New()
-        Nav.logWarning("MT:buildScrollList: no content chosen")
-    end
-    self.content:Compose()
 
     MT.resultCount = 0
     for i = 1, #self.content.categories do
@@ -302,30 +256,27 @@ function MT:buildScrollList(keepScrollPosition)
 
 	ZO_ScrollList_Commit(self.listControl)
 
+    if not keepScrollPosition or self.targetNode >= (self.resultCount or 0) then
+        -- Nav.log("executeSearch: reset targetNode keep=%d, oldTarget=%d, count=%d", keepTargetNode and 1 or 0, self.targetNode, (MT.resultCount or 0))
+        self.targetNode = 0
+        keepScrollPosition = false
+    end
+
     if keepScrollPosition then
         ZO_ScrollList_ScrollAbsolute(self.listControl, scrollPosition)
-    elseif MT.resultCount > 0 then
+    end
+    if MT.resultCount > 0 then
         -- FIXME: this doesn't account for the headings
         ZO_ScrollList_ScrollDataIntoView(self.listControl, self.targetNode + 1, nil, true)
     end
 end
 
-function MT:executeSearch(searchString, keepTargetNode)
-	local results
+function MT:UpdateContent(searchString, keepTargetNode)
+    self.searchString = searchString
 
-    MT.searchString = searchString
+    self.content = Nav.ContentBuilder.Build(self.searchString, self.filter)
 
-    results = Search:Run(searchString or "", MT.filter)
-
-	Nav.results = results
-    if not keepTargetNode or self.targetNode >= (MT.resultCount or 0) then
-        -- Nav.log("executeSearch: reset targetNode keep=%d, oldTarget=%d, count=%d", keepTargetNode and 1 or 0, self.targetNode, (MT.resultCount or 0))
-    	self.targetNode = 0
-        keepTargetNode = false
-    end
-
-	MT:buildScrollList(keepTargetNode)
-    MT:updateFilterControl()
+    self:buildScrollList(keepTargetNode)
 end
 
 function MT:getTargetDataIndex()
@@ -399,36 +350,34 @@ end
 
 function MT:onTextChanged(editbox)
 	local searchString = string.lower(editbox:GetText())
+    local setFilter = function(filter)
+        self.filter = filter
+        editbox:SetText("")
+        editbox.editTextChanged = false
+        searchString = ""
+        self:UpdateFilterControl()
+    end
+
     if searchString == "z:" then
-        local mapId = Nav.Locations.GetMapIdByZoneId(2) -- Tamriel
-        Nav.log("MT:onTextChanged mapId %d", mapId or -1)
-        -- if mapId then
-        WORLD_MAP_MANAGER:SetMapById(mapId)
-        -- end
-        MT.filter = Nav.FILTER_NONE
-        editbox:SetText("")
-        editbox.editTextChanged = false
-        searchString = ""
+        setFilter(Nav.FILTER_ZONES)
     elseif searchString == "h:" then
-        self.filter = Nav.FILTER_HOUSES
-        editbox:SetText("")
-        editbox.editTextChanged = false
-        searchString = ""
+        setFilter(Nav.FILTER_HOUSES)
+    elseif searchString == '@' or searchString == "p:" then
+        setFilter(Nav.FILTER_PLAYERS)
+    elseif searchString == "t:" then
+        setFilter(Nav.FILTER_TRADERS)
+    elseif searchString == "m:" then
+        setFilter(Nav.FILTER_TREASURE)
     elseif searchString == "a:" then
         self.filter = Nav.FILTER_ALL
         editbox:SetText("")
         editbox.editTextChanged = false
         searchString = ""
-    elseif searchString == '@' or searchString == "p:" then
-        self.filter = Nav.FILTER_PLAYERS
-        editbox.editTextChanged = false
-        editbox:SetText("")
-        searchString = ""
     else
         self.editControl.editTextChanged = true
     end
 
-    self:executeSearch(searchString)
+    self:UpdateContent(searchString, false)
 end
 
 function MT:OnEnter()
@@ -452,7 +401,8 @@ function MT:nextResult()
             known = true
         end
     until known or self.targetNode == startNode
-	self:buildScrollList()
+    ZO_ScrollList_RefreshVisible(self.listControl)
+    ZO_ScrollList_ScrollDataIntoView(self.listControl, self.targetNode + 1, nil, true)
 end
 
 function MT:previousResult()
@@ -468,12 +418,12 @@ function MT:previousResult()
             known = true
         end
     until known or self.targetNode == startNode
-	self:buildScrollList()
+	self:buildScrollList(true)
 end
 
 function MT:nextCategory()
     self.targetNode = self:getNextCategoryFirstIndex()
-	self:buildScrollList()
+	self:buildScrollList(true)
 end
 
 function MT:previousCategory()
@@ -484,7 +434,7 @@ end
 function MT:resetFilter()
 	Nav.log("MT.resetFilter")
     self.filter = Nav.FILTER_NONE
-    self:hideFilterControl()
+    --self:hideFilterControl()
     self:ImmediateRefresh()
 	ZO_ScrollList_ResetToTop(self.listControl)
 end
@@ -493,7 +443,8 @@ function MT:resetSearch()
 	Nav.log("MT.resetSearch")
 	self.editControl:SetText("")
     self.filter = Nav.FILTER_NONE
-    self:hideFilterControl()
+    self:UpdateFilterControl()
+    --self:hideFilterControl()
     self:ImmediateRefresh()
 
 	--ZO_EditDefaultText_Initialize(editbox, GetString(FASTER_TRAVEL_WAYSHRINES_SEARCH))
@@ -622,14 +573,16 @@ function MT:CategoryRowMouseUp(control, mouseButton)
         Nav.log("Toggling category %s", data.id)
         self.collapsedCategories[data.id] = not self.collapsedCategories[data.id]
         MT:buildScrollList(true)
-        MT:updateFilterControl()
+        --MT:updateFilterControl()
     end
 end
 
 function MT:HintRowMouseUp(control, mouseButton)
-    local data = ZO_ScrollList_GetData(control)
-    if data.onClick then
-        data.onClick()
+    if mouseButton == 1 then
+        local data = ZO_ScrollList_GetData(control)
+        if data.onClick then
+            data.onClick()
+        end
     end
 end
 
@@ -651,13 +604,86 @@ function MT:OnMapChanged()
         end
 
         if (self.searchString or "") == "" and self.filter == Nav.FILTER_NONE then
-            Nav.log("MT:OnMapChanged: executeSearch")
+            Nav.log("MT:OnMapChanged: UpdateContent")
             self.targetNode = 0
-            self:executeSearch("")
+            self:UpdateContent("", false)
         end
 
         Nav.Node.RemovePings()
     end
 end
+
+function MT:OpenViewMenu()
+    ClearMenu()
+
+    local doFilter = function(filterId)
+        self.filter = filterId
+        self:UpdateFilterControl()
+        self:queueRefresh()
+    end
+
+    local addItem = function (icon, stringId, filterId, gap)
+        local callback = function() doFilter(filterId) end
+        local colour = filterId == self.filter and ZO_WHITE or nil
+        AddMenuItem(string.format("|t24:24:Navigator/media/icons/%s.dds:inheritcolor|t %s",
+                                  icon, GetString(stringId)),
+                    callback, nil, nil, colour, nil, gap or 0)
+    end
+
+    addItem("zone", NAVIGATOR_SETTINGS_ZONE_ACTIONS_NAME, Nav.FILTER_ZONES)
+    addItem("player", NAVIGATOR_MENU_PLAYERS, Nav.FILTER_PLAYERS)
+    addItem("house", NAVIGATOR_SETTINGS_HOUSE_ACTIONS_NAME, Nav.FILTER_HOUSES)
+    addItem("trader", NAVIGATOR_MENU_GUILDTRADERS, Nav.FILTER_TRADERS)
+    if LibTreasure_GetItemIdData then
+        addItem("map", NAVIGATOR_MENU_TREASUREMAPS_SURVEYS, Nav.FILTER_TREASURE)
+    end
+    if self.filter ~= Nav.FILTER_NONE then
+        addItem("search_up", NAVIGATOR_MENU_CLEARVIEW, Nav.FILTER_NONE, 12)
+    end
+
+    --AddMenuItem("|t24:24:Navigator/media/icons/search_up.dds|t Clear view", function() doFilter(Nav.FILTER_NONE) end,
+    --        nil, nil, nil, nil, 12)
+
+    MT.menuOpen = true
+    ShowMenu(self.searchControl)
+    ZO_Menu:ClearAnchors()
+    ZO_Menu:SetAnchor(TOPLEFT, self.searchControl, BOTTOMLEFT, 0, 2)
+
+    SetMenuHiddenCallback(function()
+        Nav.log("SetMenuHiddenCallback: Menu hidden")
+        MT.menuOpen = false
+        if MT.needsRefresh then
+            MT:ImmediateRefresh()
+        end
+    end)
+end
+
+function MT:UpdateFilterControl()
+    local textures = { "search_up", "search_down", "search_over" }
+
+    if     self.filter == Nav.FILTER_PLAYERS  then textures = { "player" }
+    elseif self.filter == Nav.FILTER_HOUSES   then textures = { "house" }
+    elseif self.filter == Nav.FILTER_ZONES    then textures = { "zone" }
+    elseif self.filter == Nav.FILTER_TRADERS  then textures = { "trader" }
+    elseif self.filter == Nav.FILTER_TREASURE then textures = { "map" }
+    --elseif self.filter == Nav.FILTER_NONE then
+    --elseif self.filter == Nav.FILTER_ALL then
+    end
+
+    self.viewButton:SetNormalTexture(string.format("Navigator/media/icons/%s.dds", textures[1]))
+    self.viewButton:SetPressedTexture(string.format("Navigator/media/icons/%s.dds", textures[2] or textures[1]))
+    self.viewButton:SetMouseOverTexture(string.format("Navigator/media/icons/%s.dds", textures[3] or textures[1]))
+end
+
+function MT:SetViewButtonTooltip()
+    self.viewButton:SetHandler("OnMouseEnter", function(control)
+        ZO_Tooltips_ShowTextTooltip(control, LEFT, GetString(NAVIGATOR_TOOLTIP_VIEWMENU))
+    end)
+    self.viewButton:SetHandler("OnMouseExit", function(_)
+        ZO_Tooltips_HideTextTooltip()
+    end)
+end
+
+MT:SetViewButtonTooltip()
 
 Nav.MapTab = MT

@@ -213,6 +213,27 @@ function Utils.RemoveElement(array, element)
 	end
 end
 
+function Utils.FilterArray(array, callback)
+	local i = 1
+	while i <= #array do
+		if not callback(array[i]) then
+			table.remove(array, i)
+		else
+			i = i + 1
+		end
+	end
+end
+
+function Utils.GetFilteredArray(array, callback)
+	local outArray = {}
+	for i = 1, #array do
+		if callback(array[i]) then
+			table.insert(outArray, array[i])
+		end
+	end
+	return outArray
+end
+
 function Utils.logChars(s)
 	--local s = "Épreuve" -- "Дорожное святилище"
 	local chars = {}

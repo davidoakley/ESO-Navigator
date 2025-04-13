@@ -30,8 +30,6 @@ function Category:New(o)
 end
 
 
-
-
 --- @class Content
 local Content = {}
 
@@ -50,7 +48,8 @@ function Content:AddGroupCategory()
         table.insert(self.categories, {
             id = "group",
             title = SI_MAIN_MENU_GROUP,
-            list = group
+            list = group,
+            sort = Nav.Players.GroupComparison
         })
     end
 end
@@ -233,31 +232,187 @@ function ZoneListContent:Compose()
 end
 
 
----@class SearchContent
-local SearchContent = Content:New()
+---@class HousesContent
+local HousesContent = Content:New()
 
-function SearchContent:New(results)
-    local o = {
-        results = results
-    }
+function HousesContent:Compose(isSearching)
+    self.categories = {}
+
+    local list = Nav.Locations:GetHouseList(isSearching)
+    local owned = Nav.Utils.GetFilteredArray(list, function(h) return h.owned end)
+    local unowned = Nav.Utils.GetFilteredArray(list, function(h) return not h.owned end)
+
+    table.insert(self.categories, {
+        id = "houses",
+        title = GetString("SI_COLLECTIBLEUNLOCKSTATE", COLLECTIBLE_UNLOCK_STATE_UNLOCKED_OWNED), --NAVIGATOR_SETTINGS_HOUSE_ACTIONS_NAME,
+        list = owned,
+        sort = Nav.Node.WeightComparison
+    })
+
+    table.insert(self.categories, {
+        id = "houses",
+        title = GetString("SI_COLLECTIBLEUNLOCKSTATE", COLLECTIBLE_UNLOCK_STATE_LOCKED), --NAVIGATOR_SETTINGS_HOUSE_ACTIONS_NAME,
+        list = unowned,
+        sort = Nav.Node.WeightComparison
+    })
+end
+
+
+---@class PlayersContent
+local PlayersContent = Content:New()
+
+function PlayersContent:Compose()
+    local list = Nav.Players:GetPlayerList(false)
+
+    table.insert(self.categories, {
+        id = "players",
+        title = NAVIGATOR_MENU_PLAYERS,
+        list = list,
+        sort = Nav.Node.WeightComparison
+    })
+end
+
+
+---@class ZonesContent
+local ZonesContent = Content:New()
+
+function ZonesContent:Compose()
+    self.categories = {}
+
+    local list = Nav.Locations:GetZoneList()
+
+    table.insert(self.categories, {
+        id = "zones",
+        title = NAVIGATOR_SETTINGS_ZONE_ACTIONS_NAME,
+        list = list,
+        sort = Nav.Node.NameComparison
+    })
+end
+
+
+---@class GuildTradersContent
+local GuildTradersContent = Content:New()
+
+function GuildTradersContent:Compose()
+    self.categories = {}
+
+    local list = Nav.Locations:GetTraderNodeList()
+
+    table.insert(self.categories, {
+        id = "traders",
+        title = NAVIGATOR_MENU_GUILDTRADERS,
+        list = list,
+        sort = Nav.Node.TradersComparison
+    })
+end
+
+
+---@class MapsContent
+local MapsContent = Content:New()
+
+function MapsContent:Compose()
+    self.categories = {}
+
+    local list = Nav.Locations:GetMapZones()
+
+    table.insert(self.categories, {
+        id = "maps",
+        title = NAVIGATOR_MENU_TREASUREMAPS_SURVEYS,
+        list = list,
+        sort = Nav.Node.NameComparison
+    })
+end
+
+
+---@class AllContent
+local AllContent = Content:New()
+
+function AllContent:New(showHidden)
+    local o = { showHidden = showHidden }
     setmetatable(o, self)
     self.__index = self
     return o
 end
 
-function SearchContent:Compose()
+function AllContent:Compose()
     self.categories = {}
+
+    local list = Nav.Locations:GetNodeList(nil, true)
+    Nav.Utils.tableConcat(list, Nav.Locations:GetZoneList(true))
+
+    --table.sort(list, Nav.Node.WeightComparison)
 
     table.insert(self.categories, {
         id = "results",
         title = NAVIGATOR_CATEGORY_RESULTS,
-        list = self.results,
-        emptyHint = NAVIGATOR_HINT_NORESULTS
+        list = list
     })
 end
 
 
+---@class ContentBuilder
+local ContentBuilder = {}
+
+function ContentBuilder.Build(searchString, filter)
+    --local results = Nav.Search:Run(searchString or "", filter)
+    --local isSearching = #results > 0 or (searchString and searchString ~= "") or
+    --        (filter ~= Nav.FILTER_NONE and filter == Nav.FILTER_ALL)
+    local isSearching = (searchString and searchString ~= "")
+
+    local content
+
+    if filter == Nav.FILTER_HOUSES then
+        content = HousesContent:New()
+    elseif filter == Nav.FILTER_PLAYERS then
+        content = PlayersContent:New()
+    elseif filter == Nav.FILTER_ZONES then
+        content = ZonesContent:New()
+    elseif filter == Nav.FILTER_TRADERS then
+        content = GuildTradersContent:New()
+    elseif filter == Nav.FILTER_TREASURE then
+        content = MapsContent:New()
+    elseif isSearching then
+        content = AllContent:New()
+    else
+        local zone = Nav.Locations:getCurrentMapZone()
+        if zone then
+            if zone.zoneId == Nav.ZONE_TAMRIEL then
+                content = ZoneListContent:New()
+            elseif zone.zoneId == Nav.ZONE_CYRODIIL then
+                content = CyrodiilContent:New()
+            else
+                content = ZoneContent:New(zone)
+            end
+        else
+            content = BasicContent:New()
+        end
+    end
+
+    if not content then
+        content = ZoneListContent:New()
+        Nav.logWarning("Content:Build: no content chosen")
+    end
+    content:Compose(isSearching)
+
+    if isSearching then
+        Nav.Search:FilterContent(content, searchString)
+    end
+
+    if not isSearching then
+        for c = 1, #content.categories do
+            if content.categories[c].sort then
+                --local comparison = (not isSearching) and content.categories[c].sort or Nav.Utils.WeightComparison
+                table.sort(content.categories[c].list, content.categories[c].sort)
+            end
+        end
+    end
+
+    return content
+end
+
+
 Nav.Category = Category
+Nav.ContentBuilder = ContentBuilder
 Nav.BasicContent = BasicContent
 Nav.ZoneContent = ZoneContent
 Nav.ZoneListContent = ZoneListContent

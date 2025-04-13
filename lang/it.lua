@@ -40,6 +40,8 @@ mkstr("NAVIGATOR_NOT_KNOWN", "Non conosciuto da questo personaggio") -- Location
 mkstr("NAVIGATOR_TIP_CLICK_TO_TRAVEL", "Premi per viaggiare a <<1>>") -- 1:zone/destination
 mkstr("NAVIGATOR_TIP_DOUBLECLICK_TO_TRAVEL", "Doppio-click per viaggiare a <<1>>") -- 1:zone/destination
 mkstr("NAVIGATOR_TOOLTIP_ACTION_RESULT", "<<1>>: <<2>>") -- e.g. 1:"Single-click" 2:"Show On Map"
+mkstr("NAVIGATOR_TOOLTIP_GUILDTRADERS", "<<1[/1 mercante di gilda nelle vicinanze/$d mercanti di gilde nelle vicinanze]>>")
+--mkstr("NAVIGATOR_TOOLTIP_VIEWMENU", "Switch to alternative views")
 
 -- Action and menu items
 mkstr("NAVIGATOR_TRAVEL_TO_ZONE", "Viaggia a <<1>>")
@@ -48,6 +50,10 @@ mkstr("NAVIGATOR_MENU_ADDHOUSEBOOKMARK", "Aggiungi residenza principale ai prefe
 mkstr("NAVIGATOR_MENU_REMOVEBOOKMARK", "Rimuovi preferito")
 mkstr("NAVIGATOR_MENU_MOVEBOOKMARKUP", "Sposta su")
 mkstr("NAVIGATOR_MENU_MOVEBOOKMARKDOWN", "Sposta giù")
+--mkstr("NAVIGATOR_MENU_PLAYERS", "Players")
+--mkstr("NAVIGATOR_MENU_GUILDTRADERS", "Guild Traders")
+--mkstr("NAVIGATOR_MENU_TREASUREMAPS_SURVEYS", "Treasure Maps & Surveys")
+--mkstr("NAVIGATOR_MENU_CLEARVIEW", "Clear view")
 
 
 
@@ -115,7 +121,10 @@ mkstr("NAVIGATOR_SETTINGS_DESTINATION_ACTIONS_TOOLTIP",     "Azione per Mouse e 
 mkstr("NAVIGATOR_SETTINGS_DESTINATION_ACTIONS_WARNING",     "Se il clic singolo è impostato su Viaggia, l'azione del doppio clic non verrà eseguita")
 
 mkstr("NAVIGATOR_SETTINGS_ZONE_ACTIONS_NAME",               "Zone")
---mkstr("NAVIGATOR_SETTINGS_ZONE_ACTIONS_TOOLTIP",            "Mouse and key actions for zones")
+mkstr("NAVIGATOR_SETTINGS_ZONE_ACTIONS_TOOLTIP",            "Azioni del mouse e tastiera per le zone")
+
+
+mkstr("NAVIGATOR_SETTINGS_HOUSE_ACTIONS_TOOLTIP",           "Azioni del mouse e tastiera per le tue case")
 
 --mkstr("NAVIGATOR_SETTINGS_POI_ACTIONS_NAME",                "Punti di interesse")
 mkstr("NAVIGATOR_SETTINGS_POI_ACTIONS_TOOLTIP",             "Azioni del mouse e tasti per posizioni sulla mappa come città, luoghi di missioni e localita sorprendenti")
