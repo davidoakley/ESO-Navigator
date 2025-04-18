@@ -4,6 +4,7 @@ local Bookmarks = Nav.Bookmarks or {
 
 function Bookmarks:init()
     Nav.saved.bookmarks = Nav.saved.bookmarks or {}
+    self:FixUp()
 end
 
 function Bookmarks:getIndex(entry)
@@ -26,10 +27,10 @@ function Bookmarks:getIndex(entry)
                 return i
             end
         end
-    elseif entry.userID then
-        local userID = entry.userID
+    elseif entry.playerHouse then
+        local userID = entry.playerHouse
         for i = 1, #list do
-            if userID == list[i].userID and entry.action == list[i].action then
+            if userID == list[i].playerHouse then
                 return i
             end
         end
@@ -95,8 +96,9 @@ function Bookmarks:getBookmarks()
             end
             local node = Nav.Locations:GetNode(nodeIndex)
             table.insert(results, node)
-        elseif entry.poiIndex then
-            local node = Nav.Locations:GetPOI(entry.zoneId, entry.poiIndex)
+        elseif entry.poi then
+            local node = Nav.Locations:GetPOI(entry.poi.zoneId, entry.poi.poiIndex, true)
+            --Nav.log("Bookmarks:getBookmarks(%d): zone %d poi %d -> %s", i, entry.poi.zoneId or -1, entry.poi.poiIndex or -1, node and "found" or "missing")
             table.insert(results, node)
         elseif entry.zoneId then
             local zone = Nav.Locations:getZone(entry.zoneId)
@@ -105,11 +107,10 @@ function Bookmarks:getBookmarks()
                 node.mapId = entry.mapId
                 table.insert(results, node)
             end
-        elseif entry.userID then -- Travel to primary residence
+        elseif entry.playerHouse then -- Travel to primary residence
             local node = Nav.PlayerHouseNode:New({
-                name = entry.userID,
-                userID = entry.userID,
-                action = entry.action,
+                name = entry.playerHouse,
+                userID = entry.playerHouse,
                 suffix = entry.nickname and zo_strformat(GetString(SI_TOOLTIP_COLLECTIBLE_NICKNAME), entry.nickname)
                                          or GetString(SI_HOUSING_PRIMARY_RESIDENCE_HEADER),
                 known = true
@@ -119,6 +120,31 @@ function Bookmarks:getBookmarks()
     end
 
     return results
+end
+
+--- Update the saved bookmarks table to fix key names and remove unrecognisable entries
+function Bookmarks:FixUp()
+    local i = 1
+    while i <= #Nav.saved.bookmarks do
+        local entry = Nav.saved.bookmarks[i]
+
+        if entry.userID and entry.action == "house" then
+            -- Other player's house - recreate
+            Nav.saved.bookmarks[i] = { playerHouse = entry.userID }
+            i = i + 1
+        elseif entry.zoneId and entry.poiIndex then
+            -- POI - recreate
+            Nav.saved.bookmarks[i] = { poi = { zoneId = entry.zoneId, poiIndex = entry.poiIndex } }
+            i = i + 1
+        elseif entry.zoneId or entry.nodeIndex or entry.keepId or entry.playerHouse or entry.poi then
+            -- Existing recognised node
+            i = i + 1
+        else
+            -- Unrecognised entry - remove!
+            Nav.log("Bookmarks:FixUp(%d): unknown!", i)
+            table.remove(Nav.saved.bookmarks, i)
+        end
+    end
 end
 
 Nav.Bookmarks = Bookmarks

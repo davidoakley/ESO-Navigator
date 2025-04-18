@@ -107,7 +107,7 @@ function PlayerNode:AddMenuItems()
         Nav.MapTab.menuOpen = false
     end)
 
-    local bookmarkEntry = { userID = self.userID, action = "house" }
+    local bookmarkEntry = { playerHouse = self.userID }
     if not Nav.Bookmarks:contains(bookmarkEntry) then
         AddMenuItem(GetString(NAVIGATOR_MENU_ADDHOUSEBOOKMARK), function()
             Nav.Bookmarks:add(bookmarkEntry)
@@ -675,7 +675,7 @@ function POINode:AddMenuItems()
     AddMenuItem(GetString(NAVIGATOR_MENU_SETDESTINATION), function()
         self:ZoomToPOI(true)
     end)
-    self:AddBookmarkMenuItem({ poiIndex = self.poiIndex, zoneId = self.zoneId })
+    self:AddBookmarkMenuItem({ poi = { poiIndex = self.poiIndex, zoneId = self.zoneId } })
 end
 
 function POINode:GetActions()

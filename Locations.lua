@@ -380,12 +380,15 @@ function Locs:GetNode(nodeIndex, includeUnknown)
 end
 
 function Locs:GetPOI(zoneId, poiIndex, includeUnknown)
-    for i = 1, #self.nodes do
-        local node = self.nodes[i]
-        if node.zoneId == zoneId and node.poiIndex == poiIndex and (not includeUnknown and not node:IsKnown()) then
-            return node
-        end
+    if self.zones == nil then
+        self:SetupNodes()
     end
+
+    local zone = self.zones[zoneId]
+    if zone and zone.pois[poiIndex] then
+        return zone.pois[poiIndex]
+    end
+
     return nil
 end
 
