@@ -88,7 +88,7 @@ function MT:layoutRow(rowControl, data, _)
     end
 
     if categoryId == "bookmarks" then
-        local alias = Nav.Bookmarks:GetAlias(node)
+        local alias = Nav.Bookmarks:GetAlias(data.bookmark)
         if alias then
             name = alias
             suffix = nil
@@ -192,17 +192,25 @@ local function buildCategory(scrollData, category)
             table.insert(scrollData, entry)
         elseif list[i].known or includeUnknown then
             local data = {
-                node = list[i],
                 indexInCategory = i,
                 categoryEntryCount = #list,
                 nodeIndex = currentNodeIndex
             }
 
-            local entry = ZO_ScrollList_CreateDataEntry(1, data, category.id)
-            table.insert(scrollData, entry)
+            if list[i].bookmarkIndex then -- This is a bookmark, not a node!
+                data.node = list[i]:GetNode()
+                data.bookmark = list[i]
+            else
+                data.node = list[i]
+            end
 
-            currentNodeIndex = currentNodeIndex + 1
-            listed = listed + 1
+            if data.node then
+                local entry = ZO_ScrollList_CreateDataEntry(1, data, category.id)
+                table.insert(scrollData, entry)
+
+                currentNodeIndex = currentNodeIndex + 1
+                listed = listed + 1
+            end
 
             if category.maxEntries and listed >= category.maxEntries then
                 break
@@ -481,9 +489,9 @@ local function showWayshrineMenu(owner, data)
         AddMenuItem(GetString(NAVIGATOR_MENU_CUSTOMISEBOOKMARK), function()
             Nav.MapTab.menuOpen = false
             zo_callLater(function()
-                        { node = data.node, finishedCallback = null },
-                        { initialEditText = Nav.Bookmarks:GetAlias(data.node) or "", initialDefaultText = "Enter name here"})
                 ZO_Dialogs_ShowDialog("NAVIGATOR_CUSTOMISEDIALOG",
+                        { node = data.node, bookmark = data.bookmark, finishedCallback = null },
+                        { initialEditText = Nav.Bookmarks:GetAlias(data.bookmark) or "", initialDefaultText = "Enter name here"})
             end, 10)
         end)
         AddMenuItem(GetString(NAVIGATOR_MENU_REMOVEBOOKMARK), function()
