@@ -1,7 +1,7 @@
 <GuiXml>
     <Controls>
 
-        <TopLevelControl name="Navigator_RenameBookmarkDialog" inherits="ZO_CustomDialogBase" hidden="true">
+        <TopLevelControl name="Navigator_CustomiseDialog" inherits="ZO_CustomDialogBase" hidden="true">
             <ResizeToFitPadding width="50" height="33" />
             <Controls>
                 <Label name="$(parent)Text" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame"/>

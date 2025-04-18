@@ -5,19 +5,19 @@
 ---
 
 local Dialogs = {}
-local RenameBookmarkDialog = Navigator_RenameBookmarkDialog -- from XML
+local CustomiseDialog = Navigator_CustomiseDialog -- from XML
 local Nav = Navigator
 
 function Dialogs:Init()
-    RenameBookmarkDialog:Init()
+    CustomiseDialog:Init()
 end
 
-function RenameBookmarkDialog:Init()
-    local function SetupDialog(dialog, data)
-        --RenameBookmarkDialog.selectSound = RenameBookmarkDialog:GetNamedChild("SelectSound")
-        --RenameBookmarkDialog.selectedSoundID = self:GetSoundValue(data.category, data.key)
-        --RenameBookmarkDialog.selectSound.dropdown:SetSelectedItemText(self:GetSoundName(customControl.selectedSoundID))
-    end
+function CustomiseDialog:Init()
+    --local function SetupDialog(dialog, data)
+        --CustomiseDialog.selectSound = CustomiseDialog:GetNamedChild("SelectSound")
+        --CustomiseDialog.selectedSoundID = self:GetSoundValue(data.category, data.key)
+        --CustomiseDialog.selectSound.dropdown:SetSelectedItemText(self:GetSoundName(customControl.selectedSoundID))
+    --end
 
     local function OnDialogSetup(dialog, data, textParams)
         dialog.data = data
@@ -31,7 +31,7 @@ function RenameBookmarkDialog:Init()
             name = name .. " " .. colour:Colorize(suffix)
         end
 
-        local text = zo_strformat(GetString(NAVIGATOR_RENAMEBOOKMARKDIALOG_TEXT), name);
+        local text = zo_strformat(GetString(NAVIGATOR_CUSTOMISEDIALOG_TEXT), name);
         textControl:SetText(text)
 
         local editControl = dialog:GetNamedChild("ContainerEditBox")
@@ -49,24 +49,24 @@ function RenameBookmarkDialog:Init()
     end
 
     local function OnDialogConfirm(dialog)
-        local node = dialog.data.node
+        --local node = dialog.data.node
         local editControl = dialog:GetNamedChild("ContainerEditBox")
-        Nav.Bookmarks:SetAlias(node, editControl:GetText())
+        Nav.Bookmarks:SetAlias(dialog.data.bookmark, editControl:GetText())
         Nav.MapTab:ImmediateRefresh()
     end
 
     local function OnDialogDefault(dialog)
-        local node = dialog.data.node
-        Nav.Bookmarks:SetAlias(node, nil)
+        --local node = dialog.data.node
+        Nav.Bookmarks:SetAlias(dialog.data.bookmark, nil)
         Nav.MapTab:ImmediateRefresh()
     end
 
-    ZO_Dialogs_RegisterCustomDialog("NAVIGATOR_RENAMEBOOKMARK",
+    ZO_Dialogs_RegisterCustomDialog("NAVIGATOR_CUSTOMISEDIALOG",
     {
-        customControl = RenameBookmarkDialog,
+        customControl = CustomiseDialog,
         title =
         {
-            text = NAVIGATOR_MENU_RENAMEBOOKMARK,
+            text = NAVIGATOR_MENU_CUSTOMISEBOOKMARK,
         },
         mainText =
         {
@@ -76,17 +76,17 @@ function RenameBookmarkDialog:Init()
         buttons =
         {
             {
-                control = RenameBookmarkDialog:GetNamedChild("ButtonsOk"),
+                control = CustomiseDialog:GetNamedChild("ButtonsOk"),
                 text = SI_OK,
                 callback = OnDialogConfirm,
                 keybind = "DIALOG_PRIMARY",
             },
             {
-                control = RenameBookmarkDialog:GetNamedChild("ButtonsCancel"),
+                control = CustomiseDialog:GetNamedChild("ButtonsCancel"),
                 text = SI_DIALOG_CANCEL,
             },
             {
-                control = RenameBookmarkDialog:GetNamedChild("ButtonsDefault"),
+                control = CustomiseDialog:GetNamedChild("ButtonsDefault"),
                 text = SI_COLLECTIONS_INVENTORY_DIALOG_DEFAULT_NAME,
                 callback = OnDialogDefault,
                 keybind = "DIALOG_SECONDARY",
@@ -96,5 +96,5 @@ function RenameBookmarkDialog:Init()
 end
 
 
-Nav.RenameBookmarkDialog = RenameBookmarkDialog
+Nav.CustomiseDialog = CustomiseDialog
 Nav.Dialogs = Dialogs

@@ -46,7 +46,7 @@ mkstr("NAVIGATOR_TOOLTIP_VIEWMENU", "Switch to alternative views")
 -- Action and menu items
 mkstr("NAVIGATOR_TRAVEL_TO_ZONE", "Travel to <<1>>")
 mkstr("NAVIGATOR_MENU_ADDBOOKMARK", "Add Bookmark")
-mkstr("NAVIGATOR_MENU_RENAMEBOOKMARK", "Rename Bookmark")
+mkstr("NAVIGATOR_MENU_CUSTOMISEBOOKMARK", "Customise Bookmark")
 mkstr("NAVIGATOR_MENU_ADDHOUSEBOOKMARK", "Add Primary Residence Bookmark")
 mkstr("NAVIGATOR_MENU_REMOVEBOOKMARK", "Remove Bookmark")
 mkstr("NAVIGATOR_MENU_MOVEBOOKMARKUP", "Move Bookmark up")
@@ -135,8 +135,8 @@ mkstr("NAVIGATOR_SETTINGS_JOIN_GUILD_DESCRIPTION",          "|cC5C29E|H1:guild:7
 
 
 -- Alias Dialog
-mkstr("NAVIGATOR_RENAMEBOOKMARKDIALOG_TEXT",                "Set custom name for \"<<1>>\"") -- 1:Location
---mkstr("NAVIGATOR_RENAMEBOOKMARKDIALOG_BUTTON_REMOVE",       "Remove")
+mkstr("NAVIGATOR_CUSTOMISEDIALOG_TEXT",                "Customise \"<<1>>\"") -- 1:Location
+--mkstr("NAVIGATOR_CUSTOMISEDIALOG_BUTTON_REMOVE",       "Remove")
 
 -- -----------------------------------------------------------------------------
 -- Notes: gsub uses Lua patterns - https://www.lua.org/pil/20.2.html

@@ -478,12 +478,12 @@ local function showWayshrineMenu(owner, data)
             end, nil, nil, nil, nil, yPad)
             yPad = 0
         end
-        AddMenuItem(GetString(NAVIGATOR_MENU_RENAMEBOOKMARK), function()
+        AddMenuItem(GetString(NAVIGATOR_MENU_CUSTOMISEBOOKMARK), function()
             Nav.MapTab.menuOpen = false
             zo_callLater(function()
-                ZO_Dialogs_ShowDialog("NAVIGATOR_RENAMEBOOKMARK",
                         { node = data.node, finishedCallback = null },
                         { initialEditText = Nav.Bookmarks:GetAlias(data.node) or "", initialDefaultText = "Enter name here"})
+                ZO_Dialogs_ShowDialog("NAVIGATOR_CUSTOMISEDIALOG",
             end, 10)
         end)
         AddMenuItem(GetString(NAVIGATOR_MENU_REMOVEBOOKMARK), function()
