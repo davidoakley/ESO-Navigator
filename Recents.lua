@@ -104,7 +104,7 @@ function Recents.addTravelDialogCallbacks()
 		-- extract "Confirm" callbacks if any and save them
 		if 	ESO_Dialogs[name] and
 			ESO_Dialogs[name].buttons and
-			ESO_Dialogs[name].buttons[1] then 
+			ESO_Dialogs[name].buttons[1] then
 				data.saved_callback = ESO_Dialogs[name].buttons[1].callback -- may be nil
                 Nav.log("Saved callback for travel dialog '"..name.."'")
         end
@@ -141,13 +141,13 @@ Recents.__Hook_Checker = function(name, node, _, ...)
                 end
             end
         end
-    else
+    --[[ else
         Nav.log("Hook checkpoint NON-TRAVEL")
         -- restore original callbacks
         for _, data in pairs(travelDialogs) do
-            if 	ESO_Dialogs[name] and 
+            if 	ESO_Dialogs[name] and
                 ESO_Dialogs[name].buttons and
-                ESO_Dialogs[name].buttons[1] then 
+                ESO_Dialogs[name].buttons[1] then
                     if ESO_Dialogs[name].buttons[1].callback ~= data.saved_callback then
                         if ESO_Dialogs[name].buttons[1].callback == data.my_callback then
                             ESO_Dialogs[name].buttons[1].callback = data.saved_callback
@@ -156,7 +156,7 @@ Recents.__Hook_Checker = function(name, node, _, ...)
                         end
                     end
             end
-        end
+        end --]]
     end
     return false -- true == I've done everything, don't call ZO_Dialogs_ShowPlatformDialog
 end

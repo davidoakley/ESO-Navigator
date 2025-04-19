@@ -135,7 +135,10 @@ mkstr("NAVIGATOR_SETTINGS_JOIN_GUILD_DESCRIPTION",          "|cC5C29E|H1:guild:7
 
 
 -- Alias Dialog
-mkstr("NAVIGATOR_CUSTOMISEDIALOG_TEXT",                "Customise \"<<1>>\"") -- 1:Location
+mkstr("NAVIGATOR_CUSTOMISEDIALOG_TEXT",                     "Customise \"<<1>>\"") -- 1:Location
+mkstr("NAVIGATOR_CUSTOMISEDIALOG_ICONCOLOUR",               "Icon Colour")
+mkstr("NAVIGATOR_CUSTOMISEDIALOG_TEXTCOLOUR",               "Text Colour")
+mkstr("NAVIGATOR_CUSTOMISEDIALOG_NAME_INITIALTEXT",          "Enter a new name (optional)")
 --mkstr("NAVIGATOR_CUSTOMISEDIALOG_BUTTON_REMOVE",       "Remove")
 
 -- -----------------------------------------------------------------------------

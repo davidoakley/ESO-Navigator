@@ -88,9 +88,9 @@ function MT:layoutRow(rowControl, data, _)
     end
 
     if categoryId == "bookmarks" then
-        local alias = Nav.Bookmarks:GetAlias(data.bookmark)
-        if alias then
-            name = alias
+        local customization = Nav.Bookmarks:GetCustomization(data.bookmark)
+        if customization and customization.name then
+            name = customization.name
             suffix = nil
         end
     end
@@ -489,9 +489,7 @@ local function showWayshrineMenu(owner, data)
         AddMenuItem(GetString(NAVIGATOR_MENU_CUSTOMISEBOOKMARK), function()
             Nav.MapTab.menuOpen = false
             zo_callLater(function()
-                ZO_Dialogs_ShowDialog("NAVIGATOR_CUSTOMISEDIALOG",
-                        { node = data.node, bookmark = data.bookmark, finishedCallback = null },
-                        { initialEditText = Nav.Bookmarks:GetAlias(data.bookmark) or "", initialDefaultText = "Enter name here"})
+                Nav.CustomiseDialog:Show(data.bookmark)
             end, 10)
         end)
         AddMenuItem(GetString(NAVIGATOR_MENU_REMOVEBOOKMARK), function()

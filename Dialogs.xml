@@ -1,7 +1,7 @@
 <GuiXml>
     <Controls>
 
-        <TopLevelControl name="Navigator_CustomiseDialog" inherits="ZO_CustomDialogBase" hidden="true">
+        <TopLevelControl name="Navigator_CustomiseDialog" inherits="ZO_CustomDialogBase" hidden="true" resizeToFitDescendents="true">
             <ResizeToFitPadding width="50" height="33" />
             <Controls>
                 <Label name="$(parent)Text" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame"/>
@@ -12,13 +12,8 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Text" relativePoint="BOTTOMLEFT" offsetY="16" />
                     <Controls>
 
-<!--                        <Label name="$(parent)NameHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" text="SI_COLLECTIONS_INVENTORY_DIALOG_RENAME_COLLECTIBLE_MAIN">-->
-<!--                            <Anchor point="TOPLEFT" offsetX="-12" />-->
-<!--                        </Label>-->
-
                         <Backdrop name="$(parent)Edit" inherits="ZO_SingleLineEditBackdrop_Keyboard">
-<!--                            <Anchor point="TOPLEFT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMLEFT" offsetY="5"/>-->
-                            <Anchor point="LEFT"/>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)"/>
                             <Dimensions x="340" />
                             <Controls>
                                 <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop">
@@ -38,36 +33,67 @@
                             </Controls>
                         </Backdrop>
 
-<!--                        <Control name="$(parent)Dropdown" inherits="ZO_ComboBox">-->
-<!--                            <Dimensions x="340"/>-->
-<!--                            <Anchor point="LEFT"/>-->
-<!--                        </Control>-->
+                        <Label name="$(parent)IconColourLabel" text="NAVIGATOR_CUSTOMISEDIALOG_ICONCOLOUR" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" mouseEnabled="false">
+                            <Anchor point="TOP" relativeTo="$(parent)Edit" relativePoint="BOTTOMLEFT" offsetX="113" offsetY="24"/>
+                        </Label>
+
+                        <Control name="$(parent)IconColour" mouseEnabled="true">
+                            <Dimensions x="40" y="22"/>
+                            <Anchor point="TOP" relativeTo="$(parent)IconColourLabel" relativePoint="BOTTOM" offsetX="0" offsetY="8" />
+                            <Controls>
+                                <Texture name="$(parent)Texture" layer="OVERLAY" level="1" hidden="false" mouseEnabled="true">
+                                    <Dimensions x="36" y="18"/>
+                                    <Anchor point="CENTER" />
+                                </Texture>
+                                <Texture name="$(parent)Border" textureFile="EsoUI/Art/ChatWindow/chatOptions_bgColSwatch_frame.dds" hidden="false">
+                                    <Dimensions x="40" y="22"/>
+                                    <Anchor point="CENTER" />
+                                    <TextureCoords left="0" right="0.625" top="0" bottom="0.8125"/>
+                                </Texture>
+                            </Controls>
+                        </Control>
+
+                        <Label name="$(parent)TextColourLabel" text="NAVIGATOR_CUSTOMISEDIALOG_TEXTCOLOUR" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" mouseEnabled="false">
+                            <Anchor point="TOP" relativeTo="$(parent)Edit" relativePoint="BOTTOMLEFT" offsetX="227" offsetY="24"/>
+                        </Label>
+
+                        <Texture name="$(parent)TextColourLabelBorder" textureFile="EsoUI/Art/ChatWindow/chatOptions_bgColSwatch_frame.dds" hidden="false" mouseEnabled="false">
+                            <Dimensions x="40" y="22"/>
+                            <Anchor point="TOP" relativeTo="$(parent)TextColourLabel" relativePoint="BOTTOM" offsetX="0" offsetY="8" />
+                            <TextureCoords left="0" right="0.625" top="0" bottom="0.8125"/>
+                        </Texture>
+
+                        <Texture name="$(parent)TextColourLabelTexture" hidden="false" mouseEnabled="true">
+                            <Dimensions x="36" y="18"/>
+                            <Anchor point="CENTER" relativeTo="$(parent)TextColourLabelBorder" relativePoint="CENTER" offsetX="0" offsetY="0" />
+                        </Texture>
+                        <!--
+                        <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Buttons/plus_up.dds" hidden="false" mouseEnabled="false">
+                            <Dimensions x="25" y="25"/>
+                            <Anchor point="TOPLEFT" offsetX="0" offsetY="14" />
+                            <TextureCoords top="0" bottom="1" left="0" right="1"/>
+                        </Texture>
+-->
+
                     </Controls>
                 </Control>
 
-            <Control name="$(parent)Buttons" resizeToFitDescendents="true">
-                <Anchor point="TOP" relativeTo="$(parent)Container" relativePoint="BOTTOM" offsetY="33" />
-                <Controls>
+                <Control name="$(parent)Buttons" resizeToFitDescendents="true">
+                    <Anchor point="TOP" relativeTo="$(parent)Container" relativePoint="BOTTOM" offsetY="24" />
+                    <Controls>
 
-                    <Control name="$(parent)Default" inherits="ZO_DialogButton">
-                        <Anchor point="LEFT" />
-                    </Control>
-                    <Control name="$(parent)Ok" inherits="ZO_DialogButton">
-                        <Anchor point="LEFT" relativeTo="$(parent)Default" relativePoint="RIGHT" offsetX="20"/>
-                    </Control>
-                    <Control name="$(parent)Cancel" inherits="ZO_DialogButton">
-                        <Anchor point="LEFT" relativeTo="$(parent)Ok" relativePoint="RIGHT" offsetX="20"/>
-                    </Control>
+                        <Control name="$(parent)Default" inherits="ZO_DialogButton">
+                            <Anchor point="LEFT" />
+                        </Control>
+                        <Control name="$(parent)Ok" inherits="ZO_DialogButton">
+                            <Anchor point="LEFT" relativeTo="$(parent)Default" relativePoint="RIGHT" offsetX="20"/>
+                        </Control>
+                        <Control name="$(parent)Cancel" inherits="ZO_DialogButton">
+                            <Anchor point="LEFT" relativeTo="$(parent)Ok" relativePoint="RIGHT" offsetX="20"/>
+                        </Control>
 
-                </Controls>
-            </Control>
-
-                <!--                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton">-->
-<!--                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SelectSound" relativePoint="BOTTOMRIGHT" offsetY="23" />-->
-<!--                </Control>-->
-<!--                <Control name="$(parent)Confirm" inherits="ZO_CustomDialogButton">-->
-<!--                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Cancel" relativePoint="TOPLEFT" offsetX="-15"/>-->
-<!--                </Control>-->
+                    </Controls>
+                </Control>
             </Controls>
         </TopLevelControl>
 

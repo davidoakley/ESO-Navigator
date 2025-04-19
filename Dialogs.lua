@@ -12,6 +12,15 @@ function Dialogs:Init()
     CustomiseDialog:Init()
 end
 
+function CustomiseDialog:Show(bookmark)
+    local customization = Nav.Bookmarks:GetCustomization(bookmark)
+    local initialEditText = customization and customization.name or ""
+
+    ZO_Dialogs_ShowDialog("NAVIGATOR_CUSTOMISEDIALOG",
+            { node = bookmark:GetNode(), bookmark = bookmark, finishedCallback = null },
+            { initialEditText = initialEditText, initialDefaultText = GetString(NAVIGATOR_CUSTOMISEDIALOG_NAME_INITIALTEXT)})
+end
+
 function CustomiseDialog:Init()
     --local function SetupDialog(dialog, data)
         --CustomiseDialog.selectSound = CustomiseDialog:GetNamedChild("SelectSound")
@@ -23,6 +32,7 @@ function CustomiseDialog:Init()
         dialog.data = data
         local node = data.node
 
+        local containerControl = dialog:GetNamedChild("Container")
         local textControl = dialog:GetNamedChild("Text")
         local name = node:GetName()
         local suffix = node.zoneSuffix or node:GetSuffix()
@@ -46,6 +56,27 @@ function CustomiseDialog:Init()
         end
 
         editControl:SelectAll()
+
+        local function ColorPickerCallback(r, g, b, a)
+            --containerControl:UpdateValue(false, r, g, b, a)
+        end
+
+        local iconColourBtn = containerControl:GetNamedChild("IconColour")
+
+        iconColourBtn:SetHandler("OnMouseUp", function(self, btn, upInside)
+            Nav.log("OnMouseUp")
+            if upInside then
+                local r, g, b, a = 1, 1, 1, 1 --colorpickerData.getFunc()
+                zo_callLater(function()
+                    COLOR_PICKER:Show(ColorPickerCallback, r, g, b, a)
+                end, 100)
+            end
+        end)
+
+        local iconColourTexture = iconColourBtn:GetNamedChild("Texture")
+        iconColourTexture:SetColor(1, 0, 0, 1)
+
+
     end
 
     local function OnDialogConfirm(dialog)

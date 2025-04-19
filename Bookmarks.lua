@@ -141,7 +141,7 @@ function Bookmarks:getBookmarks()
 
     for i = 1, #list do
         local entry = list[i]
-        local bookmark = Bookmark:New(entry)
+        local bookmark = Bookmark:New(Nav.Utils.shallowCopy(entry))
         bookmark.bookmarkIndex = i
         table.insert(results, bookmark)
         --[[
@@ -179,24 +179,24 @@ function Bookmarks:getBookmarks()
     return results
 end
 
-function Bookmarks:GetAlias(node)
+function Bookmarks:GetCustomization(node)
     local i = self:getIndex(node)
     if i then
-        return Nav.saved.bookmarks[i].alias
+        return Nav.saved.bookmarks[i].customization
     end
     return nil
 end
 
-function Bookmarks:SetAlias(bookmark, text)
+function Bookmarks:SetCustomization(bookmark, text)
     local i = self:getIndex(bookmark)
     if i then
         if text == "" then
-            Nav.saved.bookmarks[i].alias = nil
+            Nav.saved.bookmarks[i].customization = nil
         else
-            Nav.saved.bookmarks[i].alias = text
+            Nav.saved.bookmarks[i].customization = text
         end
     else
-        Nav.log("Bookmarks:SetAlias: Can't find bookmark")
+        Nav.log("Bookmarks:SetCustomization: Can't find bookmark")
     end
 end
 
