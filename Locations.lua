@@ -371,8 +371,12 @@ function Locs:SetKeepsInaccessible()
 end
 
 function Locs:GetNode(nodeIndex, includeUnknown)
+    if not self.NodeMap then
+        self:SetupNodes()
+    end
+
     local node = self.nodeMap[nodeIndex]
-    if not includeUnknown and not node:IsKnown() then
+    if not node or (not includeUnknown and not node:IsKnown()) then
         return nil
     end
 
