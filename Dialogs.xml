@@ -33,26 +33,46 @@
                             </Controls>
                         </Backdrop>
 
-                        <Label name="$(parent)IconColourLabel" text="NAVIGATOR_CUSTOMISEDIALOG_ICONCOLOUR" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" mouseEnabled="false">
+                        <Control name="$(parent)IconColour" mouseEnabled="true" resizeToFitDescendents="true">
                             <Anchor point="TOP" relativeTo="$(parent)Edit" relativePoint="BOTTOMLEFT" offsetX="113" offsetY="24"/>
-                        </Label>
-
-                        <Control name="$(parent)IconColour" mouseEnabled="true">
-                            <Dimensions x="40" y="22"/>
-                            <Anchor point="TOP" relativeTo="$(parent)IconColourLabel" relativePoint="BOTTOM" offsetX="0" offsetY="8" />
+<!--                            <Anchor point="TOP" relativeTo="$(parent)IconColourLabel" relativePoint="BOTTOM" offsetX="0" offsetY="8" />-->
                             <Controls>
-                                <Texture name="$(parent)Texture" layer="OVERLAY" level="1" hidden="false" mouseEnabled="true">
-                                    <Dimensions x="36" y="18"/>
-                                    <Anchor point="CENTER" />
-                                </Texture>
+                                <Label name="$(parent)Label" text="NAVIGATOR_CUSTOMISEDIALOG_ICONCOLOUR" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" mouseEnabled="false">
+                                    <Anchor point="TOP" relativeTo="$(parent)" relativePoint="TOP" offsetX="0" offsetY="0"/>
+                                </Label>
+
                                 <Texture name="$(parent)Border" textureFile="EsoUI/Art/ChatWindow/chatOptions_bgColSwatch_frame.dds" hidden="false">
                                     <Dimensions x="40" y="22"/>
-                                    <Anchor point="CENTER" />
+                                    <Anchor point="TOP" relativeTo="$(parent)Label" relativePoint="BOTTOM" offsetY="8" />
                                     <TextureCoords left="0" right="0.625" top="0" bottom="0.8125"/>
                                 </Texture>
+
+                                <Texture name="$(parent)Texture" layer="OVERLAY" level="1" hidden="false" mouseEnabled="true">
+                                    <Dimensions x="36" y="18"/>
+                                    <Anchor point="CENTER" relativeTo="$(parent)Border" relativePoint="CENTER" />
+                                </Texture>
+
+                                <Button name="$(parent)Left" mouseOverBlendMode="ADD">
+                                    <Dimensions x="24" y="24" />
+                                    <Anchor point="RIGHT" relativeTo="$(parent)Border" relativePoint="LEFT" offsetX="0"/>
+                                    <Textures normal="EsoUI/Art/Buttons/large_leftArrow_up.dds"
+                                              pressed="EsoUI/Art/Buttons/large_leftArrow_down.dds"
+                                              mouseOver="EsoUI/Art/Buttons/large_leftArrow_over.dds"
+                                              disabled="EsoUI/Art/Buttons/large_leftArrow_disabled.dds" />
+                                </Button>
+
+                                <Button name="$(parent)Right" mouseOverBlendMode="ADD">
+                                    <Dimensions x="24" y="24" />
+                                    <Anchor point="LEFT" relativeTo="$(parent)Border" relativePoint="RIGHT" offsetX="0"/>
+                                    <Textures normal="EsoUI/Art/Buttons/large_rightArrow_up.dds"
+                                              pressed="EsoUI/Art/Buttons/large_rightArrow_down.dds"
+                                              mouseOver="EsoUI/Art/Buttons/large_rightArrow_over.dds"
+                                              disabled="EsoUI/Art/Buttons/large_rightArrow_disabled.dds" />
+                                </Button>
                             </Controls>
                         </Control>
 
+                        <!--
                         <Label name="$(parent)TextColourLabel" text="NAVIGATOR_CUSTOMISEDIALOG_TEXTCOLOUR" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" mouseEnabled="false">
                             <Anchor point="TOP" relativeTo="$(parent)Edit" relativePoint="BOTTOMLEFT" offsetX="227" offsetY="24"/>
                         </Label>
@@ -66,12 +86,6 @@
                         <Texture name="$(parent)TextColourLabelTexture" hidden="false" mouseEnabled="true">
                             <Dimensions x="36" y="18"/>
                             <Anchor point="CENTER" relativeTo="$(parent)TextColourLabelBorder" relativePoint="CENTER" offsetX="0" offsetY="0" />
-                        </Texture>
-                        <!--
-                        <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Buttons/plus_up.dds" hidden="false" mouseEnabled="false">
-                            <Dimensions x="25" y="25"/>
-                            <Anchor point="TOPLEFT" offsetX="0" offsetY="14" />
-                            <TextureCoords top="0" bottom="1" left="0" right="1"/>
                         </Texture>
 -->
 

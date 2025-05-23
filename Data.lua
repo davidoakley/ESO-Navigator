@@ -40,6 +40,24 @@ Nav.REFRESH_NONE = 0
 Nav.REFRESH_EXISTING = 1
 Nav.REFRESH_REBUILD = 2
 
+Data.iconColours = {
+    Nav.COLOUR_WHITE,
+    Nav.COLOUR_NORMAL,
+    "999999",
+    "ffaaaa",
+    "ffcc99",
+    "ffff99",
+    "ccff99",
+    "aaffaa",
+    "99ffcc",
+    "99ffff",
+    "aaddff",
+    "bbbbff",
+    "ddaaff",
+    "ffaaff",
+    "ff99cc"
+}
+
 -- Trader Locations, copied from Faster Travel by SimonIllyan, XanDDemoX, upyachka, Valandil
 local trader_counts = { -- nodeIndex -> traders_count
     [  1] = 1, -- Wyrd Tree Wayshrine

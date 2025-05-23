@@ -61,19 +61,26 @@ function CustomiseDialog:Init()
             --containerControl:UpdateValue(false, r, g, b, a)
         end
 
-        local iconColourBtn = containerControl:GetNamedChild("IconColour")
+        local iconColour = containerControl:GetNamedChild("IconColour")
 
-        iconColourBtn:SetHandler("OnMouseUp", function(self, btn, upInside)
-            Nav.log("OnMouseUp")
+        local iconColourRight = iconColour:GetNamedChild("Right")
+        iconColourRight:SetHandler("OnMouseUp", function(self, btn, upInside)
+            Nav.log("iconColourRight OnMouseUp")
             if upInside then
-                local r, g, b, a = 1, 1, 1, 1 --colorpickerData.getFunc()
-                zo_callLater(function()
-                    COLOR_PICKER:Show(ColorPickerCallback, r, g, b, a)
-                end, 100)
             end
         end)
 
-        local iconColourTexture = iconColourBtn:GetNamedChild("Texture")
+            --iconColourBtn:SetHandler("OnMouseUp", function(self, btn, upInside)
+        --    Nav.log("OnMouseUp")
+        --    if upInside then
+        --        local r, g, b, a = 1, 1, 1, 1 --colorpickerData.getFunc()
+        --        zo_callLater(function()
+        --            COLOR_PICKER:Show(ColorPickerCallback, r, g, b, a)
+        --        end, 100)
+        --    end
+        --end)
+
+        local iconColourTexture = iconColour:GetNamedChild("Texture")
         iconColourTexture:SetColor(1, 0, 0, 1)
 
 
