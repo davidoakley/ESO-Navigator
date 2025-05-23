@@ -177,7 +177,7 @@ function ZoneNode:JumpToZone()
     local player = Nav.Players:GetPlayerInZone(zoneId)
     if not player then
         -- Eeek! Refresh the search results and finish
-        Nav.MapTab:buildScrollList()
+        Nav.MapTab:ImmediateRefresh()
         ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, (zo_strformat(GetString(NAVIGATOR_NO_PLAYER_IN_ZONE), GetZoneNameById(zoneId))))
         return
     end
