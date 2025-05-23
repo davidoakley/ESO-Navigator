@@ -136,7 +136,11 @@ function Bookmarks:FixUp()
             -- POI - recreate
             Nav.saved.bookmarks[i] = { poi = { zoneId = entry.zoneId, poiIndex = entry.poiIndex } }
             i = i + 1
-        elseif entry.zoneId or entry.nodeIndex or entry.keepId or entry.playerHouse or entry.poi then
+        elseif (entry.zoneId and Nav.Locations:getZone(entry.zoneId)) or
+                (entry.nodeIndex and Nav.Locations:GetNode(entry.nodeIndex)) or
+                entry.keepId or
+                entry.playerHouse or
+                (entry.poi and Nav.Locations:GetPOI(entry.poi.zoneId, entry.poi.poiIndex, true)) then
             -- Existing recognised node
             i = i + 1
         else
