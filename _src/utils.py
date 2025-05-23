@@ -44,9 +44,16 @@ def get_line(file_string, prefix):
     return None
 
 
-def get_other_addon_version(addon_name):
+def get_addon_file_path(addon_name):
     home_dir = os.path.expanduser("~")
-    with open(f"{home_dir}/Documents/Elder Scrolls Online/live/AddOns/{addon_name}/{addon_name}.txt", 'r') as file:
+    if os.path.exists(f"{home_dir}/Documents/Elder Scrolls Online/live/AddOns/{addon_name}/{addon_name}.addon"):
+        return f"{home_dir}/Documents/Elder Scrolls Online/live/AddOns/{addon_name}/{addon_name}.addon"
+    elif os.path.exists(f"{home_dir}/Documents/Elder Scrolls Online/live/AddOns/{addon_name}/{addon_name}.txt"):
+        return f"{home_dir}/Documents/Elder Scrolls Online/live/AddOns/{addon_name}/{addon_name}.txt"
+    return None
+
+def get_other_addon_version(addon_name):
+    with open(get_addon_file_path(addon_name), 'r') as file:
         txt = file.read()
         ver_line = get_line(txt, "## AddOnVersion:")
         return ver_line
@@ -65,3 +72,29 @@ def check_dependencies(depends_prefix):
             current_version = get_other_addon_version(name)
             if version != current_version:
                 print(f"⚠️ Addon {name} version mis-match: ours: {version}, theirs: {current_version}", file=sys.stderr)
+
+# https://github.com/pywinauto/pywinauto
+from pywinauto.application import Application
+from pywinauto.keyboard import send_keys
+from pywinauto.findwindows import ElementNotFoundError
+
+def reload_eso():
+    try:
+        app = Application().connect(title_re="Elder Scrolls Online", class_name="EsoClientWndClass")
+        win = app.window(title='Elder Scrolls Online')
+
+        win.restore()
+        win.set_focus()
+
+        # sleep(1)
+
+        active_app = Application().connect(active_only=True)
+        active_win = active_app.top_window()
+        print(f"ESO: {win.window_text()}")
+        print(f"Active: {active_win.window_text()}")
+        if win.window_text() == active_win.window_text():
+            send_keys('{VK_SHIFT down}{VK_MENU down}{DEL}{VK_MENU up}{VK_SHIFT up}', vk_packet=False)
+        else:
+            print("ESO not active")
+    except ElementNotFoundError as e:
+        print("ESO not running")
