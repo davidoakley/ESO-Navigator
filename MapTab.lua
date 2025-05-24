@@ -343,6 +343,7 @@ end
 function MT:onTextChanged(editbox)
 	local searchString = string.lower(editbox:GetText())
     local setView = function(view)
+        Nav.log("MapTab.onTextChanged: currentView = %d", view)
         self.currentView = view
         editbox:SetText("")
         editbox.editTextChanged = false
@@ -430,10 +431,10 @@ function MT:ResetView()
 	ZO_ScrollList_ResetToTop(self.listControl)
 end
 
-function MT:resetSearch()
-	Nav.log("MT.resetSearch")
+function MT:ResetSearch()
+	Nav.log("MT.ResetSearch")
 	self.editControl:SetText("")
-    self.currentView = Nav.VIEW_NONE
+    --self.currentView = Nav.VIEW_NONE
     self:UpdateViewControl()
     self:ImmediateRefresh()
 
@@ -597,6 +598,7 @@ function MT:OpenViewMenu()
     ClearMenu()
 
     local doView = function(viewId)
+        Nav.log("MapTab.OpenViewMenu.doView: currentView = %d", viewId)
         self.currentView = viewId
         self:UpdateViewControl()
         self:queueRefresh()

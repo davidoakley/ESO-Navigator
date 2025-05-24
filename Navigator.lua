@@ -103,7 +103,7 @@ function Nav.showSearch(callback)
     local tabVisible = Nav.MapTab.visible
     MAIN_MENU_KEYBOARD:ShowScene("worldMap")
     WORLD_MAP_INFO:SelectTab(NAVIGATOR_TAB_SEARCH)
-    Nav.MapTab:resetSearch()
+    Nav.MapTab:ResetSearch()
     if Nav.saved.autoFocus or tabVisible then
         Nav.MapTab.editControl:TakeFocus()
         Nav.log("showSearch: setting editControl focus")

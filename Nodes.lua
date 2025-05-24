@@ -207,7 +207,7 @@ function ZoneNode:DoAction(action)
             if targetMapId then
                 -- Delay single click to give time for the double-click to occur
                 clickEvent = zo_callLater(function()
-                    Nav.MapTab.currentView = Nav.VIEW_NONE
+                    --Nav.MapTab.currentView = Nav.VIEW_NONE
                     --self.editControl:SetText("")
                     WORLD_MAP_MANAGER:SetMapById(targetMapId)
                 end, 200)

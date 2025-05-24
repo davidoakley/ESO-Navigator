@@ -184,7 +184,11 @@
 
 						<Button name="$(parent)Clear" tier="HIGH">
 							<Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT" offsetX="-5" offsetY="5"/>
-							<OnMouseUp>Navigator.MapTab:resetSearch()</OnMouseUp>
+							<OnMouseUp>
+								Navigator.MapTab:ResetSearch()
+								Navigator.MapTab:ResetView()
+								Navigator.MapTab:UpdateViewControl()
+							</OnMouseUp>
 							<Dimensions x="23" y="23" />
 							<Textures 	normal="EsoUI/art/buttons/decline_up.dds"
 										pressed="EsoUI/art/buttons/decline_down.dds"
@@ -213,7 +217,7 @@
 								SCENE_MANAGER:Hide("worldMap")
 							</OnEscape>
 							<OnEffectivelyShown>
-								Navigator.MapTab:resetSearch()
+								Navigator.MapTab:ResetSearch()
 								if Navigator.saved.autoFocus then
 									self:TakeFocus()
 								end
