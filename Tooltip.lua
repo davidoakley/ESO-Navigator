@@ -20,7 +20,7 @@ function Tooltip:New(node, control)
 
     if node.keepId then
         o:AddKeepInfo()
-    elseif not node.known and not node.houseId then
+    elseif not node:IsKnown() and not node.houseId then
         o.tooltip:AddLine(GetString(NAVIGATOR_NOT_KNOWN), "", ZO_DISABLED_TEXT:UnpackRGB())
     end
 
@@ -357,7 +357,7 @@ end
 
 local function createActionLine(node, actionLines, interaction, action)
     local actionDesc = node:GetActionDescription(action)
-    if not node.known and (action == Nav.ACTION_TRAVEL or action == Nav.ACTION_TRAVELOUTSIDE) and not node.houseId then
+    if not node:IsKnown() and (action == Nav.ACTION_TRAVEL or action == Nav.ACTION_TRAVELOUTSIDE) and not node.houseId then
         actionDesc = Nav.Utils.StrikethroughString(actionDesc)
     end
     table.insert(actionLines, zo_strformat(GetString(NAVIGATOR_TOOLTIP_ACTION_RESULT), interaction, actionDesc))
