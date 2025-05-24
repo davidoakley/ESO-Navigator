@@ -240,7 +240,7 @@ local JumpToZoneNode = ZoneNode:New()
 JumpToZoneNode.AddMenuItems = ZoneNode.AddMenuItems
 
 function JumpToZoneNode:GetName()
-    if self.known then
+    if self:IsKnown() then
         return zo_strformat(GetString(NAVIGATOR_TRAVEL_TO_ZONE), self.name)
     else
         return GetString(NAVIGATOR_NO_TRAVEL_PLAYER)
@@ -248,7 +248,7 @@ function JumpToZoneNode:GetName()
 end
 
 function JumpToZoneNode:GetIcon()
-    return self.known and "Navigator/media/icons/recall.dds" or "esoui/art/crafting/crafting_smithing_notrait.dds"
+    return self:IsKnown() and "Navigator/media/icons/recall.dds" or "esoui/art/crafting/crafting_smithing_notrait.dds"
 end
 
 function JumpToZoneNode:GetOverlayIcon()
@@ -268,10 +268,10 @@ function JumpToZoneNode:GetActionDescription(_)
 end
 
 function JumpToZoneNode:GetColour(isSelected)
-    if isSelected and self.known then
+    if isSelected and self:IsKnown() then
         return Nav.COLOUR_WHITE
     else
-        return self.known and Nav.COLOUR_NORMAL or Nav.COLOUR_DISABLED
+        return self:IsKnown() and Nav.COLOUR_NORMAL or Nav.COLOUR_DISABLED
     end
 end
 
@@ -357,15 +357,15 @@ function HouseNode:GetOverlayIcon()
 end
 
 function HouseNode:GetColour(isSelected)
-    if isSelected and self.known and self.owned then
+    if isSelected and self:IsKnown() and self.owned then
         return Nav.COLOUR_WHITE
     else
-        return (self.known and self.owned) and Nav.COLOUR_NORMAL or Nav.COLOUR_DISABLED
+        return (self:IsKnown() and self.owned) and Nav.COLOUR_NORMAL or Nav.COLOUR_DISABLED
     end
 end
 
 function HouseNode:GetSuffixColour()
-    return (self.known and self.owned) and Nav.COLOUR_SUFFIX_NORMAL or Nav.COLOUR_SUFFIX_DISABLED
+    return (self:IsKnown() and self.owned) and Nav.COLOUR_SUFFIX_NORMAL or Nav.COLOUR_SUFFIX_DISABLED
 end
 
 function HouseNode:Jump(jumpOutside)
@@ -440,7 +440,7 @@ local FastTravelNode = Node:New()
 
 function FastTravelNode:GetWeight()
     local weight = ((self.freeRecall or Nav.jumpState == Nav.JUMPSTATE_WAYSHRINE) and 1.0) or
-            (not self.known and 0.4) or
+            (not self:IsKnown() and 0.4) or
             (self.disabled and 0.3) or 0.8
 
     if Nav.Bookmarks:contains(self) then
@@ -484,7 +484,7 @@ function FastTravelNode:GetTagList()
 end
 
 function FastTravelNode:GetOverlayIcon()
-    if self.known and self:GetRecallCost() then
+    if self:IsKnown() and self:GetRecallCost() then
         return "Navigator/media/overlays/coin.dds", Nav.COLOUR_COIN
     else
         return nil, nil
@@ -552,7 +552,7 @@ function FastTravelNode:GetTooltip(control)
 end
 
 function FastTravelNode:Jump()
-    if not self.known or self.disabled then
+    if not self:IsKnown() or self.disabled then
         Nav.log("FastTravelNode:Jump: unknown or disabled")
         return
     end
@@ -650,9 +650,9 @@ local POINode = Node:New()
 function POINode:IsPOI() return true end
 
 function POINode:GetColour(isSelected)
-    if isSelected and self.known and not self.disabled then
+    if isSelected and self:IsKnown() and not self.disabled then
         return Nav.COLOUR_WHITE
-    elseif self.known and not self.disabled then
+    elseif self:IsKnown() and not self.disabled then
         return Nav.COLOUR_POI
     else
         return Nav.COLOUR_DISABLED
@@ -660,7 +660,7 @@ function POINode:GetColour(isSelected)
 end
 
 function POINode:GetSuffixColour()
-    if self.known and not self.disabled then
+    if self:IsKnown() and not self.disabled then
         return Nav.COLOUR_SUFFIX_POI
     else
         return Nav.COLOUR_SUFFIX_DISABLED

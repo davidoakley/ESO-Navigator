@@ -111,7 +111,7 @@ function Node:GetActionDescription(action)
     elseif action == Nav.ACTION_TRAVEL then
         if Nav.jumpState == Nav.JUMPSTATE_WORLD and not self.userID then
             local s = Nav.Utils.EllipsisString(SI_WORLD_MAP_ACTION_RECALL_TO_WAYSHRINE)
-            local recallCost = self.known and self:GetRecallCost() or nil
+            local recallCost = self:IsKnown() and self:GetRecallCost() or nil
             if recallCost then
                 local currencyType = CURT_MONEY
                 local formatType = ZO_CURRENCY_FORMAT_AMOUNT_ICON
@@ -130,9 +130,9 @@ function Node:GetActionDescription(action)
 end
 
 function Node:GetColour(isSelected)
-    if isSelected and self.known and not self.disabled then
+    if isSelected and self:IsKnown() and not self.disabled then
         return Nav.COLOUR_WHITE
-    elseif self.known and not self.disabled then
+    elseif self:IsKnown() and not self.disabled then
         return Nav.COLOUR_NORMAL
     else
         return Nav.COLOUR_DISABLED
@@ -140,7 +140,7 @@ function Node:GetColour(isSelected)
 end
 
 function Node:GetIconColour()
-    if self.known and not self.disabled then
+    if self:IsKnown() and not self.disabled then
         return Nav.COLOUR_WHITE
     else
         return Nav.COLOUR_DISABLED
@@ -148,7 +148,7 @@ function Node:GetIconColour()
 end
 
 function Node:GetSuffixColour()
-    if self.known and not self.disabled then
+    if self:IsKnown() and not self.disabled then
         return Nav.COLOUR_SUFFIX_NORMAL
     else
         return Nav.COLOUR_SUFFIX_DISABLED

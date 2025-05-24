@@ -73,7 +73,7 @@ local currentTooltip
 
 function MT:layoutRow(rowControl, data, _)
     local node = data.node
-    local isSelected = self.editControl:HasFocus() and node.known and (data.nodeIndex == MT.targetNode)
+    local isSelected = self.editControl:HasFocus() and node:IsKnown() and (data.nodeIndex == MT.targetNode)
 	local name = node:GetName()
     local icon = node:GetIcon()
     local categoryId = data.dataEntry.categoryId
@@ -182,7 +182,7 @@ local function buildCategory(scrollData, category)
         if list[i].hint then
             local entry = ZO_ScrollList_CreateDataEntry(3, { hint = list[i].hint })
             table.insert(scrollData, entry)
-        elseif list[i].known or includeUnknown then
+        elseif list[i]:IsKnown() or includeUnknown then
             local data = {
                 node = list[i],
                 indexInCategory = i,
@@ -314,7 +314,7 @@ function MT:getNextCategoryFirstIndex()
 
     while true do
         if scrollData[i].typeId == 1 then -- wayshrine row
-            if (foundCategory and scrollData[i].data.node and scrollData[i].data.node.known) or i == currentIndex then
+            if (foundCategory and scrollData[i].data.node and scrollData[i].data.node:IsKnown()) or i == currentIndex then
                 -- return the first entry after the category header
                 -- Nav.log("Index %d node %d is result - returning", i, currentNodeIndex)
                 return currentNodeIndex
