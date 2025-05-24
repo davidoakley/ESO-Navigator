@@ -158,7 +158,7 @@ end
 function ZoneNode:GetTagList()
     local tagList = {}
 
-    if Nav.MapTab.filter ~= Nav.FILTER_TREASURE and self:IsJumpable() and Nav.jumpState == Nav.JUMPSTATE_WORLD then
+    if Nav.MapTab.currentView ~= Nav.VIEW_TREASURE and self:IsJumpable() and Nav.jumpState == Nav.JUMPSTATE_WORLD then
         table.insert(tagList, "player")
     end
 
@@ -207,7 +207,7 @@ function ZoneNode:DoAction(action)
             if targetMapId then
                 -- Delay single click to give time for the double-click to occur
                 clickEvent = zo_callLater(function()
-                    Nav.MapTab.filter = Nav.FILTER_NONE
+                    Nav.MapTab.currentView = Nav.VIEW_NONE
                     --self.editControl:SetText("")
                     WORLD_MAP_MANAGER:SetMapById(targetMapId)
                 end, 200)
@@ -460,7 +460,7 @@ function FastTravelNode:GetSuffix()
         return GetString(NAVIGATOR_TRIAL)
     elseif self.poiType == Nav.POI_ARENA then
         return GetString(NAVIGATOR_ARENA)
-    elseif Nav.MapTab.filter == Nav.FILTER_TRADERS and self.traders > 0 then
+    elseif Nav.MapTab.currentView == Nav.VIEW_TRADERS and self.traders > 0 then
         return "  "..self.traders
     end
     return ""
@@ -470,7 +470,7 @@ function FastTravelNode:GetTagList()
     local tagList = {}
 
     if self.traders and self.traders > 0 then
-        if Nav.MapTab.filter ~= Nav.FILTER_TRADERS then
+        if Nav.MapTab.currentView ~= Nav.VIEW_TRADERS then
             if self.traders >= 5 then
                 table.insert(tagList, "city")
             elseif self.traders >= 2 then

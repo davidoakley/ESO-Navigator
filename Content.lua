@@ -353,23 +353,23 @@ end
 ---@class ContentBuilder
 local ContentBuilder = {}
 
-function ContentBuilder.Build(searchString, filter)
-    --local results = Nav.Search:Run(searchString or "", filter)
+function ContentBuilder.Build(searchString, view)
+    --local results = Nav.Search:Run(searchString or "", view)
     --local isSearching = #results > 0 or (searchString and searchString ~= "") or
-    --        (filter ~= Nav.FILTER_NONE and filter == Nav.FILTER_ALL)
+    --        (view ~= Nav.VIEW_NONE and view == Nav.VIEW_ALL)
     local isSearching = (searchString and searchString ~= "")
 
     local content
 
-    if filter == Nav.FILTER_HOUSES then
+    if view == Nav.VIEW_HOUSES then
         content = HousesContent:New()
-    elseif filter == Nav.FILTER_PLAYERS then
+    elseif view == Nav.VIEW_PLAYERS then
         content = PlayersContent:New()
-    elseif filter == Nav.FILTER_ZONES then
+    elseif view == Nav.VIEW_ZONES then
         content = ZonesContent:New()
-    elseif filter == Nav.FILTER_TRADERS then
+    elseif view == Nav.VIEW_TRADERS then
         content = GuildTradersContent:New()
-    elseif filter == Nav.FILTER_TREASURE then
+    elseif view == Nav.VIEW_TREASURE then
         content = MapsContent:New()
     elseif isSearching then
         content = AllContent:New()

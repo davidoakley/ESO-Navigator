@@ -54,7 +54,7 @@ function Search:Execute(searchTerm)
     return result
 end
 
-function Search:Run(searchTerm, filter)
+function Search:Run(searchTerm, view)
     self.candidates = {}
 
     searchTerm = Nav.Utils.trim(searchTerm or "")
@@ -62,23 +62,23 @@ function Search:Run(searchTerm, filter)
 
     --Nav.Utils.logChars("Épreuve")
     --Nav.Utils.logChars(searchTerm)
-    -- Nav.log("Search:Run('%s', %d)", searchTerm, filter)
+    -- Nav.log("Search:Run('%s', %d)", searchTerm, view)
 
-    if filter == Nav.FILTER_NONE and searchTerm == "" then
+    if view == Nav.VIEW_NONE and searchTerm == "" then
         return {}
     end
 
-    if filter == Nav.FILTER_PLAYERS then
+    if view == Nav.VIEW_PLAYERS then
         self:AddCandidates(Nav.Players:GetPlayerList(hasSearch))
-    elseif filter == Nav.FILTER_HOUSES then
+    elseif view == Nav.VIEW_HOUSES then
         self:AddCandidates(Locations:GetHouseList(hasSearch))
-    elseif filter == Nav.FILTER_ZONES then
+    elseif view == Nav.VIEW_ZONES then
         local list = Nav.Locations:GetZoneList()
         table.sort(list, Nav.Node.NameComparison)
         self:AddCandidates(list)
-    elseif filter == Nav.FILTER_TREASURE then
+    elseif view == Nav.VIEW_TREASURE then
         self:AddCandidates(Locations:GetMapZones())
-    elseif filter == Nav.FILTER_TRADERS then
+    elseif view == Nav.VIEW_TRADERS then
         self:AddCandidates(Locations:GetTraderNodeList())
     else
         self:AddCandidates(Locations:GetNodeList(nil, hasSearch))
