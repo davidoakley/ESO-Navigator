@@ -1,7 +1,7 @@
 local MT = Navigator_MapTab -- from XML
 local Nav = Navigator
 
-MT.filter = Nav.FILTER_NONE
+MT.currentView = Nav.VIEW_NONE
 MT.needsRefresh = Nav.REFRESH_NONE
 MT.collapsedCategories = {}
 MT.targetNode = 0
@@ -152,7 +152,7 @@ function MT:layoutHintRow(rowControl, data, _)
 end
 
 local function ShowUndiscovered()
-    MT.filter = Nav.FILTER_ALL
+    MT.currentView = Nav.VIEW_ALL
     MT:ImmediateRefresh()
 end
 
@@ -175,7 +175,7 @@ local function buildCategory(scrollData, category)
     end
 
     local currentNodeIndex = MT.resultCount
-    local includeUnknown = Nav.saved.includeUndiscovered or MT.filter == Nav.FILTER_ALL
+    local includeUnknown = Nav.saved.includeUndiscovered or MT.currentView == Nav.VIEW_ALL
     local listed = 0
 
     for i = 1, #list do
@@ -202,7 +202,7 @@ local function buildCategory(scrollData, category)
         end
     end
 
-    if #list > 0 and listed == 0 and (MT.filter == Nav.FILTER_NONE or MT.filter ~= Nav.FILTER_ALL) then
+    if #list > 0 and listed == 0 and (MT.currentView == Nav.VIEW_NONE or MT.currentView ~= Nav.VIEW_ALL) then
         local entry = ZO_ScrollList_CreateDataEntry(3, { hint = GetString(NAVIGATOR_HINT_SHOWUNDISCOVERED), onClick = ShowUndiscovered })
         table.insert(scrollData, entry)
     end
@@ -266,7 +266,7 @@ end
 function MT:UpdateContent(searchString, keepTargetNode)
     self.searchString = searchString
 
-    self.content = Nav.ContentBuilder.Build(self.searchString, self.filter)
+    self.content = Nav.ContentBuilder.Build(self.searchString, self.currentView)
 
     self:buildScrollList(keepTargetNode)
 end
@@ -342,26 +342,27 @@ end
 
 function MT:onTextChanged(editbox)
 	local searchString = string.lower(editbox:GetText())
-    local setFilter = function(filter)
-        self.filter = filter
+    local setView = function(view)
+        Nav.log("MapTab.onTextChanged: currentView = %d", view)
+        self.currentView = view
         editbox:SetText("")
         editbox.editTextChanged = false
         searchString = ""
-        self:UpdateFilterControl()
+        self:UpdateViewControl()
     end
 
     if searchString == "z:" then
-        setFilter(Nav.FILTER_ZONES)
+        setView(Nav.VIEW_ZONES)
     elseif searchString == "h:" then
-        setFilter(Nav.FILTER_HOUSES)
+        setView(Nav.VIEW_HOUSES)
     elseif searchString == '@' or searchString == "p:" then
-        setFilter(Nav.FILTER_PLAYERS)
+        setView(Nav.VIEW_PLAYERS)
     elseif searchString == "t:" then
-        setFilter(Nav.FILTER_TRADERS)
+        setView(Nav.VIEW_TRADERS)
     elseif searchString == "m:" then
-        setFilter(Nav.FILTER_TREASURE)
+        setView(Nav.VIEW_TREASURE)
     elseif searchString == "a:" then
-        self.filter = Nav.FILTER_ALL
+        self.currentView = Nav.VIEW_ALL
         editbox:SetText("")
         editbox.editTextChanged = false
         searchString = ""
@@ -423,24 +424,20 @@ function MT:previousCategory()
 	-- self:buildScrollList()
 end
 
-function MT:resetFilter()
-	Nav.log("MT.resetFilter")
-    self.filter = Nav.FILTER_NONE
-    --self:hideFilterControl()
+function MT:ResetView()
+	Nav.log("MT.ResetView")
+    self.currentView = Nav.VIEW_NONE
     self:ImmediateRefresh()
 	ZO_ScrollList_ResetToTop(self.listControl)
 end
 
-function MT:resetSearch()
-	Nav.log("MT.resetSearch")
+function MT:ResetSearch()
+	Nav.log("MT.ResetSearch")
 	self.editControl:SetText("")
-    self.filter = Nav.FILTER_NONE
-    self:UpdateFilterControl()
-    --self:hideFilterControl()
+    --self.currentView = Nav.VIEW_NONE
+    self:UpdateViewControl()
     self:ImmediateRefresh()
 
-	--ZO_EditDefaultText_Initialize(editbox, GetString(FASTER_TRAVEL_WAYSHRINES_SEARCH))
-	--ResetVisibility(listcontrol)
 	ZO_ScrollList_ResetToTop(self.listControl)
 end
 
@@ -587,7 +584,7 @@ function MT:OnMapChanged()
             self.collapsedCategories = {}
         end
 
-        if (self.searchString or "") == "" and self.filter == Nav.FILTER_NONE then
+        if (self.searchString or "") == "" and self.currentView == Nav.VIEW_NONE then
             Nav.log("MT:OnMapChanged: UpdateContent")
             self.targetNode = 0
             self:UpdateContent("", false)
@@ -600,32 +597,33 @@ end
 function MT:OpenViewMenu()
     ClearMenu()
 
-    local doFilter = function(filterId)
-        self.filter = filterId
-        self:UpdateFilterControl()
+    local doView = function(viewId)
+        Nav.log("MapTab.OpenViewMenu.doView: currentView = %d", viewId)
+        self.currentView = viewId
+        self:UpdateViewControl()
         self:queueRefresh()
     end
 
-    local addItem = function (icon, stringId, filterId, gap)
-        local callback = function() doFilter(filterId) end
-        local colour = filterId == self.filter and ZO_WHITE or nil
+    local addItem = function (icon, stringId, viewId, gap)
+        local callback = function() doView(viewId) end
+        local colour = viewId == self.currentView and ZO_WHITE or nil
         AddMenuItem(string.format("|t24:24:Navigator/media/icons/%s.dds:inheritcolor|t %s",
                                   icon, GetString(stringId)),
                     callback, nil, nil, colour, nil, gap or 0)
     end
 
-    addItem("zone", NAVIGATOR_SETTINGS_ZONE_ACTIONS_NAME, Nav.FILTER_ZONES)
-    addItem("player", NAVIGATOR_MENU_PLAYERS, Nav.FILTER_PLAYERS)
-    addItem("house", NAVIGATOR_SETTINGS_HOUSE_ACTIONS_NAME, Nav.FILTER_HOUSES)
-    addItem("trader", NAVIGATOR_MENU_GUILDTRADERS, Nav.FILTER_TRADERS)
+    addItem("zone", NAVIGATOR_SETTINGS_ZONE_ACTIONS_NAME, Nav.VIEW_ZONES)
+    addItem("player", NAVIGATOR_MENU_PLAYERS, Nav.VIEW_PLAYERS)
+    addItem("house", NAVIGATOR_SETTINGS_HOUSE_ACTIONS_NAME, Nav.VIEW_HOUSES)
+    addItem("trader", NAVIGATOR_MENU_GUILDTRADERS, Nav.VIEW_TRADERS)
     if LibTreasure_GetItemIdData then
-        addItem("map", NAVIGATOR_MENU_TREASUREMAPS_SURVEYS, Nav.FILTER_TREASURE)
+        addItem("map", NAVIGATOR_MENU_TREASUREMAPS_SURVEYS, Nav.VIEW_TREASURE)
     end
-    if self.filter ~= Nav.FILTER_NONE then
-        addItem("search_up", NAVIGATOR_MENU_CLEARVIEW, Nav.FILTER_NONE, 12)
+    if self.currentView ~= Nav.VIEW_NONE then
+        addItem("search_up", NAVIGATOR_MENU_CLEARVIEW, Nav.VIEW_NONE, 12)
     end
 
-    --AddMenuItem("|t24:24:Navigator/media/icons/search_up.dds|t Clear view", function() doFilter(Nav.FILTER_NONE) end,
+    --AddMenuItem("|t24:24:Navigator/media/icons/search_up.dds|t Clear view", function() doFilter(Nav.VIEW_NONE) end,
     --        nil, nil, nil, nil, 12)
 
     MT.menuOpen = true
@@ -642,16 +640,16 @@ function MT:OpenViewMenu()
     end)
 end
 
-function MT:UpdateFilterControl()
+function MT:UpdateViewControl()
     local textures = { "search_up", "search_down", "search_over" }
 
-    if     self.filter == Nav.FILTER_PLAYERS  then textures = { "player" }
-    elseif self.filter == Nav.FILTER_HOUSES   then textures = { "house" }
-    elseif self.filter == Nav.FILTER_ZONES    then textures = { "zone" }
-    elseif self.filter == Nav.FILTER_TRADERS  then textures = { "trader" }
-    elseif self.filter == Nav.FILTER_TREASURE then textures = { "map" }
-    --elseif self.filter == Nav.FILTER_NONE then
-    --elseif self.filter == Nav.FILTER_ALL then
+    if     self.currentView == Nav.VIEW_PLAYERS  then textures = { "player" }
+    elseif self.currentView == Nav.VIEW_HOUSES   then textures = { "house" }
+    elseif self.currentView == Nav.VIEW_ZONES    then textures = { "zone" }
+    elseif self.currentView == Nav.VIEW_TRADERS  then textures = { "trader" }
+    elseif self.currentView == Nav.VIEW_TREASURE then textures = { "map" }
+    --elseif self.currentView == Nav.VIEW_NONE then
+    --elseif self.currentView == Nav.VIEW_ALL then
     end
 
     self.viewButton:SetNormalTexture(string.format("Navigator/media/icons/%s.dds", textures[1]))
@@ -661,7 +659,9 @@ end
 
 function MT:SetViewButtonTooltip()
     self.viewButton:SetHandler("OnMouseEnter", function(control)
-        ZO_Tooltips_ShowTextTooltip(control, LEFT, GetString(NAVIGATOR_TOOLTIP_VIEWMENU))
+        ZO_Tooltips_ShowTextTooltip(control, LEFT, GetString(
+            self.currentView == Nav.VIEW_NONE and NAVIGATOR_TOOLTIP_VIEWMENU or NAVIGATOR_TOOLTIP_CLEARVIEW
+        ))
     end)
     self.viewButton:SetHandler("OnMouseExit", function(_)
         ZO_Tooltips_HideTextTooltip()

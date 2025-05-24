@@ -57,12 +57,12 @@ function Chat:Search(text)
 
     if text:sub(1, 1) == "@" then
         if #text >= 2 then
-            searchResult = Nav.Search:Run(text:sub(2), Nav.FILTER_PLAYERS)
+            searchResult = Nav.Search:Run(text:sub(2), Nav.VIEW_PLAYERS)
         else
             searchResult = {}
         end
     else
-        searchResult = Nav.Search:Run(text, Nav.FILTER_NONE)
+        searchResult = Nav.Search:Run(text, Nav.VIEW_NONE)
     end
 
     if #searchResult >= 1 then

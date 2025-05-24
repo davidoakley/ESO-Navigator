@@ -134,7 +134,6 @@
                 self.listControl = self:GetNamedChild("List")
 				self.searchControl = self:GetNamedChild("Search")
 				self.editControl = self:GetNamedChild("SearchEdit")
-				--self.filterControl = self:GetNamedChild("SearchFilter")
 				self.viewButton = self.searchControl:GetNamedChild("View")
 
 				self.fragment = ZO_FadeSceneFragment:New(self)
@@ -167,20 +166,17 @@
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT" offsetX="0" offsetY="-30" />
 
 					<Controls>
-						<!--
-						<Label name="$(parent)Filter" font="$(MEDIUM_FONT)|$(KB_14)" text="|u6:6::Reaper's March|u" hidden="true">
-							<Anchor point="TOPLEFT" offsetX="0" offsetY="6"/>
-							<Controls>
-								<Backdrop name="$(parent)Bg" inherits="ZO_LargeKeyBackdrop" alpha="0.5">
-									<Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="0" offsetY="-4" />
-									<Anchor point="BOTTOMRIGHT" relativeTo="$(parent)" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="4" />
-								</Backdrop>
-							</Controls>
-						</Label>
-						-->
 						<Button name="$(parent)View" tier="HIGH">
 							<Anchor point="TOPLEFT" offsetX="2" offsetY="3"/>
-							<OnMouseUp>Navigator.MapTab:OpenViewMenu()</OnMouseUp>
+							<OnMouseUp>
+								if button == 1 then
+									Navigator.MapTab:OpenViewMenu()
+								else
+									Navigator.MapTab:ResetView()
+									Navigator.MapTab:UpdateViewControl()
+								end
+								ZO_Tooltips_HideTextTooltip()
+							</OnMouseUp>
 							<Dimensions x="24" y="24" />
 							<Textures 	 normal="Navigator/media/icons/search_up.dds"
 										pressed="Navigator/media/icons/search_down.dds"
@@ -196,7 +192,11 @@
 
 						<Button name="$(parent)Clear" tier="HIGH">
 							<Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT" offsetX="-5" offsetY="5"/>
-							<OnMouseUp>Navigator.MapTab:resetSearch()</OnMouseUp>
+							<OnMouseUp>
+								Navigator.MapTab:ResetSearch()
+								Navigator.MapTab:ResetView()
+								Navigator.MapTab:UpdateViewControl()
+							</OnMouseUp>
 							<Dimensions x="23" y="23" />
 							<Textures 	normal="EsoUI/art/buttons/decline_up.dds"
 										pressed="EsoUI/art/buttons/decline_down.dds"
@@ -213,7 +213,7 @@
 							<OnBackspace>
 								--Navigator.log("OnBackspace: pos="..self:GetCursorPosition().." changed="..(self.editTextChanged and 1 or 0))
 								if self:GetCursorPosition() == 0 and not self.editTextChanged then
-									Navigator.MapTab:resetFilter()
+									Navigator.MapTab:ResetView()
 								end
 								self.editTextChanged = false
 							</OnBackspace>
@@ -225,7 +225,7 @@
 								SCENE_MANAGER:Hide("worldMap")
 							</OnEscape>
 							<OnEffectivelyShown>
-								Navigator.MapTab:resetSearch()
+								Navigator.MapTab:ResetSearch()
 								if Navigator.saved.autoFocus then
 									self:TakeFocus()
 								end
