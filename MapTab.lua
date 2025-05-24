@@ -659,7 +659,9 @@ end
 
 function MT:SetViewButtonTooltip()
     self.viewButton:SetHandler("OnMouseEnter", function(control)
-        ZO_Tooltips_ShowTextTooltip(control, LEFT, GetString(NAVIGATOR_TOOLTIP_VIEWMENU))
+        ZO_Tooltips_ShowTextTooltip(control, LEFT, GetString(
+            self.currentView == Nav.VIEW_NONE and NAVIGATOR_TOOLTIP_VIEWMENU or NAVIGATOR_TOOLTIP_CLEARVIEW
+        ))
     end)
     self.viewButton:SetHandler("OnMouseExit", function(_)
         ZO_Tooltips_HideTextTooltip()

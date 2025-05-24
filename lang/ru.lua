@@ -42,6 +42,7 @@ mkstr("NAVIGATOR_TIP_DOUBLECLICK_TO_TRAVEL", "Щелкните дважды, ч�
 mkstr("NAVIGATOR_TOOLTIP_ACTION_RESULT", "<<1>>: <<2>>") -- e.g. 1:"Single-click" 2:"Show On Map"
 --mkstr("NAVIGATOR_TOOLTIP_GUILDTRADERS", "<<1[/1 Guild Trader nearby/$d Guild Traders nearby]>>")
 --mkstr("NAVIGATOR_TOOLTIP_VIEWMENU", "Switch to alternative views")
+--mkstr("NAVIGATOR_TOOLTIP_CLEARVIEW", "Right-click to clear view\nRight-click to clear view")
 
 -- Action and menu items
 mkstr("NAVIGATOR_TRAVEL_TO_ZONE", "Переместиться в <<1>>")

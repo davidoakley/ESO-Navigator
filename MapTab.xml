@@ -168,7 +168,15 @@
 					<Controls>
 						<Button name="$(parent)View" tier="HIGH">
 							<Anchor point="TOPLEFT" offsetX="2" offsetY="3"/>
-							<OnMouseUp>Navigator.MapTab:OpenViewMenu()</OnMouseUp>
+							<OnMouseUp>
+								if button == 1 then
+									Navigator.MapTab:OpenViewMenu()
+								else
+									Navigator.MapTab:ResetView()
+									Navigator.MapTab:UpdateViewControl()
+								end
+								ZO_Tooltips_HideTextTooltip()
+							</OnMouseUp>
 							<Dimensions x="24" y="24" />
 							<Textures 	 normal="Navigator/media/icons/search_up.dds"
 										pressed="Navigator/media/icons/search_down.dds"
