@@ -1,13 +1,15 @@
 local Nav = Navigator
 local Bookmarks = Nav.Bookmarks or {
+    hasRunFixup = false
 }
 
 function Bookmarks:init()
     Nav.saved.bookmarks = Nav.saved.bookmarks or {}
-    self:FixUp()
 end
 
 function Bookmarks:getIndex(entry)
+    if not self.hasRunFixup then self:FixUp() end
+
     local list = Nav.saved.bookmarks
 
     if entry.nodeIndex then
@@ -53,6 +55,8 @@ function Bookmarks:getIndex(entry)
 end
 
 function Bookmarks:add(entry)
+    if not self.hasRunFixup then self:FixUp() end
+
     if entry.nodeIndex and (entry.nodeIndex == 211 or entry.nodeIndex == 212) then
         -- Always store The Harborage as index 210
         entry.nodeIndex = 210
@@ -62,6 +66,8 @@ function Bookmarks:add(entry)
 end
 
 function Bookmarks:remove(entry)
+    if not self.hasRunFixup then self:FixUp() end
+
     local i = self:getIndex(entry)
     if i then
         table.remove(Nav.saved.bookmarks, i)
@@ -70,10 +76,14 @@ end
 
 
 function Bookmarks:contains(entry)
+    if not self.hasRunFixup then self:FixUp() end
+
     return self:getIndex(entry) ~= nil
 end
 
 function Bookmarks:Move(node, offset)
+    if not self.hasRunFixup then self:FixUp() end
+
     local index = self:getIndex(node) --node = Nav.saved.bookmarks[index]
     if index then
         table.remove(Nav.saved.bookmarks, index)
@@ -84,6 +94,8 @@ function Bookmarks:Move(node, offset)
 end
 
 function Bookmarks:getBookmarks()
+    if not self.hasRunFixup then self:FixUp() end
+
     local list = Nav.saved.bookmarks
     local results = {}
 
@@ -149,6 +161,8 @@ function Bookmarks:FixUp()
             table.remove(Nav.saved.bookmarks, i)
         end
     end
+
+    self.hasRunFixup = true
 end
 
 Nav.Bookmarks = Bookmarks

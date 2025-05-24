@@ -124,7 +124,7 @@ local function getOrCreateZone(self, zoneId, zoneName, zoneIndex, mapId, canJump
                 self.zones[zoneId].hidden = true
             end
         else
-            Nav.log("SetupNodes: not zone: zoneId %d name %s", zoneId, zoneName)
+            Nav.log("getOrCreateZone: not zone: zoneId %d name %s", zoneId, zoneName)
         end
     end
     return self.zones[zoneId]
@@ -371,7 +371,7 @@ function Locs:SetKeepsInaccessible()
 end
 
 function Locs:GetNode(nodeIndex, includeUnknown)
-    if not self.NodeMap then
+    if not self.nodeMap then
         self:SetupNodes()
     end
 
