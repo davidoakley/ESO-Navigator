@@ -6,12 +6,8 @@ Navigator = {
   author = "SirNightstorm",
   appVersion = "0",
   svName = "Navigator_SavedVariables",
-  Location = {},
-  Wayshrine = {},
-  Search = {},
   isCLI = false,
   isDeveloper = (GetDisplayName() == '@SirNightstorm' and true) or false,
-  results = {},
   mapVisible = false,
   currentNodeIndex = nil,
 }
