@@ -583,6 +583,7 @@ function FastTravelNode:Jump()
             local currencyString = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(CURT_MONEY, cost, ZO_CURRENCY_FORMAT_AMOUNT_ICON))
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.POSITIVE_CLICK,
                     zo_strformat(GetString(id), self.name, currencyString))
+            Nav.Recents:insert(self.nodeIndex)
         end, 10)
         return
     end
