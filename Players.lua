@@ -144,12 +144,18 @@ end
 function Players:GetPlayerInZone(zoneId)
     if self.players == nil then self:SetupPlayers() end
 
+    local players = {}
     for _, player in pairs(self.players) do
         if player.zoneId == zoneId and player.isOnline then
-            return player
+            table.insert(players, player) --return player
         end
     end
-    return nil
+
+    if #players > 0 then
+        return players[math.random(#players)]
+    else
+        return nil
+    end
 end
 
 function Players.GroupComparison(x, y)
