@@ -34,6 +34,7 @@ end
 
 function Players:SetupPlayers()
     local zones = Nav.Locations:GetZones()
+    local playerUserID = GetUnitDisplayName("player")
 
     self.players = {}
 
@@ -45,11 +46,13 @@ function Players:SetupPlayers()
         for i = 1, guildMembers do
             local userID, _, _, playerStatus, secsSinceLogoff = GetGuildMemberInfo(guildID, i)
 
-            local hasChar, charName, zoneName, _, _, _, _, zoneId = GetGuildMemberCharacterInfo(guildID, i)
-            if hasChar then
-                local player = addPlayer(self, zones, zoneId, zoneName, userID, charName, playerStatus ~= PLAYER_STATUS_OFFLINE and secsSinceLogoff == 0)
-                player.guildID = guild
-                player.isGuildmate = true
+            if userID ~= playerUserID then
+                local hasChar, charName, zoneName, _, _, _, _, zoneId = GetGuildMemberCharacterInfo(guildID, i)
+                if hasChar then
+                    local player = addPlayer(self, zones, zoneId, zoneName, userID, charName, playerStatus ~= PLAYER_STATUS_OFFLINE and secsSinceLogoff == 0)
+                    player.guildID = guild
+                    player.isGuildmate = true
+                end
             end
         end
     end
@@ -58,22 +61,23 @@ function Players:SetupPlayers()
     for i = 1, friendCount do
         local userID, _, playerStatus, secsSinceLogoff = GetFriendInfo(i)
 
-        local hasChar, charName, zoneName, _, _, _, _, zoneId = GetFriendCharacterInfo(i)
-        if hasChar then
-            local player = addPlayer(self, zones, zoneId, zoneName, userID, charName, playerStatus ~= PLAYER_STATUS_OFFLINE and secsSinceLogoff == 0)
-            player.friendIndex = i
-            player.isFriend = true
+        if userID ~= playerUserID then
+            local hasChar, charName, zoneName, _, _, _, _, zoneId = GetFriendCharacterInfo(i)
+            if hasChar then
+                local player = addPlayer(self, zones, zoneId, zoneName, userID, charName, playerStatus ~= PLAYER_STATUS_OFFLINE and secsSinceLogoff == 0)
+                player.friendIndex = i
+                player.isFriend = true
+            end
         end
     end
 
     local groupCount = GetGroupSize()
-    local playerName = string.lower(GetUnitName("player"))
     for i = 1, groupCount do
         local unitTag = GetGroupUnitTagByIndex(i)
         if unitTag then
             local charName = GetUnitName(unitTag)
             local userID = GetUnitDisplayName(unitTag)
-            if string.lower(charName) ~= playerName then
+            if userID ~= playerUserID then
                 local zoneId = GetZoneId(GetUnitZoneIndex(unitTag))
                 local zoneName = GetZoneNameById(zoneId)
                 local player = addPlayer(self, zones, zoneId, zoneName, userID or '"'..charName..'"', charName, IsUnitOnline(unitTag))
