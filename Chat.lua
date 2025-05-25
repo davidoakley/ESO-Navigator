@@ -13,7 +13,7 @@ function Chat:Init()
 
     local command = self.lsc:Register()
     command:AddAlias(Nav.saved.tpCommand)
-    command:SetCallback(function(input) self:TP(input) end)
+    command:SetCallback(function(input) self:Submit(input) end)
     command:SetDescription(GetString(NAVIGATOR_SLASH_DESCRIPTION))
 
     ---@class Chat.AutoCompleteProvider
@@ -72,7 +72,7 @@ function Chat:Search(text)
     return self.result
 end
 
-function Chat:TP(text)
+function Chat:Submit(text)
     if text == "" then
         LibAddonMenu2:OpenToPanel(Nav.settingsPanel)
         return
@@ -108,8 +108,10 @@ function Chat:TP(text)
     elseif result.JumpToZone then
         result:JumpToZone()
     else
-         CHAT_SYSTEM:AddMessage("Sorry, I wasn't able to process that result")
+        CHAT_SYSTEM:AddMessage("Sorry, I wasn't able to process that result")
     end
+
+    self.result = nil -- Forget autocomplete search result
 end
 
 Nav.Chat = Chat
