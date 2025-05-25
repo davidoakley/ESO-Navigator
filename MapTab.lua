@@ -56,6 +56,9 @@ local function getDeveloperTooltip(node)
     if node.nodeIndex then
         table.insert(items, "nodeIndex="..(node.nodeIndex or "-"))
     end
+    if node.poiIndex then
+        table.insert(items, "poiIndex="..(node.poiIndex or "-"))
+    end
     if node.zoneId then
         table.insert(items, "zoneId="..(node.zoneId or "-"))
     end
