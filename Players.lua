@@ -98,6 +98,7 @@ end
 
 function Players:UpdatePlayer(userID)
     if not self.players then return end
+    if userID == GetUnitDisplayName("player") then return end
 
     local player = self.players[userID]
     if not player then
