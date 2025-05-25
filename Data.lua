@@ -119,6 +119,7 @@ local trader_counts = { -- nodeIndex -> traders_count
     [529] = 6, -- Vastyr Wayshrine
 	[536] = 6, -- Necrom Wayshrine
 	[558] = 6, -- Skingrad City Wayshrine
+    [598] = 6, -- Sunport Wayshrine
 }
 
 
