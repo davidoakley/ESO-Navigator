@@ -159,12 +159,17 @@ function ZoneNode:GetTagList()
     local tagList = {}
 
     if Nav.MapTab.currentView ~= Nav.VIEW_TREASURE and self:IsJumpable() and Nav.jumpState == Nav.JUMPSTATE_WORLD then
-        table.insert(tagList, "player")
+        table.insert(tagList, "{player}")
     end
 
     if self.treasure then
-        if self.treasure.survey then table.insert(tagList, "survey") end
-        if self.treasure.treasure then table.insert(tagList, "treasure") end
+        if Nav.MapTab.currentView == Nav.VIEW_TREASURE then
+            if self.treasure.survey then table.insert(tagList, " "..#self.treasure.survey.."{survey}") end
+            if self.treasure.treasure then table.insert(tagList, " "..#self.treasure.treasure.."{treasure}") end
+        else
+            if self.treasure.survey then table.insert(tagList, "{survey}") end
+            if self.treasure.treasure then table.insert(tagList, "{treasure}") end
+        end
     end
 
     return Nav.Utils.tableConcat(tagList, Node.GetTagList(self))
@@ -472,12 +477,12 @@ function FastTravelNode:GetTagList()
     if self.traders and self.traders > 0 then
         if Nav.MapTab.currentView ~= Nav.VIEW_TRADERS then
             if self.traders >= 5 then
-                table.insert(tagList, "city")
+                table.insert(tagList, "{city}")
             elseif self.traders >= 2 then
-                table.insert(tagList, "town")
+                table.insert(tagList, "{town}")
             end
         end
-        table.insert(tagList, "trader")
+        table.insert(tagList, "{trader}")
     end
 
     return Nav.Utils.tableConcat(tagList, Node.GetTagList(self))
@@ -711,7 +716,7 @@ function KeepNode:GetTagList()
     local isUnderAttack = self:IsUnderAttack()
     if isUnderAttack then
         --Nav.log("Keep %s %d UA %d", self.name, self.keepId, isUnderAttack)
-        table.insert(tagList, isUnderAttack == 2 and "attackburst" or "attackburst-small")
+        table.insert(tagList, isUnderAttack == 2 and "{attackburst}" or "{attackburst-small}")
     end
 
     return Nav.Utils.tableConcat(tagList, Node.GetTagList(self))
