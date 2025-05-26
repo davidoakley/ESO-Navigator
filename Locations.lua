@@ -611,20 +611,29 @@ function Locs:SetTreasureData()
     end
 
     local beginTime = GetGameTimeMilliseconds()
-    local bag = SHARED_INVENTORY.bagCache[BAG_BACKPACK]
+    local bag = SHARED_INVENTORY:GetOrCreateBagCache(BAG_BACKPACK)
     local mapIndexMap = {}
     for _, slotData in pairs(bag) do
         local itemId = GetItemId(slotData.bagId, slotData.slotIndex)
+        local icon, stackCount, sellPrice, meetsUsageRequirement, locked, equipType, _, functionalQuality, displayQuality = GetItemInfo(slotData.bagId, slotData.slotIndex)
         local thatMap = LibTreasure_GetItemIdData(itemId)
         if thatMap ~= nil then
             local mapID = thatMap.mapId
             local _, _, _,zoneIndex, _ = GetMapInfoById(mapID)
             local pinType = thatMap.pinType
             local itemName = GetItemName(slotData.bagId, slotData.slotIndex)
-            if pinType == "survey" then itemName = itemName:gsub("%s*:.*$", "") end
+            local surveyType = nil
+            if pinType == "survey" then
+                itemName = itemName:gsub("%s*:.*$", "")
+
+                for word in string.gmatch(thatMap.texture, "[^_]+") do
+                    surveyType = word  -- Update lastItem with the current word
+                end
+            end
             if not mapIndexMap[zoneIndex] then mapIndexMap[zoneIndex] = {} end
             if not mapIndexMap[zoneIndex][pinType] then mapIndexMap[zoneIndex][pinType] = {} end
-            table.insert(mapIndexMap[zoneIndex][pinType], { pinType, itemName })
+
+            table.insert(mapIndexMap[zoneIndex][pinType], { pinType, itemName, surveyType, stackCount, thatMap })
         end
     end
 

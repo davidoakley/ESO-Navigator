@@ -164,7 +164,16 @@ function ZoneNode:GetTagList()
 
     if self.treasure then
         if Nav.MapTab.currentView == Nav.VIEW_TREASURE then
-            if self.treasure.survey then table.insert(tagList, " "..#self.treasure.survey.."{survey}") end
+            if self.treasure.survey then
+                local types = {}
+                for i = 1, #self.treasure.survey do
+                    local survey = self.treasure.survey[i]
+                    types[survey[3]] = survey[4]--(types[survey[3]] or 0) + 1
+                end
+                for type, count in pairs(types) do
+                    table.insert(tagList, " "..count.."{"..type.."}")
+                end
+            end
             if self.treasure.treasure then table.insert(tagList, " "..#self.treasure.treasure.."{treasure}") end
         else
             if self.treasure.survey then table.insert(tagList, "{survey}") end
