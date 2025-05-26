@@ -217,7 +217,7 @@ function MT:UpdateEditDefaultText()
 	local searchString = self.editControl:GetText()
 	if searchString == "" then
 		-- reinstate default text
-        local openTabBinding = ZO_Keybindings_GetHighestPriorityNarrationStringFromAction("NAVIGATOR_OPENTAB") or '-'
+        local openTabBinding = ZO_Keybindings_GetHighestPriorityNarrationStringFromAction("NAVIGATOR_FOCUSSEARCH") or '-'
         local s = zo_strformat(self.editControl:HasFocus() and GetString(NAVIGATOR_SEARCH) or GetString(NAVIGATOR_SEARCH_KEYPRESS),
             openTabBinding)
 		ZO_EditDefaultText_Initialize(self.editControl, s)

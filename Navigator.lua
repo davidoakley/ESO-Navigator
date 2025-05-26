@@ -94,6 +94,15 @@ function Nav.mkstr(id, str)
     end
 end
 
+function Nav:OnFocusSearchPressed(keyDown)
+    if self.mapVisible then
+        self.showSearch()
+        return true
+    else
+        return false
+    end
+end
+
 function Nav.showSearch(callback)
     Nav.log("showSearch")
     local tabVisible = Nav.MapTab.visible
@@ -145,7 +154,7 @@ local function OnMapStateChange(_, newState)
         ButtonGroup = {
             {
                 name = GetString(NAVIGATOR_KEYBIND_SEARCH),
-                keybind = "NAVIGATOR_OPENTAB", --"UI_SHORTCUT_QUICK_SLOTS", --"NAVIGATOR_SEARCH",
+                keybind = "NAVIGATOR_FOCUSSEARCH", --"UI_SHORTCUT_QUICK_SLOTS", --"NAVIGATOR_SEARCH",
                 order = 200,
                 visible = function() return true end,
                 callback = function() Nav.showSearch() end,
@@ -307,6 +316,8 @@ function Nav:initialize()
   self:loadSettings()
 
   setupEvents()
+
+  CreateDefaultActionBind("NAVIGATOR_FOCUSSEARCH", KEY_TAB)
 
   local buttonData = {
     pressed = "Navigator/media/tabicon_down.dds",

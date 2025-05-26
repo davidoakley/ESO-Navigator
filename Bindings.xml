@@ -6,11 +6,15 @@
 			</Action>
 		</Category>
 	</Layer>
-	
-	<Layer name="Map">
-		<Category>
-			<Action name="NAVIGATOR_OPENTAB" hideAction="true" inheritsBindFrom="CYCLE_PREFERRED_ENEMY_TARGET">
-				<Down>Navigator.showSearch()</Down>
+	<Layer name="SI_KEYBINDINGS_LAYER_USER_INTERFACE_SHORTCUTS">
+		<Category name="Navigator">
+			<Action name="NAVIGATOR_FOCUSSEARCH" rebindable="true">
+				<Down>
+					Navigator:OnFocusSearchPressed(true)
+				</Down>
+				<Up>
+					Navigator:OnFocusSearchPressed(false)
+				</Up>
 			</Action>
 		</Category>
 	</Layer>
