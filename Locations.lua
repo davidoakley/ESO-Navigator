@@ -105,6 +105,7 @@ local function getOrCreateZone(self, zoneId, zoneName, zoneIndex, mapId, canJump
             zoneName = n
             zoneIndex = i
         end
+        zoneName = Utils.FormatSimpleName(zoneName)
         if self:IsZone(zoneId) or mapId then
             if canJumpToPlayer == nil then
                 canJumpToPlayer = CanJumpToPlayerInZone(zoneId) or zoneId == Nav.ZONE_ATOLLOFIMMOLATION
