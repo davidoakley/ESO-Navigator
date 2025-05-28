@@ -105,6 +105,7 @@ local function getOrCreateZone(self, zoneId, zoneName, zoneIndex, mapId, canJump
             zoneName = n
             zoneIndex = i
         end
+        zoneName = Utils.FormatSimpleName(zoneName)
         if self:IsZone(zoneId) or mapId then
             if canJumpToPlayer == nil then
                 canJumpToPlayer = CanJumpToPlayerInZone(zoneId) or zoneId == Nav.ZONE_ATOLLOFIMMOLATION
@@ -174,7 +175,6 @@ local function loadPopulatedZones(self, zoneLookup)
             if zoneName ~= nil and zoneName ~= ""
             then
                 zoneIdLimit = math.max(zoneIdLimit, zoneId + 50)
-                zoneName = Utils.FormatSimpleName(zoneName)
                 local zoneIndex = GetZoneIndex(zoneId)
                 local numPOIs = GetNumPOIs(zoneIndex)
                 if numPOIs > 0 then
@@ -621,10 +621,10 @@ function Locs:SetTreasureData()
             local mapID = thatMap.mapId
             local _, _, _,zoneIndex, _ = GetMapInfoById(mapID)
             local pinType = thatMap.pinType
-            local itemName = GetItemName(slotData.bagId, slotData.slotIndex)
+            local itemName = Nav.Utils.FormatSimpleName(GetItemName(slotData.bagId, slotData.slotIndex))
             local surveyType = nil
             if pinType == "survey" then
-                itemName = itemName:gsub("%s*:.*$", "")
+                itemName = itemName:gsub(" *:.*$", "")
 
                 for word in string.gmatch(thatMap.texture, "[^_]+") do
                     surveyType = word  -- Update lastItem with the current word
