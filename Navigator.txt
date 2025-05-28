@@ -23,6 +23,7 @@ Players.lua
 Search.lua
 Chat.lua
 Tooltip.lua
+Treasure.lua
 
 LAM_navactions.lua
 Settings.lua

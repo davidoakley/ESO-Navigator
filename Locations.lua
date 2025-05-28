@@ -487,7 +487,7 @@ function Locs:GetMapZones()
     local filteredZones = {}
     for i = 1, #zones do
         local zone = zones[i]
-        if zone.treasure and (zone.treasure.survey or zone.treasure.treasure) then
+        if zone.treasure then
             table.insert(filteredZones, zone)
         end
     end
@@ -602,6 +602,18 @@ function Locs.GetMapIdByZoneId(zoneId)
     end
 end
 
+local function getSurveyType(texture)
+    local i = 1
+
+    for word in string.gmatch(texture, "[^_]+") do
+        if i == 3 then
+            return word
+        end
+        i = i + 1
+    end
+    return nil
+end
+
 function Locs:SetTreasureData()
     if not LibTreasure_GetItemIdData then -- Check if LibTreasure is available
         return
@@ -610,37 +622,7 @@ function Locs:SetTreasureData()
         self:SetupNodes()
     end
 
-    local beginTime = GetGameTimeMilliseconds()
-    local bag = SHARED_INVENTORY:GetOrCreateBagCache(BAG_BACKPACK)
-    local mapIndexMap = {}
-    for _, slotData in pairs(bag) do
-        local itemId = GetItemId(slotData.bagId, slotData.slotIndex)
-        local icon, stackCount, sellPrice, meetsUsageRequirement, locked, equipType, _, functionalQuality, displayQuality = GetItemInfo(slotData.bagId, slotData.slotIndex)
-        local thatMap = LibTreasure_GetItemIdData(itemId)
-        if thatMap ~= nil then
-            local mapID = thatMap.mapId
-            local _, _, _,zoneIndex, _ = GetMapInfoById(mapID)
-            local pinType = thatMap.pinType
-            local itemName = GetItemName(slotData.bagId, slotData.slotIndex)
-            local surveyType = nil
-            if pinType == "survey" then
-                itemName = itemName:gsub("%s*:.*$", "")
-
-                for word in string.gmatch(thatMap.texture, "[^_]+") do
-                    surveyType = word  -- Update lastItem with the current word
-                end
-            end
-            if not mapIndexMap[zoneIndex] then mapIndexMap[zoneIndex] = {} end
-            if not mapIndexMap[zoneIndex][pinType] then mapIndexMap[zoneIndex][pinType] = {} end
-
-            table.insert(mapIndexMap[zoneIndex][pinType], { pinType, itemName, surveyType, stackCount, thatMap })
-        end
-    end
-
-    for _, zone in pairs(self.zones) do
-        zone.treasure = mapIndexMap[zone.zoneIndex]
-    end
-    Nav.log("Locs:SetTreasureData: %dms", GetGameTimeMilliseconds() - beginTime)
+    Nav.Treasure.Load(self.zones)
 end
 
 Nav.Locations = Locs
