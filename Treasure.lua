@@ -65,19 +65,28 @@ function Treasure:Add(slotData, thatMap)
     local itemName = Nav.Utils.FormatSimpleName(GetItemName(slotData.bagId, slotData.slotIndex))
     local icon, stackCount, sellPrice, meetsUsageRequirement, locked, equipType, _, functionalQuality, displayQuality = GetItemInfo(slotData.bagId, slotData.slotIndex)
     local surveyType = nil
-    if pinType == "survey" then
-        itemName = itemName:gsub(" *:.*[^I%s][^I]*$", "")
+    local suffix = ""
 
-        surveyType = getSurveyType(thatMap.texture)
-        --for word in string.gmatch(thatMap.texture, "[^_]+") do
-        --    surveyType = word  -- Update lastItem with the current word
-        --end
+    if itemName:sub(-3) == "III" then
+        suffix = " III"
+        itemName = itemName:sub(1, #itemName - 4)
+    elseif itemName:sub(-2) == "II" then
+        suffix = " II"
+        itemName = itemName:sub(1, #itemName - 3)
+    elseif itemName:sub(-1) == "I" then
+        suffix = " I"
+        itemName = itemName:sub(1, #itemName - 2)
     end
 
-    --local category = surveyType or pinType
-    --if not self[category] then self[category] = {} end
+    if pinType == "survey" then
+        itemName = itemName:gsub(":.*$", "")
+        itemName = itemName:gsub(" $", "") -- Remove non-breaking space before colon in some languages
 
-    --table.insert(self.list, { pinType, itemName, surveyType, stackCount, thatMap })
+        surveyType = getSurveyType(thatMap.texture)
+    end
+
+    itemName = itemName .. suffix
+
     table.insert(self.list, { pinType = pinType, name = itemName, surveyType = surveyType, count = stackCount, map = thatMap })
 end
 
