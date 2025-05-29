@@ -106,7 +106,7 @@ function Bookmarks:getBookmarks()
             if nodeIndex and Nav.Locations:IsHarborage(nodeIndex) then
                 nodeIndex = Nav.Locations:GetHarborage()
             end
-            local node = Nav.Locations:GetNode(nodeIndex)
+            local node = Nav.Locations:GetNode(nodeIndex, true)
             table.insert(results, node)
         elseif entry.poi then
             local node = Nav.Locations:GetPOI(entry.poi.zoneId, entry.poi.poiIndex, true)
@@ -149,7 +149,7 @@ function Bookmarks:FixUp()
             Nav.saved.bookmarks[i] = { poi = { zoneId = entry.zoneId, poiIndex = entry.poiIndex } }
             i = i + 1
         elseif (entry.zoneId and Nav.Locations:getZone(entry.zoneId)) or
-                (entry.nodeIndex and Nav.Locations:GetNode(entry.nodeIndex)) or
+                (entry.nodeIndex and Nav.Locations:GetNode(entry.nodeIndex, true)) or
                 entry.keepId or
                 entry.playerHouse or
                 (entry.poi and Nav.Locations:GetPOI(entry.poi.zoneId, entry.poi.poiIndex, true)) then
