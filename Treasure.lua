@@ -88,7 +88,7 @@ function Treasure:GetCount(splitSurveys)
     for i = 1, #self.list do
         local item = self.list[i]
         local category = splitSurveys and item.surveyType or item.pinType
-        result[category] = (result[category] or 0) + 1
+        result[category] = (result[category] or 0) + item.count
     end
 
     return result
