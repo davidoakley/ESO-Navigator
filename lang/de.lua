@@ -52,9 +52,9 @@ mkstr("NAVIGATOR_CATEGORY_ZONES", "Gebiete")
 --mkstr("NAVIGATOR_MENU_REMOVEBOOKMARK", "Remove Bookmark")
 --mkstr("NAVIGATOR_MENU_MOVEBOOKMARKUP", "Move Bookmark up")
 --mkstr("NAVIGATOR_MENU_MOVEBOOKMARKDOWN", "Move Bookmark down")
---mkstr("NAVIGATOR_MENU_PLAYERS", "Players")
---mkstr("NAVIGATOR_MENU_GUILDTRADERS", "Guild Traders")
---mkstr("NAVIGATOR_MENU_TREASUREMAPS_SURVEYS", "Treasure Maps & Surveys")
+mkstr("NAVIGATOR_MENU_PLAYERS", "Spieler")
+mkstr("NAVIGATOR_MENU_GUILDTRADERS", "Gildenhändler")
+mkstr("NAVIGATOR_MENU_TREASUREMAPS_SURVEYS", "Schatzkartes & Fundbericht")
 --mkstr("NAVIGATOR_MENU_CLEARVIEW", "Clear view")
 
 

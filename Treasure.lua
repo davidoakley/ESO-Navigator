@@ -79,8 +79,7 @@ function Treasure:Add(slotData, thatMap)
     end
 
     if pinType == "survey" then
-        itemName = itemName:gsub(":.*$", "")
-        itemName = itemName:gsub(" $", "") -- Remove non-breaking space before colon in some languages
+        itemName = itemName:gsub("%s*:.*$", "")
 
         surveyType = getSurveyType(thatMap.texture)
     end

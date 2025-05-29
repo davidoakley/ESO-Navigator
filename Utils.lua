@@ -165,6 +165,7 @@ end
 
 function Utils.FormatSimpleName(str)
 	if str == nil or str == "" then return str end
+	str = str:gsub(" ", " ") -- Replace non-breaking spaces with simple spaces
 	local lang = string.lower(CurrentLanguage())
 	if lang == "en" then
 		return str
