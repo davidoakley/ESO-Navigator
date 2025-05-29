@@ -117,15 +117,16 @@ function Tooltip:AddZoneInfo()
     local textList = {}
 
     if self.node.treasure then
-        for _, itemList in pairs(self.node.treasure) do
-            for i = 1, #itemList do
-                local icon = itemList[i][3] or itemList[i][1]
-                local text = string.format("|u12:0::|u|t18:24:Navigator/media/tags/%s.dds:inheritcolor|t %s", icon, itemList[i][2])
-                if itemList[i][4] > 1 then
-                    text = text .. " × " .. itemList[i][4]
-                end
-                table.insert(textList, text)
+        local items = self.node.treasure:GetList()
+
+        for i = 1, #items do
+            local item = items[i]
+
+            local text = string.format("|u12:0::|u|t18:24:Navigator/media/tags/%s.dds:inheritcolor|t %s", item.icon, item.name)
+            if item.count > 1 then
+                text = text .. " × " .. item.count
             end
+            table.insert(textList, text)
         end
     end
 

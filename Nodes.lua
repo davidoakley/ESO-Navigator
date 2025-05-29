@@ -164,20 +164,20 @@ function ZoneNode:GetTagList()
 
     if self.treasure then
         if Nav.MapTab.currentView == Nav.VIEW_TREASURE then
-            if self.treasure.survey then
-                local types = {}
-                for i = 1, #self.treasure.survey do
-                    local survey = self.treasure.survey[i]
-                    types[survey[3]] = survey[4]--(types[survey[3]] or 0) + 1
-                end
-                for type, count in pairs(types) do
-                    table.insert(tagList, " "..count.."{"..type.."}")
-                end
+            local treasureCounts = self.treasure:GetCount(true)
+            if treasureCounts.treasure then
+                table.insert(tagList, " "..treasureCounts.treasure.."{treasure}")
+                treasureCounts.treasure = nil
             end
-            if self.treasure.treasure then table.insert(tagList, " "..#self.treasure.treasure.."{treasure}") end
+
+            for pinType, count in pairs(treasureCounts) do
+                table.insert(tagList, " "..count.."{"..pinType.."}")
+            end
         else
-            if self.treasure.survey then table.insert(tagList, "{survey}") end
-            if self.treasure.treasure then table.insert(tagList, "{treasure}") end
+            local treasureCounts = self.treasure:GetCount(false)
+            for pinType, _ in pairs(treasureCounts) do
+                table.insert(tagList, "{"..pinType.."}")
+            end
         end
     end
 

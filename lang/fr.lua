@@ -42,8 +42,8 @@ mkstr("NAVIGATOR_TIP_CLICK_TO_TRAVEL", "Double-cliquez pour voyager à <<1>>") -
 mkstr("NAVIGATOR_TIP_DOUBLECLICK_TO_TRAVEL", "Cliquez pour voyager à <<1>>") -- 1:zone
 mkstr("NAVIGATOR_TOOLTIP_ACTION_RESULT", "<<1>> : <<2>>") -- e.g. 1:"Single-click" 2:"Show On Map"
 --mkstr("NAVIGATOR_TOOLTIP_GUILDTRADERS", "<<1[/1 Guild Trader nearby/$d Guild Traders nearby]>>")
---mkstr("NAVIGATOR_TOOLTIP_VIEWMENU", "Switch to alternative views")
---mkstr("NAVIGATOR_TOOLTIP_CLEARVIEW", "Right-click to clear view\nRight-click to clear view")
+mkstr("NAVIGATOR_TOOLTIP_VIEWMENU", "Passer à des Vues alternatives")
+mkstr("NAVIGATOR_TOOLTIP_CLEARVIEW", "Passer à des Vues alternatives\nCliquer avec le bouton droit pour effacer l'affichage")
 
 -- Actions items
 mkstr("NAVIGATOR_TRAVEL_TO_ZONE", "Se rendre à <<1>>") -- 1:Zone
@@ -54,7 +54,7 @@ mkstr("NAVIGATOR_TRAVEL_TO_ZONE", "Se rendre à <<1>>") -- 1:Zone
 --mkstr("NAVIGATOR_MENU_MOVEBOOKMARKDOWN", "Move Bookmark down")
 mkstr("NAVIGATOR_MENU_PLAYERS", "Joueurs")
 mkstr("NAVIGATOR_MENU_GUILDTRADERS", "Marchands de guilde")
---mkstr("NAVIGATOR_MENU_TREASUREMAPS_SURVEYS", "Treasure Maps & Surveys")
+mkstr("NAVIGATOR_MENU_TREASUREMAPS_SURVEYS", "Carte au trésor & Repérages")
 --mkstr("NAVIGATOR_MENU_CLEARVIEW", "Clear view")
 
 
