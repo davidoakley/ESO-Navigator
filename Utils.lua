@@ -255,4 +255,8 @@ function Utils.StrikethroughString(str)
 	return "|c666666|l0:1:0:-25%:2:666666|l"..str.."|l|r"
 end
 
+function Utils.NameComparison(x, y)
+	return Nav.SortName(x.name) < Nav.SortName(y.name)
+end
+
 Nav.Utils = Utils

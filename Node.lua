@@ -88,7 +88,7 @@ end
 
 function Node:GetTagList()
     local tagList = {}
-    if Nav.MapTab.currentView ~= Nav.VIEW_TREASURE and Nav.MapTab.currentView ~= Nav.VIEW_TRADERS and Nav.Bookmarks:contains(self) then
+    if Nav.MapTab.currentView ~= "treasureMaps" and Nav.MapTab.currentView ~= "guildTraders" and Nav.Bookmarks:contains(self) then
         table.insert(tagList, "{bookmark}")
     end
     return tagList
