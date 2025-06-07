@@ -30,6 +30,8 @@ function Tooltip:New(node, control)
         o:AddPOIInfo()
     elseif node.zoneIndex then
         o:AddZoneInfo()
+    elseif node.userID then
+        o:AddPlayerInfo()
     end
 
     o:AddActions()
@@ -135,6 +137,13 @@ function Tooltip:AddZoneInfo()
         self.tooltip:AddLine(table.concat(textList, "\n"), "", r, g, b, TOPLEFT, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_LEFT, true)
         ZO_Tooltip_AddDivider(self.tooltip)
     end
+end
+
+function Tooltip:AddPlayerInfo()
+    local r, g, b = ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB()
+    local status = self.node.isOnline and self.node.zoneName or GetString(SI_PLAYERSTATUS4)
+    self.tooltip:AddLine(status, "", r, g, b)
+    ZO_Tooltip_AddDivider(self.tooltip)
 end
 
 function Tooltip:AddKeepInfo()
