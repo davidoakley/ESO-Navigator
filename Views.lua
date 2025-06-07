@@ -84,24 +84,6 @@ function ViewManager:Build(searchString, viewId, zone)
 end
 
 
----@class Category
-local Category = {}
-
-function Category:New(o)
-    o = o or {
-        id = "",
-        title = "",
-        list = {},
-        emptyHint = nil,
-        maxEntries = nil,
-        sort = nil
-    }
-    setmetatable(o, self)
-    self.__index = self
-    return o
-end
-
-
 --- @class View
 local View = {}
 
@@ -322,8 +304,6 @@ end
 ViewManager:Add(SearchView:New())
 
 
--- == VIEWS MENU == --
-
 --- @class TamrielView
 local TamrielView = View:New({ id = "tamriel" })
 
@@ -444,15 +424,29 @@ local GuildTradersView = View:New({
     icon = "Navigator/media/icons/trader.dds"
 })
 
+function GuildTradersView:GetTraderNodeList()
+    local nodeList = Nav.Locations:GetNodeList(nil, false, false)
+    local filteredList = {}
+
+    for i = 1, #nodeList do
+        local node = nodeList[i]
+        if node.traders and node.traders > 0 then
+            table.insert(filteredList, node)
+        end
+    end
+
+    table.sort(filteredList, Nav.Node.TradersComparison)
+
+    return filteredList
+end
+
 function GuildTradersView:Build()
     local categoryList = {}
-
-    local list = Nav.Locations:GetTraderNodeList()
 
     table.insert(categoryList, {
         id = "traders",
         title = NAVIGATOR_MENU_GUILDTRADERS,
-        list = list,
+        list = self:GetTraderNodeList(),
         sort = Nav.Node.TradersComparison
     })
 
@@ -469,15 +463,25 @@ local TreasureMapsView = View:New({
     icon = "Navigator/media/icons/map.dds"
 })
 
+function TreasureMapsView:GetTreasureMapZoneList()
+    local zones = Nav.Locations:GetZoneList()
+    local filteredZones = {}
+    for i = 1, #zones do
+        local zone = zones[i]
+        if zone.treasure then
+            table.insert(filteredZones, zone)
+        end
+    end
+    return filteredZones
+end
+
 function TreasureMapsView:Build()
     local categoryList = {}
-
-    local list = Nav.Locations:GetMapZones()
 
     table.insert(categoryList, {
         id = "treasureMaps",
         title = NAVIGATOR_MENU_TREASUREMAPS_SURVEYS,
-        list = list,
+        list = self:GetTreasureMapZoneList(),
         sort = Nav.Node.NameComparison
     })
 
@@ -491,71 +495,5 @@ end
 ViewManager:AddToMenu(TreasureMapsView:New())
 
 
--- ---@class ContentBuilder
---local ContentBuilder = {}
---
---function ContentBuilder.Build(searchString, viewId)
---    --local results = Nav.Search:Run(searchString or "", view)
---    --local isSearching = #results > 0 or (searchString and searchString ~= "") or
---    --        (view ~= Nav.VIEW_NONE and view == Nav.VIEW_ALL)
---    local isSearching = (searchString and searchString ~= "")
---
---    local view
---
---    if viewId == Nav.VIEW_HOUSES then
---        view = HousesView:New()
---    elseif viewId == Nav.VIEW_PLAYERS then
---        view = PlayersView:New()
---    elseif viewId == Nav.VIEW_ZONES then
---        view = ZonesView:New()
---    elseif viewId == Nav.VIEW_TRADERS then
---        view = GuildTradersView:New()
---    elseif viewId == Nav.VIEW_TREASURE then
---        view = MapsView:New()
---    elseif isSearching then
---        view = SearchView:New()
---    else
---        local zone = Nav.Locations:getCurrentMapZone()
---        if zone then
---            if zone.zoneId == Nav.ZONE_TAMRIEL then
---                view = TamrielView:New()
---            elseif zone.zoneId == Nav.ZONE_CYRODIIL then
---                view = CyrodiilView:New()
---            else
---                view = ZoneView:New(zone)
---            end
---        else
---            view = StandardView:New()
---        end
---    end
---
---    if not view then
---        view = TamrielView:New()
---        Nav.logWarning("View:Build: no content chosen")
---    end
---    view:Compose(isSearching)
---
---    if isSearching then
---        Nav.Search:FilterView(view, searchString)
---    end
---
---    if not isSearching then
---        for c = 1, #view.categories do
---            if view.categories[c].sort then
---                --local comparison = (not isSearching) and content.categories[c].sort or Nav.Utils.WeightComparison
---                table.sort(view.categories[c].list, view.categories[c].sort)
---            end
---        end
---    end
---
---    return view
---end
-
-
 Nav.ViewManager = ViewManager
 Nav.Category = Category
---Nav.ContentBuilder = ContentBuilder
---Nav.StandardView = StandardView
---Nav.ZoneView = ZoneView
---Nav.ZoneListView = TamrielView
---Nav.CyrodiilView = CyrodiilView

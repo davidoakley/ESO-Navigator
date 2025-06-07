@@ -53,20 +53,21 @@ end
 
 function Chat:Search(text)
     local searchResult
+    local filter
     self.search = text
+    self.result = nil
 
     if text:sub(1, 1) == "@" then
-        if #text >= 2 then
-            searchResult = Nav.Search:Run(text:sub(2), "players")
-        else
-            searchResult = {}
-        end
-    else
-        searchResult = Nav.Search:Run(text, nil)
+        filter = "players"
+        text = text:sub(2)
     end
 
-    if #searchResult >= 1 then
-        self.result = searchResult[1]
+    if #text >= 1 then
+        searchResult = Nav.Search:Run(text, filter)
+
+        if searchResult and #searchResult >= 1 then
+            self.result = searchResult[1]
+        end
     end
 
     return self.result

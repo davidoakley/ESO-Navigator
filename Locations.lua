@@ -485,18 +485,6 @@ function Locs:GetZones()
     return self.zones
 end
 
-function Locs:GetMapZones()
-    local zones = self:GetZoneList()
-    local filteredZones = {}
-    for i = 1, #zones do
-        local zone = zones[i]
-        if zone.treasure then
-            table.insert(filteredZones, zone)
-        end
-    end
-    return filteredZones
-end
-
 function Locs:GetZoneList(includeAliases)
     local nodes = {}
 

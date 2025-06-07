@@ -24,7 +24,7 @@ Search.lua
 Chat.lua
 Tooltip.lua
 Treasure.lua
-Content.lua
+Views.lua
 
 LAM_navactions.lua
 Settings.lua
