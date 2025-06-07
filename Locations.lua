@@ -100,10 +100,12 @@ end
 
 local function getOrCreateZone(self, zoneId, zoneName, zoneIndex, mapId, canJumpToPlayer)
     if not self.zones[zoneId] then
-        if mapId and zoneIndex == nil then
+        if mapId and (zoneIndex == nil or zoneName == nil) then
             local n, _, _, i, _ = GetMapInfoById(mapId)
             zoneName = n
-            zoneIndex = i
+            if zoneIndex == nil then
+                zoneIndex = i
+            end
         end
         zoneName = Utils.FormatSimpleName(zoneName)
         if self:IsZone(zoneId) or mapId then
@@ -189,7 +191,7 @@ local function loadPopulatedZones(self, zoneLookup)
 
     getOrCreateZone(self, Nav.ZONE_TAMRIEL, nil, nil, 27, false) -- Sort of true, but called 'Clean Test'
     getOrCreateZone(self, 1, nil, nil, 439, false) -- Fake!
-    getOrCreateZone(self, Nav.ZONE_ATOLLOFIMMOLATION, nil, nil, 2000, true)
+    getOrCreateZone(self, Nav.ZONE_ATOLLOFIMMOLATION, nil, 844, 2000, true)
     getOrCreateZone(self, Nav.ZONE_BLACKREACH, nil, nil, 1782, false)
 end
 

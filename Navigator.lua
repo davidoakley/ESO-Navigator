@@ -320,9 +320,9 @@ function Nav:initialize()
   CreateDefaultActionBind("NAVIGATOR_FOCUSSEARCH", KEY_TAB)
 
   local buttonData = {
-    pressed = "Navigator/media/tabicon_down.dds",
-    highlight = "Navigator/media/tabicon_over.dds",
-    normal = "Navigator/media/tabicon_up.dds",
+    pressed = "Navigator/media/tabicons/tabicon_down.dds",
+    highlight = "Navigator/media/tabicons/tabicon_over.dds",
+    normal = "Navigator/media/tabicons/tabicon_up.dds",
     callback = function()
       -- Hide the modebar title
       WORLD_MAP_INFO.modeBar.label:SetText("")
