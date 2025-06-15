@@ -134,7 +134,7 @@ local function getOrCreateZone(self, zoneId, zoneName, zoneIndex, mapId, canJump
 end
 
 local function loadFastTravelNode(self, nodeIndex, nodeLookup, zoneLookup)
-    local known, name, x, z, icon, glowIcon, typePOI, _, isLocked = GetFastTravelNodeInfo(nodeIndex)
+    local known, name, _, _, icon, glowIcon, typePOI, _, isLocked = GetFastTravelNodeInfo(nodeIndex)
 
     if not isLocked and name ~= "" and (typePOI == 1 or glowIcon ~= nil) then
         local zoneIndex, poiIndex = GetFastTravelNodePOIIndicies(nodeIndex)
@@ -158,10 +158,10 @@ local function loadFastTravelNode(self, nodeIndex, nodeLookup, zoneLookup)
 
                 node.nodeZoneIndex = zoneIndex
                 node.nodePOIIndex = poiIndex
-            else
+            elseif poiIndex ~= 26 then -- We already know about the Wyrd Tree duplicate
                 Nav.log("loadFastTravelNode: duplicate %d/%d/%s vs %d/%d/%s", zoneIndex, poiIndex, name, zone.pois[poiIndex].zoneIndex or -1, zone.pois[poiIndex].poiIndex or -1, zone.pois[poiIndex].name or "?")
             end
-        else
+        elseif zoneId ~= Nav.ZONE_CYRODIIL then -- Cyrodiil wayshrines are special
             Nav.log("loadFastTravelNode: nodeIndex %d '%s': no zone for zoneIndex %d zoneId %d", nodeIndex, name, zoneIndex or -1, zoneId or -1)
         end
     end
@@ -226,7 +226,7 @@ local function loadZonePOIs(self, zoneId, zoneIndex, zoneName, numPOIs)
 end
 
 local function loadKeep(self, bgContext, ktnnIndex, zone)
-    local keepId, accessible, normalizedX,  normalizedY = GetKeepTravelNetworkNodeInfo(ktnnIndex, bgContext)
+    local keepId, accessible, _,  _ = GetKeepTravelNetworkNodeInfo(ktnnIndex, bgContext)
 
     local pinType, _, _  = GetKeepPinInfo(keepId, bgContext)
     local name = Utils.FormatSimpleName(GetKeepName(keepId))
