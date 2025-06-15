@@ -7,6 +7,7 @@ texconv -o ..\..\media\tabicons -r -y -ft dds -f DXT5 -m 2 tabicon-assets\*.png
 
 if not exist "..\..\media\icons" mkdir ""..\..\media\icons"
 texconv -o ..\..\media\icons -r -y -ft dds -f DXT5 -m 2 icons-assets\*.png
+texconv -o ..\..\media\icons -r -y -ft dds -f DXT5 -m 2 search-icon-assets\*.png
 
 if not exist "..\..\media\tags" mkdir ""..\..\media\tags"
 texconv -o ..\..\media\tags -r -y -ft dds -f DXT5 -m 2 tag-icons-assets\*.png
