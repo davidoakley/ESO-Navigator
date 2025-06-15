@@ -34,6 +34,10 @@ function ViewManager:GetMenuViews()
     return self.menuList
 end
 
+function ViewManager:NewView(id)
+    return self.views[id]
+end
+
 --- @usage Run and return the appropriate View's Build method, optionally filtering by a search term
 --- @param searchString string|nil The current string to filter by
 --- @param viewId string|nil The current View's id
@@ -42,42 +46,39 @@ end
 function ViewManager:Build(searchString, viewId, zone)
     local isSearching = (searchString and searchString ~= "")
 
-    local view
-
-    if viewId and self.views[viewId] then
-        view = self.views[viewId]:New()
-    elseif isSearching then
-        view = self.views["search"]:New()
-    elseif zone then
-        if zone.zoneId == Nav.ZONE_TAMRIEL then
-            view = self.views["tamriel"]:New()
-        elseif zone.zoneId == Nav.ZONE_CYRODIIL then
-            view = self.views["cyrodiil"]:New()
+    if not viewId or not self.views[viewId] then
+        if isSearching then
+            viewId = "search"
+        elseif zone then
+            if zone.zoneId == Nav.ZONE_TAMRIEL then
+                viewId = "tamriel"
+            elseif zone.zoneId == Nav.ZONE_CYRODIIL then
+                viewId = "cyrodiil"
+            else
+                viewId = "zone"
+            end
         else
-            view = self.views["zone"]:New(zone)
+            viewId = "standard"
         end
-    else
-        view = self.views["standard"]:New()
     end
+
+    local view = self.views[viewId]:New()
 
     if not view then
         view = self.views["tamriel"]:New()
-        Nav.logWarning("View:Build: no content chosen")
+        Nav.logWarning("View:Build: no content chosen for viewId = '%s'", viewId)
     end
 
-    local categoryList = view:Build(isSearching)
+    local context = {
+        isSearching = isSearching,
+        searchString = searchString,
+        zone = zone
+    }
+
+    local categoryList = view:Build(context)
 
     if isSearching then
         Nav.Search:FilterView(categoryList, searchString)
-    end
-
-    if not isSearching then
-        for c = 1, #categoryList do
-            if categoryList[c].sort then
-                --local comparison = (not isSearching) and categoryList[c].sort or Nav.Utils.WeightComparison
-                table.sort(categoryList[c].list, categoryList[c].sort)
-            end
-        end
     end
 
     return categoryList
@@ -99,11 +100,11 @@ function View:IsAvailable() return true end
 function View:AddGroupCategory(categoryList)
     local group = Nav.Players:GetGroupList()
     if #group > 0 then
+        table.sort(group, Nav.Players.GroupComparison)
         table.insert(categoryList, {
             id = "group",
             title = SI_MAIN_MENU_GROUP,
-            list = group,
-            sort = Nav.Players.GroupComparison
+            list = group
         })
     end
 end
@@ -229,23 +230,13 @@ ViewManager:Add(StandardView:New())
 --- @class ZoneView
 local ZoneView = View:New({ id = "zone" })
 
-function ZoneView:New(zone)
-    local o = {
-        id = ZoneView.id,
-        zone = zone
-    }
-    setmetatable(o, self)
-    self.__index = self
-    return o
-end
-
-function ZoneView:Build()
+function ZoneView:Build(context)
     local categoryList = {}
 
     self:AddGroupCategory(categoryList)
     self:AddBookmarksCategory(categoryList)
     self:AddRecentsCategory(categoryList)
-    self:AddZoneCategory(categoryList, self.zone)
+    self:AddZoneCategory(categoryList, context.zone)
 
     return categoryList
 end
@@ -345,12 +336,12 @@ function ZonesView:Build()
     local categoryList = {}
 
     local list = Nav.Locations:GetZoneList()
+    table.sort(list, Nav.Node.NameComparison)
 
     table.insert(categoryList, {
         id = "zones",
         title = NAVIGATOR_SETTINGS_ZONE_ACTIONS_NAME,
-        list = list,
-        sort = Nav.Node.NameComparison
+        list = list
     })
 
     return categoryList
@@ -369,12 +360,12 @@ local PlayersView = View:New({
 function PlayersView:Build()
     local categoryList = {}
     local list = Nav.Players:GetPlayerList(false)
+    table.sort(list, Nav.Node.WeightComparison)
 
     table.insert(categoryList, {
         id = "players",
         title = NAVIGATOR_MENU_PLAYERS,
-        list = list,
-        sort = Nav.Node.WeightComparison
+        list = list
     })
 
     return categoryList
@@ -390,25 +381,27 @@ local HousesView = View:New({
     icon = "Navigator/media/icons/house.dds"
 })
 
-function HousesView:Build(isSearching)
+function HousesView:Build(context)
     local categoryList = {}
 
-    local list = Nav.Locations:GetHouseList(isSearching)
+    local list = Nav.Locations:GetHouseList(context.isSearching)
+
     local owned = Nav.Utils.GetFilteredArray(list, function(h) return h.owned end)
+    table.sort(owned, Nav.Node.WeightComparison)
+
     local unowned = Nav.Utils.GetFilteredArray(list, function(h) return not h.owned end)
+    table.sort(unowned, Nav.Node.WeightComparison)
 
     table.insert(categoryList, {
         id = "houses",
         title = GetString("SI_COLLECTIBLEUNLOCKSTATE", COLLECTIBLE_UNLOCK_STATE_UNLOCKED_OWNED), --NAVIGATOR_SETTINGS_HOUSE_ACTIONS_NAME,
-        list = owned,
-        sort = Nav.Node.WeightComparison
+        list = owned
     })
 
     table.insert(categoryList, {
         id = "houses",
         title = GetString("SI_COLLECTIBLEUNLOCKSTATE", COLLECTIBLE_UNLOCK_STATE_LOCKED), --NAVIGATOR_SETTINGS_HOUSE_ACTIONS_NAME,
-        list = unowned,
-        sort = Nav.Node.WeightComparison
+        list = unowned
     })
 
     return categoryList
@@ -442,12 +435,13 @@ end
 
 function GuildTradersView:Build()
     local categoryList = {}
+    local list = self:GetTraderNodeList()
+    table.sort(list, Nav.Node.TradersComparison)
 
     table.insert(categoryList, {
         id = "traders",
         title = NAVIGATOR_MENU_GUILDTRADERS,
-        list = self:GetTraderNodeList(),
-        sort = Nav.Node.TradersComparison
+        list = list
     })
 
     return categoryList
@@ -463,27 +457,45 @@ local TreasureMapsView = View:New({
     icon = "Navigator/media/icons/map.dds"
 })
 
-function TreasureMapsView:GetTreasureMapZoneList()
+function TreasureMapsView:GetTreasureMapZoneList(skipZoneId)
     local zones = Nav.Locations:GetZoneList()
     local filteredZones = {}
     for i = 1, #zones do
         local zone = zones[i]
-        if zone.treasure then
+        if zone.treasure and zone.zoneId ~= skipZoneId then
             table.insert(filteredZones, zone)
         end
     end
+    table.sort(filteredZones, Nav.Node.NameComparison)
     return filteredZones
 end
 
-function TreasureMapsView:Build()
+function TreasureMapsView:GetZoneTreasureMapList(zone)
+    if zone.treasure then
+        local list = zone.treasure:GetList()
+        table.sort(list, Nav.Utils.NameComparison)
+        return list
+    end
+    return { }
+end
+
+function TreasureMapsView:Build(context)
     local categoryList = {}
 
     table.insert(categoryList, {
-        id = "treasureMaps",
+        id = "otherTreasureMaps",
         title = NAVIGATOR_MENU_TREASUREMAPS_SURVEYS,
-        list = self:GetTreasureMapZoneList(),
-        sort = Nav.Node.NameComparison
+        list = self:GetTreasureMapZoneList()
     })
+
+    local thisZoneList = self:GetZoneTreasureMapList(context.zone)
+    if thisZoneList then
+        table.insert(categoryList, {
+            id = "zoneTreasureMaps",
+            title = context.zone.name,
+            list = thisZoneList
+        })
+    end
 
     return categoryList
 end
@@ -496,4 +508,3 @@ ViewManager:AddToMenu(TreasureMapsView:New())
 
 
 Nav.ViewManager = ViewManager
-Nav.Category = Category

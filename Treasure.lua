@@ -7,20 +7,113 @@
 local Nav = Navigator
 
 
+--- @class TreasureNode
+local TreasureNode = Nav.Node:New()
+
+function TreasureNode:GetIcon()
+    return string.format("Navigator/media/icons/%s.dds", self.icon)
+end
+
+function TreasureNode:GetTagList()
+    local tagList = {}
+
+    if self.count > 1 then
+        table.insert(tagList, "× "..self.count)
+    end
+
+    return Nav.Utils.tableConcat(tagList, Nav.Node.GetTagList(self))
+end
+
+function TreasureNode:AddMenuItems()
+    AddMenuItem(GetString(NAVIGATOR_MENU_SHOWONMAP), function()
+        self:ZoomToPOI(false)
+    end)
+    AddMenuItem(GetString(NAVIGATOR_MENU_SETDESTINATION), function()
+        self:ZoomToPOI(true)
+    end)
+end
+
+function TreasureNode:GetActions()
+    return Nav.saved.poiActions
+end
+
+function TreasureNode:ZoomToPOI(setWaypoint, useCurrentZoom)
+    local function panToPOI(self, zoneIndex, mapId)
+        local normalizedX, normalizedZ = self.map.x, self.map.y --self:GetMapInfo(self, zoneIndex, mapId)
+        --Nav.log("Node:ZoomToPOI: poiIndex=%d, %f,%f", self.poiIndex or -1, normalizedX, normalizedZ)
+        if setWaypoint then
+            PingMap(MAP_PIN_TYPE_PLAYER_WAYPOINT, MAP_TYPE_LOCATION_CENTERED, normalizedX, normalizedZ)
+        else
+            Nav.Node.AddPing(normalizedX, normalizedZ)
+        end
+
+        local mapPanAndZoom = ZO_WorldMap_GetPanAndZoom()
+        mapPanAndZoom:PanToNormalizedPosition(normalizedX, normalizedZ, useCurrentZoom)
+    end
+
+    local targetMapId = self.mapId or Nav.Locations.GetMapIdByZoneId(self.zoneId)
+    local currentMapId = GetCurrentMapId()
+    local targetZoneIndex = GetZoneIndex(self.zoneId)
+    if self.nodeIndex == 407 then -- Dragonguard Sanctum
+        targetMapId = 1654
+    end
+
+    if targetMapId ~= currentMapId then
+        WORLD_MAP_MANAGER:SetMapById(targetMapId)
+
+        zo_callLater(function()
+            panToPOI(self, targetZoneIndex, targetMapId)
+        end, 100)
+    else
+        panToPOI(self, targetZoneIndex, targetMapId)
+    end
+end
+
+function TreasureNode:GetWeight()
+    return self.count
+end
+
+
 --- @class Treasure
 local Treasure = {}
+
+local function getItemsData()
+    if Treasure.itemsData then
+        return Treasure.itemsData
+    end
+
+    Treasure.itemsData = { }
+    local zones = Nav.Locations:GetZones()
+    for zoneId, zone in pairs(zones) do
+        local mapId = zone.mapId or Nav.Locations.GetMapIdByZoneId(zoneId)
+        local mapIdData = LibTreasure_GetMapIdData(mapId)
+        if mapIdData then
+            Nav.log("getTreasureMap: %d +", mapId or -1)
+            for m = 1, #mapIdData do
+                local itemData = mapIdData[m]
+                Treasure.itemsData[itemData.itemId] = itemData
+            end
+        else
+            Nav.log("getTreasureMap: %d -", mapId or -1)
+        end
+    end
+
+    return Treasure.itemsData
+end
 
 function Treasure.Load(zones)
     if not LibTreasure_GetItemIdData then -- Check if LibTreasure is available
         return
     end
 
+    local itemsData = getItemsData()
+
     local beginTime = GetGameTimeMilliseconds()
     local bag = SHARED_INVENTORY:GetOrCreateBagCache(BAG_BACKPACK)
     local mapIndexMap = {}
     for _, slotData in pairs(bag) do
         local itemId = GetItemId(slotData.bagId, slotData.slotIndex)
-        local thatMap = LibTreasure_GetItemIdData(itemId)
+        local thatMap = itemsData[itemId]
         if thatMap ~= nil then
             local mapID = thatMap.mapId
             local _, _, _,zoneIndex, _ = GetMapInfoById(mapID)
@@ -86,7 +179,17 @@ function Treasure:Add(slotData, thatMap)
 
     itemName = itemName .. suffix
 
-    table.insert(self.list, { pinType = pinType, name = itemName, surveyType = surveyType, count = stackCount, map = thatMap })
+    table.insert(self.list, TreasureNode:New({
+        name = itemName,
+        icon = surveyType or pinType,
+        pinType = pinType,
+        surveyType = surveyType,
+        count = stackCount,
+        mapId = thatMap.mapId,
+        known = true,
+        map = thatMap,
+        slotData = slotData
+    }))
 end
 
 
@@ -103,16 +206,8 @@ function Treasure:GetCount(splitSurveys)
 end
 
 function Treasure:GetList()
-    local result = {}
-
-    for i = 1, #self.list do
-        local item = self.list[i]
-        local icon = item.surveyType or item.pinType
-        --local text = string.format("|u12:0::|u|t18:24:Navigator/media/tags/%s.dds:inheritcolor|t %s", icon, itemList[i][2])
-        table.insert(result, { name = item.name, icon = icon, count = item.count })
-    end
-
-    return result
+    return self.list
 end
 
 Nav.Treasure = Treasure
+Nav.TreasureNode = TreasureNode
