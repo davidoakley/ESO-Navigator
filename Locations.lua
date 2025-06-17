@@ -28,7 +28,7 @@ function Locs:IsZone(zoneId)
 end
 
 function Locs:ShouldCollapseCategories(zoneId)
-    return zoneId <= 2 or zoneId == Nav.ZONE_CYRODIIL or zoneId == Nav.ZONE_IMPERIALCITY or zoneId == Nav.ZONE_IMPERIALSEWERS
+    return zoneId <= 2 or (zoneId == Nav.ZONE_CYRODIIL and Nav.jumpState ~= Nav.JUMPSTATE_WAYSHRINE) or zoneId == Nav.ZONE_IMPERIALCITY or zoneId == Nav.ZONE_IMPERIALSEWERS
 end
 
 local function createNode(self, i, name, typePOI, icon, glowIcon, known, zone, poiIndex)
