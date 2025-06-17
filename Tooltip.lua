@@ -323,7 +323,7 @@ function Tooltip:AddKeepInfo()
                 local isKeepAccessible = isUsingKeepRecallStone and GetKeepRecallAvailable(keepId, bgContext) or CanKeepBeFastTravelledTo(keepId, bgContext)
 
                 if isKeepAccessible then
-                    self.tooltip:AddLine(GetString(SI_TOOLTIP_KEEP_ACCESSIBLE), KEEP_TOOLTIP_ACCESSIBLE)
+                    self.tooltip:AddLine(GetString(SI_TOOLTIP_KEEP_ACCESSIBLE), "", KEEP_TOOLTIP_ACCESSIBLE:UnpackRGB())
                 else
                     local playerAlliance = GetUnitAlliance("player")
                     if keepType ~= KEEPTYPE_KEEP and keepType ~= KEEPTYPE_BORDER_KEEP and keepType ~= KEEPTYPE_OUTPOST and keepType ~= KEEPTYPE_TOWN then
