@@ -201,6 +201,13 @@ local function OnStartFastTravel(eventCode, nodeIndex)
     Nav.jumpState = Nav.JUMPSTATE_WAYSHRINE
     Nav.currentNodeIndex = nodeIndex
     Nav.log("OnStartFastTravel(%d,%d) jumpState %d", eventCode, nodeIndex, Nav.jumpState)
+
+    if Nav.Locations:ShouldCollapseCategories(Nav.currentZoneId) then
+        Nav.MapTab.collapsedCategories = { bookmarks = true, recents = true }
+    else
+        Nav.MapTab.collapsedCategories = {}
+    end
+
     Nav.MapTab:ImmediateRefresh()
 end
 

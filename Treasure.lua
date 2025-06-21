@@ -88,13 +88,10 @@ local function getItemsData()
         local mapId = zone.mapId or Nav.Locations.GetMapIdByZoneId(zoneId)
         local mapIdData = LibTreasure_GetMapIdData(mapId)
         if mapIdData then
-            Nav.log("getTreasureMap: %d +", mapId or -1)
             for m = 1, #mapIdData do
                 local itemData = mapIdData[m]
                 Treasure.itemsData[itemData.itemId] = itemData
             end
-        else
-            Nav.log("getTreasureMap: %d -", mapId or -1)
         end
     end
 
