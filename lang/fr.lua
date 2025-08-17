@@ -162,3 +162,6 @@ function Navigator.SearchName(name)
     name = name:gsub(" II$", " II 2", 1):gsub(" I$", " I 1", 1) -- Allows searches like COA2
     return name
 end
+function Navigator.KeepSuffix(name)
+    return nil
+end

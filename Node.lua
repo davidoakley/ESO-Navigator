@@ -60,10 +60,6 @@ function Node:IsKnown()
     return self.known
 end
 
-function Node:GetWeight()
-    return 1.0
-end
-
 function Node:AddBookmarkMenuItem(entry)
     if entry and not Nav.Bookmarks:contains(entry) then
         AddMenuItem(GetString(NAVIGATOR_MENU_ADDBOOKMARK), function()
@@ -74,17 +70,15 @@ function Node:AddBookmarkMenuItem(entry)
     end
 end
 
-function Node:GetName()
-    return self.name or ""
-end
+function Node:GetWeight() return 1.0 end
 
-function Node:GetIcon()
-    return self.icon
-end
+function Node:GetRowTypeID() return Nav.MapTab.ROW_NODE end
 
-function Node:GetSuffix()
-    return self.suffix or ""
-end
+function Node:GetName() return self.name or "" end
+
+function Node:GetIcon() return self.icon end
+
+function Node:GetSuffix() return self.suffix or "" end
 
 function Node:GetTagList()
     local tagList = {}
@@ -159,6 +153,10 @@ Node.GetTagColour = Node.GetSuffixColour
 
 function Node:GetRecallCost()
     return nil -- By default, free!
+end
+
+function Node:GetSortName()
+    return Nav.SortName(self.name)
 end
 
 function Node:GetMapInfo(self, zoneIndex, mapId)

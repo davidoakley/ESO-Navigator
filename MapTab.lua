@@ -6,6 +6,25 @@ MT.needsRefresh = Nav.REFRESH_NONE
 MT.collapsedCategories = {}
 MT.targetNode = 0
 
+MT.ROW_CATEGORY = 0
+MT.ROW_NODE = 1
+MT.ROW_CATEGORY_COLLAPSED = 2
+MT.ROW_HINT = 3
+MT.ROW_KEEP = 4
+
+function MT:Init()
+    Nav.log("MapTab:Init")
+
+    self.fragment = ZO_FadeSceneFragment:New(self)
+    self.fragment.duration = 100
+
+    ZO_ScrollList_AddDataType(self.listControl, MT.ROW_CATEGORY, "Navigator_CategoryRow", 50, function(...) self:layoutCategoryRow(...) end, nil, nil, nil)
+    ZO_ScrollList_AddDataType(self.listControl, MT.ROW_NODE, "Navigator_NodeRow", 25, function(...) self:layoutNodeRow(...) end, nil, nil, nil)
+    ZO_ScrollList_AddDataType(self.listControl, MT.ROW_CATEGORY_COLLAPSED, "Navigator_CollapsedCategoryRow", 40, function(...) self:layoutCategoryRow(...) end, nil, nil, nil)
+    ZO_ScrollList_AddDataType(self.listControl, MT.ROW_HINT, "Navigator_HintRow", 70, function(...) self:layoutHintRow(...) end, nil, nil, nil)
+    ZO_ScrollList_AddDataType(self.listControl, MT.ROW_KEEP, "Navigator_KeepRow", 25, function(...) self:LayoutKeepRow(...) end, nil, nil, nil)
+end
+
 function MT:queueRefresh(refreshMode)
     if refreshMode == nil then refreshMode = Nav.REFRESH_REBUILD end
 
@@ -74,7 +93,7 @@ end
 
 local currentTooltip
 
-function MT:layoutRow(rowControl, data, _)
+function MT:layoutNodeRow(rowControl, data, _)
     local node = data.node
     local isSelected = self.editControl:HasFocus() and node:IsKnown() and (data.nodeIndex == MT.targetNode)
 	local name = node:GetName()
@@ -146,6 +165,25 @@ function MT:layoutRow(rowControl, data, _)
     end)
 end
 
+function MT:LayoutKeepRow(rowControl, data, _)
+    self:layoutNodeRow(rowControl, data)
+
+    local node = data.node
+
+    rowControl.attacked:SetHidden(not node:IsUnderAttack())
+
+    for r = 1, 3 do
+        local resource = node.resources[r]
+        rowControl.resources[r].icon:SetHidden(not resource)
+        if resource then
+            rowControl.resources[r].icon:SetTexture(resource.icon)
+            rowControl.resources[r].attacked:SetHidden(not resource.underAttack) --node:IsResourceUnderAttack(r))
+        else
+            rowControl.resources[r].attacked:SetHidden(true)
+        end
+    end
+end
+
 function MT:layoutCategoryRow(rowControl, data, _)
 	rowControl.label:SetText(data.name)
 end
@@ -161,7 +199,7 @@ end
 
 local function buildCategoryHeader(scrollData, id, title, collapsed)
     title = tonumber(title) ~= nil and GetString(title) or title
-    local recentEntry = ZO_ScrollList_CreateDataEntry(collapsed and 2 or 0, { id = id, name = title })
+    local recentEntry = ZO_ScrollList_CreateDataEntry(collapsed and MT.ROW_CATEGORY_COLLAPSED or MT.ROW_CATEGORY, { id = id, name = title })
     table.insert(scrollData, recentEntry)
 end
 
@@ -183,7 +221,7 @@ local function buildCategory(scrollData, category)
 
     for i = 1, #list do
         if list[i].hint then
-            local entry = ZO_ScrollList_CreateDataEntry(3, { hint = list[i].hint })
+            local entry = ZO_ScrollList_CreateDataEntry(MT.ROW_HINT, { hint = list[i].hint })
             table.insert(scrollData, entry)
         elseif list[i]:IsKnown() or includeUnknown then
             local data = {
@@ -193,7 +231,7 @@ local function buildCategory(scrollData, category)
                 nodeIndex = currentNodeIndex
             }
 
-            local entry = ZO_ScrollList_CreateDataEntry(1, data, category.id)
+            local entry = ZO_ScrollList_CreateDataEntry(list[i]:GetRowTypeID(), data, category.id)
             table.insert(scrollData, entry)
 
             currentNodeIndex = currentNodeIndex + 1
@@ -206,7 +244,7 @@ local function buildCategory(scrollData, category)
     end
 
     if #list > 0 and listed == 0 and (MT.currentView == nil or MT.currentView ~= "all") then
-        local entry = ZO_ScrollList_CreateDataEntry(3, { hint = GetString(NAVIGATOR_HINT_SHOWUNDISCOVERED), onClick = ShowUndiscovered })
+        local entry = ZO_ScrollList_CreateDataEntry(MR.ROW_HINT, { hint = GetString(NAVIGATOR_HINT_SHOWUNDISCOVERED), onClick = ShowUndiscovered })
         table.insert(scrollData, entry)
     end
 
@@ -281,7 +319,7 @@ function MT:getTargetDataIndex()
     local scrollData = ZO_ScrollList_GetDataList(self.listControl)
 
     for i = 1, #scrollData do
-        if scrollData[i].typeId == 1 then -- wayshrine row
+        if scrollData[i].typeId == MT.ROW_NODE or scrollData[i].typeId == MT.ROW_KEEP then
             if currentNodeIndex == self.targetNode then
                 return i
             end
@@ -338,10 +376,6 @@ function MT:getNextCategoryFirstIndex()
             i = i + 1
         end
     end
-end
-
-function MT:init()
-	Nav.log("MapTab:init")
 end
 
 function MT:onTextChanged(editbox)

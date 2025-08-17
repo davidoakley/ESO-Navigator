@@ -706,6 +706,9 @@ end
 
 --- @class KeepNode
 local KeepNode = Node:New()
+KeepNode.historyPercent = ZO_WorldMap_GetHistoryPercentToUse()
+
+function KeepNode:GetRowTypeID() return Nav.MapTab.ROW_KEEP end
 
 function KeepNode:GetColour(isSelected)
     if isSelected and self.accessible then
@@ -717,14 +720,17 @@ function KeepNode:GetColour(isSelected)
     end
 end
 
+function Node:GetSuffixColour()
+    if self:IsKnown() and self.accessible and not self.disabled then
+        return Nav.COLOUR_SUFFIX_NORMAL
+    else
+        return Nav.COLOUR_SUFFIX_POI
+    end
+end
+
 function KeepNode:GetTagList()
     local tagList = {}
 
-    local isUnderAttack = self:IsUnderAttack()
-    if isUnderAttack then
-        --Nav.log("Keep %s %d UA %d", self.name, self.keepId, isUnderAttack)
-        table.insert(tagList, isUnderAttack == 2 and "{attackburst}" or "{attackburst-small}")
-    end
 
     return Nav.Utils.tableConcat(tagList, Node.GetTagList(self))
 end
@@ -734,23 +740,17 @@ function KeepNode:GetTagColour()
 end
 
 function KeepNode:IsUnderAttack()
-    local historyPercent = ZO_WorldMap_GetHistoryPercentToUse()
-    if GetHistoricalKeepUnderAttack(self.keepId, self.bgContext, historyPercent) then
-        return 2
+    if GetHistoricalKeepUnderAttack(self.keepId, self.bgContext, KeepNode.historyPercent) then
+        return true
     end
-
-    for i = 1, 3 do
-        local resourceKeepId = GetResourceKeepForKeep(self.keepId, i)
-        if resourceKeepId > 0 then
-            -- Check if the resource is being attacked rather than reclaimed
-            if GetHistoricalKeepUnderAttack(resourceKeepId, self.bgContext, historyPercent) then
-               --and GetKeepAlliance(resourceKeepId, bgContext) == self.alliance then
-                return 1
-            end
-        end
-    end
-
     return nil
+end
+
+function KeepNode:IsResourceUnderAttack(index)
+    if self.resources[index] and self.resources[index].keepId > 0 then
+        return GetHistoricalKeepUnderAttack(self.resources[index].keepId, self.bgContext, KeepNode.historyPercent)
+    end
+    return false
 end
 
 function KeepNode:GetMapInfo(self, _, _)

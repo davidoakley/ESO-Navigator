@@ -143,6 +143,10 @@ function Navigator.DisplayName(name)
     name = name:gsub("^Dungeon: ", "")
     name = name:gsub("^Trial: ", "")
     name = name:gsub(" Wayshrine$", "")
+    name = name:gsub("^Castle ", "")
+    name = name:gsub("^Fort ", "")
+    name = name:gsub(" Keep$", "")
+    name = name:gsub(" Outpost$", "")
     return name
 end
 function Navigator.SearchName(name)
@@ -150,10 +154,28 @@ function Navigator.SearchName(name)
     name = name:gsub("^Trial: ", "")
     name = name:gsub(" Wayshrine$", "")
     name = name:gsub(" II$", " II 2", 1):gsub(" I$", " I 1", 1) -- Allows searches like COA2 (for City of Ash II)
+    name = name:gsub("^Castle ", "")
+    name = name:gsub("^Fort ", "")
+    if name ~= "Blue Road Keep" then
+        name = name:gsub(" Keep$", "")
+    end
+    name = name:gsub(" Outpost$", "")
     return name
 end
 function Navigator.SortName(name)
     name = string.lower(Navigator.DisplayName(name))
     name = Navigator.Utils.SimplifyAccents(name)
     return Navigator.Utils.trim(name)
+end
+function Navigator.KeepSuffix(name)
+    if string.match(name, "^Castle ") then
+        return "Castle"
+    elseif string.match(name, "^Fort ") then
+        return "Fort"
+    elseif string.match(name, " Keep$") then
+        return "Keep"
+    elseif string.match(name, " Outpost$") then
+        return "Outpost"
+    end
+    return nil
 end

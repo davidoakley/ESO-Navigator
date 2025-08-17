@@ -225,6 +225,41 @@ local function loadZonePOIs(self, zoneId, zoneIndex, zoneName, numPOIs)
     end
 end
 
+local function getKeepResources(self, keepId, bgContext)
+    local resources = {}
+    local historyPercent = ZO_WorldMap_GetHistoryPercentToUse()
+
+    for i = 1, 3 do
+        local resourceKeepId = GetResourceKeepForKeep(keepId, i)
+        if resourceKeepId > 0 then
+            local pinType, _, _  = GetKeepPinInfo(resourceKeepId, bgContext)
+
+            local icon = pinType > 0 and ZO_MapPin.PIN_DATA[pinType].texture or "/esoui/art/crafting/crafting_smithing_notrait.dds"
+
+            local resource = {
+                keepId = resourceKeepId,
+                alliance = GetKeepAlliance(resourceKeepId, bgContext),
+                icon = icon,
+                known = true
+            }
+            -- Check if the resource is being attacked rather than reclaimed
+            if GetHistoricalKeepUnderAttack(resourceKeepId, bgContext, historyPercent) then
+                --and GetKeepAlliance(resourceKeepId, bgContext) == self.alliance then
+                resource.underAttack = true
+                --Nav.log("getKeepResources: %s[%d] %d: GetHistoricalKeepUnderAttack", keepId, i, resourceKeepId)
+            elseif GetKeepUnderAttack(resourceKeepId, bgContext) then
+                resource.underAttack = true
+                --Nav.log("getKeepResources: %s[%d] %d: GetKeepUnderAttack", keepId, i, resourceKeepId)
+            else
+                --Nav.log("getKeepResources: %s[%d] %d: none", keepId, i, resourceKeepId)
+            end
+            table.insert(resources, resource)
+        end
+    end
+
+    return resources
+end
+
 local function loadKeep(self, bgContext, ktnnIndex, zone)
     local keepId, accessible, _,  _ = GetKeepTravelNetworkNodeInfo(ktnnIndex, bgContext)
 
@@ -245,6 +280,7 @@ local function loadKeep(self, bgContext, ktnnIndex, zone)
         ktnnIndex = ktnnIndex,
         keepId = keepId,
         name = Nav.DisplayName(name),
+        suffix = Nav.KeepSuffix(name),
         originalName = name,
         zoneId = Nav.ZONE_CYRODIIL,
         icon = icon,
@@ -252,6 +288,7 @@ local function loadKeep(self, bgContext, ktnnIndex, zone)
         accessible = Nav.jumpState == Nav.JUMPSTATE_TRANSITUS and accessible,
         pinType = pinType,
         alliance = GetKeepAlliance(keepId, bgContext),
+        resources = getKeepResources(self, keepId, bgContext),
         bgContext = bgContext
     })
 
@@ -357,6 +394,7 @@ function Locs:UpdateKeeps()
         if pinType > 0 then
             keep.pinType  = pinType
             keep.icon = ZO_MapPin.PIN_DATA[pinType].texture or "/esoui/art/crafting/crafting_smithing_notrait.dds"
+            keep.resources = getKeepResources(self, keep.keepId, bgContext)
             --Nav.log("UpdateKeeps: icon %d '%s'", pinType, keep.icon or "-")
         end
     end

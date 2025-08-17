@@ -316,7 +316,7 @@ function Nav:initialize()
 
   self.currentAlliance = GetUnitAlliance("player")
 
-  self.MapTab:init()
+  self.MapTab:Init()
   self.Recents:init()
   self.Bookmarks:init()
   self.Chat:Init()
