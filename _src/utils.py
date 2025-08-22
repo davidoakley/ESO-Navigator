@@ -17,7 +17,7 @@ def push(dest_dir):
     os.mkdir(dest_dir)
 
     copy(r'*.lua', dest_dir)
-    copy(r'*.txt', dest_dir)
+    copy(r'*.addon', dest_dir)
     copy(r'*.xml', dest_dir)
 
     shutil.copytree('media', f'{dest_dir}/media')
@@ -60,7 +60,7 @@ def get_other_addon_version(addon_name):
 
 
 def check_dependencies(depends_prefix):
-    with open('Navigator.txt', 'r') as file:
+    with open('Navigator.addon', 'r') as file:
         txt = file.read()
         depends_on_line = get_line(txt, depends_prefix)
         if not depends_on_line:

@@ -31,11 +31,11 @@ utils.copy(r'*.xml', '_build/Navigator')
 shutil.copytree('media', '_build/Navigator/media')
 shutil.copytree('lang', '_build/Navigator/lang')
 
-with open('Navigator.txt', 'r') as inFile:
+with open('Navigator.addon', 'r') as inFile:
   NAVIGATOR_TXT = inFile.read()
   NAVIGATOR_TXT = re.sub(r'## Version: \w+', f"## Version: {VERSION}", NAVIGATOR_TXT)
   NAVIGATOR_TXT = re.sub(r'## AddOnVersion: \w+', f"## AddOnVersion: {ADDON_VERSION}", NAVIGATOR_TXT)
-  with open('_build/Navigator/Navigator.txt', 'w') as outFile:
+  with open('_build/Navigator/Navigator.addon', 'w') as outFile:
     outFile.write(NAVIGATOR_TXT)
 
 with open('Navigator.lua', 'r') as inFile:

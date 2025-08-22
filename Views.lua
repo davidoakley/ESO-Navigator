@@ -278,8 +278,11 @@ end
 function SearchView:Build()
     local categoryList = {}
 
-    local list = Nav.Locations:GetNodeList(nil, true)
-    Nav.Utils.tableConcat(list, Nav.Locations:GetZoneList(true))
+    local zoneId = (Nav.jumpState == Nav.JUMPSTATE_TRANSITUS) and Nav.ZONE_CYRODIIL
+    local list = Nav.Locations:GetNodeList(zoneId, true)
+    if Nav.jumpState ~= Nav.JUMPSTATE_TRANSITUS then
+        Nav.Utils.tableConcat(list, Nav.Locations:GetZoneList(true))
+    end
 
     --table.sort(list, Nav.Node.WeightComparison)
 
