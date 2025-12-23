@@ -1,11 +1,11 @@
 ## Title: |c66CC66N|r|c66CCFFavigator|r
 ## Description: Find your way around ESO's maps quicker with a context-aware sidebar and search
 ## Author: |c9999FFSirNightstorm|r
-## APIVersion: 101046 101047
+## APIVersion: 101047 101048
 ## Version: 0
 ## AddOnVersion: 0
-## DependsOn: LibAddonMenu-2.0>=40
-## OptionalDependsOn: LibDebugLogger>=268 pChat>=10006080 FasterTravel>=030108 LibSlashCommander>=45 LibWorldMapInfoTab>=127 PerfectPixel>=001327 LibTreasure>=22
+## DependsOn: LibAddonMenu-2.0>=41
+## OptionalDependsOn: LibDebugLogger>=268 pChat>=10007010 FasterTravel>=030110 LibSlashCommander>=45 LibWorldMapInfoTab>=127 PerfectPixel>=001328 LibTreasure>=23
 ## SavedVariables: Navigator_SavedVariables
 
 Navigator.lua
