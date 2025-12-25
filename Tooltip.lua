@@ -24,7 +24,9 @@ function Tooltip:New(node, control)
         o.tooltip:AddLine(GetString(NAVIGATOR_NOT_KNOWN), "", ZO_DISABLED_TEXT:UnpackRGB())
     end
 
-    if node.nodeIndex and not node.houseId then
+    if node.GetTooltipLines then
+        o:AddTooltipLines()
+    elseif node.nodeIndex and not node.houseId then
         o:AddFastTravelNodeInfo()
     elseif node.poiIndex then
         o:AddPOIInfo()
@@ -366,6 +368,16 @@ function Tooltip:AddKeepInfo()
         end
     end
 
+    ZO_Tooltip_AddDivider(self.tooltip)
+end
+
+function Tooltip:AddTooltipLines()
+    local lines = self.node:GetTooltipLines()
+    if #lines > 0 then
+        for i = 1, #lines do
+            self.tooltip:AddLine(lines[i].text, "", ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB())
+        end
+    end
     ZO_Tooltip_AddDivider(self.tooltip)
 end
 
