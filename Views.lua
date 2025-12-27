@@ -519,15 +519,7 @@ local QuestsView = View:New({
 })
 
 function QuestsView:Build()
-    local categoryList = {}
-
-    table.insert(categoryList, {
-        id = "quests",
-        title = NAVIGATOR_MENU_QUESTS,
-        list = Nav.Quest:GetQuestNodeList()
-    })
-
-    return categoryList
+    return Nav.Quest:BuildQuestCategories()
 end
 
 ViewManager:AddToMenu(QuestsView:New())

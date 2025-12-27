@@ -18,14 +18,6 @@ function QuestNode:GetIcon()
     end
 end
 
-function QuestNode:GetOverlayIcon()
-    if self.tracked then
-        return "Navigator/media/overlays/star.dds", Nav.COLOUR_WHITE
-    else
-        return nil, nil
-    end
-end
-
 function QuestNode:GetWeight()
     return self.tracked and 1.0 or 0.0
 end
@@ -35,6 +27,14 @@ function QuestNode:GetColour(isSelected)
         return Nav.COLOUR_WHITE
     else
         return Nav.Node.GetColour(self, isSelected)
+    end
+end
+
+function QuestNode:GetIconColour()
+    if self.repeatable then
+        return Nav.COLOUR_REPEATABLE
+    else
+        return Nav.COLOUR_WHITE
     end
 end
 
@@ -125,60 +125,113 @@ local Quest = {
     cache = {}
 }
 
-function Quest:GetQuestNodeList()
-    local list = {}
+local questTypeMap = {
+    [QUEST_TYPE_MAIN_STORY] = { "~MainStory", SI_QUESTTYPE2, 1, true },
+    [QUEST_TYPE_HOLIDAY_EVENT] = { "~Holiday", SI_QUESTTYPE12, 9, true },
+    [QUEST_TYPE_DUNGEON] = { "~Group", NAVIGATOR_CATEGORY_GROUPCONTENT, 10, false },
+    [QUEST_TYPE_RAID] = { "~Group", NAVIGATOR_CATEGORY_GROUPCONTENT, 10, false },
+    [QUEST_TYPE_GUILD] = { "~Guild", SI_QUESTTYPE3, 11, false },
+    [QUEST_TYPE_UNDAUNTED_PLEDGE] = { "~Guild", SI_QUESTTYPE3, 11, false },
+    [QUEST_TYPE_BATTLEGROUND] = { "~Battleground", SI_QUESTTYPE13, 12, false },
+    [QUEST_TYPE_PROLOGUE] = { "~Prologue", SI_QUESTTYPE14, 14, true },
+    [QUEST_TYPE_COMPANION] = { "~Companion", SI_QUESTTYPE16, 15, true },
+    [QUEST_TYPE_TRIBUTE] = { "~Tribute", SI_QUESTTYPE17, 16, true },
+    [QUEST_TYPE_SCRIBING] = { "~Scribing", SI_QUESTTYPE18, 17, true },
+    [QUEST_TYPE_CRAFTING] = { "~Crafting", SI_QUESTTYPE4, 20, false },
+}
 
-    for questIndex = 1, GetNumJournalQuests() do
-        local questName, _, _, _, _, _, tracked = GetJournalQuestInfo(questIndex)
-        local _, _, questZoneIndex = GetJournalQuestLocationInfo(questIndex)
-        local questJournalObject = SYSTEMS:GetObject("questJournal")
-        local questMapId
-
-        local questZoneId = GetZoneId(questZoneIndex)
-        if questZoneId ~= 0 then
-            -- get exact quest location
-            questZoneId, questMapId = self:GetQuestZoneId(questIndex)
-        end
-
-        local zoneId = Nav.Locations:IsZone(questZoneId) and questZoneId or GetParentZoneId(questZoneId)
-
-        local zoneName = zoneId ~= nil and GetZoneNameById(zoneId) or nil
-
-        local questType = GetJournalQuestType(questIndex)
-        local zoneDisplayType = GetJournalQuestZoneDisplayType(questIndex)
-        local iconTexture = questJournalObject:GetIconTexture(questType, zoneDisplayType)
-        local zoneMapId = Nav.Locations.GetMapIdByZoneId(questZoneId)
-
-        table.insert(list, Nav.QuestNode:New({
-            name = questName,
-            icon = iconTexture,
-            suffix = zoneName,
-            --pinType = pinType,
-            --surveyType = surveyType,
-            --count = stackCount,
-            zoneId = zoneId,
-            mapId = zoneMapId,
-            known = true,
-            questIndex = questIndex,
-            tracked = tracked
-            --map = thatMap,
-            --slotData = slotData
-        }))
-
-        --if tracked then
-        --    local _, _, questZoneIndex = GetJournalQuestLocationInfo(slotIndex)
-        --    local questZoneId = GetZoneId(questZoneIndex)
-        --    if questZoneId ~= 0 then
-        --        -- get exact quest location
-        --        questZoneId = BMU.findExactQuestLocation(slotIndex)
-        --    end
-        --    BMU.sc_porting(questZoneId)
-        --end
+local function getQuestCategory(questType, zoneName, zoneId)
+    if questTypeMap[questType] ~= nil then
+        return unpack(questTypeMap[questType])
+    elseif zoneName ~= nil and zoneName ~= "" then
+        return "Zone" .. zoneName, zoneName, (zoneId == Nav.currentZoneId and 5 or 6), false
+    else
+        return "~Other", SI_QUEST_JOURNAL_GENERAL_CATEGORY, 100, true
     end
 
-    self.list = list -- Keep a copy for debugging
+end
 
-    return list
+function Quest:BuildQuestCategories()
+    local categoryMap = {}
+
+    for questIndex = 1, MAX_JOURNAL_QUESTS do
+        if IsValidQuestIndex(questIndex) then
+            local questName, _, _, _, _, _, tracked = GetJournalQuestInfo(questIndex)
+            local _, _, questZoneIndex, poiIndex = GetJournalQuestLocationInfo(questIndex)
+            Nav.log("%d: '%s' z:%d poi:%d", questIndex, questName or "nil", questZoneIndex, poiIndex or -1)
+            local questJournalObject = SYSTEMS:GetObject("questJournal")
+            local questMapId
+
+            local questZoneId = GetZoneId(questZoneIndex)
+            local questZoneName = GetZoneNameById(questZoneId)
+            if questZoneId ~= 0 then
+                -- get exact quest location
+                questZoneId, questMapId = self:GetQuestZoneId(questIndex)
+            end
+
+            local zoneId = Nav.Locations:IsZone(questZoneId) and questZoneId or GetParentZoneId(questZoneId)
+
+            local zoneName = zoneId ~= nil and GetZoneNameById(zoneId) or nil
+
+            local questType = GetJournalQuestType(questIndex)
+            local zoneDisplayType = GetJournalQuestZoneDisplayType(questIndex)
+            local iconTexture = questJournalObject:GetIconTexture(questType, zoneDisplayType)
+            local zoneMapId = Nav.Locations.GetMapIdByZoneId(questZoneId)
+            local repeatableType = GetJournalQuestRepeatType(questIndex)
+
+            local node = Nav.QuestNode:New({
+                name = questName,
+                icon = iconTexture,
+                zoneId = zoneId,
+                mapId = zoneMapId,
+                known = true,
+                questIndex = questIndex,
+                tracked = tracked,
+                repeatable = repeatableType ~= QUEST_REPEAT_NOT_REPEATABLE
+            })
+
+            local categoryId, categoryTitle, categoryOrder, showZone = getQuestCategory(questType, zoneName, zoneId)
+
+            if showZone and zoneName ~= nil then
+                node.suffix = zoneName
+            elseif categoryId == "~Group" then
+                node.suffix = questZoneName
+            end
+
+            --if Nav.isDeveloper then
+            --    node.suffix = (node.suffix or "") .. string.format("[%d]", questType)
+            --end
+
+            if categoryMap[categoryId] == nil then
+                categoryMap[categoryId] = {
+                    id = categoryId,
+                    title = categoryTitle,
+                    list = {},
+                    order = categoryOrder
+                }
+            end
+
+            table.insert(categoryMap[categoryId].list, node)
+        end
+    end
+
+    local categoryList = {}
+    for _, v in pairs(categoryMap) do
+        table.insert(categoryList, v)
+    end
+
+    local function comparison(a, b)
+        if a.order ~= b.order then
+            return a.order < b.order
+        end
+        return a.id < b.id
+    end
+
+    table.sort(categoryList, comparison)
+
+    Quest.categoryMap = categoryMap -- Keep a copy for debugging
+
+    return categoryList
 end
 
 function Quest:GetQuestZoneId(questIndex)

@@ -12,16 +12,16 @@ local Locs = Nav.Locations or {
 local Utils = Nav.Utils
 
 function Locs:IsZone(zoneId)
-    if (zoneId == GetParentZoneId(zoneId)
-       or zoneId==267 -- Eyevea
-       or zoneId==981 -- The Brass Fortress
-       or zoneId==1027 -- Artaeum
-       or zoneId==1413 -- Apocrypha
-       or zoneId==1463 -- The Scholarium
-       or zoneId==1272 -- Atoll of Immolation
-       or zoneId==Nav.ZONE_IMPERIALSEWERS
-       )
-       then
+    if zoneId == GetParentZoneId(zoneId)
+    or zoneId==267 -- Eyevea
+    or zoneId==981 -- The Brass Fortress
+    or zoneId==1027 -- Artaeum
+    or zoneId==1413 -- Apocrypha
+    or zoneId==1463 -- The Scholarium
+    or zoneId==Nav.ZONE_ATOLLOFIMMOLATION
+    or zoneId==Nav.ZONE_IMPERIALSEWERS
+    or zoneId==Nav.ZONE_INFINITE_ARCHIVE
+    then
         return true
     end
     return false
