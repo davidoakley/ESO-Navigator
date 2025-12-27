@@ -39,7 +39,7 @@ function QuestNode:GetIconColour()
 end
 
 function QuestNode:GetActions()
-    return { singleClick = Nav.ACTION_SHOWONMAP, doubleClick = Nav.ACTION_TRAVEL }
+    return { singleClick = Nav.ACTION_SHOWONMAP, doubleClick = nil }
 end
 
 function QuestNode:ZoomToQuestPins(attempts)
