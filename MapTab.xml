@@ -21,7 +21,7 @@
 				</Label>
             </Controls>
 			<OnMouseUp>
-				if upInside then Navigator.MapTab:CategoryRowMouseUp(self, button) end
+				if upInside then self.tab:CategoryRowMouseUp(self, button) end
 			</OnMouseUp>
         </Control>
 
@@ -45,7 +45,7 @@
 				</Label>
             </Controls>
 			<OnMouseUp>
-				if upInside then Navigator.MapTab:CategoryRowMouseUp(self, button) end
+				if upInside then self.tab:CategoryRowMouseUp(self, button) end
 			</OnMouseUp>
         </Control>
 
@@ -106,7 +106,7 @@
 				</Label>
             </Controls>
 			<OnMouseUp>
-				Navigator.MapTab:HandleMouseUp(Navigator.MapTab.RowMouseUp, self, button, upInside)
+				self.tab:HandleMouseUp(Navigator.mainTab.RowMouseUp, self, button, upInside)
 			</OnMouseUp>
         </Control>
 
@@ -122,44 +122,15 @@
 				</Label>
             </Controls>
 			<OnMouseUp>
-				if upInside then Navigator.MapTab:HintRowMouseUp(self, button, false) end
+				if upInside then self.tab:HintRowMouseUp(self, button, false) end
 			</OnMouseUp>
         </Control>
 
-
-        <TopLevelControl name="Navigator_MapTab" inherits="ZO_WorldMapInfoContent">
+        <TopLevelControl name="Navigator_MainTab" inherits="ZO_WorldMapInfoContent">
             <OnInitialized>
-				Navigator.log("Navigator_MapTab.OnInitialized")
-				self.visible = false
-                self.listControl = self:GetNamedChild("List")
-				self.searchControl = self:GetNamedChild("Search")
-				self.editControl = self:GetNamedChild("SearchEdit")
-				self.viewButton = self.searchControl:GetNamedChild("View")
-
-				self.fragment = ZO_FadeSceneFragment:New(self)
-				self.fragment.duration = 100
-
-				ZO_ScrollList_AddDataType(self.listControl, 0, "Navigator_CategoryRow", 50, function(...) self:layoutCategoryRow(...) end, nil, nil, nil)
-				ZO_ScrollList_AddDataType(self.listControl, 1, "Navigator_WayshrineRow", 25, function(...) self:layoutRow(...) end, nil, nil, nil)
-				ZO_ScrollList_AddDataType(self.listControl, 2, "Navigator_CollapsedCategoryRow", 40, function(...) self:layoutCategoryRow(...) end, nil, nil, nil)
-				ZO_ScrollList_AddDataType(self.listControl, 3, "Navigator_HintRow", 70, function(...) self:layoutHintRow(...) end, nil, nil, nil)
-	        </OnInitialized>
-			<OnEffectivelyShown>
-				Navigator.log("Navigator_MapTab.OnEffectivelyShown")
-				self.visible = true
-				if self.needsRefresh then
-					self:ImmediateRefresh()
-				else
-				    Navigator.MapTab:buildScrollList()
-				end
-				if Navigator.Locations.keepsDirty then
-					Navigator.Locations:UpdateKeeps()
-				end
-			</OnEffectivelyShown>
-			<OnEffectivelyHidden>
-				Navigator.log("Navigator_MapTab.OnEffectivelyHidden")
-				self.visible = false
-			</OnEffectivelyHidden>
+				Navigator.AttachMapTab("mainTab", self, Navigator.MapTab)
+				self:init()
+			</OnInitialized>
             <Controls>
 				<Backdrop name="$(parent)Search" tier="HIGH"  inherits="ZO_SingleLineEditBackdrop_Keyboard"  mouseEnabled="true">
 					<Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="0" offsetY="-30"/>
@@ -170,10 +141,10 @@
 							<Anchor point="TOPLEFT" offsetX="2" offsetY="3"/>
 							<OnMouseUp>
 								if button == 1 then
-									Navigator.MapTab:OpenViewMenu()
+									Navigator.mainTab:OpenViewMenu()
 								else
-									Navigator.MapTab:ResetView()
-									Navigator.MapTab:UpdateViewControl()
+									Navigator.mainTab:ResetView()
+									Navigator.mainTab:UpdateViewControl()
 								end
 								ZO_Tooltips_HideTextTooltip()
 							</OnMouseUp>
@@ -193,9 +164,9 @@
 						<Button name="$(parent)Clear" tier="HIGH">
 							<Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT" offsetX="-5" offsetY="5"/>
 							<OnMouseUp>
-								Navigator.MapTab:ResetSearch()
-								Navigator.MapTab:ResetView()
-								Navigator.MapTab:UpdateViewControl()
+								Navigator.mainTab:ResetSearch()
+								Navigator.mainTab:ResetView()
+								Navigator.mainTab:UpdateViewControl()
 							</OnMouseUp>
 							<Dimensions x="23" y="23" />
 							<Textures 	normal="EsoUI/art/buttons/decline_up.dds"
@@ -209,58 +180,59 @@
 							<Anchor point="TOPLEFT" relativeTo="$(parent)Separator" relativePoint="TOPRIGHT" offsetX="2" offsetY="-1" />
 							<Anchor point="TOPRIGHT" relativeTo="$(parent)Clear" relativePoint="TOPLEFT" offsetX="-4" offsetY="-1" />
 							<OnInitialized>
+								self.tab = self:GetParent():GetParent()
 							</OnInitialized>
 							<OnBackspace>
 								--Navigator.log("OnBackspace: pos="..self:GetCursorPosition().." changed="..(self.editTextChanged and 1 or 0))
 								if self:GetCursorPosition() == 0 and not self.editTextChanged then
-									Navigator.MapTab:ResetView()
-									Navigator.MapTab:UpdateViewControl()
+									Navigator.mainTab:ResetView()
+									Navigator.mainTab:UpdateViewControl()
 								end
 								self.editTextChanged = false
 							</OnBackspace>
 							<OnEnter>
-								Navigator.MapTab:OnEnter()
+								self.tab:OnEnter()
 							</OnEnter>
 							<OnEscape>
 								-- self:LoseFocus()
 								SCENE_MANAGER:Hide("worldMap")
 							</OnEscape>
 							<OnEffectivelyShown>
-								Navigator.MapTab:ResetSearch()
+								self.tab:ResetSearch()
 								if Navigator.saved.autoFocus then
 									self:TakeFocus()
 								end
 							</OnEffectivelyShown>
 							<OnFocusGained>
-								Navigator.MapTab:buildScrollList()
-								zo_callLater(function() Navigator.MapTab:UpdateEditDefaultText() end, 10)
+								self.tab:buildScrollList()
+								zo_callLater(function() self.tab:UpdateEditDefaultText() end, 10)
 							</OnFocusGained>
 							<OnFocusLost>
-								Navigator.MapTab:UpdateEditDefaultText()
-								Navigator.MapTab:buildScrollList()
+								self.tab:UpdateEditDefaultText()
+								self.tab:buildScrollList()
 							</OnFocusLost>
 							<OnTextChanged>
 								--Navigator.log("onTextChanged: pos="..self:GetCursorPosition())
-								Navigator.MapTab:onTextChanged(self)
+								self.tab:onTextChanged(self)
 							</OnTextChanged>
 							<OnMouseDown>
 								self:TakeFocus()
 								ZO_EditDefaultText_Disable(self)
 							</OnMouseDown>
 							<OnDownArrow>
-								Navigator.MapTab:nextResult()
+								self.tab:nextResult()
 							</OnDownArrow>
 							<OnUpArrow>
-								Navigator.MapTab:previousResult()
+								self.tab:previousResult()
 							</OnUpArrow>
 							<OnPageDown>
-								Navigator.MapTab:nextCategory()
+								self.tab:nextCategory()
 							</OnPageDown>
 							<OnPageUp>
-								Navigator.MapTab:previousCategory()
+								self.tab:previousCategory()
 							</OnPageUp>
 							<OnTab>
-								Navigator.MapTab.editControl:LoseFocus()
+								self.tab.editControl:LoseFocus()
 							</OnTab>
 						</EditBox>						
 					</Controls>
@@ -274,5 +246,47 @@
 
             </Controls>
         </TopLevelControl>
-    </Controls>
+
+		<TopLevelControl name="Navigator_QuestTab" inherits="ZO_WorldMapInfoContent">
+			<OnInitialized>
+				Navigator.AttachMapTab("questTab", self, Navigator.MapTab, "quests")
+				self:init()
+			</OnInitialized>
+			<Controls>
+				<Control name="$(parent)List" inherits="ZO_ScrollList">
+					<Dimensions x="285" y="400" />
+					<Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="0" offsetY="-30"/>
+					<Anchor point="BOTTOMRIGHT" />
+				</Control>
+			</Controls>
+		</TopLevelControl>
+
+		<TopLevelControl name="Navigator_HousingTab" inherits="ZO_WorldMapInfoContent">
+			<OnInitialized>
+				Navigator.AttachMapTab("housingTab", self, Navigator.MapTab, "houses")
+				self:init()
+			</OnInitialized>
+			<Controls>
+				<Control name="$(parent)List" inherits="ZO_ScrollList">
+					<Dimensions x="285" y="400" />
+					<Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="0" offsetY="-30"/>
+					<Anchor point="BOTTOMRIGHT" />
+				</Control>
+			</Controls>
+		</TopLevelControl>
+
+		<TopLevelControl name="Navigator_ZonesTab" inherits="ZO_WorldMapInfoContent">
+			<OnInitialized>
+				Navigator.AttachMapTab("zonesTab", self, Navigator.MapTab, "zones")
+				self:init()
+			</OnInitialized>
+			<Controls>
+				<Control name="$(parent)List" inherits="ZO_ScrollList">
+					<Dimensions x="285" y="400" />
+					<Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="0" offsetY="-30"/>
+					<Anchor point="BOTTOMRIGHT" />
+				</Control>
+			</Controls>
+		</TopLevelControl>
+	</Controls>
 </GuiXml>

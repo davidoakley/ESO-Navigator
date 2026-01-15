@@ -98,21 +98,21 @@ function PlayerNode:AddMenuItems()
     if Nav.Players:IsGroupLeader() and self.isGroupmate then
         AddMenuItem(GetString(SI_GROUP_LIST_MENU_PROMOTE_TO_LEADER), function()
             GroupPromote(self.unitTag)
-            Nav.MapTab.menuOpen = false
-            Nav.MapTab:ImmediateRefresh()
+            Nav.mainTab.menuOpen = false
+            Nav.mainTab:ImmediateRefresh()
         end)
     end
     AddMenuItem(GetString(SI_SOCIAL_MENU_VISIT_HOUSE), function()
         self:JumpToPrimaryResidence()
-        Nav.MapTab.menuOpen = false
+        Nav.mainTab.menuOpen = false
     end)
 
     local bookmarkEntry = { playerHouse = self.userID }
     if not Nav.Bookmarks:contains(bookmarkEntry) then
         AddMenuItem(GetString(NAVIGATOR_MENU_ADDHOUSEBOOKMARK), function()
             Nav.Bookmarks:add(bookmarkEntry)
-            Nav.MapTab.menuOpen = false
-            zo_callLater(function() Nav.MapTab:ImmediateRefresh() end, 10)
+            Nav.mainTab.menuOpen = false
+            zo_callLater(function() Nav.mainTab:ImmediateRefresh() end, 10)
         end)
     end
 end
@@ -158,12 +158,12 @@ end
 function ZoneNode:GetTagList()
     local tagList = {}
 
-    if Nav.MapTab.currentView ~= "treasureMaps" and self:IsJumpable() and Nav.jumpState == Nav.JUMPSTATE_WORLD then
+    if Nav.mainTab.currentView ~= "treasureMaps" and self:IsJumpable() and Nav.jumpState == Nav.JUMPSTATE_WORLD then
         table.insert(tagList, "{player}")
     end
 
     if self.treasure then
-        if Nav.MapTab.currentView == "treasureMaps" then
+        if Nav.mainTab.currentView == "treasureMaps" then
             local treasureCounts = self.treasure:GetCount(true)
             if treasureCounts.treasure then
                 table.insert(tagList, " "..treasureCounts.treasure.."{treasure}")
@@ -191,7 +191,7 @@ function ZoneNode:JumpToZone()
     local player = Nav.Players:GetPlayerInZone(zoneId)
     if not player then
         -- Eeek! Refresh the search results and finish
-        Nav.MapTab:ImmediateRefresh()
+        Nav.mainTab:ImmediateRefresh()
         ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, (zo_strformat(GetString(NAVIGATOR_NO_PLAYER_IN_ZONE), GetZoneNameById(zoneId))))
         return
     end
@@ -432,7 +432,7 @@ function HouseNode:AddMenuItems()
     --        SetHousingPrimaryHouse(houseId)
     --        zo_callLater(function()
     --            Nav.Locations:SetupNodes()
-    --            Nav.MapTab:ImmediateRefresh()
+    --            Nav.mainTab:ImmediateRefresh()
     --        end, 10)
     --        ClearMenu()
     --    end)
@@ -472,7 +472,7 @@ function FastTravelNode:GetSuffix()
         return GetString(NAVIGATOR_TRIAL)
     elseif self.poiType == Nav.POI_ARENA then
         return GetString(NAVIGATOR_ARENA)
-    elseif Nav.MapTab.currentView == "guildTraders" and self.traders > 0 then
+    elseif Nav.mainTab.currentView == "guildTraders" and self.traders > 0 then
         return "  "..self.traders
     end
     return ""
@@ -482,7 +482,7 @@ function FastTravelNode:GetTagList()
     local tagList = {}
 
     if self.traders and self.traders > 0 then
-        if Nav.MapTab.currentView ~= "guildTraders" then
+        if Nav.mainTab.currentView ~= "guildTraders" then
             if self.traders >= 5 then
                 table.insert(tagList, "{city}")
             elseif self.traders >= 2 then

@@ -66,7 +66,11 @@ Nav.default = {
       slash = Nav.ACTION_TRAVEL
   },
   singleClickZone = false,
-  confirmFastTravel = Nav.CONFIRMFASTTRAVEL_ALWAYS
+  confirmFastTravel = Nav.CONFIRMFASTTRAVEL_ALWAYS,
+
+  enableHousingTab = false,
+  enableZonesTab = false,
+  enableQuestsTab = false
 }
 
 local logger = LibDebugLogger and LibDebugLogger(Nav.name)
@@ -105,16 +109,35 @@ end
 
 function Nav.showSearch(callback)
     Nav.log("showSearch")
-    local tabVisible = Nav.MapTab.visible
+    local tabVisible = Nav.mainTab.visible
     MAIN_MENU_KEYBOARD:ShowScene("worldMap")
     WORLD_MAP_INFO:SelectTab(NAVIGATOR_TAB_SEARCH)
-    Nav.MapTab:ResetSearch()
+    Nav.mainTab:ResetSearch()
     if Nav.saved.autoFocus or tabVisible then
-        Nav.MapTab.editControl:TakeFocus()
+        Nav.mainTab.editControl:TakeFocus()
         Nav.log("showSearch: setting editControl focus")
     end
     if callback then
         callback()
+    end
+end
+
+function Nav.AttachMapTab(name, xmlObj, baseObj, view)
+    Nav[name] = xmlObj
+    for k, v in pairs(baseObj) do
+        Nav[name][k] = Nav.Utils.deepCopy(v)
+    end
+    Nav[name].currentView = view
+
+    if PP and PP.ADDON_NAME then
+        local success, error = pcall(function()
+            local listCtrl = xmlObj:GetNamedChild("List")
+            PP.ScrollBar(listCtrl:GetNamedChild("ScrollBar"))
+            ZO_Scroll_SetMaxFadeDistance(listCtrl, PP.savedVars.ListStyle.list_fade_distance)
+        end)
+        if not success then
+            Nav.logWarning("OnAddOnLoaded: PP error '%s'", error)
+        end
     end
 end
 
@@ -176,9 +199,9 @@ local function OnMapStateChange(_, newState)
     Nav.Locations:SetTreasureData()
 
     if zone and Nav.Locations:ShouldCollapseCategories(zone.zoneId) then
-        Nav.MapTab.collapsedCategories = { bookmarks = true, recents = true }
+        Nav.mainTab.collapsedCategories = { bookmarks = true, recents = true }
     else
-        Nav.MapTab.collapsedCategories = {}
+        Nav.mainTab.collapsedCategories = {}
     end
   elseif newState == SCENE_HIDDEN then
     Nav.log("WorldMap hidden")
@@ -189,12 +212,12 @@ local function OnMapStateChange(_, newState)
 end
 
 local function OnMapChanged()
-    if Nav.MapTab.visible then
+    if Nav.mainTab.visible then
         Nav.Locations:UpdateKeeps()
-        Nav.MapTab:ImmediateRefresh()
+        Nav.mainTab:ImmediateRefresh()
     else
     end
-  Nav.MapTab:OnMapChanged()
+  Nav.mainTab:OnMapChanged()
 end
 
 local function OnStartFastTravel(eventCode, nodeIndex)
@@ -203,19 +226,19 @@ local function OnStartFastTravel(eventCode, nodeIndex)
     Nav.log("OnStartFastTravel(%d,%d) jumpState %d", eventCode, nodeIndex, Nav.jumpState)
 
     if Nav.Locations:ShouldCollapseCategories(Nav.currentZoneId) then
-        Nav.MapTab.collapsedCategories = { bookmarks = true, recents = true }
+        Nav.mainTab.collapsedCategories = { bookmarks = true, recents = true }
     else
-        Nav.MapTab.collapsedCategories = {}
+        Nav.mainTab.collapsedCategories = {}
     end
 
-    Nav.MapTab:ImmediateRefresh()
+    Nav.mainTab:ImmediateRefresh()
 end
 
 local function OnStartFastTravelKeep(eventCode, nodeIndex)
     Nav.jumpState = Nav.JUMPSTATE_TRANSITUS
     Nav.Locations:UpdateKeeps()
     Nav.log("OnStartFastTravelKeep(%d,%d) jumpState %d", eventCode, nodeIndex, Nav.jumpState)
-    Nav.MapTab:ImmediateRefresh()
+    Nav.mainTab:ImmediateRefresh()
 end
 
 local function OnEndFastTravel()
@@ -237,19 +260,30 @@ local function OnPOIUpdated()
 end
 
 local function SetPlayersDirty(_)
-  -- Nav.log("SetPlayersDirty("..eventCode..")")
-  Nav.Players:ClearPlayers()
-  Nav.MapTab:queueRefresh()
+    -- Nav.log("SetPlayersDirty("..eventCode..")")
+    Nav.Players:ClearPlayers()
+    Nav.mainTab:queueRefresh()
+    if Nav.zonesTab then
+        Nav.zonesTab:queueRefresh()
+    end
 end
 
 local function UpdatePlayer(userID)
     Nav.Players:UpdatePlayer(userID)
-    Nav.MapTab:queueRefresh(Nav.REFRESH_EXISTING)
+    Nav.mainTab:queueRefresh(Nav.REFRESH_EXISTING)
 end
 
 local function SetKeepsDirty(_)
     Nav.Locations:SetKeepsDirty()
-    Nav.MapTab:queueRefresh()
+    Nav.mainTab:queueRefresh()
+end
+
+local function RefreshQuests()
+    Nav.Quest.ClearCache()
+    Nav.mainTab:queueRefresh()
+    if Nav.questTab then
+        Nav.questTab:queueRefresh()
+    end
 end
 
 local function setupEvents()
@@ -290,23 +324,85 @@ local function setupEvents()
             EVENT_KEEPS_INITIALIZED, EVENT_KEEP_ALLIANCE_OWNER_CHANGED, EVENT_KEEP_UNDER_ATTACK_CHANGED
     )
 
-    addEvents(Nav.Quest.ClearCache, EVENT_QUEST_ADDED, EVENT_QUEST_REMOVED, EVENT_QUEST_CONDITION_COUNTER_CHANGED,
+    addEvents(RefreshQuests, EVENT_QUEST_ADDED, EVENT_QUEST_REMOVED, EVENT_QUEST_CONDITION_COUNTER_CHANGED,
             EVENT_QUEST_ADVANCED)
 end
 
-local function moveTabToFirst()
+local function findTabIndexByName(name)
+    for i, buttonData in ipairs(WORLD_MAP_INFO.modeBar.buttonData) do
+        if buttonData.descriptor == name then
+            return i
+        end
+    end
+    return nil
+end
+
+local function moveLastTabToIndex(index, replace)
     local buttons = WORLD_MAP_INFO.modeBar.menuBar.m_object.m_buttons
     local ourButton = buttons[#buttons]
     buttons[#buttons] = nil
-    table.insert(buttons, 1, ourButton)
+
+    if replace then
+        buttons[index] = ourButton
+    else
+        table.insert(buttons, index, ourButton)
+    end
 
     local buttonData = WORLD_MAP_INFO.modeBar.buttonData
     local ourData = buttonData[#buttonData]
     buttonData[#buttonData] = nil
-    table.insert(buttonData, 1, ourData)
+    if replace then
+        buttonData[index] = ourData
+    else
+        table.insert(buttonData, index, ourData)
+    end
 
     WORLD_MAP_INFO.modeBar:UpdateButtons(false)
     Nav.log("Menu re-ordered")
+end
+
+local function replaceWorldMapTab(name, fragmentGroup, buttonData)
+    local tabIndex = findTabIndexByName(name)
+    WORLD_MAP_INFO.modeBar:Add(name, fragmentGroup, buttonData)
+    moveLastTabToIndex(tabIndex, true)
+
+end
+
+local function setupTabs(self)
+    local buttonData = {
+        pressed = "Navigator/media/tabicons/tabicon_down.dds",
+        highlight = "Navigator/media/tabicons/tabicon_over.dds",
+        normal = "Navigator/media/tabicons/tabicon_up.dds",
+        callback = function()
+            -- Hide the modebar title
+            WORLD_MAP_INFO.modeBar.label:SetText("")
+        end
+    }
+    WORLD_MAP_INFO.modeBar:Add(NAVIGATOR_TAB_SEARCH, { self.mainTab.fragment }, buttonData)
+    if self.saved["defaultTab"] and not FasterTravel then
+        moveLastTabToIndex(1)
+    end
+
+    local questButtonData = {
+        normal = "EsoUI/Art/WorldMap/map_indexIcon_quests_up.dds",
+        pressed = "EsoUI/Art/WorldMap/map_indexIcon_quests_down.dds",
+        highlight = "EsoUI/Art/WorldMap/map_indexIcon_quests_over.dds"
+    }
+    replaceWorldMapTab(SI_MAP_INFO_MODE_QUESTS, { self.questTab.fragment }, questButtonData)
+
+    local zonesButtonData = {
+        normal = "EsoUI/Art/WorldMap/map_indexIcon_locations_up.dds",
+        pressed = "EsoUI/Art/WorldMap/map_indexIcon_locations_down.dds",
+        highlight = "EsoUI/Art/WorldMap/map_indexIcon_locations_over.dds"
+    }
+    replaceWorldMapTab(SI_MAP_INFO_MODE_LOCATIONS, { self.zonesTab.fragment }, zonesButtonData)
+
+    local housingButtonData = {
+        normal = "EsoUI/Art/WorldMap/map_indexIcon_housing_up.dds",
+        pressed = "EsoUI/Art/WorldMap/map_indexIcon_housing_down.dds",
+        highlight = "EsoUI/Art/WorldMap/map_indexIcon_housing_over.dds"
+    }
+    replaceWorldMapTab(SI_MAP_INFO_MODE_HOUSES, { self.housingTab.fragment }, housingButtonData)
 end
 
 function Nav:initialize()
@@ -319,7 +415,8 @@ function Nav:initialize()
 
   self.currentAlliance = GetUnitAlliance("player")
 
-  self.MapTab:init()
+  setupTabs(self)
+
   self.Recents:init()
   self.Bookmarks:init()
   self.Chat:Init()
@@ -329,22 +426,7 @@ function Nav:initialize()
 
   CreateDefaultActionBind("NAVIGATOR_FOCUSSEARCH", KEY_TAB)
 
-  local buttonData = {
-    pressed = "Navigator/media/tabicons/tabicon_down.dds",
-    highlight = "Navigator/media/tabicons/tabicon_over.dds",
-    normal = "Navigator/media/tabicons/tabicon_up.dds",
-    callback = function()
-      -- Hide the modebar title
-      WORLD_MAP_INFO.modeBar.label:SetText("")
-    end
-  }
-
-  WORLD_MAP_INFO.modeBar:Add(NAVIGATOR_TAB_SEARCH, { self.MapTab.fragment }, buttonData)
-  if self.saved["defaultTab"] and not FasterTravel then
-    moveTabToFirst()
-  end
-
-  Nav.log("Initialize exits")
+    Nav.log("Initialize exits")
 end
 
 local function OnAddOnLoaded(_, addonName)
@@ -352,15 +434,15 @@ local function OnAddOnLoaded(_, addonName)
 
     Nav:initialize()
 
-    if PP and PP.ADDON_NAME then
-        local success, error = pcall(function()
-            PP.ScrollBar(Navigator_MapTabListScrollBar)
-            ZO_Scroll_SetMaxFadeDistance(Navigator_MapTabList, PP.savedVars.ListStyle.list_fade_distance)
-        end)
-        if not success then
-            Nav.logWarning("OnAddOnLoaded: PP error '%s'", error)
-        end
-    end
+    --if PP and PP.ADDON_NAME then
+    --    local success, error = pcall(function()
+    --        PP.ScrollBar(Navigator_MainTab:GetNamedChild("List"):GetNamedChild("ScrollBar")) --Navigator_MainTabListScrollBar
+    --        ZO_Scroll_SetMaxFadeDistance(Navigator_MainTab:GetNamedChild("List"), PP.savedVars.ListStyle.list_fade_distance)
+    --    end)
+    --    if not success then
+    --        Nav.logWarning("OnAddOnLoaded: PP error '%s'", error)
+    --    end
+    --end
 
     EVENT_MANAGER:UnregisterForEvent(Nav.name, EVENT_ADD_ON_LOADED)
 end
