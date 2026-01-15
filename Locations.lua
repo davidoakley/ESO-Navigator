@@ -123,7 +123,7 @@ local function getOrCreateZone(self, zoneId, zoneName, zoneIndex, mapId, canJump
                 canJumpToPlayer = canJumpToPlayer,
                 known = true
             })
-            if zoneId == 642 then
+            if zoneId == 642 or zoneId == 572 then -- Hide The Earth Forge and old Stirk
                 self.zones[zoneId].hidden = true
             end
         else

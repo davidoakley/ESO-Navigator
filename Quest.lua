@@ -38,6 +38,24 @@ function QuestNode:GetIconColour()
     end
 end
 
+function QuestNode:AddMenuItems()
+    AddMenuItem(GetString(NAVIGATOR_MENU_SHOWONMAP), function()
+        self:ZoomToPOI(false)
+    end)
+
+    if GetIsQuestSharable(self.questIndex) and IsUnitGrouped("player") then
+        AddMenuItem(GetString(SI_QUEST_JOURNAL_SHARE), function()
+            QUEST_JOURNAL_MANAGER:ShareQuest(self.questIndex)
+        end)
+    end
+
+    if CanAbandonJournalQuest(self.questIndex) then
+        AddMenuItem(GetString(SI_QUEST_JOURNAL_ABANDON), function()
+            QUEST_JOURNAL_MANAGER:ConfirmAbandonQuest(self.questIndex)
+        end)
+    end
+end
+
 function QuestNode:GetActions()
     return { singleClick = Nav.ACTION_SHOWONMAP, doubleClick = nil }
 end
