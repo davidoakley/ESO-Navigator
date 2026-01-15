@@ -24,6 +24,7 @@ Search.lua
 Chat.lua
 Tooltip.lua
 Treasure.lua
+Quest.lua
 Views.lua
 
 LAM_navactions.lua

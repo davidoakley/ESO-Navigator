@@ -510,4 +510,19 @@ end
 ViewManager:AddToMenu(TreasureMapsView:New())
 
 
+---@class QuestsView
+
+local QuestsView = View:New({
+    id = "quests",
+    title = NAVIGATOR_MENU_QUESTS,
+    icon = "Navigator/media/icons/quest.dds"
+})
+
+function QuestsView:Build()
+    return Nav.Quest:BuildQuestCategories()
+end
+
+ViewManager:AddToMenu(QuestsView:New())
+
+
 Nav.ViewManager = ViewManager

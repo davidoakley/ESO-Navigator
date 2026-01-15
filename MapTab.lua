@@ -1,5 +1,6 @@
-local MT = Navigator_MapTab -- from XML
 local Nav = Navigator
+
+local MT = {}
 
 MT.currentView = nil
 MT.needsRefresh = Nav.REFRESH_NONE
@@ -76,7 +77,7 @@ local currentTooltip
 
 function MT:layoutRow(rowControl, data, _)
     local node = data.node
-    local isSelected = self.editControl:HasFocus() and node:IsKnown() and (data.nodeIndex == MT.targetNode)
+    local isSelected = self.editControl:HasFocus() and node:IsKnown() and (data.nodeIndex == self.targetNode)
 	local name = node:GetName()
     local icon = node:GetIcon()
     local categoryId = data.dataEntry.categoryId
@@ -154,22 +155,22 @@ function MT:layoutHintRow(rowControl, data, _)
 	rowControl.label:SetText(data.hint or "-")
 end
 
-local function ShowUndiscovered()
-    MT.currentView = "all"
-    MT:ImmediateRefresh()
+function MT:ShowUndiscovered()
+    self.currentView = "all"
+    self:ImmediateRefresh()
 end
 
-local function buildCategoryHeader(scrollData, id, title, collapsed)
+ function MT:BuildCategoryHeader(scrollData, id, title, collapsed)
     title = tonumber(title) ~= nil and GetString(title) or title
     local recentEntry = ZO_ScrollList_CreateDataEntry(collapsed and 2 or 0, { id = id, name = title })
     table.insert(scrollData, recentEntry)
 end
 
-local function buildCategory(scrollData, category)
-    local collapsed = MT.collapsedCategories[category.id] and true or false
+function MT:BuildCategory(scrollData, category)
+    local collapsed = self.collapsedCategories[category.id] and true or false
     local list = category.list
 
-    buildCategoryHeader(scrollData, category.id, category.title, collapsed)
+    self:BuildCategoryHeader(scrollData, category.id, category.title, collapsed)
 
     if collapsed then
         return
@@ -177,8 +178,8 @@ local function buildCategory(scrollData, category)
         list = {{ hint = GetString(category.emptyHint) }}
     end
 
-    local currentNodeIndex = MT.resultCount
-    local includeUnknown = Nav.saved.includeUndiscovered or MT.currentView == "all"
+    local currentNodeIndex = self.resultCount
+    local includeUnknown = Nav.saved.includeUndiscovered or self.currentView == "all"
     local listed = 0
 
     for i = 1, #list do
@@ -205,12 +206,15 @@ local function buildCategory(scrollData, category)
         end
     end
 
-    if #list > 0 and listed == 0 and (MT.currentView == nil or MT.currentView ~= "all") then
-        local entry = ZO_ScrollList_CreateDataEntry(3, { hint = GetString(NAVIGATOR_HINT_SHOWUNDISCOVERED), onClick = ShowUndiscovered })
+    if #list > 0 and listed == 0 and (self.currentView == nil or self.currentView ~= "all") then
+        local entry = ZO_ScrollList_CreateDataEntry(3,{
+            hint = GetString(NAVIGATOR_HINT_SHOWUNDISCOVERED),
+            onClick = function() self:ShowUndiscovered() end
+        })
         table.insert(scrollData, entry)
     end
 
-    MT.resultCount = currentNodeIndex
+    self.resultCount = currentNodeIndex
 end
 
 function MT:UpdateEditDefaultText()
@@ -243,10 +247,10 @@ function MT:buildScrollList(keepScrollPosition)
     local scrollData = ZO_ScrollList_GetDataList(self.listControl)
 
 
-    MT.resultCount = 0
+    self.resultCount = 0
     for i = 1, #self.content do
         local category = self.content[i]
-        buildCategory(scrollData, category)
+        self:BuildCategory(scrollData, category)
     end
 
 	ZO_ScrollList_Commit(self.listControl)
@@ -260,7 +264,7 @@ function MT:buildScrollList(keepScrollPosition)
     if keepScrollPosition then
         ZO_ScrollList_ScrollAbsolute(self.listControl, scrollPosition)
     end
-    if MT.resultCount > 0 then
+    if self.resultCount > 0 then
         -- FIXME: this doesn't account for the headings
         ZO_ScrollList_ScrollDataIntoView(self.listControl, self.targetNode + 1, nil, true)
     end
@@ -342,6 +346,7 @@ end
 
 function MT:init()
 	Nav.log("MapTab:init")
+    self:SetViewButtonTooltip()
 end
 
 function MT:onTextChanged(editbox)
@@ -392,7 +397,7 @@ function MT:nextResult()
     local known = false
     local startNode = self.targetNode
     repeat
-    	self.targetNode = (self.targetNode + 1) % MT.resultCount
+    	self.targetNode = (self.targetNode + 1) % self.resultCount
         local data = self:getTargetData()
         if data and data.node and data.node:IsKnown() then
             known = true
@@ -408,7 +413,7 @@ function MT:previousResult()
     repeat
         self.targetNode = self.targetNode - 1
         if self.targetNode < 0 then
-            self.targetNode = MT.resultCount - 1
+            self.targetNode = self.resultCount - 1
         end
         local data = self:getTargetData()
         if data and data.node and data.node:IsKnown() then
@@ -444,7 +449,7 @@ function MT:ResetSearch()
 	ZO_ScrollList_ResetToTop(self.listControl)
 end
 
-local function showWayshrineMenu(owner, data)
+function MT:ShowWayshrineMenu(owner, data)
 	ClearMenu()
     local bookmarks = Nav.Bookmarks
 
@@ -457,53 +462,53 @@ local function showWayshrineMenu(owner, data)
         if data.indexInCategory > 1 then
             AddMenuItem(GetString(NAVIGATOR_MENU_MOVEBOOKMARKUP), function()
                 Nav.Bookmarks:Move(data.node, -1)
-                MT.menuOpen = false
-                zo_callLater(function() MT:ImmediateRefresh() end, 10)
+                self.menuOpen = false
+                zo_callLater(function() self:ImmediateRefresh() end, 10)
             end, nil, nil, nil, nil, yPad)
             yPad = 0
         end
         if data.indexInCategory < data.categoryEntryCount then
             AddMenuItem(GetString(NAVIGATOR_MENU_MOVEBOOKMARKDOWN), function()
                 Nav.Bookmarks:Move(data.node, 1)
-                MT.menuOpen = false
-                zo_callLater(function() MT:ImmediateRefresh() end, 10)
+                self.menuOpen = false
+                zo_callLater(function() self:ImmediateRefresh() end, 10)
             end, nil, nil, nil, nil, yPad)
             yPad = 0
         end
         AddMenuItem(GetString(NAVIGATOR_MENU_REMOVEBOOKMARK), function()
             bookmarks:remove(data.node)
-            MT.menuOpen = false
-            zo_callLater(function() MT:ImmediateRefresh() end, 10)
+            self.menuOpen = false
+            zo_callLater(function() self:ImmediateRefresh() end, 10)
         end)
     end
 
-    MT.menuOpen = true
+    self.menuOpen = true
 	ShowMenu(owner)
     SetMenuHiddenCallback(function()
         Nav.log("SetMenuHiddenCallback: Menu hidden")
-        MT.menuOpen = false
-        if MT.needsRefresh then
-            MT:ImmediateRefresh()
+        self.menuOpen = false
+        if self.needsRefresh then
+            self:ImmediateRefresh()
         end
     end)
 end
 
-local function showGroupMenu(owner, _)
+function MT:showGroupMenu(owner, _)
     ClearMenu()
 
     AddMenuItem(GetString(SI_GROUP_LEAVE), function()
         ZO_Dialogs_ShowDialog("GROUP_LEAVE_DIALOG")
-        MT.menuOpen = false
-        MT:ImmediateRefresh()
+        self.menuOpen = false
+        self:ImmediateRefresh()
     end)
 
-    MT.menuOpen = true
+    self.menuOpen = true
     ShowMenu(owner)
     SetMenuHiddenCallback(function()
         Nav.log("SetMenuHiddenCallback: Menu hidden")
-        MT.menuOpen = false
-        if MT.needsRefresh then
-            MT:ImmediateRefresh()
+        self.menuOpen = false
+        if self.needsRefresh then
+            self:ImmediateRefresh()
         end
     end)
 end
@@ -515,7 +520,7 @@ function MT:selectResult(control, data, mouseButton, isDoubleClick)
             data.node:OnClick(isDoubleClick)
         end
     elseif mouseButton == 2 then
-        showWayshrineMenu(control, data)
+        self:ShowWayshrineMenu(control, data)
     else
         Nav.log("selectResult: unhandled; poiType=%d zoneId=%d", data.poiType or -1, data.zoneId or -1)
     end
@@ -551,12 +556,12 @@ function MT:CategoryRowMouseUp(control, mouseButton)
     local data = ZO_ScrollList_GetData(control)
     if mouseButton == 2 then
         if data.id == "group" then
-            showGroupMenu(control, data)
+            self:showGroupMenu(control, data)
         end
     else
         Nav.log("Toggling category %s", data.id)
         self.collapsedCategories[data.id] = not self.collapsedCategories[data.id]
-        MT:buildScrollList(true)
+        self:buildScrollList(true)
         --MT:updateFilterControl()
     end
 end
@@ -627,16 +632,16 @@ function MT:OpenViewMenu()
         addItem("Navigator/media/icons/search_up.dds", NAVIGATOR_MENU_CLEARVIEW, nil, 12)
     end
 
-    MT.menuOpen = true
+    self.menuOpen = true
     ShowMenu(self.searchControl)
     ZO_Menu:ClearAnchors()
     ZO_Menu:SetAnchor(TOPLEFT, self.searchControl, BOTTOMLEFT, 0, 2)
 
     SetMenuHiddenCallback(function()
         Nav.log("SetMenuHiddenCallback: Menu hidden")
-        MT.menuOpen = false
-        if MT.needsRefresh then
-            MT:ImmediateRefresh()
+        self.menuOpen = false
+        if self.needsRefresh then
+            self:ImmediateRefresh()
         end
     end)
 end
@@ -668,6 +673,7 @@ function MT:SetViewButtonTooltip()
     end)
 end
 
-MT:SetViewButtonTooltip()
-
-Nav.MapTab = MT
+Nav.MapTab = Navigator_MapTab
+for k, v in pairs(MT) do
+    Nav.MapTab[k] = Nav.Utils.deepCopy(v)
+end

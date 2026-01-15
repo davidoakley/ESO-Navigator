@@ -12,7 +12,9 @@ function Bookmarks:getIndex(entry)
 
     local list = Nav.saved.bookmarks
 
-    if entry.nodeIndex then
+    if entry.questIndex then
+        return nil
+    elseif entry.nodeIndex then
         local nodeIndex = entry.nodeIndex
         if nodeIndex == 211 or nodeIndex == 212 then
             -- Always refer to The Harborage as index 210

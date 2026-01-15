@@ -12,16 +12,16 @@ local Locs = Nav.Locations or {
 local Utils = Nav.Utils
 
 function Locs:IsZone(zoneId)
-    if (zoneId == GetParentZoneId(zoneId)
-       or zoneId==267 -- Eyevea
-       or zoneId==981 -- The Brass Fortress
-       or zoneId==1027 -- Artaeum
-       or zoneId==1413 -- Apocrypha
-       or zoneId==1463 -- The Scholarium
-       or zoneId==1272 -- Atoll of Immolation
-       or zoneId==Nav.ZONE_IMPERIALSEWERS
-       )
-       then
+    if zoneId == GetParentZoneId(zoneId)
+    or zoneId==267 -- Eyevea
+    or zoneId==981 -- The Brass Fortress
+    or zoneId==1027 -- Artaeum
+    or zoneId==1413 -- Apocrypha
+    or zoneId==1463 -- The Scholarium
+    or zoneId==Nav.ZONE_ATOLLOFIMMOLATION
+    or zoneId==Nav.ZONE_IMPERIALSEWERS
+    or zoneId==Nav.ZONE_INFINITE_ARCHIVE
+    then
         return true
     end
     return false
@@ -123,7 +123,7 @@ local function getOrCreateZone(self, zoneId, zoneName, zoneIndex, mapId, canJump
                 canJumpToPlayer = canJumpToPlayer,
                 known = true
             })
-            if zoneId == 642 then
+            if zoneId == 642 or zoneId == 572 then -- Hide The Earth Forge and old Stirk
                 self.zones[zoneId].hidden = true
             end
         else
