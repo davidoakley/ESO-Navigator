@@ -68,9 +68,9 @@ Nav.default = {
   singleClickZone = false,
   confirmFastTravel = Nav.CONFIRMFASTTRAVEL_ALWAYS,
 
-  enableHousingTab = false,
-  enableZonesTab = false,
-  enableQuestsTab = false
+  replaceHousesTab = false,
+  replaceLocationsTab = false,
+  replaceQuestsTab = false
 }
 
 local logger = LibDebugLogger and LibDebugLogger(Nav.name)
@@ -383,26 +383,32 @@ local function setupTabs(self)
         moveLastTabToIndex(1)
     end
 
-    local questButtonData = {
-        normal = "EsoUI/Art/WorldMap/map_indexIcon_quests_up.dds",
-        pressed = "EsoUI/Art/WorldMap/map_indexIcon_quests_down.dds",
-        highlight = "EsoUI/Art/WorldMap/map_indexIcon_quests_over.dds"
-    }
-    replaceWorldMapTab(SI_MAP_INFO_MODE_QUESTS, { self.questTab.fragment }, questButtonData)
+    if self.saved.replaceQuestsTab then
+        local questButtonData = {
+            normal = "EsoUI/Art/WorldMap/map_indexIcon_quests_up.dds",
+            pressed = "EsoUI/Art/WorldMap/map_indexIcon_quests_down.dds",
+            highlight = "EsoUI/Art/WorldMap/map_indexIcon_quests_over.dds"
+        }
+        replaceWorldMapTab(SI_MAP_INFO_MODE_QUESTS, { self.questTab.fragment }, questButtonData)
+    end
 
-    local zonesButtonData = {
-        normal = "EsoUI/Art/WorldMap/map_indexIcon_locations_up.dds",
-        pressed = "EsoUI/Art/WorldMap/map_indexIcon_locations_down.dds",
-        highlight = "EsoUI/Art/WorldMap/map_indexIcon_locations_over.dds"
-    }
-    replaceWorldMapTab(SI_MAP_INFO_MODE_LOCATIONS, { self.zonesTab.fragment }, zonesButtonData)
+    if self.saved.replaceLocationsTab then
+        local zonesButtonData = {
+            normal = "EsoUI/Art/WorldMap/map_indexIcon_locations_up.dds",
+            pressed = "EsoUI/Art/WorldMap/map_indexIcon_locations_down.dds",
+            highlight = "EsoUI/Art/WorldMap/map_indexIcon_locations_over.dds"
+        }
+        replaceWorldMapTab(SI_MAP_INFO_MODE_LOCATIONS, { self.zonesTab.fragment }, zonesButtonData)
+    end
 
-    local housingButtonData = {
-        normal = "EsoUI/Art/WorldMap/map_indexIcon_housing_up.dds",
-        pressed = "EsoUI/Art/WorldMap/map_indexIcon_housing_down.dds",
-        highlight = "EsoUI/Art/WorldMap/map_indexIcon_housing_over.dds"
-    }
-    replaceWorldMapTab(SI_MAP_INFO_MODE_HOUSES, { self.housingTab.fragment }, housingButtonData)
+    if self.saved.replaceHousesTab then
+        local housingButtonData = {
+            normal = "EsoUI/Art/WorldMap/map_indexIcon_housing_up.dds",
+            pressed = "EsoUI/Art/WorldMap/map_indexIcon_housing_down.dds",
+            highlight = "EsoUI/Art/WorldMap/map_indexIcon_housing_over.dds"
+        }
+        replaceWorldMapTab(SI_MAP_INFO_MODE_HOUSES, { self.housingTab.fragment }, housingButtonData)
+    end
 end
 
 function Nav:initialize()

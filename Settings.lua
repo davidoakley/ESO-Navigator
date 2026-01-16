@@ -241,6 +241,43 @@ function Navigator:loadSettings()
         reference = Nav.settingsName .. "_actions"
     })
 
+    table.insert(optionsTable, {
+        type = "header",
+        name = NAVIGATOR_SETTINGS_TABS_HEADER,
+        width = "full",
+    })
+
+    table.insert(optionsTable, {
+        type = "checkbox",
+        name = NAVIGATOR_SETTINGS_TABS_REPLACE_QUESTS_NAME,
+        tooltip = NAVIGATOR_SETTINGS_TABS_REPLACE_QUESTS_TOOLTIP,
+        getFunc = function() return sv.replaceQuestsTab end,
+        setFunc = function(value) sv.replaceQuestsTab = value end,
+        width = "full",
+        requiresReload = true
+    })
+
+    table.insert(optionsTable, {
+        type = "checkbox",
+        name = NAVIGATOR_SETTINGS_TABS_REPLACE_LOCATIONS_NAME,
+        tooltip = NAVIGATOR_SETTINGS_TABS_REPLACE_LOCATIONS_TOOLTIP,
+        getFunc = function() return sv.replaceLocationsTab end,
+        setFunc = function(value) sv.replaceLocationsTab = value end,
+        width = "full",
+        requiresReload = true
+    })
+
+    table.insert(optionsTable, {
+        type = "checkbox",
+        name = NAVIGATOR_SETTINGS_TABS_REPLACE_HOUSES_NAME,
+        tooltip = NAVIGATOR_SETTINGS_TABS_REPLACE_HOUSES_TOOLTIP,
+        getFunc = function() return sv.replaceHousesTab end,
+        setFunc = function(value) sv.replaceHousesTab = value end,
+        width = "full",
+        requiresReload = true
+    })
+
+
     if GetWorldName() == "EU Megaserver" then
         table.insert(optionsTable, {
             type = "divider"
