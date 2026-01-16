@@ -157,15 +157,10 @@ function Treasure:Add(slotData, thatMap)
     local surveyType = nil
     local suffix = ""
 
-    if itemName:sub(-3) == "III" then
-        suffix = " III"
-        itemName = itemName:sub(1, #itemName - 4)
-    elseif itemName:sub(-2) == "II" then
-        suffix = " II"
-        itemName = itemName:sub(1, #itemName - 3)
-    elseif itemName:sub(-1) == "I" then
-        suffix = " I"
-        itemName = itemName:sub(1, #itemName - 2)
+    local suffixMatch = string.match(itemName, " [IVX]+$")
+    if suffixMatch then
+        suffix = suffixMatch
+        itemName = itemName:sub(1, #itemName - #suffix)
     end
 
     if pinType == "survey" then
