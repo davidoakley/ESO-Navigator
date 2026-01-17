@@ -325,7 +325,8 @@ local function setupEvents()
     )
 
     addEvents(RefreshQuests, EVENT_QUEST_ADDED, EVENT_QUEST_REMOVED, EVENT_QUEST_CONDITION_COUNTER_CHANGED,
-            EVENT_QUEST_ADVANCED)
+            EVENT_QUEST_ADVANCED, EVENT_QUEST_LIST_UPDATED)
+    FOCUSED_QUEST_TRACKER:RegisterCallback("QuestTrackerTrackingStateChanged", RefreshQuests)
 end
 
 local function findTabIndexByName(name)
