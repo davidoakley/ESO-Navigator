@@ -68,8 +68,8 @@ function Node:AddBookmarkMenuItem(entry)
     if entry and not Nav.Bookmarks:contains(entry) then
         AddMenuItem(GetString(NAVIGATOR_MENU_ADDBOOKMARK), function()
             Nav.Bookmarks:add(entry)
-            Nav.MapTab.menuOpen = false
-            zo_callLater(function() Nav.MapTab:ImmediateRefresh() end, 10)
+            Nav.mainTab.menuOpen = false
+            zo_callLater(function() Nav.mainTab:ImmediateRefresh() end, 10)
         end)
     end
 end
@@ -88,7 +88,7 @@ end
 
 function Node:GetTagList()
     local tagList = {}
-    if Nav.MapTab.currentView ~= "treasureMaps" and Nav.MapTab.currentView ~= "guildTraders" and Nav.Bookmarks:contains(self) then
+    if Nav.mainTab.currentView ~= "treasureMaps" and Nav.mainTab.currentView ~= "guildTraders" and Nav.Bookmarks:contains(self) then
         table.insert(tagList, "{bookmark}")
     end
     return tagList

@@ -26,15 +26,16 @@ Tooltip.lua
 Treasure.lua
 Quest.lua
 Views.lua
+MapTab.lua
 
 LAM_navactions.lua
 Settings.lua
 
-MapTab.xml
-MapTab.lua
 
 Recents.lua
 Bookmarks.lua
+
+MapTab.xml
 Bindings.xml
 
 # This Add-on is not created by, affiliated with, or sponsored by, ZeniMax

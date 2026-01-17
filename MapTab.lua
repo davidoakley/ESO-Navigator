@@ -76,8 +76,10 @@ end
 local currentTooltip
 
 function MT:layoutRow(rowControl, data, _)
+    rowControl.tab = self
+
     local node = data.node
-    local isSelected = self.editControl:HasFocus() and node:IsKnown() and (data.nodeIndex == self.targetNode)
+    local isSelected = self.editControl and self.editControl:HasFocus() and node:IsKnown() and (data.nodeIndex == self.targetNode)
 	local name = node:GetName()
     local icon = node:GetIcon()
     local categoryId = data.dataEntry.categoryId
@@ -148,11 +150,13 @@ function MT:layoutRow(rowControl, data, _)
 end
 
 function MT:layoutCategoryRow(rowControl, data, _)
-	rowControl.label:SetText(data.name)
+    rowControl.tab = self
+    rowControl.label:SetText(data.name)
 end
 
 function MT:layoutHintRow(rowControl, data, _)
-	rowControl.label:SetText(data.hint or "-")
+    rowControl.tab = self
+    rowControl.label:SetText(data.hint or "-")
 end
 
 function MT:ShowUndiscovered()
@@ -218,6 +222,8 @@ function MT:BuildCategory(scrollData, category)
 end
 
 function MT:UpdateEditDefaultText()
+    if not self.editControl then return end
+
 	local searchString = self.editControl:GetText()
 	if searchString == "" then
 		-- reinstate default text
@@ -345,8 +351,39 @@ function MT:getNextCategoryFirstIndex()
 end
 
 function MT:init()
-	Nav.log("MapTab:init")
+	Nav.log(self:GetName() .. ":init")
     self:SetViewButtonTooltip()
+
+    self.visible = false
+    self.listControl = self:GetNamedChild("List")
+    self.searchControl = self:GetNamedChild("Search")
+    self.editControl = self:GetNamedChild("SearchEdit")
+    self.viewButton = self.searchControl and self.searchControl:GetNamedChild("View")
+
+    self.fragment = ZO_FadeSceneFragment:New(self)
+    self.fragment.duration = 100
+
+    ZO_ScrollList_AddDataType(self.listControl, 0, "Navigator_CategoryRow", 50, function(...) self:layoutCategoryRow(...) end, nil, nil, nil)
+    ZO_ScrollList_AddDataType(self.listControl, 1, "Navigator_WayshrineRow", 25, function(...) self:layoutRow(...) end, nil, nil, nil)
+    ZO_ScrollList_AddDataType(self.listControl, 2, "Navigator_CollapsedCategoryRow", 40, function(...) self:layoutCategoryRow(...) end, nil, nil, nil)
+    ZO_ScrollList_AddDataType(self.listControl, 3, "Navigator_HintRow", 70, function(...) self:layoutHintRow(...) end, nil, nil, nil)
+
+    self:SetHandler("OnEffectivelyShown", function(control)
+        Nav.log(control:GetName() .. ".OnEffectivelyShown")
+        control.visible = true
+        if control.needsRefresh then
+            control:ImmediateRefresh()
+        else
+            control:buildScrollList()
+        end
+        if Nav.Locations.keepsDirty then
+            Nav.Locations:UpdateKeeps()
+        end
+    end)
+    self:SetHandler("OnEffectivelyHidden", function(control)
+        Navigator.log(control:GetName() .. ".OnEffectivelyHidden")
+        self.visible = false
+    end)
 end
 
 function MT:onTextChanged(editbox)
@@ -663,6 +700,8 @@ function MT:UpdateViewControl()
 end
 
 function MT:SetViewButtonTooltip()
+    if self.viewButton == null then return end
+
     self.viewButton:SetHandler("OnMouseEnter", function(control)
         ZO_Tooltips_ShowTextTooltip(control, LEFT, GetString(
             self.currentView == nil and NAVIGATOR_TOOLTIP_VIEWMENU or NAVIGATOR_TOOLTIP_CLEARVIEW
@@ -673,7 +712,4 @@ function MT:SetViewButtonTooltip()
     end)
 end
 
-Nav.MapTab = Navigator_MapTab
-for k, v in pairs(MT) do
-    Nav.MapTab[k] = Nav.Utils.deepCopy(v)
-end
+Nav.MapTab = MT

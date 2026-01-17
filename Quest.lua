@@ -112,7 +112,7 @@ function QuestNode:ZoomToPOI(setWaypoint, useCurrentZoom)
     end
     self:ZoomToQuestPins()
 
-    Nav.MapTab:ImmediateRefresh()
+    Nav.mainTab:ImmediateRefresh()
 end
 
 function QuestNode:GetTooltipLines()
