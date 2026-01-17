@@ -409,6 +409,8 @@ local function setupTabs(self)
         }
         replaceWorldMapTab(SI_MAP_INFO_MODE_HOUSES, { self.housingTab.fragment }, housingButtonData)
     end
+
+    self.currentTab = self.mainTab
 end
 
 function Nav:initialize()

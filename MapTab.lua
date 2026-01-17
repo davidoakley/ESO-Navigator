@@ -370,6 +370,7 @@ function MT:init()
 
     self:SetHandler("OnEffectivelyShown", function(control)
         Nav.log(control:GetName() .. ".OnEffectivelyShown")
+        Nav.currentTab = control
         control.visible = true
         if control.needsRefresh then
             control:ImmediateRefresh()
