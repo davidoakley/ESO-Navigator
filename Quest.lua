@@ -39,8 +39,12 @@ function QuestNode:GetIconColour()
 end
 
 function QuestNode:AddMenuItems()
-    AddMenuItem(GetString(NAVIGATOR_MENU_SHOWONMAP), function()
-        self:ZoomToPOI(false)
+    AddMenuItem(GetString(NAVIGATOR_MENU_SELECT_QUEST), function()
+        self:Select()
+    end)
+
+    AddMenuItem(GetString(SI_ITEM_ACTION_SHOW_QUEST), function()
+        SYSTEMS:GetObject("questJournal"):OpenQuestJournalToQuest(self.questIndex)
     end)
 
     if GetIsQuestSharable(self.questIndex) and IsUnitGrouped("player") then
@@ -57,45 +61,46 @@ function QuestNode:AddMenuItems()
 end
 
 function QuestNode:GetActions()
-    return { singleClick = Nav.ACTION_SHOWONMAP, doubleClick = nil }
+    return { singleClick = Nav.ACTION_SELECT, doubleClick = nil }
 end
 
-function QuestNode:ZoomToQuestPins(attempts)
+function QuestNode:DoAction(action)
+    if action == Nav.ACTION_SELECT then
+        self:Select()
+    end
+end
+
+function QuestNode:GetActionDescription(action)
+    if action == Nav.ACTION_SELECT then
+        return GetString(NAVIGATOR_MENU_SELECT_QUEST)
+    else
+        return Nav.Node.GetActionDescription(self, action)
+    end
+end
+
+local function zoomToQuestPins(self, attempts)
     local pinManager = ZO_WorldMap_GetPinManager()
     local mapPanAndZoom = ZO_WorldMap_GetPanAndZoom()
 
     local pins = {}
     pinManager:AddPinsToArray(pins, "quest", self.questIndex)
     Nav.questPins = pins
-    --return pins ~= nil and #pins > 0 and pins[1] or nil --ZO_WorldMapPins_Manager:GetQuestConditionPin(self.questIndex)
 
     if pins ~= nil and #pins > 0 then
         Nav.log("Found quest pins: %d after %d attempts", #pins, attempts or 0)
         local normalizedX, normalizedZ = pins[1]:GetNormalizedPosition()
         mapPanAndZoom:PanToNormalizedPosition(normalizedX, normalizedZ, false)
-    elseif attempts == nil or attempts < 20 then
+    elseif attempts == nil or attempts < 5 then
         zo_callLater(function()
-            self:ZoomToQuestPins((attempts or 0) + 1)
+            -- If the quest pin hasn't been added to the zone map yet, try again in 0.1s
+            zoomToQuestPins(self, (attempts or 0) + 1)
         end, 100)
     else
-        Nav.log("Failed to find quest pins after 20 attempts")
+        Nav.log("Failed to find quest pins after 5 attempts")
     end
 end
 
-function QuestNode:ZoomToPOI(setWaypoint, useCurrentZoom)
-    --local function panToPOI(self, zoneIndex, mapId)
-    --    local normalizedX, normalizedZ = self.map.x, self.map.y --self:GetMapInfo(self, zoneIndex, mapId)
-    --    --Nav.log("Node:ZoomToPOI: poiIndex=%d, %f,%f", self.poiIndex or -1, normalizedX, normalizedZ)
-    --    if setWaypoint then
-    --        PingMap(MAP_PIN_TYPE_PLAYER_WAYPOINT, MAP_TYPE_LOCATION_CENTERED, normalizedX, normalizedZ)
-    --    else
-    --        Nav.Node.AddPing(normalizedX, normalizedZ)
-    --    end
-    --
-    --    local mapPanAndZoom = ZO_WorldMap_GetPanAndZoom()
-    --    mapPanAndZoom:PanToNormalizedPosition(normalizedX, normalizedZ, useCurrentZoom)
-    --end
-
+function QuestNode:Select()
     ZO_ZoneStories_Manager.SetTrackedZoneStoryAssisted(false)
     FOCUSED_QUEST_TRACKER:ForceAssist(self.questIndex)
 
@@ -107,10 +112,15 @@ function QuestNode:ZoomToPOI(setWaypoint, useCurrentZoom)
         targetMapId = 1654
     end
 
-    if targetMapId ~= currentMapId then
-        WORLD_MAP_MANAGER:SetMapById(targetMapId)
-    end
-    self:ZoomToQuestPins()
+    --if targetMapId ~= currentMapId then
+        -- Allow time for the new quest to be registered before switching zones
+        zo_callLater(function()
+            WORLD_MAP_MANAGER:SetMapById(targetMapId)
+            zoomToQuestPins(self)
+        end, 100)
+    --else
+    --    zoomToQuestPins(self)
+    --end
 
     Nav.mainTab:ImmediateRefresh(Nav.REFRESH_REBUILD)
     if Nav.questTab then
@@ -179,7 +189,7 @@ function Quest:BuildQuestCategories()
         if IsValidQuestIndex(questIndex) then
             local questName, _, _, _, _, _, tracked = GetJournalQuestInfo(questIndex)
             local _, _, questZoneIndex, poiIndex = GetJournalQuestLocationInfo(questIndex)
-            Nav.log("%d: '%s' z:%d poi:%d", questIndex, questName or "nil", questZoneIndex, poiIndex or -1)
+            --Nav.log("%d: '%s' z:%d poi:%d", questIndex, questName or "nil", questZoneIndex, poiIndex or -1)
             local questJournalObject = SYSTEMS:GetObject("questJournal")
             local questMapId
 
