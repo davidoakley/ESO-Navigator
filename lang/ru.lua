@@ -79,9 +79,9 @@ mkstr("NAVIGATOR_SLASH_DESCRIPTION", "Навигатор: Перемещение
 mkstr("NAVIGATOR_LOCATION_OBLIVIONPORTAL", "Портал Обливиона")
 
 -- Add-on Settings
-mkstr("NAVIGATOR_SETTINGS_DEFAULT_TAB_NAME",                "Автоматический выбор вкладки аддона")
-mkstr("NAVIGATOR_SETTINGS_DEFAULT_TAB_TOOLTIP",             "Автоматическое переключение на вкладку аддона при открытии карты.")
-mkstr("NAVIGATOR_SETTINGS_DEFAULT_TAB_WARNING",             "Этот аддон не может автоматически переключаться на вкладку, когда включен аддон «|c99FFFFFaster Travel|r».")
+--mkstr("NAVIGATOR_SETTINGS_DEFAULT_TAB_NAME",                "Автоматический выбор вкладки аддона")
+--mkstr("NAVIGATOR_SETTINGS_DEFAULT_TAB_TOOLTIP",             "Автоматическое переключение на вкладку аддона при открытии карты.")
+--mkstr("NAVIGATOR_SETTINGS_DEFAULT_TAB_WARNING",             "Этот аддон не может автоматически переключаться на вкладку, когда включен аддон «|c99FFFFFaster Travel|r».")
 
 mkstr("NAVIGATOR_SETTINGS_RECENT_COUNT_NAME",               "Количество последних направлений")
 mkstr("NAVIGATOR_SETTINGS_RECENT_COUNT_TOOLTIP",            "Укажите 0, чтобы отключить список «Недавнее».")

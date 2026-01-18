@@ -194,9 +194,9 @@ local function OnMapStateChange(_, newState)
     Nav.log("WorldMap showing; initialMapZoneId=%d", Nav.initialMapZoneId or 0)
     PushActionLayerByName("Map")
     KEYBIND_STRIP:AddKeybindButtonGroup(ButtonGroup)
-    if Nav.saved and Nav.saved["defaultTab"] and not FasterTravel then
-      WORLD_MAP_INFO:SelectTab(NAVIGATOR_TAB_SEARCH)
-    end
+    --if Nav.saved and Nav.saved["defaultTab"] and not FasterTravel then
+    --  WORLD_MAP_INFO:SelectTab(NAVIGATOR_TAB_SEARCH)
+    --end
     Nav.Locations:SetTreasureData()
 
     if zone and Nav.Locations:ShouldCollapseCategories(zone.zoneId) then
@@ -383,6 +383,7 @@ local function setupTabs(self)
     WORLD_MAP_INFO.modeBar:Add(NAVIGATOR_TAB_SEARCH, { self.mainTab.fragment }, buttonData)
     if self.saved["defaultTab"] and not FasterTravel then
         moveLastTabToIndex(1)
+        WORLD_MAP_INFO:SelectTab(NAVIGATOR_TAB_SEARCH)
     end
 
     if self.saved.replaceQuestsTab then

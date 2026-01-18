@@ -79,9 +79,9 @@ mkstr("NAVIGATOR_SLASH_DESCRIPTION", "Navigator: Teletrasporto verso la zona, la
 mkstr("NAVIGATOR_LOCATION_OBLIVIONPORTAL", "Portale per Oblivion")
 
 -- Add-on Settings
-mkstr("NAVIGATOR_SETTINGS_DEFAULT_TAB_NAME",                "Selezione automatica scheda Navigator")
-mkstr("NAVIGATOR_SETTINGS_DEFAULT_TAB_TOOLTIP",             "Apertura automatica scheda Navigator all apertura della mappa.")
-mkstr("NAVIGATOR_SETTINGS_DEFAULT_TAB_WARNING",             "Navigator non può selezionare automaticamente la sua scheda quando l'addon |c99FFFFFaster Travel|r è attivo")
+--mkstr("NAVIGATOR_SETTINGS_DEFAULT_TAB_NAME",                "Selezione automatica scheda Navigator")
+--mkstr("NAVIGATOR_SETTINGS_DEFAULT_TAB_TOOLTIP",             "Apertura automatica scheda Navigator all apertura della mappa.")
+--mkstr("NAVIGATOR_SETTINGS_DEFAULT_TAB_WARNING",             "Navigator non può selezionare automaticamente la sua scheda quando l'addon |c99FFFFFaster Travel|r è attivo")
 
 mkstr("NAVIGATOR_SETTINGS_RECENT_COUNT_NAME",               "Voci nella lista recenti")
 mkstr("NAVIGATOR_SETTINGS_RECENT_COUNT_TOOLTIP",            "Impostare questo a 0 disabilitera la lista dei recenti")
