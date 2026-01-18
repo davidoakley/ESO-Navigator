@@ -22,6 +22,7 @@ Nav.ACTION_SETDESTINATION = 1
 Nav.ACTION_TRAVEL = 2
 Nav.ACTION_TRAVELOUTSIDE = 3
 Nav.ACTION_VISITHOUSE = 4
+Nav.ACTION_SELECT = 5
 
 Nav.JUMPSTATE_WORLD = 0
 Nav.JUMPSTATE_WAYSHRINE = 1
@@ -193,9 +194,9 @@ local function OnMapStateChange(_, newState)
     Nav.log("WorldMap showing; initialMapZoneId=%d", Nav.initialMapZoneId or 0)
     PushActionLayerByName("Map")
     KEYBIND_STRIP:AddKeybindButtonGroup(ButtonGroup)
-    if Nav.saved and Nav.saved["defaultTab"] and not FasterTravel then
-      WORLD_MAP_INFO:SelectTab(NAVIGATOR_TAB_SEARCH)
-    end
+    --if Nav.saved and Nav.saved["defaultTab"] and not FasterTravel then
+    --  WORLD_MAP_INFO:SelectTab(NAVIGATOR_TAB_SEARCH)
+    --end
     Nav.Locations:SetTreasureData()
 
     if zone and Nav.Locations:ShouldCollapseCategories(zone.zoneId) then
@@ -325,7 +326,8 @@ local function setupEvents()
     )
 
     addEvents(RefreshQuests, EVENT_QUEST_ADDED, EVENT_QUEST_REMOVED, EVENT_QUEST_CONDITION_COUNTER_CHANGED,
-            EVENT_QUEST_ADVANCED)
+            EVENT_QUEST_ADVANCED, EVENT_QUEST_LIST_UPDATED)
+    FOCUSED_QUEST_TRACKER:RegisterCallback("QuestTrackerTrackingStateChanged", RefreshQuests)
 end
 
 local function findTabIndexByName(name)
@@ -381,6 +383,7 @@ local function setupTabs(self)
     WORLD_MAP_INFO.modeBar:Add(NAVIGATOR_TAB_SEARCH, { self.mainTab.fragment }, buttonData)
     if self.saved["defaultTab"] and not FasterTravel then
         moveLastTabToIndex(1)
+        WORLD_MAP_INFO:SelectTab(NAVIGATOR_TAB_SEARCH)
     end
 
     if self.saved.replaceQuestsTab then
@@ -409,6 +412,8 @@ local function setupTabs(self)
         }
         replaceWorldMapTab(SI_MAP_INFO_MODE_HOUSES, { self.housingTab.fragment }, housingButtonData)
     end
+
+    self.currentTab = self.mainTab
 end
 
 function Nav:initialize()

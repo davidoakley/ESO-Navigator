@@ -58,6 +58,7 @@ mkstr("NAVIGATOR_MENU_GUILDTRADERS", "Guild Traders")
 mkstr("NAVIGATOR_MENU_TREASUREMAPS_SURVEYS", "Treasure Maps & Surveys")
 mkstr("NAVIGATOR_MENU_QUESTS", "Quests")
 mkstr("NAVIGATOR_MENU_CLEARVIEW", "Clear view")
+mkstr("NAVIGATOR_MENU_SELECT_QUEST", "Select Quest")
 NAVIGATOR_MENU_SHOWONMAP = SI_QUEST_JOURNAL_SHOW_ON_MAP
 NAVIGATOR_MENU_SETDESTINATION = SI_WORLD_MAP_ACTION_SET_PLAYER_WAYPOINT
 
@@ -81,9 +82,9 @@ mkstr("NAVIGATOR_SLASH_DESCRIPTION", "Navigator: Teleports to the given zone, wa
 mkstr("NAVIGATOR_LOCATION_OBLIVIONPORTAL", "Oblivion Portal")
 
 -- Add-on Settings
-mkstr("NAVIGATOR_SETTINGS_DEFAULT_TAB_NAME",                "Auto-select Navigator tab")
-mkstr("NAVIGATOR_SETTINGS_DEFAULT_TAB_TOOLTIP",             "Automatically selects the Navigator tab when the Maps screen is opened.")
-mkstr("NAVIGATOR_SETTINGS_DEFAULT_TAB_WARNING",             "Navigator cannot auto-select its tab when the |c99FFFFFaster Travel|r addon is also enabled")
+mkstr("NAVIGATOR_SETTINGS_DEFAULT_TAB_NAME",                "Default tab")
+mkstr("NAVIGATOR_SETTINGS_DEFAULT_TAB_TOOLTIP",             "Moves the Navigator tab to be left-most on the World Map.")
+mkstr("NAVIGATOR_SETTINGS_DEFAULT_TAB_WARNING",             "Navigator cannot move its tab when the |c99FFFFFaster Travel|r addon is also enabled")
 
 mkstr("NAVIGATOR_SETTINGS_RECENT_COUNT_NAME",               "Entries in Recent list")
 mkstr("NAVIGATOR_SETTINGS_RECENT_COUNT_TOOLTIP",            "Setting this to 0 will disable the Recent list")
