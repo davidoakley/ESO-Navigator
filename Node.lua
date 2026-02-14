@@ -178,6 +178,7 @@ function Node:ZoomToPOI(setWaypoint, useCurrentZoom)
         if setWaypoint then
             PingMap(MAP_PIN_TYPE_PLAYER_WAYPOINT, MAP_TYPE_LOCATION_CENTERED, normalizedX, normalizedZ)
         else
+            Node.RemovePings()
             Node.AddPing(normalizedX, normalizedZ)
         end
 
@@ -203,10 +204,15 @@ function Node:ZoomToPOI(setWaypoint, useCurrentZoom)
     end
 end
 
-function Node.AddPing(x, y)
-    Node.RemovePings()
+function Node.AddPing(x, y, tag)
     local pinMgr = ZO_WorldMap_GetPinManager()
-    pinMgr:CreatePin(MAP_PIN_TYPE_AUTO_MAP_NAVIGATION_PING, "pings", x, y)
+    if not tag then
+        tag = "pings"
+    end
+    pinMgr:CreatePin(MAP_PIN_TYPE_AUTO_MAP_NAVIGATION_PING, tag, x, y)
+    if pingEvent then
+        zo_removeCallLater(pingEvent)
+    end
     pingEvent = zo_callLater(function()
         Node.RemovePings()
         pingEvent = nil
@@ -217,8 +223,8 @@ function Node.RemovePings()
     if pingEvent then
         zo_removeCallLater(pingEvent)
         pingEvent = nil
-        ZO_WorldMap_GetPinManager():RemovePins("pings", MAP_PIN_TYPE_AUTO_MAP_NAVIGATION_PING)
     end
+    ZO_WorldMap_GetPinManager():RemovePins("pings") --, MAP_PIN_TYPE_AUTO_MAP_NAVIGATION_PING)
 end
 
 local singleClickEvent

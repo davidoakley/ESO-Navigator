@@ -100,10 +100,30 @@ local function zoomToQuestPins(self, attempts)
     end
 end
 
-function QuestNode:Select()
-    ZO_ZoneStories_Manager.SetTrackedZoneStoryAssisted(false)
-    FOCUSED_QUEST_TRACKER:ForceAssist(self.questIndex)
+local function pingQuestPins(self, attempts)
+    local pinManager = ZO_WorldMap_GetPinManager()
 
+    local pins = {}
+    pinManager:AddPinsToArray(pins, "quest", self.questIndex)
+
+    if pins ~= nil and #pins > 0 then
+        Nav.log("Found quest pins: %d after %d attempts", #pins, attempts or 0)
+        Nav.Node.RemovePings()
+        for i = 1, #pins do
+            local normalizedX, normalizedZ = pins[i]:GetNormalizedPosition()
+            Nav.Node.AddPing(normalizedX, normalizedZ, "quest_"..i)
+        end
+    elseif attempts == nil or attempts < 5 then
+        zo_callLater(function()
+            -- If the quest pin hasn't been added to the zone map yet, try again in 0.1s
+            pingQuestPins(self, (attempts or 0) + 1)
+        end, 100)
+    else
+        Nav.log("Failed to find quest pins after 5 attempts")
+    end
+end
+
+function QuestNode:Select()
     local targetMapId = Nav.Locations.GetMapIdByZoneId(self.zoneId)
     --local targetMapId = self.mapId or Nav.Locations.GetMapIdByZoneId(self.zoneId)
     local currentMapId = GetCurrentMapId()
@@ -112,15 +132,15 @@ function QuestNode:Select()
         targetMapId = 1654
     end
 
-    --if targetMapId ~= currentMapId then
-        -- Allow time for the new quest to be registered before switching zones
-        zo_callLater(function()
-            WORLD_MAP_MANAGER:SetMapById(targetMapId)
-            zoomToQuestPins(self)
-        end, 100)
-    --else
-    --    zoomToQuestPins(self)
-    --end
+    ZO_ZoneStories_Manager.SetTrackedZoneStoryAssisted(false)
+    FOCUSED_QUEST_TRACKER:ForceAssist(self.questIndex)
+    WORLD_MAP_MANAGER:SetMapById(targetMapId)
+
+    -- Allow time for the new quest to be registered before switching zones
+    zo_callLater(function()
+        WORLD_MAP_MANAGER:SetMapById(targetMapId)
+        pingQuestPins(self)
+    end, 100)
 
     Nav.mainTab:ImmediateRefresh(Nav.REFRESH_REBUILD)
     if Nav.questTab then

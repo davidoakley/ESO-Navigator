@@ -44,6 +44,7 @@ function TreasureNode:ZoomToPOI(setWaypoint, useCurrentZoom)
         if setWaypoint then
             PingMap(MAP_PIN_TYPE_PLAYER_WAYPOINT, MAP_TYPE_LOCATION_CENTERED, normalizedX, normalizedZ)
         else
+            Nav.Node.RemovePings()
             Nav.Node.AddPing(normalizedX, normalizedZ)
         end
 
