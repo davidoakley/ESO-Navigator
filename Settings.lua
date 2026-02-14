@@ -130,6 +130,15 @@ function Navigator:loadSettings()
     })
 
     table.insert(optionsTable, {
+        type = "checkbox",
+        name = NAVIGATOR_SETTINGS_SHOWATWAYSHRINE_NAME,
+        tooltip = NAVIGATOR_SETTINGS_SHOWATWAYSHRINE_TOOLTIP,
+        getFunc = function() return sv.showAtWayshrine end,
+        setFunc = function(value) sv.showAtWayshrine = value end,
+        width = "full"
+    })
+
+    table.insert(optionsTable, {
       type = "slider",
       name = NAVIGATOR_SETTINGS_RECENT_COUNT_NAME,
       tooltip = NAVIGATOR_SETTINGS_RECENT_COUNT_TOOLTIP,
