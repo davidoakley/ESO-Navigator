@@ -34,6 +34,7 @@ Nav.default = {
   recentNodes = {},
   bookmarks = {},
   defaultTab = true,
+  showAtWayshrine = true,
   autoFocus = false,
   includeUndiscovered = false,
   tpCommand = "/nav",
@@ -233,6 +234,11 @@ local function OnStartFastTravel(eventCode, nodeIndex)
     end
 
     Nav.mainTab:ImmediateRefresh()
+
+    if Nav.saved.showAtWayshrine then
+        -- Override the default behaviour that opens the Locations tab
+        WORLD_MAP_INFO:SelectTab(Nav.lastTab.descriptor or NAVIGATOR_TAB_SEARCH)
+    end
 end
 
 local function OnStartFastTravelKeep(eventCode, nodeIndex)
@@ -413,7 +419,7 @@ local function setupTabs(self)
         replaceWorldMapTab(SI_MAP_INFO_MODE_HOUSES, { self.housingTab.fragment }, housingButtonData)
     end
 
-    self.currentTab = self.mainTab
+    self.lastTab = self.mainTab
 end
 
 function Nav:initialize()
