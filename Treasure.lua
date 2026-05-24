@@ -39,7 +39,7 @@ end
 
 function TreasureNode:ZoomToPOI(setWaypoint, useCurrentZoom)
     local function panToPOI(self, zoneIndex, mapId)
-        local normalizedX, normalizedZ = self.map.x, self.map.y --self:GetMapInfo(self, zoneIndex, mapId)
+        local normalizedX, normalizedZ = self.map.x, self.map.y --self:GetMapInfo(zoneIndex, mapId)
         --Nav.log("Node:ZoomToPOI: poiIndex=%d, %f,%f", self.poiIndex or -1, normalizedX, normalizedZ)
         if setWaypoint then
             PingMap(MAP_PIN_TYPE_PLAYER_WAYPOINT, MAP_TYPE_LOCATION_CENTERED, normalizedX, normalizedZ)

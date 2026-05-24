@@ -43,6 +43,10 @@ function QuestNode:AddMenuItems()
         self:Select()
     end)
 
+    AddMenuItem(GetString(NAVIGATOR_MENU_QUEST_JUMP), function()
+        self:Select(true)
+    end)
+
     AddMenuItem(GetString(SI_ITEM_ACTION_SHOW_QUEST), function()
         SYSTEMS:GetObject("questJournal"):OpenQuestJournalToQuest(self.questIndex)
     end)
@@ -100,7 +104,7 @@ local function zoomToQuestPins(self, attempts)
     end
 end
 
-local function pingQuestPins(self, attempts)
+local function pingQuestPins(self, andJump, attempts)
     local pinManager = ZO_WorldMap_GetPinManager()
 
     local pins = {}
@@ -108,26 +112,57 @@ local function pingQuestPins(self, attempts)
 
     if pins ~= nil and #pins > 0 then
         Nav.log("Found quest pins: %d after %d attempts", #pins, attempts or 0)
-        Nav.Node.RemovePings()
-        for i = 1, #pins do
-            local normalizedX, normalizedZ = pins[i]:GetNormalizedPosition()
-            Nav.Node.AddPing(normalizedX, normalizedZ, "quest_"..i)
+        if andJump then
+            self:jumpToNearestWayshrine(pins[1])
+        else
+            Nav.Node.RemovePings()
+            for i = 1, #pins do
+                local normalizedX, normalizedZ = pins[i]:GetNormalizedPosition()
+                Nav.Node.AddPing(normalizedX, normalizedZ, "quest_"..i)
+            end
         end
     elseif attempts == nil or attempts < 5 then
         zo_callLater(function()
             -- If the quest pin hasn't been added to the zone map yet, try again in 0.1s
-            pingQuestPins(self, (attempts or 0) + 1)
+            pingQuestPins(self, andJump, (attempts or 0) + 1)
         end, 100)
     else
         Nav.log("Failed to find quest pins after 5 attempts")
     end
 end
 
-function QuestNode:Select()
+local function distanceSq(ax, az, bx, bz)
+    local dx = bx - ax
+    local dz = bz - az
+    return dx * dx + dz * dz
+end
+
+function QuestNode:jumpToNearestWayshrine(pin)
+    local normalizedX, normalizedZ = pin:GetNormalizedPosition()
+
+    local nodeList = Nav.Locations:GetNodeList(self.zoneId, false, false)
+    local nearestNode
+    local nearestDist = 9999
+    for i = 1, #nodeList do
+        local destX, destZ = nodeList[i]:GetMapInfo(self.zoneIndex, self.mapId)
+        local dist = distanceSq(normalizedX, normalizedZ, destX, destZ)
+        d(string.format(" - %s: %.2f", nodeList[i].name, dist))
+        if dist < nearestDist then
+            nearestNode = nodeList[i]
+            nearestDist = dist
+        end
+    end
+
+    if nearestNode ~= nil then
+        nearestNode:Jump()
+    end
+end
+
+function QuestNode:Select(andJump)
     local targetMapId = Nav.Locations.GetMapIdByZoneId(self.zoneId)
     --local targetMapId = self.mapId or Nav.Locations.GetMapIdByZoneId(self.zoneId)
-    local currentMapId = GetCurrentMapId()
-    local targetZoneIndex = GetZoneIndex(self.zoneId)
+    --local currentMapId = GetCurrentMapId()
+    --local targetZoneIndex = GetZoneIndex(self.zoneId)
     if self.nodeIndex == 407 then -- Dragonguard Sanctum
         targetMapId = 1654
     end
@@ -139,7 +174,7 @@ function QuestNode:Select()
     -- Allow time for the new quest to be registered before switching zones
     zo_callLater(function()
         WORLD_MAP_MANAGER:SetMapById(targetMapId)
-        pingQuestPins(self)
+        pingQuestPins(self, andJump)
     end, 100)
 
     Nav.mainTab:ImmediateRefresh(Nav.REFRESH_REBUILD)
@@ -208,7 +243,7 @@ function Quest:BuildQuestCategories()
     for questIndex = 1, MAX_JOURNAL_QUESTS do
         if IsValidQuestIndex(questIndex) then
             local questName, _, _, _, _, _, tracked = GetJournalQuestInfo(questIndex)
-            local _, _, questZoneIndex, poiIndex = GetJournalQuestLocationInfo(questIndex)
+            local _, _, questZoneIndex, _ = GetJournalQuestLocationInfo(questIndex)
             --Nav.log("%d: '%s' z:%d poi:%d", questIndex, questName or "nil", questZoneIndex, poiIndex or -1)
             local questJournalObject = SYSTEMS:GetObject("questJournal")
             local questMapId
@@ -234,6 +269,7 @@ function Quest:BuildQuestCategories()
                 name = questName,
                 icon = iconTexture,
                 zoneId = zoneId,
+                zoneIndex = GetZoneIndex(zoneId),
                 mapId = zoneMapId,
                 known = true,
                 questIndex = questIndex,
@@ -293,7 +329,7 @@ function Quest:GetQuestZoneId(questIndex)
         return self.cache[questIndex]["zoneId"]
     else
     --    -- Get location info
-        local result = Quest.SetMapToQuest(questIndex)
+    --    local result = Quest.SetMapToQuest(questIndex)
         local questZoneId = GetZoneId(GetCurrentMapZoneIndex())
         local mapId = GetCurrentMapId()
     --    -- set map back to player location

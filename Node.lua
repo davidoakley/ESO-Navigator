@@ -161,7 +161,7 @@ function Node:GetRecallCost()
     return nil -- By default, free!
 end
 
-function Node:GetMapInfo(self, zoneIndex, mapId)
+function Node:GetMapInfo(zoneIndex, mapId)
     if mapId == 2082 then
         return 0.3485, 0.3805 -- The Shambles
     elseif self.nodeIndex == 407 then
@@ -173,7 +173,7 @@ end
 
 function Node:ZoomToPOI(setWaypoint, useCurrentZoom)
     local function panToPOI(self, zoneIndex, mapId)
-        local normalizedX, normalizedZ = self:GetMapInfo(self, zoneIndex, mapId)
+        local normalizedX, normalizedZ = self:GetMapInfo(zoneIndex, mapId)
         --Nav.log("Node:ZoomToPOI: poiIndex=%d, %f,%f", self.poiIndex or -1, normalizedX, normalizedZ)
         if setWaypoint then
             PingMap(MAP_PIN_TYPE_PLAYER_WAYPOINT, MAP_TYPE_LOCATION_CENTERED, normalizedX, normalizedZ)
