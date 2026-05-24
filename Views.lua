@@ -389,10 +389,10 @@ function HousesView:Build(context)
 
     local list = Nav.Locations:GetHouseList(context.isSearching)
 
-    local owned = Nav.Utils.GetFilteredArray(list, function(h) return h.owned end)
+    local owned = Nav.Utils.GetFilteredArray(list, function(h) return h:IsOwned() end)
     table.sort(owned, Nav.Node.WeightComparison)
 
-    local unowned = Nav.Utils.GetFilteredArray(list, function(h) return not h.owned end)
+    local unowned = Nav.Utils.GetFilteredArray(list, function(h) return not h:IsOwned() end)
     table.sort(unowned, Nav.Node.WeightComparison)
 
     table.insert(categoryList, {

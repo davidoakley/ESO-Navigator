@@ -306,6 +306,17 @@ function HouseNode:GetHouseId()
     return self.houseId
 end
 
+function HouseNode:GetCollectableId()
+    if self.collectibleId == null then
+        self.collectibleId = GetCollectibleIdForHouse(self:GetHouseId())
+    end
+    return self.collectibleId
+end
+
+function HouseNode:IsOwned()
+    return IsCollectibleOwnedByDefId(self:GetCollectableId())
+end
+
 function HouseNode:IsPrimary()
     if self.isPrimary == nil then
         self.isPrimary = self:GetHouseId() == GetHousingPrimaryHouse()
@@ -318,7 +329,7 @@ function HouseNode:GetWeight()
 
     if self.isAlias then
         weight = 0.6
-    elseif not self.owned then
+    elseif not self:IsOwned() then
         weight = 0.4
     elseif Nav.Bookmarks:contains(self) then
         weight = 1.2
@@ -336,14 +347,14 @@ end
 
 function HouseNode:GetActionDescription(action)
     if action == Nav.ACTION_TRAVEL then
-        if self.owned then
+        if self:IsOwned() then
             return Nav.Utils.EllipsisString(SI_WORLD_MAP_ACTION_TRAVEL_TO_HOUSE_INSIDE)
         else
             return Nav.Utils.EllipsisString(SI_WORLD_MAP_ACTION_PREVIEW_HOUSE)
         end
     elseif action == Nav.ACTION_TRAVELOUTSIDE then
         local s = Nav.Utils.EllipsisString(SI_WORLD_MAP_ACTION_TRAVEL_TO_HOUSE_OUTSIDE)
-        if not self.owned then
+        if not self:IsOwned() then
             s = Nav.Utils.StrikethroughString(s)
         end
         return s
@@ -353,7 +364,7 @@ function HouseNode:GetActionDescription(action)
 end
 
 function HouseNode:GetIconColour()
-    if self.owned then
+    if self:IsOwned() then
         return Nav.COLOUR_WHITE
     else
         return Nav.COLOUR_DISABLED
@@ -369,20 +380,20 @@ function HouseNode:GetOverlayIcon()
 end
 
 function HouseNode:GetColour(isSelected)
-    if isSelected and self:IsKnown() and self.owned then
+    if isSelected and self:IsKnown() and self:IsOwned() then
         return Nav.COLOUR_WHITE
     else
-        return (self:IsKnown() and self.owned) and Nav.COLOUR_NORMAL or Nav.COLOUR_DISABLED
+        return (self:IsKnown() and self:IsOwned()) and Nav.COLOUR_NORMAL or Nav.COLOUR_DISABLED
     end
 end
 
 function HouseNode:GetSuffixColour()
-    return (self:IsKnown() and self.owned) and Nav.COLOUR_SUFFIX_NORMAL or Nav.COLOUR_SUFFIX_DISABLED
+    return (self:IsKnown() and self:IsOwned()) and Nav.COLOUR_SUFFIX_NORMAL or Nav.COLOUR_SUFFIX_DISABLED
 end
 
 function HouseNode:Jump(jumpOutside)
     if not CanJumpToHouseFromCurrentLocation() then
-        local cannotJumpString = self.owned and GetString(SI_COLLECTIONS_CANNOT_JUMP_TO_HOUSE_FROM_LOCATION) or GetString(SI_COLLECTIONS_CANNOT_PREVIEW_HOUSE_FROM_LOCATION)
+        local cannotJumpString = self:IsOwned() and GetString(SI_COLLECTIONS_CANNOT_JUMP_TO_HOUSE_FROM_LOCATION) or GetString(SI_COLLECTIONS_CANNOT_PREVIEW_HOUSE_FROM_LOCATION)
         zo_callLater(function()
             SCENE_MANAGER:Hide("worldMap")
             ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, cannotJumpString)
@@ -402,7 +413,7 @@ end
 
 function HouseNode:DoAction(action)
     if action == Nav.ACTION_TRAVELOUTSIDE then
-        if self.owned then
+        if self:IsOwned() then
             self:Jump(true)
         else
             ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, SI_JUMPRESULT17)
@@ -413,7 +424,7 @@ function HouseNode:DoAction(action)
 end
 
 function HouseNode:AddMenuItems()
-    if self.owned then
+    if self:IsOwned() then
         AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_HOUSE_INSIDE), self.name), function()
             self:Jump(false)
         end)
