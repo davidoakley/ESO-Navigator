@@ -161,7 +161,7 @@ function Node:GetRecallCost()
     return nil -- By default, free!
 end
 
-function Node:GetMapInfo(self, zoneIndex, mapId)
+function Node:GetMapInfo(zoneIndex, mapId)
     if mapId == 2082 then
         return 0.3485, 0.3805 -- The Shambles
     elseif self.nodeIndex == 407 then
@@ -173,11 +173,12 @@ end
 
 function Node:ZoomToPOI(setWaypoint, useCurrentZoom)
     local function panToPOI(self, zoneIndex, mapId)
-        local normalizedX, normalizedZ = self:GetMapInfo(self, zoneIndex, mapId)
+        local normalizedX, normalizedZ = self:GetMapInfo(zoneIndex, mapId)
         --Nav.log("Node:ZoomToPOI: poiIndex=%d, %f,%f", self.poiIndex or -1, normalizedX, normalizedZ)
         if setWaypoint then
             PingMap(MAP_PIN_TYPE_PLAYER_WAYPOINT, MAP_TYPE_LOCATION_CENTERED, normalizedX, normalizedZ)
         else
+            Node.RemovePings()
             Node.AddPing(normalizedX, normalizedZ)
         end
 
@@ -203,10 +204,15 @@ function Node:ZoomToPOI(setWaypoint, useCurrentZoom)
     end
 end
 
-function Node.AddPing(x, y)
-    Node.RemovePings()
+function Node.AddPing(x, y, tag)
     local pinMgr = ZO_WorldMap_GetPinManager()
-    pinMgr:CreatePin(MAP_PIN_TYPE_AUTO_MAP_NAVIGATION_PING, "pings", x, y)
+    if not tag then
+        tag = "pings"
+    end
+    pinMgr:CreatePin(MAP_PIN_TYPE_AUTO_MAP_NAVIGATION_PING, tag, x, y)
+    if pingEvent then
+        zo_removeCallLater(pingEvent)
+    end
     pingEvent = zo_callLater(function()
         Node.RemovePings()
         pingEvent = nil
@@ -217,8 +223,8 @@ function Node.RemovePings()
     if pingEvent then
         zo_removeCallLater(pingEvent)
         pingEvent = nil
-        ZO_WorldMap_GetPinManager():RemovePins("pings", MAP_PIN_TYPE_AUTO_MAP_NAVIGATION_PING)
     end
+    ZO_WorldMap_GetPinManager():RemovePins("pings") --, MAP_PIN_TYPE_AUTO_MAP_NAVIGATION_PING)
 end
 
 local singleClickEvent

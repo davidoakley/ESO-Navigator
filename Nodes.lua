@@ -753,7 +753,7 @@ function KeepNode:IsUnderAttack()
     return nil
 end
 
-function KeepNode:GetMapInfo(self, _, _)
+function KeepNode:GetMapInfo(_, _)
     local _,nx,ny  = GetKeepPinInfo(self.keepId, self.bgContext)
     Nav.log("KeepNode:GetMapInfo: keepId=%d -> %f,%f", self.keepId, nx, ny)
     return nx,ny
