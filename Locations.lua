@@ -59,13 +59,12 @@ local function createNode(self, i, name, typePOI, icon, glowIcon, known, zone, p
         nodeInfo.poiType = Nav.POI_TRIAL
         nodeInfo.icon = "esoui/art/tutorial/poi_raiddungeon_complete.dds"
     elseif typePOI == 7 then
-        nodeInfo.owned = (icon:find("poi_group_house_owned") ~= nil)
-        nodeInfo.freeRecall = true
         isHouse = true
+        nodeInfo.houseId = GetFastTravelNodeHouseId(i)
+        nodeInfo.collectibleId = GetCollectibleIdForHouse(nodeInfo.houseId)
+        nodeInfo.freeRecall = true
         if Nav.saved.useHouseNicknames then
-            nodeInfo.houseId = GetFastTravelNodeHouseId(i)
-            local collectibleId = GetCollectibleIdForHouse(nodeInfo.houseId)
-            nodeInfo.nickname = GetCollectibleNickname(collectibleId)
+            nodeInfo.nickname = GetCollectibleNickname(nodeInfo.collectibleId)
             nodeInfo.suffix = zo_strformat(GetString(SI_TOOLTIP_COLLECTIBLE_NICKNAME), nodeInfo.nickname)
         end
     elseif typePOI == 1 then
@@ -450,11 +449,11 @@ function Locs:GetHouseList(includeAliases)
 
     local nodes = {}
     for i = 1, #self.nodes do
-        if self.nodes[i]:IsKnown() and self.nodes[i]:IsHouse() then
+        if self.nodes[i]:IsHouse() then
             local node = self.nodes[i]
             table.insert(nodes, node)
 
-            if includeAliases and node.owned and Nav.saved.useHouseNicknames then
+            if includeAliases and node:IsOwned() and Nav.saved.useHouseNicknames then
                 table.insert(nodes, createHouseAlias(node))
             end
         end
