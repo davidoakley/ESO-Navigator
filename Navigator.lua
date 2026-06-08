@@ -143,6 +143,30 @@ function Nav.AttachMapTab(name, xmlObj, baseObj, view)
     end
 end
 
+function Nav.CreateMapTab(controlName, name, baseObj, view)
+    local xmlObj = CreateControlFromVirtual(controlName, GuiRoot, "Navigator_Tab")
+    Nav[name] = xmlObj
+    for k, v in pairs(baseObj) do
+        Nav[name][k] = Nav.Utils.deepCopy(v)
+    end
+    Nav[name].currentView = view
+
+    if PP and PP.ADDON_NAME then
+        local success, error = pcall(function()
+            local listCtrl = xmlObj:GetNamedChild("List")
+            PP.ScrollBar(listCtrl:GetNamedChild("ScrollBar"))
+            ZO_Scroll_SetMaxFadeDistance(listCtrl, PP.savedVars.ListStyle.list_fade_distance)
+        end)
+        if not success then
+            Nav.logWarning("OnAddOnLoaded: PP error '%s'", error)
+        end
+    end
+
+    xmlObj:init()
+
+    return xmlObj
+end
+
 local function GetUniqueEventId(id)
   local count = _events[id] or 0
   count = count + 1
@@ -376,6 +400,83 @@ local function replaceWorldMapTab(name, fragmentGroup, buttonData)
 
 end
 
+local function showOverflowMenu(self, name, fragmentGroup, buttonData, keybindButton)
+    self:RemoveActiveKeybind()
+    if self.currentFragmentGroup then
+        SCENE_MANAGER:RemoveFragmentGroup(self.currentFragmentGroup)
+    end
+
+    self.currentFragmentGroup = fragmentGroup
+    self.currentKeybindButton = keybindButton
+
+    SCENE_MANAGER:AddFragmentGroup(fragmentGroup)
+    if keybindButton then
+        if keybindButton.keybind then
+            KEYBIND_STRIP:AddKeybindButton(keybindButton)
+        else
+            KEYBIND_STRIP:AddKeybindButtonGroup(keybindButton)
+        end
+    end
+
+    if self.label then
+        self.label:SetText(zo_strformat(SI_SCENE_FRAGMENT_BAR_TITLE, GetString(buttonData.categoryName)))
+    end
+
+    self.lastFragmentName = name
+    --if existingCallback then
+    --    existingCallback()
+    --end
+
+end
+
+local function showOverflowView(viewId)
+    Nav.log("MapTab.OpenViewMenu.doView: currentView = %s", viewId or "-")
+    Nav.overflowTab.currentView = viewId
+    --self:UpdateViewControl()
+    Nav.overflowTab:queueRefresh()
+
+    showOverflowMenu(WORLD_MAP_INFO.modeBar, NAVIGATOR_TAB_OVERFLOW, { Nav.overflowTab.fragment }, Nav.overflowButtonData)
+
+    Nav.overflowMenuButton.m_object.m_menuBar:SetClickedButton(Nav.overflowMenuButton.m_object, true)
+end
+
+local function openOverflowMenu(self)
+    ClearMenu()
+
+    local addItem = function (icon, stringId, viewId, gap)
+        local callback = function() showOverflowView(viewId) end
+        local colour = viewId == self.currentView and ZO_WHITE or nil
+        AddMenuItem(string.format("|t24:24:%s:inheritcolor|t %s",
+                icon, GetString(stringId)),
+                callback, nil, nil, colour, nil, gap or 0)
+    end
+
+    local menuViews = Nav.ViewManager:GetMenuViews()
+    for i = 1, #menuViews do
+        local view = menuViews[i]
+        if view:IsAvailable() then
+            addItem(view.icon, view.title, view.id)
+        end
+    end
+
+    --if self.currentView ~= nil then
+    --    addItem("Navigator/media/icons/search_up.dds", NAVIGATOR_MENU_CLEARVIEW, nil, 12)
+    --end
+
+    self.menuOpen = true
+    ShowMenu(self.searchControl)
+    ZO_Menu:ClearAnchors()
+    --ZO_Menu:SetAnchor(TOPLEFT, self.searchControl, BOTTOMLEFT, 0, 2)
+    ZO_Menu:SetAnchor(TOPRIGHT, Nav.overflowMenuButton, BOTTOMRIGHT, 0, 0)
+    SetMenuHiddenCallback(function()
+        Nav.log("SetMenuHiddenCallback: Menu hidden")
+        self.menuOpen = false
+        if self.needsRefresh then
+            self:ImmediateRefresh()
+        end
+    end)
+end
+
 local function setupTabs(self)
     local buttonData = {
         pressed = "Navigator/media/tabicons/tabicon_down.dds",
@@ -393,6 +494,7 @@ local function setupTabs(self)
     end
 
     if self.saved.replaceQuestsTab then
+        Nav.CreateMapTab("Navigator_QuestTab", "questTab", Nav.MapTab, "quests")
         local questButtonData = {
             normal = "EsoUI/Art/WorldMap/map_indexIcon_quests_up.dds",
             pressed = "EsoUI/Art/WorldMap/map_indexIcon_quests_down.dds",
@@ -402,6 +504,7 @@ local function setupTabs(self)
     end
 
     if self.saved.replaceLocationsTab then
+        Nav.CreateMapTab("Navigator_ZonesTab", "zonesTab", Nav.MapTab, "zones")
         local zonesButtonData = {
             normal = "EsoUI/Art/WorldMap/map_indexIcon_locations_up.dds",
             pressed = "EsoUI/Art/WorldMap/map_indexIcon_locations_down.dds",
@@ -411,6 +514,7 @@ local function setupTabs(self)
     end
 
     if self.saved.replaceHousesTab then
+        Nav.CreateMapTab("Navigator_HousingTab", "housingTab", Nav.MapTab, "houses")
         local housingButtonData = {
             normal = "EsoUI/Art/WorldMap/map_indexIcon_housing_up.dds",
             pressed = "EsoUI/Art/WorldMap/map_indexIcon_housing_down.dds",
@@ -418,6 +522,53 @@ local function setupTabs(self)
         }
         replaceWorldMapTab(SI_MAP_INFO_MODE_HOUSES, { self.housingTab.fragment }, housingButtonData)
     end
+
+    Nav.CreateMapTab("Navigator_OverflowTab", "overflowTab", Nav.MapTab, "guildTraders")
+    local overflowButtonData = {
+        pressed = "Navigator/media/tabicons/ellipsis_down.dds",
+        highlight = "Navigator/media/tabicons/ellipsis_over.dds",
+        normal = "Navigator/media/tabicons/ellipsis_up.dds",
+        callback = function()
+            -- Hide the modebar title
+            WORLD_MAP_INFO.modeBar.label:SetText("OVERFLOW")
+        end,
+        descriptor = NAVIGATOR_TAB_OVERFLOW,
+        categoryName = NAVIGATOR_TAB_OVERFLOW,
+        callback = function(_, playerDriven)
+            Nav.log("Overflow: callback(%d)", playerDriven and 1 or 0)
+            if playerDriven then
+                openOverflowMenu(self.overflowTab)
+                self.overflowMenuButton.m_object.m_locked = false
+            else
+                --Nav.overflowTab:queueRefresh()
+                --showOverflowMenu(WORLD_MAP_INFO.modeBar, NAVIGATOR_TAB_OVERFLOW, { Nav.overflowTab.fragment }, Nav.overflowButtonData)
+                showOverflowView(Nav.overflowTab.currentView)
+            end
+        end
+    }
+    self.overflowMenuButton = ZO_MenuBar_AddButton(WORLD_MAP_INFO.modeBar.menuBar, overflowButtonData)
+    self.overflowButtonData = overflowButtonData
+    table.insert(WORLD_MAP_INFO.modeBar.buttonData, overflowButtonData)
+    self.overflowMenuButton.m_object.Release = function(button, upInside, skipAnimation, playerDriven)
+        --if upInside then
+            Nav.log("Overflow: Release(%d,%d,%d)", upInside and 1 or 0, skipAnimation and 1 or 0, playerDriven and 1 or 0)
+        --    --button.m_menuBar:SetClickedButton(self, skipAnimation)
+        --
+            local bd = button.m_buttonData
+            if bd.callback then
+                bd:callback(playerDriven)
+            end
+        --
+        --    local clickSound = buttonData.clickSound or button.m_menuBar:GetClickSound()
+        --    if clickSound and playerDriven then
+        --        PlaySound(clickSound)
+        --    end
+        --else
+            button:UnPress(skipAnimation)
+        --end
+    end
+
+    --WORLD_MAP_INFO.modeBar:Add(NAVIGATOR_TAB_OVERFLOW, { self.mainTab.fragment }, overflowButtonData)
 
     self.lastTab = self.mainTab
 end

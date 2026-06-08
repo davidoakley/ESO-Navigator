@@ -4,8 +4,8 @@
 ## APIVersion: 101049 101050
 ## Version: 0
 ## AddOnVersion: 0
-## DependsOn: LibAddonMenu-2.0>=41
-## OptionalDependsOn: LibDebugLogger>=303 pChat>=10007030 FasterTravel>=030110 LibSlashCommander>=45 LibWorldMapInfoTab>=127 PerfectPixel>=001332 LibTreasure>=24
+## DependsOn: LibAddonMenu-2.0>=41 LibWorldMapInfoTab>=127
+## OptionalDependsOn: LibDebugLogger>=303 pChat>=10007030 FasterTravel>=030110 LibSlashCommander>=45 PerfectPixel>=001332 LibTreasure>=24
 ## SavedVariables: Navigator_SavedVariables
 
 Navigator.lua

@@ -6,6 +6,7 @@ mkstr("SI_BINDING_NAME_NAVIGATOR_FOCUSSEARCH", "Search (on World Map)")
 
 -- Name of the tab on the World Map
 mkstr("NAVIGATOR_TAB_SEARCH","Navigator")
+mkstr("NAVIGATOR_TAB_OVERFLOW","More")
 
 -- Shown on the bottom keybind bar
 NAVIGATOR_KEYBIND_SEARCH = SI_GAMEPAD_HELP_SEARCH

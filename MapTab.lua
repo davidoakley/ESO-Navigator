@@ -673,8 +673,8 @@ function MT:OpenViewMenu()
     self.menuOpen = true
     ShowMenu(self.searchControl)
     ZO_Menu:ClearAnchors()
-    ZO_Menu:SetAnchor(TOPLEFT, self.searchControl, BOTTOMLEFT, 0, 2)
-
+    --ZO_Menu:SetAnchor(TOPLEFT, self.searchControl, BOTTOMLEFT, 0, 2)
+    ZO_Menu:SetAnchor(TOPRIGHT, Nav.overflowMenuButton, BOTTOMRIGHT, 0, 0)
     SetMenuHiddenCallback(function()
         Nav.log("SetMenuHiddenCallback: Menu hidden")
         self.menuOpen = false

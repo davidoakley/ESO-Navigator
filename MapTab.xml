@@ -247,39 +247,7 @@
             </Controls>
         </TopLevelControl>
 
-		<TopLevelControl name="Navigator_QuestTab" inherits="ZO_WorldMapInfoContent">
-			<OnInitialized>
-				Navigator.AttachMapTab("questTab", self, Navigator.MapTab, "quests")
-				self:init()
-			</OnInitialized>
-			<Controls>
-				<Control name="$(parent)List" inherits="ZO_ScrollList">
-					<Dimensions x="285" y="400" />
-					<Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="0" offsetY="-30"/>
-					<Anchor point="BOTTOMRIGHT" />
-				</Control>
-			</Controls>
-		</TopLevelControl>
-
-		<TopLevelControl name="Navigator_HousingTab" inherits="ZO_WorldMapInfoContent">
-			<OnInitialized>
-				Navigator.AttachMapTab("housingTab", self, Navigator.MapTab, "houses")
-				self:init()
-			</OnInitialized>
-			<Controls>
-				<Control name="$(parent)List" inherits="ZO_ScrollList">
-					<Dimensions x="285" y="400" />
-					<Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="0" offsetY="-30"/>
-					<Anchor point="BOTTOMRIGHT" />
-				</Control>
-			</Controls>
-		</TopLevelControl>
-
-		<TopLevelControl name="Navigator_ZonesTab" inherits="ZO_WorldMapInfoContent">
-			<OnInitialized>
-				Navigator.AttachMapTab("zonesTab", self, Navigator.MapTab, "zones")
-				self:init()
-			</OnInitialized>
+		<TopLevelControl name="Navigator_Tab" inherits="ZO_WorldMapInfoContent" virtual="true">
 			<Controls>
 				<Control name="$(parent)List" inherits="ZO_ScrollList">
 					<Dimensions x="285" y="400" />
