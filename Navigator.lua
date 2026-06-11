@@ -422,6 +422,27 @@ local function setupTabs(self)
     self.lastTab = self.mainTab
 end
 
+local function setupGamepadTabs(self)
+    local mapInfo = GAMEPAD_WORLD_MAP_INFO
+    local tabBarEntries = mapInfo.tabBarEntries
+    self.orginalHeaderData = GAMEPAD_WORLD_MAP_INFO.baseHeaderData
+
+    local newtab = {
+        text = GetString(NAVIGATOR_TAB_SEARCH),
+        callback = function() GAMEPAD_WORLD_MAP_INFO:SwitchToFragment(Nav.mainTab.fragment) end,
+--
+    }
+
+    table.insert(tabBarEntries, 1, newtab)
+
+    self.tabBarEntries = tabBarEntries
+    mapInfo.tabBarEntries = tabBarEntries
+
+    ZO_GamepadGenericHeader_Refresh(mapInfo.header, self:GetHeaderData())
+    ZO_GamepadGenericHeader_SetActiveTabIndex(mapInfo.header, 1)
+end
+
+
 function Nav:initialize()
   Nav.log("initialize starts")
   -- https://wiki.esoui.com/How_to_add_buttons_to_the_keybind_strip
@@ -433,6 +454,7 @@ function Nav:initialize()
   self.currentAlliance = GetUnitAlliance("player")
 
   setupTabs(self)
+  setupGamepadTabs(self)
 
   self.Recents:init()
   self.Bookmarks:init()
