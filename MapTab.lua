@@ -1,11 +1,81 @@
 local Nav = Navigator
 
-local MT = {}
+local MT = ZO_InitializingObject:Subclass()
 
 MT.currentView = nil
 MT.needsRefresh = Nav.REFRESH_NONE
 MT.collapsedCategories = {}
 MT.targetNode = 0
+
+function MT:Initialize(control)
+    self.control = control
+
+    Nav.log(control:GetName() .. "[shared]:init")
+    --self:SetViewButtonTooltip()
+    --
+    --self.visible = false
+    --self.listControl = self.control:GetNamedChild("List")
+    --self.searchControl = self.control:GetNamedChild("Search")
+    --self.editControl = self.control:GetNamedChild("SearchEdit")
+    --self.viewButton = self.searchControl and self.searchControl:GetNamedChild("View")
+    --
+    --self.fragment = ZO_FadeSceneFragment:New(control)
+    --self.fragment.duration = 100
+    --
+    --ZO_ScrollList_AddDataType(self.listControl, 0, "Navigator_CategoryRow", 50, function(...) self:layoutCategoryRow(...) end, nil, nil, nil)
+    --ZO_ScrollList_AddDataType(self.listControl, 1, "Navigator_WayshrineRow", 25, function(...) self:layoutRow(...) end, nil, nil, nil)
+    --ZO_ScrollList_AddDataType(self.listControl, 2, "Navigator_CollapsedCategoryRow", 40, function(...) self:layoutCategoryRow(...) end, nil, nil, nil)
+    --ZO_ScrollList_AddDataType(self.listControl, 3, "Navigator_HintRow", 70, function(...) self:layoutHintRow(...) end, nil, nil, nil)
+    --
+    --self:SetHandlers()
+    --self:ApplyPerfectPixel(control)
+
+    --Nav.callback:RegisterCallback("OnMapChanged", function() self:OnMapChanged() end)
+end
+
+function MT:SetHandlers()
+    self.control:SetHandler("OnEffectivelyShown", function(control)
+        Nav.log(control:GetName() .. ".OnEffectivelyShown")
+        Nav.lastTab = self
+        self.visible = true
+        if self.needsRefresh then
+            self:ImmediateRefresh()
+        else
+            self:buildScrollList()
+        end
+        if Nav.Locations.keepsDirty then
+            Nav.Locations:UpdateKeeps()
+        end
+    end)
+    self.control:SetHandler("OnEffectivelyHidden", function(control)
+        Navigator.log(control:GetName() .. ".OnEffectivelyHidden")
+        self.visible = false
+    end)
+    --self.editControl:SetHandler("OnEffectivelyShown", function(control)
+    --    Navigator.log("EditBox.OnEffectivelyShown 1")
+    --    self:ResetSearch()
+    --    Navigator.log("EditBox.OnEffectivelyShown 2")
+    --    if Navigator.saved.autoFocus then
+    --        Navigator.log("EditBox.OnEffectivelyShown 3")
+    --        control:TakeFocus()
+    --    end
+    --    Navigator.log("EditBox.OnEffectivelyShown 4")
+    --
+    --end)
+end
+
+function MT:ApplyPerfectPixel(control)
+    if PP and PP.ADDON_NAME then
+        local success, error = pcall(function()
+            local listCtrl = control:GetNamedChild("List")
+            PP.ScrollBar(listCtrl:GetNamedChild("ScrollBar"))
+            ZO_Scroll_SetMaxFadeDistance(listCtrl, PP.savedVars.ListStyle.list_fade_distance)
+        end)
+        if not success then
+            Nav.logWarning("OnAddOnLoaded: PP error '%s'", error)
+        end
+    end
+end
 
 function MT:queueRefresh(refreshMode)
     if refreshMode == nil then refreshMode = Nav.REFRESH_REBUILD end
@@ -350,43 +420,6 @@ function MT:getNextCategoryFirstIndex()
     end
 end
 
-function MT:init()
-	Nav.log(self:GetName() .. ":init")
-    self:SetViewButtonTooltip()
-
-    self.visible = false
-    self.listControl = self:GetNamedChild("List")
-    self.searchControl = self:GetNamedChild("Search")
-    self.editControl = self:GetNamedChild("SearchEdit")
-    self.viewButton = self.searchControl and self.searchControl:GetNamedChild("View")
-
-    self.fragment = ZO_FadeSceneFragment:New(self)
-    self.fragment.duration = 100
-
-    ZO_ScrollList_AddDataType(self.listControl, 0, "Navigator_CategoryRow", 50, function(...) self:layoutCategoryRow(...) end, nil, nil, nil)
-    ZO_ScrollList_AddDataType(self.listControl, 1, "Navigator_WayshrineRow", 25, function(...) self:layoutRow(...) end, nil, nil, nil)
-    ZO_ScrollList_AddDataType(self.listControl, 2, "Navigator_CollapsedCategoryRow", 40, function(...) self:layoutCategoryRow(...) end, nil, nil, nil)
-    ZO_ScrollList_AddDataType(self.listControl, 3, "Navigator_HintRow", 70, function(...) self:layoutHintRow(...) end, nil, nil, nil)
-
-    self:SetHandler("OnEffectivelyShown", function(control)
-        Nav.log(control:GetName() .. ".OnEffectivelyShown")
-        Nav.lastTab = control
-        control.visible = true
-        if control.needsRefresh then
-            control:ImmediateRefresh()
-        else
-            control:buildScrollList()
-        end
-        if Nav.Locations.keepsDirty then
-            Nav.Locations:UpdateKeeps()
-        end
-    end)
-    self:SetHandler("OnEffectivelyHidden", function(control)
-        Navigator.log(control:GetName() .. ".OnEffectivelyHidden")
-        self.visible = false
-    end)
-end
-
 function MT:onTextChanged(editbox)
 	local searchString = string.lower(editbox:GetText())
     local setView = function(view)
@@ -479,12 +512,14 @@ function MT:ResetView()
 end
 
 function MT:ResetSearch()
-	Nav.log("MT.ResetSearch")
-	self.editControl:SetText("")
-    self:UpdateViewControl()
-    self:ImmediateRefresh()
+    if self.editControl then
+        Nav.log("MT.ResetSearch")
+        self.editControl:SetText("")
+        self:UpdateViewControl()
+        self:ImmediateRefresh()
 
-	ZO_ScrollList_ResetToTop(self.listControl)
+        ZO_ScrollList_ResetToTop(self.listControl)
+    end
 end
 
 function MT:ShowWayshrineMenu(owner, data)
@@ -714,3 +749,13 @@ function MT:SetViewButtonTooltip()
 end
 
 Nav.MapTab = MT
+
+
+
+--local MT_Gamepad = MT:Subclass()
+--
+--function Navigator_MainTab_Gamepad_OnInitialized(control)
+--    Nav.log("Navigator_MainTab_Gamepad_OnInitialized")
+--    Nav.mainTab_gamepad = MT_Gamepad:New(control)
+--    control.tab = Nav.mainTab_gamepad
+--end

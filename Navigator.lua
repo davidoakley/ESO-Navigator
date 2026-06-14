@@ -10,6 +10,7 @@ Navigator = {
   isDeveloper = (GetDisplayName() == '@SirNightstorm' and true) or false,
   mapVisible = false,
   currentNodeIndex = nil,
+  callback = ZO_CallbackObject:New()
 }
 local Nav = Navigator
 
@@ -217,9 +218,8 @@ local function OnMapChanged()
     if Nav.mainTab.visible then
         Nav.Locations:UpdateKeeps()
         Nav.mainTab:ImmediateRefresh()
-    else
     end
-  Nav.mainTab:OnMapChanged()
+    Nav.callback:FireCallbacks("OnMapChanged")
 end
 
 local function OnStartFastTravel(eventCode, nodeIndex)
@@ -429,8 +429,7 @@ local function setupGamepadTabs(self)
 
     local newtab = {
         text = GetString(NAVIGATOR_TAB_SEARCH),
-        callback = function() GAMEPAD_WORLD_MAP_INFO:SwitchToFragment(Nav.mainTab.fragment) end,
---
+        callback = function() GAMEPAD_WORLD_MAP_INFO:SwitchToFragment(Nav.mainTab_gamepad.fragment) end,
     }
 
     table.insert(tabBarEntries, 1, newtab)
@@ -438,7 +437,7 @@ local function setupGamepadTabs(self)
     self.tabBarEntries = tabBarEntries
     mapInfo.tabBarEntries = tabBarEntries
 
-    ZO_GamepadGenericHeader_Refresh(mapInfo.header, self:GetHeaderData())
+    --ZO_GamepadGenericHeader_Refresh(mapInfo.header, mapInfo:GetHeaderData())
     ZO_GamepadGenericHeader_SetActiveTabIndex(mapInfo.header, 1)
 end
 

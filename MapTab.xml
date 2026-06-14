@@ -128,8 +128,10 @@
 
         <TopLevelControl name="Navigator_MainTab" inherits="ZO_WorldMapInfoContent">
             <OnInitialized>
-				Navigator.AttachMapTab("mainTab", self, Navigator.MapTab)
-				self:init()
+				--Navigator.AttachMapTab("mainTab", self, Navigator.MapTab)
+				--self:init()
+				Navigator.log("Navigator_MainTab:OnInitialized")
+				Navigator_MainTab_OnInitialized(self)
 			</OnInitialized>
             <Controls>
 				<Backdrop name="$(parent)Search" tier="HIGH"  inherits="ZO_SingleLineEditBackdrop_Keyboard"  mouseEnabled="true">
@@ -180,7 +182,7 @@
 							<Anchor point="TOPLEFT" relativeTo="$(parent)Separator" relativePoint="TOPRIGHT" offsetX="2" offsetY="-1" />
 							<Anchor point="TOPRIGHT" relativeTo="$(parent)Clear" relativePoint="TOPLEFT" offsetX="-4" offsetY="-1" />
 							<OnInitialized>
-								self.tab = self:GetParent():GetParent()
+								--self.tab = self.owningWindow.tab --self:GetParent():GetParent().tab
 							</OnInitialized>
 							<OnBackspace>
 								--Navigator.log("OnBackspace: pos="..self:GetCursorPosition().." changed="..(self.editTextChanged and 1 or 0))
@@ -198,41 +200,45 @@
 								SCENE_MANAGER:Hide("worldMap")
 							</OnEscape>
 							<OnEffectivelyShown>
-								self.tab:ResetSearch()
+								local tab = self:GetOwningWindow().tab
+								tab:ResetSearch()
 								if Navigator.saved.autoFocus then
 									self:TakeFocus()
 								end
 							</OnEffectivelyShown>
 							<OnFocusGained>
-								self.tab:buildScrollList()
-								zo_callLater(function() self.tab:UpdateEditDefaultText() end, 10)
+								local tab = self:GetOwningWindow().tab
+								tab:buildScrollList()
+								zo_callLater(function() tab:UpdateEditDefaultText() end, 10)
 							</OnFocusGained>
 							<OnFocusLost>
-								self.tab:UpdateEditDefaultText()
-								self.tab:buildScrollList()
+								local tab = self:GetOwningWindow().tab
+								tab:UpdateEditDefaultText()
+								tab:buildScrollList()
 							</OnFocusLost>
 							<OnTextChanged>
+								local tab = self:GetOwningWindow().tab
 								--Navigator.log("onTextChanged: pos="..self:GetCursorPosition())
-								self.tab:onTextChanged(self)
+								tab:onTextChanged(self)
 							</OnTextChanged>
 							<OnMouseDown>
 								self:TakeFocus()
 								ZO_EditDefaultText_Disable(self)
 							</OnMouseDown>
 							<OnDownArrow>
-								self.tab:nextResult()
+								self:GetOwningWindow().tab:nextResult()
 							</OnDownArrow>
 							<OnUpArrow>
-								self.tab:previousResult()
+								self:GetOwningWindow().tab:previousResult()
 							</OnUpArrow>
 							<OnPageDown>
-								self.tab:nextCategory()
+								self:GetOwningWindow().tab:nextCategory()
 							</OnPageDown>
 							<OnPageUp>
-								self.tab:previousCategory()
+								self:GetOwningWindow().tab:previousCategory()
 							</OnPageUp>
 							<OnTab>
-								self.tab.editControl:LoseFocus()
+								self:GetOwningWindow().tab.editControl:LoseFocus()
 							</OnTab>
 						</EditBox>						
 					</Controls>
@@ -247,7 +253,7 @@
             </Controls>
         </TopLevelControl>
 
-		<TopLevelControl name="Navigator_QuestTab" inherits="ZO_WorldMapInfoContent">
+		<!--<TopLevelControl name="Navigator_QuestTab" inherits="ZO_WorldMapInfoContent">
 			<OnInitialized>
 				Navigator.AttachMapTab("questTab", self, Navigator.MapTab, "quests")
 				self:init()
@@ -287,6 +293,6 @@
 					<Anchor point="BOTTOMRIGHT" />
 				</Control>
 			</Controls>
-		</TopLevelControl>
+		</TopLevelControl>-->
 	</Controls>
 </GuiXml>
