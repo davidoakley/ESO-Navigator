@@ -86,6 +86,29 @@ local function getActionSettings(sv)
         reference = Nav.settingsName .. "_poiActions"
     })
 
+    -- Quests not available from slash commands...
+    actionStrings = {GetString(NAVIGATOR_SETTINGS_ACTIONS_SINGLE_CLICK),
+                     GetString(NAVIGATOR_SETTINGS_ACTIONS_DOUBLE_CLICK),
+                     GetString(NAVIGATOR_SETTINGS_ACTIONS_ENTER_KEY)}
+
+    table.insert(submenuTable, {
+        type = "nav_actions",
+        name = NAVIGATOR_SETTINGS_QUEST_ACTIONS_NAME,
+        tooltip = NAVIGATOR_SETTINGS_QUEST_ACTIONS_TOOLTIP,
+        actions = actionStrings,
+        choices = function(_)
+            return {GetString(NAVIGATOR_MENU_SELECT_QUEST),
+                    GetString(NAVIGATOR_MENU_QUEST_JUMP)}
+        end,
+        choicesValues = function(_)
+            return { Nav.ACTION_SELECT, Nav.ACTION_TRAVEL }
+        end,
+        getFunc = function(index) return sv.questActions[actionTypes[index]] end,
+        setFunc = function(index, value) sv.questActions[actionTypes[index]] = value end,
+        default = function(index) return Nav.default.questActions[index] end,
+        reference = Nav.settingsName .. "_questActions"
+    })
+
     return submenuTable
 end
 

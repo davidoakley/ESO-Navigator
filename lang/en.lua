@@ -138,6 +138,9 @@ mkstr("NAVIGATOR_SETTINGS_HOUSE_ACTIONS_TOOLTIP",           "Mouse and key actio
 mkstr("NAVIGATOR_SETTINGS_POI_ACTIONS_NAME",                GetString(SI_ZONECOMPLETIONTYPE2))
 mkstr("NAVIGATOR_SETTINGS_POI_ACTIONS_TOOLTIP",             "Mouse and key actions for map locations such as towns, quest locations and striking locales")
 
+mkstr("NAVIGATOR_SETTINGS_QUEST_ACTIONS_NAME",              GetString(SI_MAP_INFO_MODE_QUESTS))
+mkstr("NAVIGATOR_SETTINGS_QUEST_ACTIONS_TOOLTIP",           "Mouse and key actions for quests")
+
 mkstr("NAVIGATOR_SETTINGS_JOIN_GUILD_NAME",                 "Join our guild!")
 mkstr("NAVIGATOR_SETTINGS_JOIN_GUILD_DESCRIPTION",          "|cC5C29E|H1:guild:767808|hMora's Whispers|h is a vibrant social lair with a free trader, loads of events, weekly raffles, fully equipped guild base, active Discord and so forth! Hit the link above to find out more!|r")
 
