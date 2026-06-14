@@ -68,6 +68,11 @@ Nav.default = {
       enterKey = Nav.ACTION_TRAVEL,
       slash = Nav.ACTION_TRAVEL
   },
+  questActions = {
+      singleClick = Nav.ACTION_SELECT,
+      doubleClick = Nav.ACTION_TRAVEL,
+      enterKey = Nav.ACTION_SELECT
+  },
   singleClickZone = false,
   confirmFastTravel = Nav.CONFIRMFASTTRAVEL_ALWAYS,
 

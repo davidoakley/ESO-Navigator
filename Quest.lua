@@ -65,12 +65,14 @@ function QuestNode:AddMenuItems()
 end
 
 function QuestNode:GetActions()
-    return { singleClick = Nav.ACTION_SELECT, doubleClick = nil }
+    return Nav.saved.questActions
 end
 
 function QuestNode:DoAction(action)
     if action == Nav.ACTION_SELECT then
         self:Select()
+    elseif action == Nav.ACTION_TRAVEL then
+        self:Select(true)
     end
 end
 
@@ -147,14 +149,18 @@ function QuestNode:jumpToNearestWayshrine(pin)
         local destX, destZ = nodeList[i]:GetMapInfo(self.zoneIndex, self.mapId)
         local dist = distanceSq(normalizedX, normalizedZ, destX, destZ)
         d(string.format(" - %s: %.2f", nodeList[i].name, dist))
-        if dist < nearestDist then
+        if dist < nearestDist and (not nodeList[i]:IsHouse() or nodeList[i]:IsOwned()) then
             nearestNode = nodeList[i]
             nearestDist = dist
         end
     end
 
     if nearestNode ~= nil then
-        nearestNode:Jump()
+        if nearestNode:IsHouse() then
+            nearestNode:Jump(true)
+        else
+            nearestNode:Jump()
+        end
     end
 end
 
@@ -329,7 +335,7 @@ function Quest:GetQuestZoneId(questIndex)
         return self.cache[questIndex]["zoneId"]
     else
     --    -- Get location info
-    --    local result = Quest.SetMapToQuest(questIndex)
+        Quest.SetMapToQuest(questIndex)
         local questZoneId = GetZoneId(GetCurrentMapZoneIndex())
         local mapId = GetCurrentMapId()
     --    -- set map back to player location
