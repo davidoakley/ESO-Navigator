@@ -7,8 +7,8 @@ local Nav = Navigator
 
 local MapTab = Nav.MapTab:Subclass()
 
-function MapTab:Initialize(control)
-    Nav.MapTab.Initialize(self, control)
+function MapTab:Initialize(control, view)
+    Nav.MapTab.Initialize(self, control, view)
 
     Nav.log(control:GetName() .. "[keyboard]:init")
     self:SetViewButtonTooltip()
@@ -37,7 +37,22 @@ function Navigator_MainTab_OnInitialized(control)
     Nav.log("Navigator_MainTab_OnInitialized")
     Nav.mainTab = MapTab:New(control)
     control.tab = Nav.mainTab
-    --Nav.log("Navigator_MainTab_OnInitialized: " .. (self or "null"))
-    --Navigator.AttachMapTab("mainTab", self, Navigator.MapTab)
-    --self:init()
+end
+
+function Navigator_QuestTab_OnInitialized(control)
+    Nav.log("Navigator_QuestTab_OnInitialized")
+    Nav.questTab = MapTab:New(control, "quests")
+    control.tab = Nav.questTab
+end
+
+function Navigator_HousingTab_OnInitialized(control)
+    Nav.log("Navigator_HousingTab_OnInitialized")
+    Nav.housingTab = MapTab:New(control, "houses")
+    control.tab = Nav.housingTab
+end
+
+function Navigator_ZonesTab_OnInitialized(control)
+    Nav.log("Navigator_ZonesTab_OnInitialized")
+    Nav.zonesTab = MapTab:New(control, "zones")
+    control.tab = Nav.zonesTab
 end

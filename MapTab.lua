@@ -7,8 +7,9 @@ MT.needsRefresh = Nav.REFRESH_NONE
 MT.collapsedCategories = {}
 MT.targetNode = 0
 
-function MT:Initialize(control)
+function MT:Initialize(control, view)
     self.control = control
+    self.currentView = view
 
     Nav.log(control:GetName() .. "[shared]:init")
     --self:SetViewButtonTooltip()

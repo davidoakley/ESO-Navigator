@@ -128,9 +128,6 @@
 
         <TopLevelControl name="Navigator_MainTab" inherits="ZO_WorldMapInfoContent">
             <OnInitialized>
-				--Navigator.AttachMapTab("mainTab", self, Navigator.MapTab)
-				--self:init()
-				Navigator.log("Navigator_MainTab:OnInitialized")
 				Navigator_MainTab_OnInitialized(self)
 			</OnInitialized>
             <Controls>
@@ -253,10 +250,9 @@
             </Controls>
         </TopLevelControl>
 
-		<!--<TopLevelControl name="Navigator_QuestTab" inherits="ZO_WorldMapInfoContent">
+		<TopLevelControl name="Navigator_QuestTab" inherits="ZO_WorldMapInfoContent">
 			<OnInitialized>
-				Navigator.AttachMapTab("questTab", self, Navigator.MapTab, "quests")
-				self:init()
+				Navigator_QuestTab_OnInitialized(self)
 			</OnInitialized>
 			<Controls>
 				<Control name="$(parent)List" inherits="ZO_ScrollList">
@@ -269,8 +265,7 @@
 
 		<TopLevelControl name="Navigator_HousingTab" inherits="ZO_WorldMapInfoContent">
 			<OnInitialized>
-				Navigator.AttachMapTab("housingTab", self, Navigator.MapTab, "houses")
-				self:init()
+				Navigator_HousingTab_OnInitialized(self)
 			</OnInitialized>
 			<Controls>
 				<Control name="$(parent)List" inherits="ZO_ScrollList">
@@ -283,8 +278,7 @@
 
 		<TopLevelControl name="Navigator_ZonesTab" inherits="ZO_WorldMapInfoContent">
 			<OnInitialized>
-				Navigator.AttachMapTab("zonesTab", self, Navigator.MapTab, "zones")
-				self:init()
+				Navigator_ZonesTab_OnInitialized(self)
 			</OnInitialized>
 			<Controls>
 				<Control name="$(parent)List" inherits="ZO_ScrollList">
@@ -293,6 +287,6 @@
 					<Anchor point="BOTTOMRIGHT" />
 				</Control>
 			</Controls>
-		</TopLevelControl>-->
+		</TopLevelControl>
 	</Controls>
 </GuiXml>

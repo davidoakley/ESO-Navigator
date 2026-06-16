@@ -106,7 +106,9 @@ function Nav.mkstr(id, str)
     end
 end
 
-function Nav:OnFocusSearchPressed(keyDown)
+-- @usage Triggered when the Focus Search key is pressed
+-- @param keyDown
+function Nav:OnFocusSearchPressed(_)
     if self.mapVisible then
         self.showSearch()
         return true
@@ -397,7 +399,7 @@ local function setupTabs(self)
         WORLD_MAP_INFO:SelectTab(NAVIGATOR_TAB_SEARCH)
     end
 
-    if self.saved.replaceQuestsTab then
+    if self.saved.replaceQuestsTab and self.questTab then
         local questButtonData = {
             normal = "EsoUI/Art/WorldMap/map_indexIcon_quests_up.dds",
             pressed = "EsoUI/Art/WorldMap/map_indexIcon_quests_down.dds",
@@ -406,7 +408,7 @@ local function setupTabs(self)
         replaceWorldMapTab(SI_MAP_INFO_MODE_QUESTS, { self.questTab.fragment }, questButtonData)
     end
 
-    if self.saved.replaceLocationsTab then
+    if self.saved.replaceLocationsTab and self.zonesTab then
         local zonesButtonData = {
             normal = "EsoUI/Art/WorldMap/map_indexIcon_locations_up.dds",
             pressed = "EsoUI/Art/WorldMap/map_indexIcon_locations_down.dds",
@@ -415,7 +417,7 @@ local function setupTabs(self)
         replaceWorldMapTab(SI_MAP_INFO_MODE_LOCATIONS, { self.zonesTab.fragment }, zonesButtonData)
     end
 
-    if self.saved.replaceHousesTab then
+    if self.saved.replaceHousesTab and self.housingTab then
         local housingButtonData = {
             normal = "EsoUI/Art/WorldMap/map_indexIcon_housing_up.dds",
             pressed = "EsoUI/Art/WorldMap/map_indexIcon_housing_down.dds",
