@@ -206,7 +206,7 @@ function MapTab:BuildCategory(category)
                 --Nav.log("Add entry %s header %s", data.node.name, categoryTitle)
                 entryData:SetHeader(categoryTitle)
                 categoryTitle = nil
-                self.list:AddEntry("Navigator_Gamepad_WayshrineRow", entryData)
+                self.list:AddEntry("Navigator_Gamepad_WayshrineRowWithHeader", entryData)
             else
                 --Nav.log("Add entry %s", data.node.name)
                 self.list:AddEntry("Navigator_Gamepad_WayshrineRow", entryData)
@@ -262,7 +262,7 @@ function MapTab:UpdateContent(searchString, keepTargetNode)
     self:BuildList(keepTargetNode)
 end
 
-function MT:UpdateEditDefaultText()
+function MapTab:UpdateEditDefaultText()
     if not self.editControl then return end
 
     local searchString = self.editControl:GetText()
