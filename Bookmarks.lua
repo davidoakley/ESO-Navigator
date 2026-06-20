@@ -7,15 +7,15 @@ function Bookmarks:init()
     Nav.saved.bookmarks = Nav.saved.bookmarks or {}
 end
 
-function Bookmarks:getIndex(entry)
+function Bookmarks:getIndex(node)
     if not self.hasRunFixup then self:FixUp() end
 
     local list = Nav.saved.bookmarks
 
-    if entry.questIndex then
+    if node.questIndex then
         return nil
-    elseif entry.nodeIndex then
-        local nodeIndex = entry.nodeIndex
+    elseif node.nodeIndex then
+        local nodeIndex = node.nodeIndex
         if nodeIndex == 211 or nodeIndex == 212 then
             -- Always refer to The Harborage as index 210
             nodeIndex = 210
@@ -25,28 +25,28 @@ function Bookmarks:getIndex(entry)
                 return i
             end
         end
-    elseif entry.poiIndex then
+    elseif node.poiIndex then
         for i = 1, #list do
-            if entry.poiIndex == list[i].poiIndex and entry.zoneId == list[i].zoneId then
+            if list[i].poi and node.poiIndex == list[i].poi.poiIndex and node.zoneId == list[i].poi.zoneId then
                 return i
             end
         end
-    elseif entry.playerHouse then
-        local userID = entry.playerHouse
+    elseif node.playerHouse then
+        local userID = node.playerHouse
         for i = 1, #list do
             if userID == list[i].playerHouse then
                 return i
             end
         end
-    elseif entry.keepId then
-        local keepId = entry.keepId
+    elseif node.keepId then
+        local keepId = node.keepId
         for i = 1, #list do
             if keepId == list[i].keepId then
                 return i
             end
         end
-    elseif entry.zoneId and not entry.keepId then
-        local zoneId = entry.zoneId
+    elseif node.zoneId and not node.keepId then
+        local zoneId = node.zoneId
         for i = 1, #list do
             if zoneId == list[i].zoneId and not list[i].poiIndex and not list[i].keepId then
                 return i
@@ -67,20 +67,20 @@ function Bookmarks:add(entry)
     table.insert(Nav.saved.bookmarks, entry)
 end
 
-function Bookmarks:remove(entry)
+function Bookmarks:remove(node)
     if not self.hasRunFixup then self:FixUp() end
 
-    local i = self:getIndex(entry)
+    local i = self:getIndex(node)
     if i then
         table.remove(Nav.saved.bookmarks, i)
     end
 end
 
 
-function Bookmarks:contains(entry)
+function Bookmarks:contains(node)
     if not self.hasRunFixup then self:FixUp() end
 
-    return self:getIndex(entry) ~= nil
+    return self:getIndex(node) ~= nil
 end
 
 function Bookmarks:Move(node, offset)

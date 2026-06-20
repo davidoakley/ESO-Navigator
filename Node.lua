@@ -64,9 +64,11 @@ function Node:GetWeight()
     return 1.0
 end
 
-function Node:AddBookmarkMenuItem(entry)
+--- @param menu Menu
+--- @param entry any
+function Node:AddBookmarkMenuItem(menu, entry)
     if entry and not Nav.Bookmarks:contains(entry) then
-        AddMenuItem(GetString(NAVIGATOR_MENU_ADDBOOKMARK), function()
+        menu:AddItem(GetString(NAVIGATOR_MENU_ADDBOOKMARK), function()
             Nav.Bookmarks:add(entry)
             Nav.mainTab.menuOpen = false
             zo_callLater(function() Nav.mainTab:ImmediateRefresh() end, 10)
@@ -278,13 +280,14 @@ function Node:CreateTagListString(isSelected, showBookmark)
         Nav.Utils.RemoveElement(tagList, "{bookmark}")
     end
     local colour = ZO_ColorDef:New(self:GetTagColour(isSelected))
+    local size = IsInGamepadPreferredMode() and "27:36" or "18:24"
     if tagList and #tagList > 0 then
         local tagStrings = {}
         for i = 1, #tagList do
             local tagString = tagList[i]
             tagString = tagString:gsub("{.-}", function(match)
                 local textureName = match:sub(2, -2)
-                return string.format("|t18:24:Navigator/media/tags/%s.dds:inheritcolor|t", textureName)
+                return string.format("|t%s:Navigator/media/tags/%s.dds:inheritcolor|t", size, textureName)
             end)
             table.insert(tagStrings, tagString)
         end

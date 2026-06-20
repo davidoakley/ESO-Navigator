@@ -357,7 +357,8 @@ ViewManager:AddToMenu(ZonesView:New())
 local PlayersView = View:New({
     id = "players",
     title = NAVIGATOR_MENU_PLAYERS,
-    icon = "Navigator/media/icons/player.dds"
+    icon = "Navigator/media/icons/player.dds",
+    emptyHint = NAVIGATOR_HINT_NOMATCHES
 })
 
 function PlayersView:Build()
@@ -381,7 +382,8 @@ ViewManager:AddToMenu(PlayersView:New())
 local HousesView = View:New({
     id = "houses",
     title = NAVIGATOR_SETTINGS_HOUSE_ACTIONS_NAME,
-    icon = "Navigator/media/icons/house.dds"
+    icon = "Navigator/media/icons/house.dds",
+    emptyHint = NAVIGATOR_HINT_NOMATCHES
 })
 
 function HousesView:Build(context)
@@ -488,7 +490,8 @@ function TreasureMapsView:Build(context)
     table.insert(categoryList, {
         id = "otherTreasureMaps",
         title = NAVIGATOR_MENU_TREASUREMAPS_SURVEYS,
-        list = self:GetTreasureMapZoneList()
+        list = self:GetTreasureMapZoneList(),
+        emptyHint = NAVIGATOR_HINT_NOMATCHES
     })
 
     local thisZoneList = self:GetZoneTreasureMapList(context.zone)
@@ -515,7 +518,8 @@ ViewManager:AddToMenu(TreasureMapsView:New())
 local QuestsView = View:New({
     id = "quests",
     title = NAVIGATOR_MENU_QUESTS,
-    icon = "Navigator/media/icons/quest.dds"
+    icon = "Navigator/media/icons/quest.dds",
+    emptyHint = NAVIGATOR_HINT_NOMATCHES
 })
 
 function QuestsView:Build()

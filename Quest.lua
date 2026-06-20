@@ -38,27 +38,28 @@ function QuestNode:GetIconColour()
     end
 end
 
-function QuestNode:AddMenuItems()
-    AddMenuItem(GetString(NAVIGATOR_MENU_SELECT_QUEST), function()
+--- @param menu Menu
+function QuestNode:AddMenuItems(menu)
+    menu:AddItem(GetString(NAVIGATOR_MENU_SELECT_QUEST), function()
         self:Select()
     end)
 
-    AddMenuItem(GetString(NAVIGATOR_MENU_QUEST_JUMP), function()
+    menu:AddItem(GetString(NAVIGATOR_MENU_QUEST_JUMP), function()
         self:Select(true)
     end)
 
-    AddMenuItem(GetString(SI_ITEM_ACTION_SHOW_QUEST), function()
+    menu:AddItem(GetString(SI_ITEM_ACTION_SHOW_QUEST), function()
         SYSTEMS:GetObject("questJournal"):OpenQuestJournalToQuest(self.questIndex)
     end)
 
     if GetIsQuestSharable(self.questIndex) and IsUnitGrouped("player") then
-        AddMenuItem(GetString(SI_QUEST_JOURNAL_SHARE), function()
+        menu:AddItem(GetString(SI_QUEST_JOURNAL_SHARE), function()
             QUEST_JOURNAL_MANAGER:ShareQuest(self.questIndex)
         end)
     end
 
     if CanAbandonJournalQuest(self.questIndex) then
-        AddMenuItem(GetString(SI_QUEST_JOURNAL_ABANDON), function()
+        menu:AddItem(GetString(SI_QUEST_JOURNAL_ABANDON), function()
             QUEST_JOURNAL_MANAGER:ConfirmAbandonQuest(self.questIndex)
         end)
     end

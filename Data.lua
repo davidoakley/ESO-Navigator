@@ -34,6 +34,27 @@ Nav.REFRESH_NONE = 0
 Nav.REFRESH_EXISTING = 1
 Nav.REFRESH_REBUILD = 2
 
+--- @class Menu
+Nav.Menu = ZO_Object:Subclass()
+
+function Nav.Menu:New()
+    local obj = ZO_Object.New(self)
+    obj.items = {}
+    return obj
+end
+
+--- @field labelText string
+--- @field callback function
+--- @field yPad integer
+function Nav.Menu:AddItem(labelText, callback, yPad)
+    table.insert(self.items, {
+        labelText = labelText,
+        callback = callback,
+        yPad = yPad
+    })
+end
+
+
 -- Trader Locations, copied from Faster Travel by SimonIllyan, XanDDemoX, upyachka, Valandil
 local trader_counts = { -- nodeIndex -> traders_count
     [  1] = 1, -- Wyrd Tree Wayshrine
@@ -115,7 +136,6 @@ local trader_counts = { -- nodeIndex -> traders_count
 	[558] = 6, -- Skingrad City Wayshrine
     [598] = 6, -- Sunport Wayshrine
 }
-
 
 Data.traderCounts = trader_counts
 

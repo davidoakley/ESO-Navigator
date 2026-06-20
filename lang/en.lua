@@ -28,6 +28,7 @@ mkstr("NAVIGATOR_HINT_NORESULTS", "No results found")
 mkstr("NAVIGATOR_HINT_NORECENTS", "Destinations that you travel to will automatically appear here")
 mkstr("NAVIGATOR_HINT_NOBOOKMARKS", "Right click a destination to create (or delete) a bookmark for it")
 mkstr("NAVIGATOR_HINT_SHOWUNDISCOVERED", "Click to show undiscovered locations")
+mkstr("NAVIGATOR_HINT_NOMATCHES", "No matching items found")
 
 -- Enter key label (keep it short!)
 mkstr("NAVIGATOR_KEY_ENTER", "Enter")
@@ -60,8 +61,10 @@ mkstr("NAVIGATOR_MENU_QUESTS", "Quests")
 mkstr("NAVIGATOR_MENU_CLEARVIEW", "Clear view")
 mkstr("NAVIGATOR_MENU_SELECT_QUEST", "Select Quest")
 mkstr("NAVIGATOR_MENU_QUEST_JUMP", "Jump to nearest Wayshrine")
+mkstr("NAVIGATOR_MENU_VIEWS", "Views")
 NAVIGATOR_MENU_SHOWONMAP = SI_QUEST_JOURNAL_SHOW_ON_MAP
 NAVIGATOR_MENU_SETDESTINATION = SI_WORLD_MAP_ACTION_SET_PLAYER_WAYPOINT
+NAVIGATOR_MENU_SEARCH = SI_GAMEPAD_MOD_BROWSER_DEFAULT_SEARCH_TEXT
 
 -- Status / error messages
 mkstr("NAVIGATOR_NO_TRAVEL_PLAYER", "No players to travel to")

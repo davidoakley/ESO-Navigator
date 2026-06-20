@@ -16,6 +16,14 @@
             </Controls>
         </Control>
 
+        <Control name="Navigator_Gamepad_HintRow" inherits="ZO_GamepadMenuEntryDimensionsTemplate ZO_GamepadMenuEntryLabelSizedTemplate" virtual="true">
+            <Controls>
+                <Label name="$(parent)Label" inherits="ZO_GamepadMenuEntryLabelTemplateLowercase42" horizontalAlignment="CENTER" verticalAlignment="CENTER" maxLineCount="3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" mouseEnabled="false">
+                    <AnchorFill/>
+                </Label>
+            </Controls>
+        </Control>
+
         <Control name="Navigator_MainTab_EditBox" virtual="true">
             <OnInitialized>
                 self.edit = self:GetNamedChild("Backdrop"):GetNamedChild("Edit")

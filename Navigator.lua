@@ -117,18 +117,37 @@ function Nav:OnFocusSearchPressed(_)
     end
 end
 
+local function findTabIndexWithIsNavigator()
+    local arr = GAMEPAD_WORLD_MAP_INFO.baseHeaderData.tabBarEntries
+    for i = 1, #arr do
+        local t = arr[i]
+        if type(t) == "table" and t.isNavigator then
+            Nav.log("findTabIndexWithIsNavigator: %d", i)
+            return i
+        end
+    end
+    return nil -- not found
+end
+
 function Nav.showSearch(callback)
     Nav.log("showSearch")
-    local tabVisible = Nav.mainTab.visible
-    MAIN_MENU_KEYBOARD:ShowScene("worldMap")
-    WORLD_MAP_INFO:SelectTab(NAVIGATOR_TAB_SEARCH)
-    Nav.mainTab:ResetSearch()
-    if Nav.saved.autoFocus or tabVisible then
-        Nav.mainTab.editControl:TakeFocus()
-        Nav.log("showSearch: setting editControl focus")
-    end
-    if callback then
-        callback()
+    ZO_WorldMap_ShowWorldMap()
+    if IsInGamepadPreferredMode() then
+        GAMEPAD_WORLD_MAP_INFO:Show()
+        ZO_GamepadGenericHeader_SetActiveTabIndex(GAMEPAD_WORLD_MAP_INFO.header, findTabIndexWithIsNavigator())
+        --GAMEPAD_WORLD_MAP_INFO:SwitchToFragment(Nav.mainTab_gamepad.fragment, false) -- Doesn't work
+    else
+        local tabVisible = Nav.mainTab.visible
+        --MAIN_MENU_KEYBOARD:ShowScene("worldMap")
+        WORLD_MAP_INFO:SelectTab(NAVIGATOR_TAB_SEARCH)
+        Nav.mainTab:ResetSearch()
+        if Nav.saved.autoFocus or tabVisible then
+            Nav.mainTab.editControl:TakeFocus()
+            Nav.log("showSearch: setting editControl focus")
+        end
+        if callback then
+            callback()
+        end
     end
 end
 
@@ -432,14 +451,15 @@ end
 local function setupGamepadTabs(self)
     local mapInfo = GAMEPAD_WORLD_MAP_INFO
     local tabBarEntries = mapInfo.tabBarEntries
-    self.orginalHeaderData = GAMEPAD_WORLD_MAP_INFO.baseHeaderData
+    self.originalHeaderData = GAMEPAD_WORLD_MAP_INFO.baseHeaderData
 
-    local newtab = {
+    local newTab = {
+        isNavigator = true,
         text = GetString(NAVIGATOR_TAB_SEARCH),
         callback = function() GAMEPAD_WORLD_MAP_INFO:SwitchToFragment(Nav.mainTab_gamepad.fragment) end,
     }
 
-    table.insert(tabBarEntries, 1, newtab)
+    table.insert(tabBarEntries, 1, newTab)
 
     self.tabBarEntries = tabBarEntries
     mapInfo.tabBarEntries = tabBarEntries

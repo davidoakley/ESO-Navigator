@@ -194,7 +194,7 @@
 							</OnEnter>
 							<OnEscape>
 								-- self:LoseFocus()
-								SCENE_MANAGER:Hide("worldMap")
+								ZO_WorldMap_HideWorldMap()
 							</OnEscape>
 							<OnEffectivelyShown>
 								local tab = self:GetOwningWindow().tab

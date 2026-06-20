@@ -5,6 +5,7 @@
 ---
 local Nav = Navigator
 
+---@class MapTab
 local MapTab = Nav.MapTab:Subclass()
 --local MapTab = ZO_Object.MultiSubclass(Nav.MapTab, ZO_Gamepad_ParametricList_Search_Screen)
 
@@ -25,12 +26,16 @@ function MapTab:Initialize(control)
     --self.viewButton = self.searchControl and self.searchControl:GetNamedChild("View")
 
     self:InitializeKeybindDescriptor()
+    self:InitializeActionsDialog()
+    self:InitializeViewsDialog()
 
     self.fragment = ZO_SimpleSceneFragment:New(control)
 
     self.list = ZO_GamepadVerticalParametricScrollList:New(self.listControl)
-    self.list:AddDataTemplate("Navigator_Gamepad_WayshrineRow", function(...) self:SetupRow(...) end, ZO_GamepadMenuEntryTemplateParametricListFunction)
-    self.list:AddDataTemplateWithHeader("Navigator_Gamepad_WayshrineRow", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
+    self.list:AddDataTemplate("Navigator_Gamepad_WayshrineRow", function(...) self:SetupWayshrineRow(...) end, ZO_GamepadMenuEntryTemplateParametricListFunction)
+    self.list:AddDataTemplateWithHeader("Navigator_Gamepad_WayshrineRow", function(...) self:SetupWayshrineRow(...) end, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
+    self.list:AddDataTemplate("Navigator_Gamepad_HintRow", function(...) self:SetupHintRow(...) end, ZO_GamepadMenuEntryTemplateParametricListFunction)
+    self.list:AddDataTemplateWithHeader("Navigator_Gamepad_HintRow", function(...) self:SetupHintRow(...) end, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
     self.list:SetAlignToScreenCenter(true)
 
     local function OnTargetChanged()
@@ -61,9 +66,9 @@ function MapTab:Initialize(control)
     --self:SetHandlers()
     --self:ApplyPerfectPixel(control)
 
-    --Nav.callback:RegisterCallback("OnMapChanged", function() self:OnMapChanged() end)
+    Nav.callback:RegisterCallback("OnMapChanged", function() self:OnMapChanged() end)
 
-    self.fragment:RegisterCallback("StateChange",  function(oldState, newState)
+    self.fragment:RegisterCallback("StateChange",  function(_, newState)
         if newState == SCENE_SHOWING then
             Nav.log(control:GetName() .. ": SCENE_SHOWING")
             Nav.lastTab = self
@@ -99,7 +104,7 @@ function MapTab:InitializeKeybindDescriptor()
             keybind = "UI_SHORTCUT_PRIMARY",
 
             name = function()
-                if not self.selectedData then return "?" end
+                if not self.selectedData or not self.selectedData.node then return "?" end
                 local action = self.selectedData.node:GetActions()["singleClick"]
                 Nav.log("InitializeKeybindDescriptor: %s -> %s '%s'", self.selectedData.node:GetName(), action, self.selectedData.node:GetActionDescription(action))
                 return self.selectedData.node:GetActionDescription(action)
@@ -109,32 +114,72 @@ function MapTab:InitializeKeybindDescriptor()
                 if self.selectedData then
                     --WORLD_MAP_MANAGER:SetMapByIndex(self.selectedData.index)
                     local action = self.selectedData.node:GetActions()["singleClick"]
+                    Nav.log("InitializeKeybindDescriptor: %s action: %d", self.selectedData.node:GetName(), action)
+                    Nav.selectedNode = self.selectedData.node
                     self.selectedData.node:DoAction(action)
                     --SCENE_MANAGER:ShowBaseScene()
                     PlaySound(SOUNDS.MAP_LOCATION_CLICKED)
                 end
             end,
 
-            visible = function() return self.selectedData ~= nil end,
+            visible = function() return self.selectedData and self.selectedData.node end,
         },
         {
             name = GetString(SI_GAMEPAD_INVENTORY_ACTION_LIST_KEYBIND),
             keybind = "UI_SHORTCUT_TERTIARY",
             callback = function()
+                self:ShowActions()
             end,
             visible = function() return self.selectedData ~= nil end,
         },
         {
-            name = "Search",
+            name = GetString(NAVIGATOR_MENU_SEARCH),
             keybind = "UI_SHORTCUT_SECONDARY",
             callback = function()
                 self.editControl:TakeFocus()
             end,
             visible = function() return true end
-        }
+        },
+        {
+            name = GetString(NAVIGATOR_MENU_VIEWS),
+            keybind = "UI_SHORTCUT_QUINARY",
+            callback = function()
+                self:ShowViews()
+            end
+        },
     }
 
-    ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.keybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, ZO_WorldMapInfo_OnBackPressed)
+    local function backButton()
+        PlaySound(SOUNDS.GAMEPAD_MENU_BACK)
+        if self.currentView ~= nil then
+            Nav.log("backButton: ResetView")
+            self:ResetView()
+        else
+            Nav.log("backButton: ???")
+            GAMEPAD_WORLD_MAP_INFO:Hide()
+        end
+        --self:OnHideTeleportList(self.owner.selectedIndex)
+        --ZO_WorldMapInfo_OnBackPressed
+    end
+
+    ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.keybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, backButton)
+end
+
+function MapTab:ShowActions()
+    local dialogData = { }
+    ZO_Dialogs_ShowGamepadDialog("NAVIGATOR_GAMEPAD_ACTIONS_DIALOG", dialogData)
+end
+
+function MapTab:ShowViews()
+    local dialogData = { }
+    ZO_Dialogs_ShowGamepadDialog("NAVIGATOR_GAMEPAD_VIEWS_DIALOG", dialogData)
+end
+
+function MapTab:ResetView()
+    Nav.log("MapTab.ResetView")
+    self.currentView = nil
+    self:ImmediateRefresh()
+    self.list:SetFirstIndexSelected()
 end
 
 function MapTab:RefreshKeybind()
@@ -143,8 +188,7 @@ function MapTab:RefreshKeybind()
     end
 end
 
-function MapTab:SetupRow(control, data, selected, selectedDuringRebuild, enable, activated)
-    Nav.log("SetupRow %s", data.node.name)
+function MapTab:SetupWayshrineRow(control, data, selected, selectedDuringRebuild, enable, activated)
     ZO_SharedGamepadEntry_OnSetup(control, data, selected, selectedDuringRebuild, enable, activated)
     if selected then
         self.selectedData = data
@@ -153,6 +197,7 @@ function MapTab:SetupRow(control, data, selected, selectedDuringRebuild, enable,
 
     local icon = control:GetNamedChild("Overlay")
     local overlayIcon, overlayColour = data.node:GetOverlayIcon(selected)
+    --Nav.log("MapTab:SetupRow: %s: %s", data.node:GetName(), overlayIcon or "-")
     if overlayIcon then
         icon:SetColor(ZO_ColorDef.HexToFloats(overlayColour))
         icon:SetTexture(overlayIcon)
@@ -162,13 +207,21 @@ function MapTab:SetupRow(control, data, selected, selectedDuringRebuild, enable,
     end
 end
 
+function MapTab:SetupHintRow(control, data, selected, selectedDuringRebuild, enable, activated)
+    ZO_SharedGamepadEntry_OnSetup(control, data, selected, selectedDuringRebuild, enable, activated)
+    if selected then
+        self.selectedData = nil
+    end
+    control:GetNamedChild("Label"):SetColor(ZO_DISABLED_TEXT:UnpackRGBA())
+end
+
 function MapTab:BuildCategory(category)
     local collapsed = self.collapsedCategories[category.id] and true or false
     local list = category.list
 
-    --self:BuildCategoryHeader(scrollData, category.id, category.title, collapsed)
     local categoryTitle = tonumber(category.title) ~= nil and GetString(category.title) or category.title
 
+    Nav.log("MapTab:BuildCategory: '%s': %d item(s)", categoryTitle, #list)
     if collapsed then
         return
     elseif #list == 0 and category.emptyHint then
@@ -181,34 +234,59 @@ function MapTab:BuildCategory(category)
 
     for i = 1, #list do
         if list[i].hint then
-            --local entry = ZO_ScrollList_CreateDataEntry(3, { hint = list[i].hint })
-            --table.insert(scrollData, entry)
+            local entryData = ZO_GamepadEntryData:New(list[i].hint)
+            Nav.log("MapTab:BuildCategory: hint '%s'", list[i].hint)
+            if categoryTitle then
+                entryData:SetHeader(categoryTitle)
+                categoryTitle = nil
+                self.list:AddEntry("Navigator_Gamepad_HintRowWithHeader", entryData)
+            else
+                self.list:AddEntry("Navigator_Gamepad_HintRow", entryData)
+            end
+
         elseif list[i]:IsKnown() or includeUnknown then
             local data = {
                 node = list[i],
                 indexInCategory = i,
                 categoryEntryCount = #list,
-                nodeIndex = currentNodeIndex
+                nodeIndex = currentNodeIndex,
+                dataEntry = {
+                    categoryId = category.id
+                }
             }
 
             --local entry = ZO_ScrollList_CreateDataEntry(1, data, category.id)
             --table.insert(scrollData, entry)
-            local entryData = ZO_GamepadEntryData:New(data.node:GetName(), data.node:GetIcon())
+
+            local name = data.node:GetName()
+
+            --local suffix = data.node:GetSuffix()
+            --if data.node.zoneSuffix and category.id == "results" then
+            --    suffix = data.node.zoneSuffix
+            --end
+            --if suffix ~= nil and suffix ~= "" then
+            --    local colour = ZO_ColorDef:New(data.node:GetSuffixColour(false))
+            --    name = name .. " " .. colour:Colorize(suffix)
+            --end
+            local tagString = data.node:CreateTagListString(false, category.id ~= "bookmarks")
+            if tagString then
+                name = name .. "  " .. tagString
+            end
+
+            local entryData = ZO_GamepadEntryData:New(name, data.node:GetIcon())
             entryData:SetDataSource(data)
             if data.node:GetSuffix() ~= "" then
                 entryData:AddSubLabel(data.node:GetSuffix())
             end
 
-            local overlayIcon, overlayColour = data.node:GetOverlayIcon(true)
+            local overlayIcon, _ = data.node:GetOverlayIcon(true)
             entryData:SetCooldownIcon(overlayIcon)
 
             if categoryTitle then
-                --Nav.log("Add entry %s header %s", data.node.name, categoryTitle)
                 entryData:SetHeader(categoryTitle)
                 categoryTitle = nil
                 self.list:AddEntry("Navigator_Gamepad_WayshrineRowWithHeader", entryData)
             else
-                --Nav.log("Add entry %s", data.node.name)
                 self.list:AddEntry("Navigator_Gamepad_WayshrineRow", entryData)
             end
 
@@ -251,6 +329,8 @@ function MapTab:BuildList()
     self.list:Commit()
 
     self:UpdateEditDefaultText()
+
+    self.list:SetFirstIndexSelected()
 end
 
 function MapTab:UpdateContent(searchString, keepTargetNode)
@@ -277,6 +357,152 @@ function MapTab:UpdateEditDefaultText()
         -- remove default text
         ZO_EditDefaultText_Disable(self.editControl)
     end
+end
+
+function MapTab:InitializeActionsDialog()
+    ZO_Dialogs_RegisterCustomDialog("NAVIGATOR_GAMEPAD_ACTIONS_DIALOG",
+            {
+                gamepadInfo =
+                {
+                    dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
+                },
+                canQueue = true,
+                title =
+                {
+                    text = SI_GAMEPAD_INVENTORY_ACTION_LIST_KEYBIND,
+                },
+                setup = function(dialog)
+                    dialog:setupFunc()
+                    self:SetupActionsDialog(dialog)
+                end,
+                parametricList = { }, -- Added dynamically
+                buttons =
+                {
+                    {
+                        keybind = "DIALOG_PRIMARY",
+                        text = SI_OK,
+                        callback =  function(dialog)
+                            local data = dialog.entryList:GetTargetData()
+                            data.callback()
+                        end,
+                    },
+                    {
+                        keybind = "DIALOG_NEGATIVE",
+                        text = SI_DIALOG_CANCEL,
+                    },
+                }
+            })
+end
+
+function MapTab:SetupActionsDialog(dialog)
+    Nav.log("Dialog setup!")
+    local data = self.selectedData
+
+    local menu = Nav.Menu:New()
+    if data.node.AddMenuItems then
+        data.node:AddMenuItems(menu)
+    end
+    self:AddStandardMenuItems(menu, data)
+
+    local parametricListEntries = dialog.info.parametricList
+    ZO_ClearNumericallyIndexedTable(parametricListEntries)
+
+    for i = 1, #menu.items do
+        local item = menu.items[i]
+
+        local entry = {
+            template = "ZO_GamepadMenuEntryTemplate",
+            templateData =
+            {
+                text = item.labelText,
+                setup = ZO_SharedGamepadEntry_OnSetup,
+                callback =item.callback,
+                visible = true
+            }
+        }
+        table.insert(parametricListEntries, entry)
+    end
+
+    dialog.setupFunc(dialog)
+end
+
+function MapTab:InitializeViewsDialog()
+    ZO_Dialogs_RegisterCustomDialog("NAVIGATOR_GAMEPAD_VIEWS_DIALOG",
+            {
+                gamepadInfo =
+                {
+                    dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
+                },
+                canQueue = true,
+                setup = function(dialog)
+                    self:SetupViewsDialog(dialog)
+                    dialog:setupFunc()
+                end,
+                title =
+                {
+                    text = NAVIGATOR_MENU_VIEWS,
+                },
+                parametricList = { },
+                buttons =
+                {
+                    {
+                        keybind = "DIALOG_PRIMARY",
+                        text = SI_OK,
+                        callback =  function(dialog)
+                            local data = dialog.entryList:GetTargetData()
+                            data.callback()
+                        end,
+                    },
+
+                    {
+                        keybind = "DIALOG_NEGATIVE",
+                        text = SI_DIALOG_CANCEL,
+                    },
+                }
+            })
+end
+
+function MapTab:SetupViewsDialog(dialog)
+    Nav.log("Dialog setup!")
+
+    local listEntries = dialog.info.parametricList
+    ZO_ClearNumericallyIndexedTable(listEntries)
+
+    local menuViews = Nav.ViewManager:GetMenuViews()
+
+    local buildEntry = function(viewId, title)
+        return {
+            template = "ZO_GamepadMenuEntryTemplate",
+            templateData = {
+                text = title,
+                setup = ZO_SharedGamepadEntry_OnSetup,
+                callback = function()
+                    Nav.log("MapTab.OpenViewMenu.doView: currentView = %s", viewId or "-")
+                    self.currentView = viewId
+                    self:UpdateViewControl()
+                    self:queueRefresh()
+                    self.list:SetFirstIndexSelected()
+                end,
+                visible = true
+            }
+        }
+    end
+
+    if self.currentView ~= nil then
+        table.insert(listEntries, buildEntry(nil, NAVIGATOR_MENU_CLEARVIEW))
+    end
+
+    for i = 1, #menuViews do
+        local view = menuViews[i]
+        if view:IsAvailable() then
+            table.insert(listEntries, buildEntry(view.id, view.title))
+        end
+    end
+
+    dialog.setupFunc(dialog)
+end
+
+function MapTab:UpdateViewControl()
 end
 
 function Navigator_MainTab_Gamepad_OnInitialized(control)
