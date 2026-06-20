@@ -151,4 +151,48 @@ function MapTab:OnMapChanged()
     end
 end
 
+function MapTab:onTextChanged(editbox)
+    local searchString = string.lower(editbox:GetText())
+    local setView = function(view)
+        Nav.log("MapTab.onTextChanged: currentView = %d", view)
+        self.currentView = view
+        editbox:SetText("")
+        editbox.editTextChanged = false
+        searchString = ""
+        self:UpdateViewControl()
+    end
+
+    if searchString == "z:" then
+        setView("zones")
+    elseif searchString == "h:" then
+        setView("houses")
+    elseif searchString == '@' or searchString == "p:" then
+        setView("players")
+    elseif searchString == "t:" then
+        setView("guildTraders")
+    elseif searchString == "m:" then
+        setView("treasureMaps")
+    elseif searchString == "a:" then
+        self.currentView = "all"
+        editbox:SetText("")
+        editbox.editTextChanged = false
+        searchString = ""
+    else
+        self.editControl.editTextChanged = true
+    end
+
+    self:UpdateContent(searchString, false)
+end
+
+function MapTab:OnEnter()
+    local data = self:getTargetData()
+    if data and data.node then
+        if data.node.OnEnter then
+            data.node:OnEnter()
+        elseif data.node.OnClick then
+            data.node:OnClick(false)
+        end
+    end
+end
+
 Nav.MapTab = MapTab

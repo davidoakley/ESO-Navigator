@@ -134,6 +134,7 @@ function Nav.showSearch(callback)
     ZO_WorldMap_ShowWorldMap()
     if IsInGamepadPreferredMode() then
         GAMEPAD_WORLD_MAP_INFO:Show()
+        Nav.mainTab_gamepad:ResetSearch()
         ZO_GamepadGenericHeader_SetActiveTabIndex(GAMEPAD_WORLD_MAP_INFO.header, findTabIndexWithIsNavigator())
         --GAMEPAD_WORLD_MAP_INFO:SwitchToFragment(Nav.mainTab_gamepad.fragment, false) -- Doesn't work
     else

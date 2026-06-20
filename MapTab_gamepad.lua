@@ -182,6 +182,15 @@ function MapTab:ResetView()
     self.list:SetFirstIndexSelected()
 end
 
+function MapTab:ResetSearch()
+    if self.editControl then
+        Nav.log("MapTab.ResetSearch")
+        self.editControl:SetText("")
+        self:ImmediateRefresh()
+        self.list:SetFirstIndexSelected()
+    end
+end
+
 function MapTab:RefreshKeybind()
     if self.keybindStripDescriptor then
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)

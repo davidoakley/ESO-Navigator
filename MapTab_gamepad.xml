@@ -38,6 +38,10 @@
                             <!--<OnEnter>
                                 self:LoseFocus()
                             </OnEnter>-->
+                            <OnEffectivelyShown>
+                                local tab = self:GetOwningWindow().tab
+                                tab:ResetSearch()
+                            </OnEffectivelyShown>
                             <OnTextChanged>
                                 local tab = self:GetOwningWindow().tab
                                 --Navigator.log("onTextChanged: pos="..self:GetCursorPosition())
