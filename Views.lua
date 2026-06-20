@@ -49,16 +49,24 @@ function ViewManager:Build(searchString, viewId, zone)
     if not viewId or not self.views[viewId] then
         if isSearching then
             viewId = "search"
-        elseif zone then
-            if zone.zoneId == Nav.ZONE_TAMRIEL then
-                viewId = "tamriel"
-            elseif zone.zoneId == Nav.ZONE_CYRODIIL then
+        elseif IsInGamepadPreferredMode() then
+            if zone and zone.zoneId == Nav.ZONE_CYRODIIL then
                 viewId = "cyrodiil"
             else
-                viewId = "zone"
+                viewId = "standard"
             end
         else
-            viewId = "standard"
+            if zone then
+                if zone.zoneId == Nav.ZONE_TAMRIEL then
+                    viewId = "tamriel"
+                elseif zone.zoneId == Nav.ZONE_CYRODIIL then
+                    viewId = "cyrodiil"
+                else
+                    viewId = "zone"
+                end
+            else
+                viewId = "standard"
+            end
         end
     end
 
@@ -327,6 +335,29 @@ ViewManager:Add(TamrielView:New())
 
 
 -- == VIEWS MENU VIEWS == --
+
+---@class CurrentZoneView
+--- Only shown in gamepad mode
+local CurrentZoneView = View:New( {
+    id = "currentZone",
+    title = function()
+        local zone = Nav.Locations:getCurrentMapZone()
+        return zone and zone.name or "Current Zone"
+    end,
+    icon = nil
+})
+
+function CurrentZoneView:IsAvailable()
+    return IsInGamepadPreferredMode()
+end
+
+function CurrentZoneView:Build(context)
+    local categoryList = {}
+    self:AddZoneCategory(categoryList, context.zone)
+    return categoryList
+end
+
+ViewManager:AddToMenu(CurrentZoneView:New())
 
 ---@class ZonesView
 local ZonesView = View:New({
