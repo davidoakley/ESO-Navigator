@@ -469,6 +469,49 @@ local function setupGamepadTabs(self)
     ZO_GamepadGenericHeader_SetActiveTabIndex(mapInfo.header, 1)
 end
 
+local function hookGamepadWorldMapKeybinds(self)
+    local getDescriptor = function()
+        for keybindButtonDescriptor, _ in pairs(KEYBIND_STRIP.keybindGroups) do
+            return keybindButtonDescriptor
+        end
+        return nil
+    end
+    local hasNavigatorKeybind = function(descriptor)
+        for i = 1, #descriptor do
+            if descriptor[i].name == GetString(NAVIGATOR_TAB_SEARCH) then
+                return true
+            end
+        end
+        return false
+    end
+
+    local oldFunc
+    local newFunc = function(enabled)
+        oldFunc(enabled)
+        if enabled then
+            local descriptor = getDescriptor()
+
+            if descriptor and not hasNavigatorKeybind(descriptor) then
+                table.insert(descriptor, {
+                    name = GetString(NAVIGATOR_TAB_SEARCH),
+                    keybind = "UI_SHORTCUT_QUINARY",
+                    visible = function() return true end,
+                    enabled = function()
+                        return not WORLD_MAP_MANAGER:IsPreventingMapNavigation()
+                    end,
+                    callback = function()
+                        Nav.showSearch()
+                    end,
+                    sound = SOUNDS.GAMEPAD_MENU_FORWARD
+                })
+            end
+            KEYBIND_STRIP:RemoveKeybindButtonGroup(descriptor)
+            KEYBIND_STRIP:AddKeybindButtonGroup(descriptor)
+        end
+        return true
+    end
+    oldFunc = ZO_PreHook("ZO_WorldMap_SetGamepadKeybindsShown", newFunc)
+end
 
 function Nav:initialize()
   Nav.log("initialize starts")
@@ -482,6 +525,7 @@ function Nav:initialize()
 
   setupTabs(self)
   setupGamepadTabs(self)
+  hookGamepadWorldMapKeybinds(self)
 
   self.Recents:init()
   self.Bookmarks:init()
