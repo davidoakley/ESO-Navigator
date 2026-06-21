@@ -738,14 +738,21 @@ end
 --- @class KeepNode
 local KeepNode = Node:New()
 
+function KeepNode:GetSuffix() --TODO: Fix Colour when disabled
+    Nav.log("GetSuffix: %s -> %s", self.originalName, Nav.KeepSuffix(self.originalName) or "-")
+    return Nav.KeepSuffix(self.originalName)
+end
+
 function KeepNode:GetColour(isSelected)
-    if isSelected and self.accessible then
-        return Nav.COLOUR_WHITE
-    elseif self.accessible then
-        return Nav.COLOUR_NORMAL
+    if self.accessible then
+        return isSelected and Nav.COLOUR_WHITE or Nav.COLOUR_NORMAL
     else
         return Nav.COLOUR_POI
     end
+end
+
+function KeepNode:GetSuffixColour()
+    return self.accessible and  Nav.COLOUR_SUFFIX_NORMAL or Nav.COLOUR_SUFFIX_POI
 end
 
 function KeepNode:GetTagList()
