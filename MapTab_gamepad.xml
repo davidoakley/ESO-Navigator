@@ -16,13 +16,13 @@
             </Controls>
         </Control>
 
-        <Control name="Navigator_Gamepad_HintRow" inherits="ZO_GamepadMenuEntryDimensionsTemplate ZO_GamepadMenuEntryLabelSizedTemplate" virtual="true">
+        <Control name="Navigator_Gamepad_HintRow" inherits="ZO_GamepadSubMenuEntryTemplateLowercase42" virtual="true"/>
+        <!--<Control name="Navigator_Gamepad_HintRow" inherits="ZO_GamepadMenuEntryDimensionsTemplate ZO_GamepadMenuEntryLabelSizedTemplate" resizeToFitDescendents="true" virtual="true">
             <Controls>
-                <Label name="$(parent)Label" inherits="ZO_GamepadMenuEntryLabelTemplateLowercase42" horizontalAlignment="CENTER" verticalAlignment="CENTER" maxLineCount="3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" mouseEnabled="false">
-                    <AnchorFill/>
+                <Label name="$(parent)Label" font="ZoFontGamepad42" horizontalAlignment="CENTER" verticalAlignment="CENTER" maxLineCount="3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" mouseEnabled="false">
                 </Label>
             </Controls>
-        </Control>
+        </Control>-->
 
         <Control name="Navigator_MainTab_EditBox" virtual="true">
             <OnInitialized>

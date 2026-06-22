@@ -46,6 +46,19 @@ function MapTab:ApplyPerfectPixel(control)
     end
 end
 
+function MapTab:ImmediateRefresh(refreshMode)
+    if refreshMode == nil then refreshMode = Nav.REFRESH_REBUILD end
+
+    if Nav.Locations.keepsDirty then
+        Nav.Locations:UpdateKeeps()
+    end
+    if refreshMode == Nav.REFRESH_REBUILD then
+        self:UpdateContent(self.searchString, true)
+    else
+        ZO_ScrollList_RefreshVisible(self.listControl)
+    end
+    self.needsRefresh = Nav.REFRESH_NONE
+end
 
 local function getDeveloperTooltip(node)
     if not Nav.isDeveloper or not Nav.saved.loggingEnabled then

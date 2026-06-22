@@ -71,7 +71,7 @@ function Node:AddBookmarkMenuItem(menu, entry)
         menu:AddItem(GetString(NAVIGATOR_MENU_ADDBOOKMARK), function()
             Nav.Bookmarks:add(entry)
             Nav.mainTab.menuOpen = false
-            zo_callLater(function() Nav.mainTab:ImmediateRefresh() end, 10)
+            zo_callLater(function() Nav.callback:FireCallbacks("Refresh") end, 10)
         end)
     end
 end

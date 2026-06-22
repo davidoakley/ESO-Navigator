@@ -122,7 +122,9 @@ function View:AddBookmarksCategory(categoryList)
         id = "bookmarks",
         title = NAVIGATOR_CATEGORY_BOOKMARKS,
         list = Nav.Bookmarks:getBookmarks(),
-        emptyHint = NAVIGATOR_HINT_NOBOOKMARKS
+        emptyHint = IsInGamepadPreferredMode()
+                        and NAVIGATOR_HINT_NOBOOKMARKS_GAMEPAD
+                         or NAVIGATOR_HINT_NOBOOKMARKS
     })
 end
 

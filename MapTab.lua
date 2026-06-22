@@ -65,21 +65,6 @@ function MapTab:queueRefresh(refreshMode)
     end
 end
 
--- FIXME: Split into keyboard + gamepad
-function MapTab:ImmediateRefresh(refreshMode)
-    if refreshMode == nil then refreshMode = Nav.REFRESH_REBUILD end
-
-    if Nav.Locations.keepsDirty then
-        Nav.Locations:UpdateKeeps()
-    end
-    if refreshMode == Nav.REFRESH_REBUILD then
-        self:UpdateContent(self.searchString, true)
-    else
-        ZO_ScrollList_RefreshVisible(self.listControl)
-    end
-    self.needsRefresh = Nav.REFRESH_NONE
-end
-
 function MapTab:ShowUndiscovered()
     self.currentView = "all"
     self:ImmediateRefresh()
@@ -112,14 +97,14 @@ function MapTab:AddStandardMenuItems(menu, data)
             menu:AddItem(GetString(NAVIGATOR_MENU_MOVEBOOKMARKDOWN), function()
                 Nav.Bookmarks:Move(data.node, 1)
                 self.menuOpen = false
-                zo_callLater(function() self:ImmediateRefresh() end, 10)
+                zo_callLater(function() Nav.callback:FireCallbacks("Refresh") end, 10)
             end, yPad)
             yPad = 0
         end
         menu:AddItem(GetString(NAVIGATOR_MENU_REMOVEBOOKMARK), function()
-            bookmarks:remove(data.node)
+            Nav.Bookmarks:remove(data.node)
             self.menuOpen = false
-            zo_callLater(function() self:ImmediateRefresh() end, 10)
+            zo_callLater(function() Nav.callback:FireCallbacks("Refresh") end, 10)
         end)
     end
 end

@@ -27,6 +27,7 @@ NAVIGATOR_CATEGORY_POI = SI_ZONECOMPLETIONTYPE2
 mkstr("NAVIGATOR_HINT_NORESULTS", "No results found")
 mkstr("NAVIGATOR_HINT_NORECENTS", "Destinations that you travel to will automatically appear here")
 mkstr("NAVIGATOR_HINT_NOBOOKMARKS", "Right click a destination to create (or delete) a bookmark for it")
+mkstr("NAVIGATOR_HINT_NOBOOKMARKS_GAMEPAD", "Try using [SEARCH] to find a destination and press [ACTIONS] to create (or delete) a bookmark for it")
 mkstr("NAVIGATOR_HINT_SHOWUNDISCOVERED", "Click to show undiscovered locations")
 mkstr("NAVIGATOR_HINT_NOMATCHES", "No matching items found")
 

@@ -68,6 +68,14 @@ function MapTab:Initialize(control)
 
     Nav.callback:RegisterCallback("OnMapChanged", function() self:OnMapChanged() end)
 
+    Nav.callback:RegisterCallback("Refresh", function(queue)
+        if queue then
+            self:queueRefresh()
+        else
+            self:ImmediateRefresh()
+        end
+    end)
+
     self.fragment:RegisterCallback("StateChange",  function(_, newState)
         if newState == SCENE_SHOWING then
             Nav.log(control:GetName() .. ": SCENE_SHOWING")
@@ -154,6 +162,9 @@ function MapTab:InitializeKeybindDescriptor()
         if self.currentView ~= nil then
             Nav.log("backButton: ResetView")
             self:ResetView()
+        elseif self.searchString and self.searchString ~= "" then
+            self.searchString = ""
+            self:ResetSearch()
         else
             Nav.log("backButton: ???")
             GAMEPAD_WORLD_MAP_INFO:Hide()
@@ -163,6 +174,20 @@ function MapTab:InitializeKeybindDescriptor()
     end
 
     ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.keybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, backButton)
+end
+
+function MapTab:ImmediateRefresh(refreshMode)
+    if refreshMode == nil then refreshMode = Nav.REFRESH_REBUILD end
+
+    if Nav.Locations.keepsDirty then
+        Nav.Locations:UpdateKeeps()
+    end
+    if refreshMode == Nav.REFRESH_REBUILD then
+        self:UpdateContent(self.searchString, true)
+    else
+        self.list:RefreshVisible()
+    end
+    self.needsRefresh = Nav.REFRESH_NONE
 end
 
 function MapTab:ShowActions()

@@ -190,7 +190,8 @@
 								self.editTextChanged = false
 							</OnBackspace>
 							<OnEnter>
-								self.tab:OnEnter()
+								local tab = self:GetOwningWindow().tab
+								tab:OnEnter()
 							</OnEnter>
 							<OnEscape>
 								-- self:LoseFocus()
