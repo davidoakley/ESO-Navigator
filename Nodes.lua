@@ -157,8 +157,8 @@ function ZoneNode:IsJumpable()
 end
 
 function ZoneNode:GetColour()
-    return (Nav.jumpState == Nav.JUMPSTATE_WAYSHRINE and Nav.COLOUR_NORMAL) or
-            (self:IsJumpable() and Nav.COLOUR_NORMAL) or Nav.COLOUR_POI
+    local canPort = self:IsJumpable() and Nav.jumpState ~= Nav.JUMPSTATE_TRANSITUS and Nav.jumpState ~= Nav.JUMPSTATE_CYRODIIL
+    return (Nav.jumpState == Nav.JUMPSTATE_WAYSHRINE or canPort) and Nav.COLOUR_NORMAL or Nav.COLOUR_POI
 end
 
 function ZoneNode:GetTagList()
@@ -391,15 +391,17 @@ function HouseNode:GetOverlayIcon()
 end
 
 function HouseNode:GetColour(isSelected)
-    if isSelected and self:IsKnown() and self:IsOwned() then
+    local available = self:IsKnown() and self:IsOwned() and CanJumpToHouseFromCurrentLocation()
+    if isSelected and available then
         return Nav.COLOUR_WHITE
     else
-        return (self:IsKnown() and self:IsOwned()) and Nav.COLOUR_NORMAL or Nav.COLOUR_DISABLED
+        return available and Nav.COLOUR_NORMAL or Nav.COLOUR_DISABLED
     end
 end
 
 function HouseNode:GetSuffixColour()
-    return (self:IsKnown() and self:IsOwned()) and Nav.COLOUR_SUFFIX_NORMAL or Nav.COLOUR_SUFFIX_DISABLED
+    local available = self:IsKnown() and self:IsOwned() and CanJumpToHouseFromCurrentLocation()
+    return available and Nav.COLOUR_SUFFIX_NORMAL or Nav.COLOUR_SUFFIX_DISABLED
 end
 
 function HouseNode:Jump(jumpOutside)
@@ -500,6 +502,21 @@ function FastTravelNode:GetSuffix()
     end
     return ""
 end
+
+function FastTravelNode:GetColour(isSelected)
+    local available = Nav.jumpState ~= Nav.JUMPSTATE_TRANSITUS and Nav.jumpState ~= Nav.JUMPSTATE_CYRODIIL
+    if isSelected and available then
+        return Nav.COLOUR_WHITE
+    else
+        return (available) and Nav.COLOUR_NORMAL or Nav.COLOUR_DISABLED
+    end
+end
+
+function FastTravelNode:GetSuffixColour()
+    local available = Nav.jumpState ~= Nav.JUMPSTATE_TRANSITUS and Nav.jumpState ~= Nav.JUMPSTATE_CYRODIIL
+    return (available) and Nav.COLOUR_SUFFIX_NORMAL or Nav.COLOUR_SUFFIX_DISABLED
+end
+
 
 function FastTravelNode:GetTagList()
     local tagList = {}
@@ -660,6 +677,18 @@ function PlayerHouseNode:GetOverlayIcon()
     return "Navigator/media/overlays/player.dds", Nav.COLOUR_WHITE
 end
 
+function PlayerHouseNode:GetColour(isSelected)
+    if isSelected and CanJumpToHouseFromCurrentLocation() then
+        return Nav.COLOUR_WHITE
+    else
+        return CanJumpToHouseFromCurrentLocation() and Nav.COLOUR_NORMAL or Nav.COLOUR_DISABLED
+    end
+end
+
+function PlayerHouseNode:GetSuffixColour()
+    return CanJumpToHouseFromCurrentLocation() and Nav.COLOUR_SUFFIX_NORMAL or Nav.COLOUR_SUFFIX_DISABLED
+end
+
 function PlayerHouseNode:GetActions()
     return { singleClick = Nav.ACTION_VISITHOUSE }
 end
@@ -738,8 +767,7 @@ end
 --- @class KeepNode
 local KeepNode = Node:New()
 
-function KeepNode:GetSuffix() --TODO: Fix Colour when disabled
-    Nav.log("GetSuffix: %s -> %s", self.originalName, Nav.KeepSuffix(self.originalName) or "-")
+function KeepNode:GetSuffix()
     return Nav.KeepSuffix(self.originalName)
 end
 
