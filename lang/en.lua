@@ -148,7 +148,7 @@ mkstr("NAVIGATOR_SETTINGS_QUEST_ACTIONS_TOOLTIP",           "Mouse and key actio
 mkstr("NAVIGATOR_SETTINGS_JOIN_GUILD_NAME",                 "Join our guild!")
 mkstr("NAVIGATOR_SETTINGS_JOIN_GUILD_DESCRIPTION",          "|cC5C29E|H1:guild:767808|hMora's Whispers|h is a vibrant social lair with a free trader, loads of events, weekly raffles, fully equipped guild base, active Discord and so forth! Hit the link above to find out more!|r")
 
-mkstr("NAVIGATOR_SETTINGS_TABS_HEADER", "World Map Tabs (beta)")
+mkstr("NAVIGATOR_SETTINGS_TABS_HEADER", "World Map Tabs")
 mkstr("NAVIGATOR_SETTINGS_TABS_REPLACE_QUESTS_NAME", "Replace Quests Tab")
 mkstr("NAVIGATOR_SETTINGS_TABS_REPLACE_QUESTS_TOOLTIP", "Replace the World Map's Quests tab with Navigator's Quests view")
 mkstr("NAVIGATOR_SETTINGS_TABS_REPLACE_LOCATIONS_NAME", "Replace Locations Tab")
