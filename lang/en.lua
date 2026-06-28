@@ -27,7 +27,9 @@ NAVIGATOR_CATEGORY_POI = SI_ZONECOMPLETIONTYPE2
 mkstr("NAVIGATOR_HINT_NORESULTS", "No results found")
 mkstr("NAVIGATOR_HINT_NORECENTS", "Destinations that you travel to will automatically appear here")
 mkstr("NAVIGATOR_HINT_NOBOOKMARKS", "Right click a destination to create (or delete) a bookmark for it")
+mkstr("NAVIGATOR_HINT_NOBOOKMARKS_GAMEPAD", "Try using [SEARCH] to find a destination and press [ACTIONS] to create (or delete) a bookmark for it")
 mkstr("NAVIGATOR_HINT_SHOWUNDISCOVERED", "Click to show undiscovered locations")
+mkstr("NAVIGATOR_HINT_NOMATCHES", "No matching items found")
 
 -- Enter key label (keep it short!)
 mkstr("NAVIGATOR_KEY_ENTER", "Enter")
@@ -60,8 +62,10 @@ mkstr("NAVIGATOR_MENU_QUESTS", "Quests")
 mkstr("NAVIGATOR_MENU_CLEARVIEW", "Clear view")
 mkstr("NAVIGATOR_MENU_SELECT_QUEST", "Select Quest")
 mkstr("NAVIGATOR_MENU_QUEST_JUMP", "Jump to nearest Wayshrine")
+mkstr("NAVIGATOR_MENU_VIEWS", "Views")
 NAVIGATOR_MENU_SHOWONMAP = SI_QUEST_JOURNAL_SHOW_ON_MAP
 NAVIGATOR_MENU_SETDESTINATION = SI_WORLD_MAP_ACTION_SET_PLAYER_WAYPOINT
+NAVIGATOR_MENU_SEARCH = SI_GAMEPAD_MOD_BROWSER_DEFAULT_SEARCH_TEXT
 
 -- Status / error messages
 mkstr("NAVIGATOR_NO_TRAVEL_PLAYER", "No players to travel to")
@@ -144,7 +148,7 @@ mkstr("NAVIGATOR_SETTINGS_QUEST_ACTIONS_TOOLTIP",           "Mouse and key actio
 mkstr("NAVIGATOR_SETTINGS_JOIN_GUILD_NAME",                 "Join our guild!")
 mkstr("NAVIGATOR_SETTINGS_JOIN_GUILD_DESCRIPTION",          "|cC5C29E|H1:guild:767808|hMora's Whispers|h is a vibrant social lair with a free trader, loads of events, weekly raffles, fully equipped guild base, active Discord and so forth! Hit the link above to find out more!|r")
 
-mkstr("NAVIGATOR_SETTINGS_TABS_HEADER", "World Map Tabs (beta)")
+mkstr("NAVIGATOR_SETTINGS_TABS_HEADER", "World Map Tabs")
 mkstr("NAVIGATOR_SETTINGS_TABS_REPLACE_QUESTS_NAME", "Replace Quests Tab")
 mkstr("NAVIGATOR_SETTINGS_TABS_REPLACE_QUESTS_TOOLTIP", "Replace the World Map's Quests tab with Navigator's Quests view")
 mkstr("NAVIGATOR_SETTINGS_TABS_REPLACE_LOCATIONS_NAME", "Replace Locations Tab")
@@ -161,6 +165,10 @@ function Navigator.DisplayName(name)
     name = name:gsub("^Dungeon: ", "")
     name = name:gsub("^Trial: ", "")
     name = name:gsub(" Wayshrine$", "")
+    name = name:gsub("^Castle ", "")
+    name = name:gsub("^Fort ", "")
+    name = name:gsub(" Keep$", "")
+    name = name:gsub(" Outpost$", "")
     return name
 end
 function Navigator.SearchName(name)
@@ -168,10 +176,28 @@ function Navigator.SearchName(name)
     name = name:gsub("^Trial: ", "")
     name = name:gsub(" Wayshrine$", "")
     name = name:gsub(" II$", " II 2", 1):gsub(" I$", " I 1", 1) -- Allows searches like COA2 (for City of Ash II)
+    name = name:gsub("^Castle ", "")
+    name = name:gsub("^Fort ", "")
+    if name ~= "Blue Road Keep" then
+        name = name:gsub(" Keep$", "")
+    end
+    name = name:gsub(" Outpost$", "")
     return name
 end
 function Navigator.SortName(name)
     name = string.lower(Navigator.DisplayName(name))
     name = Navigator.Utils.SimplifyAccents(name)
     return Navigator.Utils.trim(name)
+end
+function Navigator.KeepSuffix(name)
+    if string.match(name, "^Castle ") then
+        return "Castle"
+    elseif string.match(name, "^Fort ") then
+        return "Fort"
+    elseif string.match(name, " Keep$") then
+        return "Keep"
+    elseif string.match(name, " Outpost$") then
+        return "Outpost"
+    end
+    return nil
 end

@@ -24,11 +24,12 @@ function TreasureNode:GetTagList()
     return Nav.Utils.tableConcat(tagList, Nav.Node.GetTagList(self))
 end
 
-function TreasureNode:AddMenuItems()
-    AddMenuItem(GetString(NAVIGATOR_MENU_SHOWONMAP), function()
+--- @param menu Menu
+function TreasureNode:AddMenuItems(menu)
+    menu:AddItem(GetString(NAVIGATOR_MENU_SHOWONMAP), function()
         self:ZoomToPOI(false)
     end)
-    AddMenuItem(GetString(NAVIGATOR_MENU_SETDESTINATION), function()
+    menu:AddItem(GetString(NAVIGATOR_MENU_SETDESTINATION), function()
         self:ZoomToPOI(true)
     end)
 end

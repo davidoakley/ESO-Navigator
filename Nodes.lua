@@ -64,14 +64,14 @@ function PlayerNode:GetSuffixColour()
 end
 
 function PlayerNode:JumpToPrimaryResidence()
-    SCENE_MANAGER:Hide("worldMap")
+    ZO_WorldMap_HideWorldMap()
     ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.POSITIVE_CLICK,zo_strformat(GetString(NAVIGATOR_TRAVELING_TO_PLAYER_HOUSE), self.userID))
     JumpToHouse(self.userID)
 end
 
 function PlayerNode:JumpToPlayer()
     ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.POSITIVE_CLICK,zo_strformat(GetString(NAVIGATOR_TRAVELING_TO_PLAYER_IN_ZONE), self.userID, self.zoneName))
-    SCENE_MANAGER:Hide("worldMap")
+    ZO_WorldMap_HideWorldMap()
     if self.isFriend then
         JumpToFriend(self.userID)
     elseif self.isGuildmate then
@@ -81,7 +81,12 @@ function PlayerNode:JumpToPlayer()
     end
 end
 
-function PlayerNode:OnClick() self:JumpToPlayer() end
+function PlayerNode:DoAction(action)
+    if action == Nav.ACTION_TRAVEL then
+        self:JumpToPlayer()
+    end
+end
+
 function PlayerNode:OnSlash() self:JumpToPlayer() end
 function PlayerNode:OnEnter() self:JumpToPlayer() end
 
@@ -89,27 +94,28 @@ function PlayerNode:GetActions()
     return { singleClick = Nav.ACTION_TRAVEL }
 end
 
-function PlayerNode:AddMenuItems()
+--- @param menu Menu
+function PlayerNode:AddMenuItems(menu)
     if self.isOnline then
-        AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE), self.userID), function()
+        menu:AddItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE), self.userID), function()
             zo_callLater(function() self:JumpToPlayer() end, 10)
         end)
     end
     if Nav.Players:IsGroupLeader() and self.isGroupmate then
-        AddMenuItem(GetString(SI_GROUP_LIST_MENU_PROMOTE_TO_LEADER), function()
+        menu:AddItem(GetString(SI_GROUP_LIST_MENU_PROMOTE_TO_LEADER), function()
             GroupPromote(self.unitTag)
             Nav.mainTab.menuOpen = false
             Nav.mainTab:ImmediateRefresh()
         end)
     end
-    AddMenuItem(GetString(SI_SOCIAL_MENU_VISIT_HOUSE), function()
+    menu:AddItem(GetString(SI_SOCIAL_MENU_VISIT_HOUSE), function()
         self:JumpToPrimaryResidence()
         Nav.mainTab.menuOpen = false
     end)
 
     local bookmarkEntry = { playerHouse = self.userID }
     if not Nav.Bookmarks:contains(bookmarkEntry) then
-        AddMenuItem(GetString(NAVIGATOR_MENU_ADDHOUSEBOOKMARK), function()
+        menu:AddItem(GetString(NAVIGATOR_MENU_ADDHOUSEBOOKMARK), function()
             Nav.Bookmarks:add(bookmarkEntry)
             Nav.mainTab.menuOpen = false
             zo_callLater(function() Nav.mainTab:ImmediateRefresh() end, 10)
@@ -151,8 +157,8 @@ function ZoneNode:IsJumpable()
 end
 
 function ZoneNode:GetColour()
-    return (Nav.jumpState == Nav.JUMPSTATE_WAYSHRINE and Nav.COLOUR_NORMAL) or
-            (self:IsJumpable() and Nav.COLOUR_NORMAL) or Nav.COLOUR_POI
+    local canPort = self:IsJumpable() and Nav.jumpState ~= Nav.JUMPSTATE_TRANSITUS and Nav.jumpState ~= Nav.JUMPSTATE_CYRODIIL
+    return (Nav.jumpState == Nav.JUMPSTATE_WAYSHRINE or canPort) and Nav.COLOUR_NORMAL or Nav.COLOUR_POI
 end
 
 function ZoneNode:GetTagList()
@@ -197,7 +203,7 @@ function ZoneNode:JumpToZone()
     end
 
     ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.POSITIVE_CLICK, (zo_strformat(GetString(NAVIGATOR_TRAVELING_TO_ZONE_VIA_PLAYER), player.zoneName, player.userID)))
-    SCENE_MANAGER:Hide("worldMap")
+    ZO_WorldMap_HideWorldMap()
     if player.isFriend then
         JumpToFriend(player.userID)
     elseif player.isGuildmate then
@@ -230,20 +236,21 @@ function ZoneNode:DoAction(action)
     end
 end
 
-function ZoneNode:AddMenuItems()
+--- @param menu Menu
+function ZoneNode:AddMenuItems(menu)
     local targetMapId = self.mapId or Nav.Locations.GetMapIdByZoneId(self.zoneId)
     if targetMapId ~= GetCurrentMapId() then
-        AddMenuItem(GetString(NAVIGATOR_MENU_SHOWONMAP), function()
+        menu:AddItem(GetString(NAVIGATOR_MENU_SHOWONMAP), function()
             WORLD_MAP_MANAGER:SetMapById(targetMapId)
         end)
     end
 
     if Nav.jumpState == Nav.JUMPSTATE_WORLD and self.canJumpToPlayer and self.zoneId ~= Nav.ZONE_CYRODIIL then
-        AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE), self.zoneName), function()
+        menu:AddItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE), self.zoneName), function()
             zo_callLater(function() self:JumpToZone() end, 10)
         end)
     end
-    self:AddBookmarkMenuItem({ zoneId = self.zoneId, mapId = self.mapId })
+    self:AddBookmarkMenuItem(menu, { zoneId = self.zoneId, mapId = self.mapId })
 end
 
 
@@ -289,8 +296,12 @@ end
 
 JumpToZoneNode.GetIconColour = JumpToZoneNode.GetColour
 
-function JumpToZoneNode:OnClick()
-    self:JumpToZone()
+function JumpToZoneNode:DoAction(action)
+    if action == Nav.ACTION_TRAVEL then
+        self:JumpToZone()
+    else
+        Node.DoAction(self, action)
+    end
 end
 
 
@@ -380,22 +391,24 @@ function HouseNode:GetOverlayIcon()
 end
 
 function HouseNode:GetColour(isSelected)
-    if isSelected and self:IsKnown() and self:IsOwned() then
+    local available = self:IsKnown() and self:IsOwned() and CanJumpToHouseFromCurrentLocation()
+    if isSelected and available then
         return Nav.COLOUR_WHITE
     else
-        return (self:IsKnown() and self:IsOwned()) and Nav.COLOUR_NORMAL or Nav.COLOUR_DISABLED
+        return available and Nav.COLOUR_NORMAL or Nav.COLOUR_DISABLED
     end
 end
 
 function HouseNode:GetSuffixColour()
-    return (self:IsKnown() and self:IsOwned()) and Nav.COLOUR_SUFFIX_NORMAL or Nav.COLOUR_SUFFIX_DISABLED
+    local available = self:IsKnown() and self:IsOwned() and CanJumpToHouseFromCurrentLocation()
+    return available and Nav.COLOUR_SUFFIX_NORMAL or Nav.COLOUR_SUFFIX_DISABLED
 end
 
 function HouseNode:Jump(jumpOutside)
     if not CanJumpToHouseFromCurrentLocation() then
         local cannotJumpString = self:IsOwned() and GetString(SI_COLLECTIONS_CANNOT_JUMP_TO_HOUSE_FROM_LOCATION) or GetString(SI_COLLECTIONS_CANNOT_PREVIEW_HOUSE_FROM_LOCATION)
         zo_callLater(function()
-            SCENE_MANAGER:Hide("worldMap")
+            ZO_WorldMap_HideWorldMap()
             ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, cannotJumpString)
         end, 10)
         return
@@ -404,7 +417,7 @@ function HouseNode:Jump(jumpOutside)
     local stringId = jumpOutside and NAVIGATOR_TRAVELING_TO_HOUSE_OUTSIDE or NAVIGATOR_TRAVELING_TO_HOUSE_INSIDE
     ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.POSITIVE_CLICK, zo_strformat(GetString(stringId), self.name))
     RequestJumpToHouse(self:GetHouseId(), jumpOutside)
-    zo_callLater(function() SCENE_MANAGER:Hide("worldMap") end, 10)
+    zo_callLater(function() ZO_WorldMap_HideWorldMap() end, 10)
 end
 
 function HouseNode:GetActions()
@@ -423,16 +436,17 @@ function HouseNode:DoAction(action)
     end
 end
 
-function HouseNode:AddMenuItems()
+--- @param menu Menu
+function HouseNode:AddMenuItems(menu)
     if self:IsOwned() then
-        AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_HOUSE_INSIDE), self.name), function()
+        menu:AddItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_HOUSE_INSIDE), self.name), function()
             self:Jump(false)
         end)
-        AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_HOUSE_OUTSIDE), self.name), function()
+        menu:AddItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_HOUSE_OUTSIDE), self.name), function()
             self:Jump(true)
         end)
     else
-        AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_PREVIEW_HOUSE), self.name), function()
+        menu:AddItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_PREVIEW_HOUSE), self.name), function()
             self:Jump(false)
         end)
     end
@@ -448,13 +462,13 @@ function HouseNode:AddMenuItems()
     --        ClearMenu()
     --    end)
     --end
-    AddMenuItem(GetString(NAVIGATOR_MENU_SHOWONMAP), function()
+    menu:AddItem(GetString(NAVIGATOR_MENU_SHOWONMAP), function()
         self:ZoomToPOI(false)
     end)
-    AddMenuItem(GetString(NAVIGATOR_MENU_SETDESTINATION), function()
+    menu:AddItem(GetString(NAVIGATOR_MENU_SETDESTINATION), function()
         self:ZoomToPOI(true)
     end)
-    self:AddBookmarkMenuItem({ nodeIndex = self.nodeIndex })
+    self:AddBookmarkMenuItem(menu, { nodeIndex = self.nodeIndex })
 end
 
 
@@ -488,6 +502,21 @@ function FastTravelNode:GetSuffix()
     end
     return ""
 end
+
+function FastTravelNode:GetColour(isSelected)
+    local available = Nav.jumpState ~= Nav.JUMPSTATE_TRANSITUS and Nav.jumpState ~= Nav.JUMPSTATE_CYRODIIL
+    if isSelected and available then
+        return Nav.COLOUR_WHITE
+    else
+        return (available) and Nav.COLOUR_NORMAL or Nav.COLOUR_DISABLED
+    end
+end
+
+function FastTravelNode:GetSuffixColour()
+    local available = Nav.jumpState ~= Nav.JUMPSTATE_TRANSITUS and Nav.jumpState ~= Nav.JUMPSTATE_CYRODIIL
+    return (available) and Nav.COLOUR_SUFFIX_NORMAL or Nav.COLOUR_SUFFIX_DISABLED
+end
+
 
 function FastTravelNode:GetTagList()
     local tagList = {}
@@ -601,7 +630,7 @@ function FastTravelNode:Jump()
        (confirm == Nav.CONFIRMFASTTRAVEL_WHENCOST and cost == 0) then
         zo_callLater(function()
             FastTravelToNode(self.nodeIndex)
-            SCENE_MANAGER:Hide("worldMap")
+            ZO_WorldMap_HideWorldMap()
             local id = Nav.jumpState == Nav.JUMPSTATE_WORLD and NAVIGATOR_RECALLING_TO_LOCATION_COST or NAVIGATOR_TRAVELING_TO_LOCATION
             local currencyString = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(CURT_MONEY, cost, ZO_CURRENCY_FORMAT_AMOUNT_ICON))
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.POSITIVE_CLICK,
@@ -615,20 +644,21 @@ function FastTravelNode:Jump()
     ZO_Dialogs_ShowPlatformDialog(id, {nodeIndex = self.nodeIndex}, {mainTextParams = {self.originalName}})
 end
 
-function FastTravelNode:AddMenuItems()
+--- @param menu Menu
+function FastTravelNode:AddMenuItems(menu)
     if self:IsKnown() then
         local strId = Nav.jumpState == Nav.JUMPSTATE_WORLD and SI_WORLD_MAP_ACTION_RECALL_TO_WAYSHRINE or SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE
-        AddMenuItem(zo_strformat(GetString(strId), self.name), function()
+        menu:AddItem(zo_strformat(GetString(strId), self.name), function()
             self:Jump()
         end)
     end
-    AddMenuItem(GetString(NAVIGATOR_MENU_SHOWONMAP), function()
+    menu:AddItem(GetString(NAVIGATOR_MENU_SHOWONMAP), function()
         self:ZoomToPOI(false)
     end)
-    AddMenuItem(GetString(NAVIGATOR_MENU_SETDESTINATION), function()
+    menu:AddItem(GetString(NAVIGATOR_MENU_SETDESTINATION), function()
         self:ZoomToPOI(true)
     end)
-    self:AddBookmarkMenuItem({ nodeIndex = self.nodeIndex })
+    self:AddBookmarkMenuItem(menu, { nodeIndex = self.nodeIndex })
 end
 
 function FastTravelNode:GetActions()
@@ -647,20 +677,38 @@ function PlayerHouseNode:GetOverlayIcon()
     return "Navigator/media/overlays/player.dds", Nav.COLOUR_WHITE
 end
 
+function PlayerHouseNode:GetColour(isSelected)
+    if isSelected and CanJumpToHouseFromCurrentLocation() then
+        return Nav.COLOUR_WHITE
+    else
+        return CanJumpToHouseFromCurrentLocation() and Nav.COLOUR_NORMAL or Nav.COLOUR_DISABLED
+    end
+end
+
+function PlayerHouseNode:GetSuffixColour()
+    return CanJumpToHouseFromCurrentLocation() and Nav.COLOUR_SUFFIX_NORMAL or Nav.COLOUR_SUFFIX_DISABLED
+end
+
 function PlayerHouseNode:GetActions()
     return { singleClick = Nav.ACTION_VISITHOUSE }
 end
 
-function PlayerHouseNode:OnClick()
-    SCENE_MANAGER:Hide("worldMap")
-    ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.POSITIVE_CLICK,zo_strformat(GetString(NAVIGATOR_TRAVELING_TO_PLAYER_HOUSE), self.userID))
-    JumpToHouse(self.userID)
+function PlayerHouseNode:DoAction(action)
+    if action == Nav.ACTION_VISITHOUSE then
+        ZO_WorldMap_HideWorldMap()
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.POSITIVE_CLICK,zo_strformat(GetString(NAVIGATOR_TRAVELING_TO_PLAYER_HOUSE), self.userID))
+        JumpToHouse(self.userID)
+    else
+        Node.DoAction(self, action)
+    end
 end
 
-function PlayerHouseNode:AddMenuItems()
-    AddMenuItem(GetString(SI_SOCIAL_MENU_VISIT_HOUSE), function()
+
+--- @param menu Menu
+function PlayerHouseNode:AddMenuItems(menu)
+    menu:AddItem(GetString(SI_SOCIAL_MENU_VISIT_HOUSE), function()
         zo_callLater(function()
-            SCENE_MANAGER:Hide("worldMap")
+            ZO_WorldMap_HideWorldMap()
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.POSITIVE_CLICK,zo_strformat(GetString(NAVIGATOR_TRAVELING_TO_PLAYER_HOUSE), self.userID))
             JumpToHouse(self.userID)
         end, 10)
@@ -692,14 +740,15 @@ function POINode:GetSuffixColour()
 end
 POINode.GetTagColour = POINode.GetSuffixColour
 
-function POINode:AddMenuItems()
-    AddMenuItem(GetString(NAVIGATOR_MENU_SHOWONMAP), function()
+--- @param menu Menu
+function POINode:AddMenuItems(menu)
+    menu:AddItem(GetString(NAVIGATOR_MENU_SHOWONMAP), function()
         self:ZoomToPOI(false)
     end)
-    AddMenuItem(GetString(NAVIGATOR_MENU_SETDESTINATION), function()
+    menu:AddItem(GetString(NAVIGATOR_MENU_SETDESTINATION), function()
         self:ZoomToPOI(true)
     end)
-    self:AddBookmarkMenuItem({ poi = { poiIndex = self.poiIndex, zoneId = self.zoneId } })
+    self:AddBookmarkMenuItem(menu, { poi = { poiIndex = self.poiIndex, zoneId = self.zoneId } })
 end
 
 function POINode:GetActions()
@@ -718,14 +767,20 @@ end
 --- @class KeepNode
 local KeepNode = Node:New()
 
+function KeepNode:GetSuffix()
+    return Nav.KeepSuffix(self.originalName)
+end
+
 function KeepNode:GetColour(isSelected)
-    if isSelected and self.accessible then
-        return Nav.COLOUR_WHITE
-    elseif self.accessible then
-        return Nav.COLOUR_NORMAL
+    if self.accessible then
+        return isSelected and Nav.COLOUR_WHITE or Nav.COLOUR_NORMAL
     else
         return Nav.COLOUR_POI
     end
+end
+
+function KeepNode:GetSuffixColour()
+    return self.accessible and  Nav.COLOUR_SUFFIX_NORMAL or Nav.COLOUR_SUFFIX_POI
 end
 
 function KeepNode:GetTagList()
@@ -782,16 +837,17 @@ function KeepNode:Jump()
     end
 end
 
-function KeepNode:AddMenuItems()
+--- @param menu Menu
+function KeepNode:AddMenuItems(menu)
     if self.accessible then
-        AddMenuItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE), self.name), function()
+        menu:AddItem(zo_strformat(GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_WAYSHRINE), self.name), function()
             self:Jump()
         end)
     end
-    AddMenuItem(GetString(NAVIGATOR_MENU_SHOWONMAP), function()
+    menu:AddItem(GetString(NAVIGATOR_MENU_SHOWONMAP), function()
         self:ZoomToPOI(false, true)
     end)
-    AddMenuItem(GetString(NAVIGATOR_MENU_SETDESTINATION), function()
+    menu:AddItem(GetString(NAVIGATOR_MENU_SETDESTINATION), function()
         self:ZoomToPOI(true, true)
     end)
     --self:AddBookmarkMenuItem({ nodeIndex = self.nodeIndex })

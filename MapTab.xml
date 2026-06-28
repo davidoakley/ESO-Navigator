@@ -128,8 +128,7 @@
 
         <TopLevelControl name="Navigator_MainTab" inherits="ZO_WorldMapInfoContent">
             <OnInitialized>
-				Navigator.AttachMapTab("mainTab", self, Navigator.MapTab)
-				self:init()
+				Navigator_MainTab_OnInitialized(self)
 			</OnInitialized>
             <Controls>
 				<Backdrop name="$(parent)Search" tier="HIGH"  inherits="ZO_SingleLineEditBackdrop_Keyboard"  mouseEnabled="true">
@@ -180,7 +179,7 @@
 							<Anchor point="TOPLEFT" relativeTo="$(parent)Separator" relativePoint="TOPRIGHT" offsetX="2" offsetY="-1" />
 							<Anchor point="TOPRIGHT" relativeTo="$(parent)Clear" relativePoint="TOPLEFT" offsetX="-4" offsetY="-1" />
 							<OnInitialized>
-								self.tab = self:GetParent():GetParent()
+								--self.tab = self.owningWindow.tab --self:GetParent():GetParent().tab
 							</OnInitialized>
 							<OnBackspace>
 								--Navigator.log("OnBackspace: pos="..self:GetCursorPosition().." changed="..(self.editTextChanged and 1 or 0))
@@ -191,48 +190,53 @@
 								self.editTextChanged = false
 							</OnBackspace>
 							<OnEnter>
-								self.tab:OnEnter()
+								local tab = self:GetOwningWindow().tab
+								tab:OnEnter()
 							</OnEnter>
 							<OnEscape>
 								-- self:LoseFocus()
-								SCENE_MANAGER:Hide("worldMap")
+								ZO_WorldMap_HideWorldMap()
 							</OnEscape>
 							<OnEffectivelyShown>
-								self.tab:ResetSearch()
+								local tab = self:GetOwningWindow().tab
+								tab:ResetSearch()
 								if Navigator.saved.autoFocus then
 									self:TakeFocus()
 								end
 							</OnEffectivelyShown>
 							<OnFocusGained>
-								self.tab:buildScrollList()
-								zo_callLater(function() self.tab:UpdateEditDefaultText() end, 10)
+								local tab = self:GetOwningWindow().tab
+								tab:buildScrollList()
+								zo_callLater(function() tab:UpdateEditDefaultText() end, 10)
 							</OnFocusGained>
 							<OnFocusLost>
-								self.tab:UpdateEditDefaultText()
-								self.tab:buildScrollList()
+								local tab = self:GetOwningWindow().tab
+								tab:UpdateEditDefaultText()
+								tab:buildScrollList()
 							</OnFocusLost>
 							<OnTextChanged>
+								local tab = self:GetOwningWindow().tab
 								--Navigator.log("onTextChanged: pos="..self:GetCursorPosition())
-								self.tab:onTextChanged(self)
+								tab:onTextChanged(self)
 							</OnTextChanged>
 							<OnMouseDown>
 								self:TakeFocus()
 								ZO_EditDefaultText_Disable(self)
 							</OnMouseDown>
 							<OnDownArrow>
-								self.tab:nextResult()
+								self:GetOwningWindow().tab:nextResult()
 							</OnDownArrow>
 							<OnUpArrow>
-								self.tab:previousResult()
+								self:GetOwningWindow().tab:previousResult()
 							</OnUpArrow>
 							<OnPageDown>
-								self.tab:nextCategory()
+								self:GetOwningWindow().tab:nextCategory()
 							</OnPageDown>
 							<OnPageUp>
-								self.tab:previousCategory()
+								self:GetOwningWindow().tab:previousCategory()
 							</OnPageUp>
 							<OnTab>
-								self.tab.editControl:LoseFocus()
+								self:GetOwningWindow().tab.editControl:LoseFocus()
 							</OnTab>
 						</EditBox>						
 					</Controls>
@@ -249,8 +253,7 @@
 
 		<TopLevelControl name="Navigator_QuestTab" inherits="ZO_WorldMapInfoContent">
 			<OnInitialized>
-				Navigator.AttachMapTab("questTab", self, Navigator.MapTab, "quests")
-				self:init()
+				Navigator_QuestTab_OnInitialized(self)
 			</OnInitialized>
 			<Controls>
 				<Control name="$(parent)List" inherits="ZO_ScrollList">
@@ -263,8 +266,7 @@
 
 		<TopLevelControl name="Navigator_HousingTab" inherits="ZO_WorldMapInfoContent">
 			<OnInitialized>
-				Navigator.AttachMapTab("housingTab", self, Navigator.MapTab, "houses")
-				self:init()
+				Navigator_HousingTab_OnInitialized(self)
 			</OnInitialized>
 			<Controls>
 				<Control name="$(parent)List" inherits="ZO_ScrollList">
@@ -277,8 +279,7 @@
 
 		<TopLevelControl name="Navigator_ZonesTab" inherits="ZO_WorldMapInfoContent">
 			<OnInitialized>
-				Navigator.AttachMapTab("zonesTab", self, Navigator.MapTab, "zones")
-				self:init()
+				Navigator_ZonesTab_OnInitialized(self)
 			</OnInitialized>
 			<Controls>
 				<Control name="$(parent)List" inherits="ZO_ScrollList">

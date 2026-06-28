@@ -10,6 +10,7 @@ Navigator = {
   isDeveloper = (GetDisplayName() == '@SirNightstorm' and true) or false,
   mapVisible = false,
   currentNodeIndex = nil,
+  callback = ZO_CallbackObject:New()
 }
 local Nav = Navigator
 
@@ -105,7 +106,9 @@ function Nav.mkstr(id, str)
     end
 end
 
-function Nav:OnFocusSearchPressed(keyDown)
+-- @usage Triggered when the Focus Search key is pressed
+-- @param keyDown
+function Nav:OnFocusSearchPressed(_)
     if self.mapVisible then
         self.showSearch()
         return true
@@ -114,18 +117,38 @@ function Nav:OnFocusSearchPressed(keyDown)
     end
 end
 
+local function findTabIndexWithIsNavigator()
+    local arr = GAMEPAD_WORLD_MAP_INFO.baseHeaderData.tabBarEntries
+    for i = 1, #arr do
+        local t = arr[i]
+        if type(t) == "table" and t.isNavigator then
+            Nav.log("findTabIndexWithIsNavigator: %d", i)
+            return i
+        end
+    end
+    return nil -- not found
+end
+
 function Nav.showSearch(callback)
     Nav.log("showSearch")
-    local tabVisible = Nav.mainTab.visible
-    MAIN_MENU_KEYBOARD:ShowScene("worldMap")
-    WORLD_MAP_INFO:SelectTab(NAVIGATOR_TAB_SEARCH)
-    Nav.mainTab:ResetSearch()
-    if Nav.saved.autoFocus or tabVisible then
-        Nav.mainTab.editControl:TakeFocus()
-        Nav.log("showSearch: setting editControl focus")
-    end
-    if callback then
-        callback()
+    ZO_WorldMap_ShowWorldMap()
+    if IsInGamepadPreferredMode() then
+        GAMEPAD_WORLD_MAP_INFO:Show()
+        Nav.mainTab_gamepad:ResetSearch()
+        ZO_GamepadGenericHeader_SetActiveTabIndex(GAMEPAD_WORLD_MAP_INFO.header, findTabIndexWithIsNavigator())
+        --GAMEPAD_WORLD_MAP_INFO:SwitchToFragment(Nav.mainTab_gamepad.fragment, false) -- Doesn't work
+    else
+        local tabVisible = Nav.mainTab.visible
+        --MAIN_MENU_KEYBOARD:ShowScene("worldMap")
+        WORLD_MAP_INFO:SelectTab(NAVIGATOR_TAB_SEARCH)
+        Nav.mainTab:ResetSearch()
+        if Nav.saved.autoFocus or tabVisible then
+            Nav.mainTab.editControl:TakeFocus()
+            Nav.log("showSearch: setting editControl focus")
+        end
+        if callback then
+            callback()
+        end
     end
 end
 
@@ -222,9 +245,8 @@ local function OnMapChanged()
     if Nav.mainTab.visible then
         Nav.Locations:UpdateKeeps()
         Nav.mainTab:ImmediateRefresh()
-    else
     end
-  Nav.mainTab:OnMapChanged()
+    Nav.callback:FireCallbacks("OnMapChanged")
 end
 
 local function OnStartFastTravel(eventCode, nodeIndex)
@@ -397,7 +419,7 @@ local function setupTabs(self)
         WORLD_MAP_INFO:SelectTab(NAVIGATOR_TAB_SEARCH)
     end
 
-    if self.saved.replaceQuestsTab then
+    if self.saved.replaceQuestsTab and self.questTab then
         local questButtonData = {
             normal = "EsoUI/Art/WorldMap/map_indexIcon_quests_up.dds",
             pressed = "EsoUI/Art/WorldMap/map_indexIcon_quests_down.dds",
@@ -406,7 +428,7 @@ local function setupTabs(self)
         replaceWorldMapTab(SI_MAP_INFO_MODE_QUESTS, { self.questTab.fragment }, questButtonData)
     end
 
-    if self.saved.replaceLocationsTab then
+    if self.saved.replaceLocationsTab and self.zonesTab then
         local zonesButtonData = {
             normal = "EsoUI/Art/WorldMap/map_indexIcon_locations_up.dds",
             pressed = "EsoUI/Art/WorldMap/map_indexIcon_locations_down.dds",
@@ -415,7 +437,7 @@ local function setupTabs(self)
         replaceWorldMapTab(SI_MAP_INFO_MODE_LOCATIONS, { self.zonesTab.fragment }, zonesButtonData)
     end
 
-    if self.saved.replaceHousesTab then
+    if self.saved.replaceHousesTab and self.housingTab then
         local housingButtonData = {
             normal = "EsoUI/Art/WorldMap/map_indexIcon_housing_up.dds",
             pressed = "EsoUI/Art/WorldMap/map_indexIcon_housing_down.dds",
@@ -425,6 +447,70 @@ local function setupTabs(self)
     end
 
     self.lastTab = self.mainTab
+end
+
+local function setupGamepadTabs(self)
+    local mapInfo = GAMEPAD_WORLD_MAP_INFO
+    local tabBarEntries = mapInfo.tabBarEntries
+    self.originalHeaderData = GAMEPAD_WORLD_MAP_INFO.baseHeaderData
+
+    local newTab = {
+        isNavigator = true,
+        text = GetString(NAVIGATOR_TAB_SEARCH),
+        callback = function() GAMEPAD_WORLD_MAP_INFO:SwitchToFragment(Nav.mainTab_gamepad.fragment) end,
+    }
+
+    table.insert(tabBarEntries, 1, newTab)
+
+    self.tabBarEntries = tabBarEntries
+    mapInfo.tabBarEntries = tabBarEntries
+
+    --ZO_GamepadGenericHeader_Refresh(mapInfo.header, mapInfo:GetHeaderData())
+    ZO_GamepadGenericHeader_SetActiveTabIndex(mapInfo.header, 1)
+end
+
+local function hookGamepadWorldMapKeybinds(self)
+    local getDescriptor = function()
+        for keybindButtonDescriptor, _ in pairs(KEYBIND_STRIP.keybindGroups) do
+            return keybindButtonDescriptor
+        end
+        return nil
+    end
+    local hasNavigatorKeybind = function(descriptor)
+        for i = 1, #descriptor do
+            if descriptor[i].name == GetString(NAVIGATOR_TAB_SEARCH) then
+                return true
+            end
+        end
+        return false
+    end
+
+    local oldFunc
+    local newFunc = function(enabled)
+        oldFunc(enabled)
+        if enabled then
+            local descriptor = getDescriptor()
+
+            if descriptor and not hasNavigatorKeybind(descriptor) then
+                table.insert(descriptor, {
+                    name = GetString(NAVIGATOR_TAB_SEARCH),
+                    keybind = "UI_SHORTCUT_QUINARY",
+                    visible = function() return true end,
+                    enabled = function()
+                        return not WORLD_MAP_MANAGER:IsPreventingMapNavigation()
+                    end,
+                    callback = function()
+                        Nav.showSearch()
+                    end,
+                    sound = SOUNDS.GAMEPAD_MENU_FORWARD
+                })
+            end
+            KEYBIND_STRIP:RemoveKeybindButtonGroup(descriptor)
+            KEYBIND_STRIP:AddKeybindButtonGroup(descriptor)
+        end
+        return true
+    end
+    oldFunc = ZO_PreHook("ZO_WorldMap_SetGamepadKeybindsShown", newFunc)
 end
 
 function Nav:initialize()
@@ -438,6 +524,8 @@ function Nav:initialize()
   self.currentAlliance = GetUnitAlliance("player")
 
   setupTabs(self)
+  setupGamepadTabs(self)
+  hookGamepadWorldMapKeybinds(self)
 
   self.Recents:init()
   self.Bookmarks:init()
